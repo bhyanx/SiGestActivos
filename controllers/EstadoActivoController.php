@@ -36,8 +36,8 @@ switch ($_GET['op']) {
                                     <i class="fa fa-cogs"></i>
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                    <button type="button" onClick="editar(' . $row['cod_UnidadNeg'] . ')" id="' . $row['cod_UnidadNeg'] . '" class="btn btn-sm dropdown-item"><i class="fa fa-edit text-warning"></i> Editar</button>
-                                    <button type="button" onClick="eliminar(' . $row['cod_UnidadNeg'] . ')" id="' . $row['cod_UnidadNeg'] . '" class="btn btn-sm dropdown-item"><i class="fa fa-trash text-danger"></i> Eliminar</button>
+                                    <button type="button" onClick="editar(' . $row['idEstadoActivo'] . ')" id="' . $row['idEstadoActivo'] . '" class="btn btn-sm dropdown-item"><i class="fa fa-edit text-warning"></i> Editar</button>
+                                    <button type="button" onClick="eliminar(' . $row['idEstadoActivo'] . ')" id="' . $row['idEstadoActivo'] . '" class="btn btn-sm dropdown-item"><i class="fa fa-trash text-danger"></i> Eliminar</button>
                                 </div>
                             </div>';
             } else {
@@ -47,7 +47,7 @@ switch ($_GET['op']) {
                                     <i class="fa fa-cogs"></i>
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                    <button type="button" onClick="activar(' . $row['cod_UnidadNeg'] . ')" id="' . $row['cod_UnidadNeg'] . '" class="btn btn-sm dropdown-item"><i class="fa fa-check text-info"></i> Activar</button>
+                                    <button type="button" onClick="activar(' . $row['idEstadoActivo'] . ')" id="' . $row['idEstadoActivo'] . '" class="btn btn-sm dropdown-item"><i class="fa fa-check text-info"></i> Activar</button>
                                 </div>
                             </div>';
             }

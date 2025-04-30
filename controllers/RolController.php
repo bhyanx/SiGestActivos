@@ -6,7 +6,7 @@ $objetoRol = new RolModels();
 $CodEmpleado = $_SESSION["CodEmpleado"];;
 $UserUpdate = $_SESSION["UserUpdate"];
 
-switch ($_GET['OP']){
+switch ($_GET['op']){
     case "combo":
         $datos = $objetoRol->get_Rol();
         if (is_array($datos) AND count($datos)>0){
