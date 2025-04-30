@@ -1,8 +1,9 @@
 <?php
+
 require_once("../../config/configuracion.php");
 //require_once("../../models/Configuracion.php");
 //$config = new Configuracion();
-$fechaactual = date("Y-m-d");//'2024-08-24';
+// *$fechaactual = date("Y-m-d");//'2024-08-24';
 //$datatcr = $config->get_TipoCambio_MonedaRomina($fechaactual);
 //var_dump($_SESSION);
 // if (count($datatcr) > 0){
@@ -22,7 +23,7 @@ $fechaactual = date("Y-m-d");//'2024-08-24';
 //   }
 // }
 
-if(!isset($_SESSION["CodRol"])){
+if(!isset($_SESSION["idRol"])){
 ?>
 <!DOCTYPE html>
 <html>
@@ -38,7 +39,7 @@ if(!isset($_SESSION["CodRol"])){
 
   <div class="login-box">
     <div class="login-logo">
-      <a href="../Home/" class="h6">
+      <a href="../Dashboard/" class="h6">
         <!-- <b id="diaactual"></b> -->
         <img src="../../public/img/logo-1.png" alt="Logo Empresa" class="img-fluid" id="logoempresa">
       </a>
@@ -51,7 +52,7 @@ if(!isset($_SESSION["CodRol"])){
       <div class="card-body">
         <p class="login-box-msg">Iniciar Sesión</p>
         <form id="login_form">
-          <div class="input-group mb-3">
+          <!-- <div class="input-group mb-3">
             <select name="cod_empresa" id="cod_empresa" class="form-control"></select>
             <div class="input-group-append">
               <div class="input-group-text">
@@ -66,9 +67,9 @@ if(!isset($_SESSION["CodRol"])){
                 <span class="fas fa-map-marked-alt"></span>
               </div>
             </div>
-          </div>
+          </div> -->
           <div class="input-group mb-3">
-            <input type="text" class="form-control" placeholder="Usuario" value="" id="cod_user" name="cod_user" required>
+            <input type="text" class="form-control" placeholder="Usuario" value="" id="CodUsuario" name="CodUsuario" required>
             <div class="input-group-append">
               <div class="input-group-text">
                 <span class="fas fa-user"></span>
@@ -76,7 +77,7 @@ if(!isset($_SESSION["CodRol"])){
             </div>
           </div>
           <div class="input-group mb-3">
-            <input type="password" class="form-control" placeholder="Password" id="clave_acceso" name="clave_acceso" required>
+            <input type="password" class="form-control" placeholder="Password" id="ClaveAcceso" name="ClaveAcceso" required>
             <div class="input-group-append">
               <button type="button" class="input-group-text" id="btnmostrarocultarpass">
                 <span class="fas fa-eye" id="iconinputpass"></span>
@@ -89,7 +90,7 @@ if(!isset($_SESSION["CodRol"])){
               <hr>
             </div>
           </div>
-          <div class="row">
+          <!-- <div class="row">
             <div class="col-12">
               <div class="card shadow">
                 <div class="card-header bg-gradient-primary">
@@ -97,10 +98,10 @@ if(!isset($_SESSION["CodRol"])){
                 </div>
                 <div class="card-body">
                   <div class="row">
-                    <div class="col-8">
-                      <h6>Fecha: <?php echo date('d/m/Y', strtotime($fechaactual));?></h6>
+                    <div class="col-8"> -->
+                      <!-- <h6>Fecha: <?php // echo date('d/m/Y', strtotime($fechaactual));?></h6> -->
                       <!-- <h5><span class="badge badge-success">Compra: <?php // echo $_SESSION['vgtccompra'];?></span></h1> -->
-                    </div>
+                    <!-- </div>
                     <div class="col-4 text-center">
                         <img class="img-fluid" src="../../public/img/sunat.ico" alt="">
                     </div>
@@ -108,14 +109,14 @@ if(!isset($_SESSION["CodRol"])){
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
         </form>
       </div>
     </div>
   </div>
 
   <?php require_once("../MainFooter/mainjs.php") ?>
-  <script src="login.js"></script>
+  <script src="Login/login.js"></script>
 </body>
 </html>
 <?php

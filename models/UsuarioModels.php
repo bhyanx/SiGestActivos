@@ -14,12 +14,12 @@ class UsuarioModels extends Conectar {
 
     // TODO: FUNCIONES ADMINISTRATIVAS PARA ACCESOS AL SISTEMA
     //FUNCION PARA VERIFICAR LOS DATOS ENVIADOS DESDE EL LOGIN
-    public function get_login($codUsuario, $contrasena){
+    public function get_login($CodUsuario, $ClaveAcceso){
         $conectar = parent::ConexionBdPracticante();
-        $sql = "SELECT * FROM " . $this->viewLogin . " WHERE codUsuario = ? AND contrasena = ?";
+        $sql = "SELECT * FROM " . $this->viewLogin . " WHERE CodUsuario = ? AND ClaveAcceso = ?";
         $sql = $conectar->prepare($sql);
-        $sql->bindValue(1, $codUsuario);
-        $sql->bindValue(2, $contrasena);
+        $sql->bindValue(1, $CodUsuario);
+        $sql->bindValue(2, $ClaveAcceso);
         $sql->execute();
         return $resultado = $sql->fetchAll();
     }
@@ -52,59 +52,59 @@ class UsuarioModels extends Conectar {
     }
 
     //FUNCION PARA QUE EL USUARIO PUEDA MODIFICAR SU NOMBRE
-    public function update_usuario($codUsuario, $nombre, $userMod){
+    public function update_usuario($CodUsuario, $nombre, $userMod){
         $conectar = parent::ConexionBdPracticante();
-        $sql = "UPDATE " . $this->table . " SET nombre = ?, userMod, userMod = ?, fechaMod = GETDATE() WHERE codUsuario = ?";
+        $sql = "UPDATE " . $this->table . " SET nombre = ?, userMod, userMod = ?, fechaMod = GETDATE() WHERE CodUsuario = ?";
         $sql = $conectar->prepare($sql);
         $sql->bindValue(1, $nombre);
         $sql->bindValue(2, $userMod);
-        $sql->bindValue(3, $codUsuario);
+        $sql->bindValue(3, $CodUsuario);
         $sql->execute();
         return $resultado = $sql->fetchAll();
     }
 
     //FUNCION PARA ELIMINAR UN USUARIO DEL SISTEMA CAMBIANDO SU ESTADO
-    public function delete_usuario($codUsuario, $estado, $userMod){
+    public function delete_usuario($CodUsuario, $estado, $userMod){
         $conectar = parent::ConexionBdPracticante();
-        $sql = "UPDATE " . $this->table . " SET estado = '0', userMod = ?, fechaMod = GETDATE() WHERE codUsuario = ?";
+        $sql = "UPDATE " . $this->table . " SET estado = '0', userMod = ?, fechaMod = GETDATE() WHERE CodUsuario = ?";
         $sql = $conectar->prepare($sql);
         $sql->bindValue(1, $userMod);
-        $sql->bindValue(2, $codUsuario);
+        $sql->bindValue(2, $CodUsuario);
         $sql->execute();
         return $resultado = $sql->fetchAll();
     }
 
     //FUNCION PARA VOLVER A ACTIVAR UN USUARIO DEL SISTEMA CAMBIANDO SU ESTADO
-    public function activar_usuario($codUsuario, $userMod){
+    public function activar_usuario($CodUsuario, $userMod){
         $conectar = parent::ConexionBdPracticante();
-        $sql = "UPDATE " . $this->table . " SET estado = '1', userMod = ?, fechaMod = GETDATE() WHERE codUsuario = ?";
+        $sql = "UPDATE " . $this->table . " SET estado = '1', userMod = ?, fechaMod = GETDATE() WHERE CodUsuario = ?";
         $sql = $conectar->prepare($sql);
         $sql->bindValue(1, $userMod);
-        $sql->bindValue(2, $codUsuario);
+        $sql->bindValue(2, $CodUsuario);
         $sql->execute();
         return $resultado = $sql->fetchAll();
     }
 
     //FUNCION PARA ACTUALIZAR LA ULTIMA SESION DE UN USUARIO EN EL SISTEMA
-    public function update_last_session($codUsuario, $UrlUltimaSession){
+    public function update_url_last_session($CodUsuario, $UrlUltimaSession){
         $conectar = parent::ConexionBdPracticante();
-        $sql = "UPDATE " . $this->table . " SET UrlUltimaSession = ? WHERE codUsuario = ?";
+        $sql = "UPDATE " . $this->table . " SET UrlUltimaSession = ? WHERE CodUsuario = ?";
         $sql = $conectar->prepare($sql);
         $sql->bindValue(1, $UrlUltimaSession);
-        $sql->bindValue(2, $codUsuario);
+        $sql->bindValue(2, $CodUsuario);
         $sql->execute();
-        return $resultado = $sql->fetchAll();
+        return $resultado = $sql->rowCount();
     }
 
 
     //FUNCION PARA ACTUALIZAR EL ROL DE UN USUARIO EN EL SISTEMA
-    public function update_rol_usuario($codUsuario, $idRol){
+    public function update_rol_usuario($CodUsuario, $idRol){
         $conectar = parent::ConexionBdPracticante();
         $sql = "UPDATE " . $this->table . " SET idRol = ?
-        WHERE codUsuario = ?";
+        WHERE CodUsuario = ?";
         $sql = $conectar->prepare($sql);
         $sql->bindValue(1, $idRol);
-        $sql->bindValue(2, $codUsuario);
+        $sql->bindValue(2, $CodUsuario);
         $sql->execute();
         return $resultado=$sql->rowCount();
     }
@@ -130,6 +130,7 @@ class UsuarioModels extends Conectar {
         return $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    
 
     // TODO: FIN FUNCIONES ADMINISTRATIVAS PARA ACCESOS AL SISTEMA
 
@@ -145,18 +146,13 @@ class UsuarioModels extends Conectar {
     }
 
     //FUNCION PARA OBTENER UN USUARIO ESPEFICO POR SU CODIGO(DNI)
-    public function get_usuarios_id($codUsuario){
+    public function get_usuarios_id($CodUsuario){
         $conectar = parent::ConexionBdPracticante();
-        $sql = "SELECT * FROM " . $this->table . "WHERE codUsuario = ? AND estado = 1";
+        $sql = "SELECT * FROM " . $this->table . "WHERE CodUsuario = ? AND estado = 1";
         $sql = $conectar->prepare($sql);
         $sql->execute();
         return $resultado = $sql->fetchObject();
     }
-
-
-
-
-
 }
 
 ?>

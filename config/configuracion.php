@@ -11,7 +11,7 @@ class Conectar
     {
         try {
             
-            $conectar = $this->dbh = new PDO("sqlsrv:Server=optimus;Database=bdActivos", "pracsistAlfa", "Calichin2025"); // CONEXION LOCAL PC PRACTICANTE
+            $conectar = $this->dbh = new PDO("sqlsrv:Server=192.168.1.35;Database=bdActivos", "practsistAlfa", "Calichin2025"); // CONEXION LOCAL PC PRACTICANTE
             return $conectar;
             echo "Conexion Exitosa";
         } catch (Exception $e) {
@@ -31,14 +31,14 @@ class Conectar
     //     }
     // }
 
-    public function set_names()
-    {
-        return $this->dbh->query("SET NAMES 'utf8'");
-    }
+    // public function set_names()
+    // {
+    //     return $this->dbh->query("SET NAMES 'utf8'");
+    // }
 
     public static function ruta()
     {
-        return 'http://192.168.1.224:8088/sigestActivos/';
+        return 'http://192.168.1.35:8088/sigestActivos/';
     }
 
     public static function rutaServidor()

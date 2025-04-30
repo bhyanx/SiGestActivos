@@ -51,7 +51,7 @@
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="Home/">Home</a></li>
+                        <li class="breadcrumb-item"><a href="Dashboard/">Dashboard</a></li>
                         <li class="breadcrumb-item active">Página no encontrada</li>
                         </ol>
                     </div>
@@ -70,7 +70,7 @@
                         </h3>
                         <p>
                             No pudimos encontrar la página que estabas buscando. Mientras tanto, puedes
-                            <a href="Home/">retornar al inicio</a>.
+                            <a href="Dashboard/">retornar al inicio</a>.
                         </p>
                     </div>
                     <!-- /.error-content -->
@@ -88,7 +88,7 @@
         </footer>
     </div>
 
-<?php require_once("../javascript/mainjs.php") ?>
+<?php require_once("../MainFooter/mainjs.php") ?>
 </body>
 </html>
 <?php

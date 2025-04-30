@@ -140,24 +140,24 @@
         //     });
         // }        
 
-        function ValidarSession() {
-            $.ajax({
-                url: "../../controllers/usuario.php?op=ValidarSession",
-                type: "POST",
-                // async: false,
-                success: (res) => {
-                    res = JSON.parse(res);
-                    //console.log(res)                    
-                    if(res.status == false){
-                        location.href ="../Logout/logout.php";
-                    }
-                },
-            });
-        }
+        // function ValidarSession() {
+        //     $.ajax({
+        //         url: "../../controllers/UsuarioController.php?op=ValidarSession",
+        //         type: "POST",
+        //         // async: false,
+        //         success: (res) => {
+        //             res = JSON.parse(res);
+        //             //console.log(res)                    
+        //             if(res.status == false){
+        //                 location.href ="../Login/";
+        //             }
+        //         },
+        //     });
+        // }
 
         function ActualizarUrlUltimaSession(lasturl) {
             $.ajax({
-                url: "../../controller/usuario.php?op=ActualizarUrlSession",
+                url: "../../controllers/UsuarioController.php?op=ActualizarUrlSession",
                 type: "POST",
                 async: false,
                 data:{
