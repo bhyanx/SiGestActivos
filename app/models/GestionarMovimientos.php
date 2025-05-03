@@ -7,6 +7,7 @@ class GestionarMovimientos{
         $this->db = (new Conectar())->ConexionBdPracticante();
     }
 
+    //! REGISTRAR MOVIMIENTO CON PROCEDIMIENTOS ALMACENADOS (escritura diferente)
     public function registrarMovimiento($data){
         try{
             $stmt = $this->db->prepare('EXEC sp_RegistrarMovimientoActivo @idActivo = ?, @idTipoMovimiento = ?, @idAmbienteOrigen = ?, @idAmbienteDestino = ?, @idResponsableNuevo = ?, @idAutorizador = ?, @observaciones = ?, @userMod = ?, @idMovimiento = ? OUTPUT');
@@ -43,57 +44,4 @@ class GestionarMovimientos{
     }
 }
 
-?>
-
-
-class Branch {
-    private $db;
-
-    public function __construct() {
-        $this->db = (new Database())->getConnection();
-    }
-
-    public function getAll() {
-        try {
-            $stmt = $this->db->query('SELECT * FROM tSucursales ORDER BY nombre');
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            error_log("Error in Branch::getAll: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
-            throw $e;
-        }
-    }
-
-    public function create($data) {
-        try {
-            $stmt = $this->db->prepare('INSERT INTO tSucursales (cod_UnidadNeg, nombre, direccion, fechaRegistro, userMod) VALUES (?, ?, ?, GETDATE(), ?)');
-            $stmt->execute([$data['cod_UnidadNeg'], $data['nombre'], $data['direccion'], $data['userMod']]);
-            return $this->db->lastInsertId();
-        } catch (\PDOException $e) {
-            error_log("Error in Branch::create: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
-            throw $e;
-        }
-    }
-
-    public function update($cod_UnidadNeg, $data) {
-        try {
-            $stmt = $this->db->prepare('UPDATE tSucursales SET nombre = ?, direccion = ?, fechaMod = GETDATE(), userMod = ? WHERE cod_UnidadNeg = ?');
-            $stmt->execute([$data['nombre'], $data['direccion'], $data['userMod'], $cod_UnidadNeg]);
-            return $stmt->rowCount();
-        } catch (\PDOException $e) {
-            error_log("Error in Branch::update: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
-            throw $e;
-        }
-    }
-
-    public function getById($cod_UnidadNeg) {
-        try {
-            $stmt = $this->db->prepare('SELECT * FROM tSucursales WHERE cod_UnidadNeg = ?');
-            $stmt->execute([$cod_UnidadNeg]);
-            return $stmt->fetch(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            error_log("Error in Branch::getById: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
-            throw $e;
-        }
-    }
-}
 ?>
