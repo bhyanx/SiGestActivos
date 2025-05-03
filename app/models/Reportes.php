@@ -8,6 +8,7 @@ class Reportes {
         $this->db = (new Conectar())->ConexionBdPracticante();
     }
 
+    //! LISTAR REPORTES CON PROCEDIMIENTOS ALMACENADOS (escritura diferente)
     public function ListarReportes($filters){
         try{
             $stmt = $this->db->prepare('EXEC sp_GetReporteActivos @idSucursal = ?, @idEstado = ?, @idCategoria = ?, @idProveedor = ?');

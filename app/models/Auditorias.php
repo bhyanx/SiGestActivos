@@ -8,6 +8,7 @@ class Auditorias {
         $this->db = (new Conectar())->ConexionBdPracticante();
     }
 
+    //! LISTAR LOGS MULTIPLES CONSULTAS CON PROCEDIMIENTOS ALMACENADOS
     public function AuditoriasLogs($filters){
         try{
             $query = 'SELECT * FROM tLogAuditoria WHERE 1=1';
