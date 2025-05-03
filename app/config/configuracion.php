@@ -7,7 +7,7 @@ class Conectar
 
     protected $dbh;
 
-    protected function ConexionBdPracticante()
+    public function ConexionBdPracticante()
     {
         try {
             

@@ -1,11 +1,11 @@
 <?php 
 
-require_once("config/configuracion.php");
+require_once("app/config/configuracion.php");
 
 if (!empty($_SESSION['CodUsuario']) && !empty($_SESSION['ClaveAcceso'])){
-    header("Location: views/Dashboard");
+    header("Location: app/views/Dashboard");
 }else{
-    header("Location: views/Login");
+    header("Location: app/views/Login");
 } ?>
 
 
