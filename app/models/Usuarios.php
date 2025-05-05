@@ -23,6 +23,16 @@ class Usuarios {
         }
     }
 
+    public function listarTodo(){
+        try{
+            $stmt = $this->db->query('SELECT * FROM tUsuarios ORDER BY CodEmpleado');
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        }catch(\PDOException $e){
+            error_log("Error in Usuarios::listarTodo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
     public function registrar($data){
         try{
             $stmt = $this->db->prepare('INSERT INTO tUsuarios(CodUsuario, CodEmpleado, idRol, ClaveAcceso, UrlUltimaSession, userUpdate, fechaUpdate) VALUES(?,?,?,?,?,GETDATE())');
@@ -33,6 +43,58 @@ class Usuarios {
             throw $e;
         }
     }
+
+
+    //! GESTIONAR USUARIOS CON PROCEDIMIENTOS ALMACENADOS
+
+    //* ACTUALIZAR ROL DE UN USUARIO USANDO sp_GestionUsuarios
+
+    public function actualizarRol($data){
+        try {
+            $stmt = $this->db->prepare('EXEC sp_GestionUsuarios @pAccion = ?, @CodUsuario = ?, @IdRol = ?, @UserMod = ?');
+            $stmt->bindParam(1, $data['pAccion'], \PDO::PARAM_STR); // 'ACTUALIZAR'
+            $stmt->bindParam(2, $data['CodUsuario'], \PDO::PARAM_STR);
+            $stmt->bindParam(3, $data['IdRol'], \PDO::PARAM_INT);
+            $stmt->bindParam(4, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->execute();
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error in actualizarRol: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
+    public function gestionarPermiso($data){
+        try{
+            $stmt = $this->db->prepare('EXEC sp_GestionPermisos @pAccion = ?, @CodPermiso = ?, @CodMenu = ?, @IdRol = ?, @Permiso = ?, @UserMod = ?');
+            $stmt->bindParam(1, $data['pAccion'], \PDO::PARAM_STR); // 'INSERTAR', 'ACTUALIZAR', 'ELIMINAR', 'CONSULTAR'
+            $stmt->bindParam(2, $data['CodPermiso'], \PDO::PARAM_INT);
+            $stmt->bindParam(3, $data['CodMenu'], \PDO::PARAM_INT);
+            $stmt->bindParam(4, $data['IdRol'], \PDO::PARAM_INT);
+            $stmt->bindParam(5, $data['Permiso'], \PDO::PARAM_BOOL);
+            $stmt->bindParam(6, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->execute();
+            if ($data['pAccion'] === 'CONSULTAR') {
+                return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            }
+            return true;
+        }catch(\PDOException $e){
+            error_log("Error in gestionarPermiso: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
+    public function listarMenusPorUsuario($codUsuario){
+        try {
+            $stmt = $this->db->prepare('SELECT * FROM vMenusPorUsuario WHERE CodUsuario = ?');
+            $stmt->execute([$codUsuario]);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error in listarMenusPorUsuario: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
 }
 
 ?>

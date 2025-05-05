@@ -8,58 +8,59 @@ class GestionarMovimientos{
     }
 
     //! REGISTRAR MOVIMIENTO CON PROCEDIMIENTOS ALMACENADOS (escritura diferente)
-    public function registrarMovimientoIndividual($data){
+    public function registrarMovimiento($data){
         try{
-            $stmt = $this->db->prepare('EXEC sp_GestionMovimientos @pTipoRegistro = ?, @idMovimiento = ?, ');
-
+            $stmt = $this->db->prepare('EXEC sp_GestionMovimientos @pTipoRegistro = ?, @idMovimiento = ?, @idFicha = ?, @idActivo = ?, @idTipoMovimiento = ?, @idAmbienteOrigen = ?, @idAmbienteDestino = ?, @idResponsableNuevo = ?, @idAutorizador = ?, @observaciones = ?, @userMod = ?, @idGenerado = ?');
             
-// <!-- @pAccion NVARCHAR(20),
-// @pTipoRegistro NVARCHAR(20) = 'INDIVIDUAL',
-// @idMovimiento INT = NULL,
-// @idFicha INT = NULL,
-// @idActivo INT = NULL,
-// @idTipoMovimiento INT = NULL,
-// @idAmbienteOrigen INT = NULL,
-// @idAmbienteDestino INT = NULL,
-// @idActivoPadreOrigen INT = NULL,
-// @idActivoPadreDestino INT = NULL,
-// @idResponsableAnterior NVARCHAR(50) = NULL,
-// @idResponsableNuevo NVARCHAR(50) = NULL,
-// @idEstadoMovimiento INT = NULL,
-// @observaciones NVARCHAR(MAX) = NULL,
-// @userMod NVARCHAR(50) = NULL,
-// @idGenerado INT OUTPUT -->
+            // idFicha, idActivo, idTipoMovimiento, idAmbienteOrigen, idAmbienteDestino, idActivoPadreOrigen,
+            // idActivoPadreDestino, idResponsableAnterior, idResponsableNuevo, idEstadoMovimiento, observaciones,
+            // fechaRegistro, userMod
 
-            $idMovimiento = 0;
-            $stmt->bindParam(1, $data['idActivo'], \PDO::PARAM_INT);
-            $stmt->bindParam(2, $data['idTipoMovimiento'], \PDO::PARAM_INT);
-            $stmt->bindParam(3, $data['idAmbienteOrigen'], \PDO::PARAM_INT);
-            $stmt->bindParam(4, $data['idAmbienteDestino'], \PDO::PARAM_INT);
-            $stmt->bindParam(5, $data['idResponsableNuevo'], \PDO::PARAM_INT);
-            $stmt->bindParam(6, $data['idAutorizador'], \PDO::PARAM_INT);
-            $stmt->bindParam(7, $data['observaciones'], \PDO::PARAM_STR);
-            $stmt->bindParam(8, $data['userMod'], \PDO::PARAM_STR);
-            $stmt->bindParam(9, $data['idMovimiento'], \PDO::PARAM_INT | \PDO::PARAM_INPUT_OUTPUT);
-
+            $stmt->bindParam(1, $data['pTipoRegistro'], \PDO::PARAM_STR); // 'INDIVIDUAL' o 'MASIVO'
+            $stmt->bindParam(2, $data['idMovimiento'], \PDO::PARAM_INT);
+            $stmt->bindParam(3, $data['idFicha'], \PDO::PARAM_INT);
+            $stmt->bindParam(4, $data['idActivo'], \PDO::PARAM_INT);
+            $stmt->bindParam(5, $data['idTipoMovimiento'], \PDO::PARAM_INT);
+            $stmt->bindParam(6, $data['idAmbienteOrigen'], \PDO::PARAM_INT);
+            $stmt->bindParam(7, $data['idAmbienteDestino'], \PDO::PARAM_INT);
+            $stmt->bindParam(8, $data['idResponsableNuevo'], \PDO::PARAM_STR);
+            $stmt->bindParam(9, $data['idAutorizador'], \PDO::PARAM_STR);
+            $stmt->bindParam(10, $data['observaciones'], \PDO::PARAM_STR);
+            $stmt->bindParam(11, $data['userMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(12, $data['idGenerado'], \PDO::PARAM_INT);
             $stmt->execute();
-            return $idMovimiento;
-
+            return true;
         }catch (\PDOException $e){
             error_log("Error in registrarMovimiento: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }
 
-    public function listarMovimientosId($idActivo){
+    //* LISTAR MOVIMIENTOS
+
+    public function listarMovimientos($idActivo){
         try{
-            $stmt = $this->db->prepare('SELECT * FROM tMovimientos WHERE idActivo = ? ORDER BY fechaRegistro DESC');
+            $stmt = $this->db->prepare('SELECT * FROM vHistorialMovimientosPorActivo WHERE idActivo = ? ORDER BY fechaMovimiento DESC');
             $stmt->execute([$idActivo]);
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        }catch (\PDOException $e){
-            error_log("Error in listarMovimientosId: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+        }catch(\PDOException $e){
+            error_log("Error in listarMovimientos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }
+
+    //* LISTAR MOVIMIENTOS POR ID
+
+    // public function listarMovimientosId($idActivo){
+    //     try{
+    //         $stmt = $this->db->prepare('SELECT * FROM tMovimientos WHERE idActivo = ? ORDER BY fechaRegistro DESC');
+    //         $stmt->execute([$idActivo]);
+    //         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    //     }catch (\PDOException $e){
+    //         error_log("Error in listarMovimientosId: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+    //         throw $e;
+    //     }
+    // }
 }
 
 ?>
