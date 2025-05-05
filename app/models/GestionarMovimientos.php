@@ -8,9 +8,27 @@ class GestionarMovimientos{
     }
 
     //! REGISTRAR MOVIMIENTO CON PROCEDIMIENTOS ALMACENADOS (escritura diferente)
-    public function registrarMovimiento($data){
+    public function registrarMovimientoIndividual($data){
         try{
-            $stmt = $this->db->prepare('EXEC sp_RegistrarMovimientoActivo @idActivo = ?, @idTipoMovimiento = ?, @idAmbienteOrigen = ?, @idAmbienteDestino = ?, @idResponsableNuevo = ?, @idAutorizador = ?, @observaciones = ?, @userMod = ?, @idMovimiento = ? OUTPUT');
+            $stmt = $this->db->prepare('EXEC sp_GestionMovimientos @pTipoRegistro = ?, @idMovimiento = ?, ');
+
+            
+// <!-- @pAccion NVARCHAR(20),
+// @pTipoRegistro NVARCHAR(20) = 'INDIVIDUAL',
+// @idMovimiento INT = NULL,
+// @idFicha INT = NULL,
+// @idActivo INT = NULL,
+// @idTipoMovimiento INT = NULL,
+// @idAmbienteOrigen INT = NULL,
+// @idAmbienteDestino INT = NULL,
+// @idActivoPadreOrigen INT = NULL,
+// @idActivoPadreDestino INT = NULL,
+// @idResponsableAnterior NVARCHAR(50) = NULL,
+// @idResponsableNuevo NVARCHAR(50) = NULL,
+// @idEstadoMovimiento INT = NULL,
+// @observaciones NVARCHAR(MAX) = NULL,
+// @userMod NVARCHAR(50) = NULL,
+// @idGenerado INT OUTPUT -->
 
             $idMovimiento = 0;
             $stmt->bindParam(1, $data['idActivo'], \PDO::PARAM_INT);
@@ -45,3 +63,4 @@ class GestionarMovimientos{
 }
 
 ?>
+
