@@ -2,12 +2,18 @@
 
 require_once '../models/GestionarActivos.php';
 
+//* CREACION DE VARIABLES QUE OBTIENEN LOS VALORES DE LOS INPUTS DEL FORMULARIO
+
 $activos = new GestionarActivos();
 
 $action = $_GET['action'] ?? $_POST['action'] ?? 'Consultar';
 
+//* USO DE SWITCH CASE PARA REALIZAR ACCIONES EN BASE A LA PETICION DEL USUARIO
+
 switch ($action){
 
+    //* CASE PARA PODER REGISTRAR UNA ACTIVO EN LA BASE DE DATOS
+    
     case 'Registrar':
         if ($_SERVER['REQUEST_METHOD'] === 'POST'){
             try{
@@ -38,6 +44,9 @@ switch ($action){
         }
 
         break;
+    
+    //* CASE PARA PODER ACTUALIZAR UN ACTIVO EN LA BASE DE DATOS
+    //* SE DEBE ENVIAR EL ID DEL ACTIVO A ACTUALIZAR
 
     case 'Actualizar':
         if ($_SESSION['REQUEST_METHOD'] === 'POST'){
@@ -70,6 +79,9 @@ switch ($action){
         }
         break;
     
+    //* CASE PARA PODER CONSULTAR UN ACTIVO EN LA BASE DE DATOS
+    //* SE DEBE ENVIAR EL ID DEL ACTIVO A CONSULTAR
+
     case 'Consultar': 
             try{
                 $filtros = [
