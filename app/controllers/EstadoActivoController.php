@@ -1,8 +1,50 @@
 <?php
-require_once '../config/configuracion.php';
-require_once '../models/EstadoActivoModels.php';
+//require_once '../config/configuracion.php';
+require_once '../models/EstadoActivo.php';
 
-$objetoEstadoActivo = new EstadoActivoModels();
+$estadoActivo = new EstadoActivo();
+
+$action = $_GET['action'] ?? $_POST['action'] ?? 'Consultar';
+
+switch($action){
+
+    case 'RegistrarEstadoActivo':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+            try{
+                $data = [
+                    'idEstadoActivo' => null,
+                    'nombre' => $_POST['nombre'],
+                    'descripcion' => $_POST['descripcion'],
+                    'esFinal' => $_POST['esFinal'],
+                ];
+                $estadoActivo->crear($data);
+                echo "Estado Activo registrado con éxito.";
+            }catch(Exception $e){
+                echo "Error: " . $e->getMessage();
+            }
+        }
+        break;
+
+    case 'ActualizarEstadoActivo':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+            try{
+                $data = [
+                    'idEstadoActivo' => $_POST['idEstadoActivo'],
+                    'nombre' => $_POST['nombre'],
+                    'descripcion' => $_POST['descripcion'],
+                    'esFinal' => $_POST['esFinal'],
+                ];
+                $estadoActivo->actualizar($data);
+                echo "Estado Activo actualizado con éxito.";
+            }catch(Exception $e){
+                echo "Error: " . $e->getMessage();
+            }
+        }
+}
+
+?>
+
+<!-- $objetoEstadoActivo = new EstadoActivoModels();
 
 switch ($_GET['op']) {
     case "combo":
@@ -66,10 +108,4 @@ switch ($_GET['op']) {
     default:
         # code...
         break;
-}
-?>
-
-[idEstadoActivo]
-,[nombre]
-,[descripcion]
-,[esFinal]
+} -->

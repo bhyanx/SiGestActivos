@@ -1,8 +1,46 @@
 <?php
-require_once("../config/configuracion.php");
-require_once("../models/UsuarioModels.php");
+//require_once("../config/configuracion.php");
+require_once("../models/Usuarios.php");
 
-$usuario = new UsuarioModels();
+$usuario = new Usuarios();
+
+$action = $_GET['action'] ?? $_POST['action'] ?? 'Consultar';
+
+switch($action){
+    case 'AccesoUsuario':
+        $datos = $usuario->login($_POST["CodUsuario"], $_POST["ClaveAcceso"]);
+        if (is_array($datos) == true and count($datos) > 0) {
+            foreach ($datos as $row){
+                $_SESSION["CodUsuario"] = $row["CodUsuario"];
+                $_SESSION["CodEmpleado"] = $row["CodEmpleado"];
+                $_SESSION["IdRol"] = $row["IdRol"];
+                $_SESSION["UrlUltimaSession"] = $row["UrlUltimaSession"];
+                $_SESSION["ClaveAcceso"] = $row["ClaveAcceso"];
+                $_SESSION["ApellidoPaterno"] = $row["ApellidoPaterno"];
+                $_SESSION["ApellidoMaterno"] = $row["ApellidoMaterno"];
+                $_SESSION["PrimerNombre"] = $row["PrimerNombre"];
+                $_SESSION["SegundoNombre"] = $row["SegundoNombre"];
+                $_SESSION["NombreTrabajador"] = $row["NombreTrabajador"];
+                $_SESSION["CorreoPersonal"] = $row["CorreoPersonal"];
+                $_SESSION["FechaNacimiento"] = date("Y-m-d", strtotime($row["fechaNacimiento"]));
+                $_SESSION["CodGenero"] = $row["CodGenero"];
+                $_SESSION["Celular"] = $row["Celular"];
+                $_SESSION["Foto"] = $row["Foto"];
+                $_SESSION["Firma"] = $row["Firma"];
+            }
+
+            if (empty($row["UrlUltimaSession"])){
+                $result = array('status' => true, 'msg' => '../views/Dashboard/');
+            } else {
+                $result = array('status' => true, 'msg' => $row["UrlUltimaSession"]);
+            }
+
+            $datapermisos = $usuario->get_menu_rol($_SESSION['IdRol']);
+        }
+}
+
+?>
+<!-- $usuario = new UsuarioModels();
 $config = new Conectar();
 $fechaActual = date("Y-m-d");
 
@@ -179,6 +217,4 @@ switch ($_GET['op']) {
 
 
     default:
-        break;
-}
-?>
+        break; -->
