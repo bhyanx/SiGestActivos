@@ -36,7 +36,7 @@ switch ($action){
                     'VidaUtil' => $_POST['VidaUtil'],
                     'ValorAdquisicion' => $_POST['ValorAdquisicion'],
                     'FechaAdquisicion' => $_POST['FechaAdquisicion'],
-                    'UserMod' => 'admin'
+                    'UserMod' => $_SESSION['CodEmpleado'],
                 ];
                 $activos->registrarActivos($data);
                 echo "Activo registrado con éxito.";

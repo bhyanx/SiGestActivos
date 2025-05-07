@@ -14,7 +14,7 @@ class Ambientes
     public function listarTodo()
     {
         try {
-            $stmt = $this->db->query('SELECT * FROM tAmbiente ORDER BY nombre');
+            $stmt = $this->db->query('SELECT * FROM vAmbientes ORDER BY nombre');
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             error_log("Error in Ambientes::listarTodo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
