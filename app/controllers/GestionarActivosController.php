@@ -1,34 +1,95 @@
 <?php
 
-class GestionarActivosController {
-    private $model;
-    public function __construct(){
-        $this->model = new GestionarActivos();
-    }
-    public function crear($data){
-        $data['userMod'] = $_SESSION['usuario'];
-        $idActivo = $this->model->gestionActivos('INSERTAR', $data);
-        header('Location: /GestionarActivos');
-    }
+require_once '../models/GestionarActivos.php';
 
-    public function listar($filters){
-        $data = [
-            'idActivo' => $filters['idActivo'] ?? null,
-            'idDocIngresoAlm' => $filters['idDocIngresoAlm'] ?? null,
-            'idArticulo' => $filters['idArticulo'] ?? null,
-            'codigo' => $filters['codigo'] ?? null,
-            'idSucursal' => $filters['idSucursal'] ?? null,
-            'idEstado' => $filters['idEstado'] ?? null,
-            'enUso' => $filters['enUso'] ?? null,
-            'fechaInicio' => $filters['fechaInicio'] ?? null,
-            'fechaFin' => $filters['fechaFin'] ?? null,
-            'userMod' => $_SESSION['usuario']
-        ];
+$activos = new GestionarActivos();
 
-        $activos = $this->model->gestionActivos('CONSULTAR', $data);
-        //require_once '../views/';
-    }
-        
+$action = $_GET['action'] ?? $_POST['action'] ?? 'Consultar';
+
+switch ($action){
+
+    case 'Registrar':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+            try{
+                $data = [
+                    'IdActivo' => null,
+                    'IdDocIngresoAlm' => $_POST['IdDocIngresoAlm'],
+                    'IdArticulo' => $_POST['IdArticulo'],
+                    'Codigo' => $_POST['Codigo'],
+                    'Serie' => $_POST['Serie'],
+                    'IdEstado' => $_POST['IdEstado'],
+                    'Garantia' => $_POST['Garantia'],
+                    'FechaFinGarantia' => $_POST['FechaFinGarantia'],
+                    'IdProveedor' => $_POST['IdProveedor'],
+                    'Observaciones' => $_POST['Observaciones'],
+                    'IdSucursal' => $_POST['IdSucursal'],
+                    'IdAmbiente' => $_POST['IdAmbiente'],
+                    'IdCategoria' => $_POST['IdCategoria'],
+                    'VidaUtil' => $_POST['VidaUtil'],
+                    'ValorAdquisicion' => $_POST['ValorAdquisicion'],
+                    'FechaAdquisicion' => $_POST['FechaAdquisicion'],
+                    'UserMod' => 'admin'
+                ];
+                $activos->registrarActivos($data);
+                echo "Activo registrado con éxito.";
+            }catch (Exception $e){
+                echo "Error: " . $e->getMessage();
+            }
+        }
+
+        break;
+
+    case 'Actualizar':
+        if ($_SESSION['REQUEST_METHOD'] === 'POST'){
+            try{
+                $data = [
+                    'IdActivo' => $_POST['IdActivo'],
+                    'IdDocIngresoAlm' => $_POST['IdDocIngresoAlm'],
+                    'IdArticulo' => $_POST['IdArticulo'],
+                    'Codigo' => $_POST['Codigo'],
+                    'Serie' => $_POST['Serie'],
+                    'IdEstado' => $_POST['IdEstado'],
+                    'Garantia' => $_POST['Garantia'],
+                    'FechaFinGarantia' => $_POST['FechaFinGarantia'],
+                    'IdProveedor' => $_POST['IdProveedor'],
+                    'Observaciones' => $_POST['Observaciones'],
+                    'IdSucursal' => $_POST['IdSucursal'],
+                    'IdAmbiente' => $_POST['IdAmbiente'],
+                    'IdCategoria' => $_POST['IdCategoria'],
+                    'VidaUtil' => $_POST['VidaUtil'],
+                    'ValorAdquisicion' => $_POST['ValorAdquisicion'],
+                    'FechaAdquisicion' => $_POST['FechaAdquisicion'],
+                    'UserMod' => 'admin'
+                ];
+
+                $activos->actualizarActivos($data);
+                echo "Activo actualizado.";
+            }catch (Exception $e){
+                echo "Error: " . $e->getMessage();
+            }
+        }
+        break;
+    
+    case 'Consultar': 
+            try{
+                $filtros = [
+                    'pCodigo' => $_POST['pCodigo'] ?? null,
+                    'pIdSucursal' => $_POST['pIdSucursal'] ?? null,
+                    'pIdCategoria' => $_POST['pIdCategoria'] ?? null,
+                    'pIdEstado' => $_POST['pIdEstado'] ?? null
+                ];
+                $resultados = $activos->consultarActivos($filtros);
+                header('Content-Type: application/json');
+                echo json_encode($resultados);
+            }catch( Exception $e){
+                echo "Error: " . $e->getMessage();
+            }
+            break;
+
+    default:
+        echo "Acción no válida.";
+        break;
+    
 }
 
 ?>

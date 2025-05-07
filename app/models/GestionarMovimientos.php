@@ -43,9 +43,48 @@ class GestionarMovimientos{
         }
     }
 
-
+    public function listarDetalleMovimientos($idDetalleMovimiento){
+        try{
+            $stmt = $this->db->prepare('SELECT *  FROM vDetalleMovimiento WHERE IdDetalleMovimiento = ? ORDER BY FechaMovimiento DESC');
+            $stmt->execute([$idDetalleMovimiento]);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        }catch(\PDOException $e){
+            error_log("Error in listarDetalleMovimientos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
 
     //! CODIGO SIN UTILIZAR (NO FUNCIONA) DADO A QUE SE MODIFICÓ LA LOGICA DE USO
+//     SELECT 
+//     dm.IdDetalleMovimiento,
+//     dm.IdActivo,
+//     a.Nombre,
+    
+//     dm.IdSucursal_Anterior,
+//     sa.Nombre AS SucursalAnterior,
+//     dm.IdSucursal_Nueva,
+//     sn.Nombre AS SucursalNueva,
+    
+//     dm.IdAmbiente_Anterior,
+//     aa.Nombre AS AmbienteAnterior,
+//     dm.IdAmbiente_Nuevo,
+//     an.Nombre AS AmbienteNuevo,
+    
+//     dm.IdResponsable_Anterior,
+//     ra.Nombre AS ResponsableAnterior,
+//     dm.IdResponsable_Nuevo,
+//     rn.Nombre AS ResponsableNuevo,
+    
+//     dm.IdActivoPadre_Anterior
+// FROM DetalleMovimiento dm
+// INNER JOIN Activo a ON a.IdActivo = dm.IdActivo
+// LEFT JOIN Sucursal sa ON sa.IdSucursal = dm.IdSucursal_Anterior
+// LEFT JOIN Sucursal sn ON sn.IdSucursal = dm.IdSucursal_Nueva
+// LEFT JOIN Ambiente aa ON aa.IdAmbiente = dm.IdAmbiente_Anterior
+// LEFT JOIN Ambiente an ON an.IdAmbiente = dm.IdAmbiente_Nuevo
+// LEFT JOIN Responsable ra ON ra.IdResponsable = dm.IdResponsable_Anterior
+// LEFT JOIN Responsable rn ON rn.IdResponsable
+
     // public function registrarMovimiento($data){
     //     try{
     //         $stmt = $this->db->prepare('EXEC sp_GestionMovimientos @pTipoRegistro = ?, @idMovimiento = ?, @idFicha = ?, @idActivo = ?, @idTipoMovimiento = ?, @idAmbienteOrigen = ?, @idAmbienteDestino = ?, @idResponsableNuevo = ?, @idAutorizador = ?, @observaciones = ?, @userMod = ?, @idGenerado = ?');
