@@ -36,6 +36,17 @@ class Usuarios
         }
     }
 
+    public function listarPorCodUsuario($IdCodUsuario){
+        try {
+            $stmt = $this->db->prepare('SELECT * FROM tUsuarios WHERE CodUsuario = ?');
+            $stmt->execute([$IdCodUsuario]);
+            return $stmt->fetch(\PDO::FETCH_ASSOC);
+        }catch(\PDOException $e){
+            error_log("Error in listarPorCodUsuario: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
     public function registrar($data)
     {
         try {

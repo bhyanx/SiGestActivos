@@ -6,7 +6,12 @@ $usuario = new Usuarios();
 
 $action = $_GET['action'] ?? $_POST['action'] ?? 'Consultar';
 
+//* USO DE SWITCH CASE PARA REALIZAR ACCIONES EN BASE A LA PETICION DEL USUARIO
+
 switch($action){
+
+    //* CASE PARA PODER INICIAR SESSIÓN EN EL SISTEMA, DEPENDIENDO DE SUS ROLES Y PERMISOS
+
     case 'AccesoUsuario':
         $datos = $usuario->login($_POST["CodUsuario"], $_POST["ClaveAcceso"]);
         if (is_array($datos) == true and count($datos) > 0) {
@@ -29,14 +34,57 @@ switch($action){
                 $_SESSION["Firma"] = $row["Firma"];
             }
 
+            //* VERIFICAMOS LA URL DE LA ULTIMA SESSION DEL USUARIO, SI NO EXISTE REDIRECCIONAMOS A LA VISTA DE DASHBOARD
+            //* SI EXISTE REDIRECCIONAMOS A LA URL QUE SE ENCUENTRA EN LA BASE DE DATOS
+            
             if (empty($row["UrlUltimaSession"])){
                 $result = array('status' => true, 'msg' => '../views/Dashboard/');
             } else {
                 $result = array('status' => true, 'msg' => $row["UrlUltimaSession"]);
             }
 
-            $datapermisos = $usuario->get_menu_rol($_SESSION['IdRol']);
+            //* OBTENEMOS LOS PERMISOS DEL USUARIO QUE SE ENCUENTA LOGUEADO
+            $datapermisos = $usuario->leerMenuRol($_SESSION['IdRol']);
+            if (is_array($datapermisos) == true and count($datapermisos) > 0){
+                $_SESSION['Permisos'] = $datapermisos;
+            }else{
+                $result = array('status' => false, 'msg' => 'No se encontraron permisos para el usuario');
+            }
+        }else{
+            $result = array('status' => false, 'msg' => 'Usuario o contraseña incorrectos');
         }
+        echo json_encode($result);
+        break;
+
+        
+    //* CASE PARA PODER LEER CUALQUIER USUARIO SOLO INGRESANDO SU CODIGO DE USUARIO(DNI)
+
+    case 'LeerUsuarioId':
+        $data = $usuario->listarPorCodUsuario($_POST["CodUsuario"]);
+        if ($data){
+            $response = array('status' => true, 'data' => $data);
+        } else {
+            $response = array('status' => false, 'data' => $data);
+        }
+        echo json_encode($response);
+        break;
+
+
+    //* CASE PARA PODER LEER TODOS LOS USUARIOS QUE SE ENCUENTRAN EN LA BASE DE DATOS
+    case 'LeerUsuarios':
+        $data = $usuario->listarTodo();
+        if($data){
+            $response = array('status' => true, 'data' => $data);
+        } else {
+            $response = array('status' => false, 'data' => $data);
+        }
+        echo json_encode($response);
+        break;
+
+    default:
+        $result = array('status' => false, 'msg' => 'No se encontraron permisos para el usuario');
+        echo json_encode($result);
+        break;
 }
 
 ?>
