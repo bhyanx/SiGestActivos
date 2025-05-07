@@ -89,7 +89,6 @@ switch ($action){
     default:
         echo "Acción no válida.";
         break;
-    
 }
 
 ?>
