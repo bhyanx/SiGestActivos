@@ -1,9 +1,5 @@
 <?php
-// require_once("../../config/conexion.php");
-// require_once("../../models/usuario.php");
-// $usuario = new Usuario();
-// $data = $usuario->get_menu_grupo($_SESSION['CodRol']);
-// $datapermisos = $usuario->get_menu_rol($_SESSION['CodRol']);
+
 ?>
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar elevation-4 sidebar-dark-green">
@@ -28,9 +24,6 @@
         <!-- Sidebar Menu -->
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent" data-widget="treeview" role="menu" data-accordion="false">
-                <!-- Add icons to the links using the .nav-icon class
-                 with font-awesome or any other icon font library -->
-
                 <li class="nav-item">
                     <a href="../Home/" class="nav-link" id="Home">
                         <i class="nav-icon fas fa-home"></i>
@@ -101,6 +94,12 @@
                     <a href="../Proveedores/" class="nav-link" id="Proveedores">
                         <i class="nav-icon fas fa-home"></i>
                         <p> Proveedores </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="../Usuario/" class="nav-link" id="Usuarios">
+                        <i class="nav-icon fas fa-user-gear"></i>
+                        <p> Usuarios </p>
                     </a>
                 </li>
                 <li class="nav-item">

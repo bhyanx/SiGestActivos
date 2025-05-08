@@ -2,26 +2,26 @@ FullCalendar.globalLocales.push(function () {
   'use strict';
 
   var cs = {
-    code: "cs",
+    code: 'cs',
     week: {
-      dow: 1,
-      doy: 4
+      dow: 1, // Monday is the first day of the week.
+      doy: 4, // The week that contains Jan 4th is the first week of the year.
     },
     buttonText: {
-      prev: "D\u0159\xEDve",
-      next: "Pozd\u011Bji",
-      today: "Nyn\xED",
-      month: "M\u011Bs\xEDc",
-      week: "T\xFDden",
-      day: "Den",
-      list: "Agenda"
+      prev: 'Dříve',
+      next: 'Později',
+      today: 'Nyní',
+      month: 'Měsíc',
+      week: 'Týden',
+      day: 'Den',
+      list: 'Agenda',
     },
-    weekText: "T\xFDd",
-    allDayText: "Cel\xFD den",
+    weekText: 'Týd',
+    allDayText: 'Celý den',
     moreLinkText: function(n) {
-      return "+dal\u0161\xED: " + n;
+      return '+další: ' + n
     },
-    noEventsText: "\u017D\xE1dn\xE9 akce k zobrazen\xED"
+    noEventsText: 'Žádné akce k zobrazení',
   };
 
   return cs;

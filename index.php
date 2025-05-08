@@ -3,7 +3,7 @@
 require_once("app/config/configuracion.php");
 
 if (!empty($_SESSION['CodUsuario']) && !empty($_SESSION['ClaveAcceso'])){
-    header("Location: app/views/Dashboard");
+    header("Location: app/views/Home");
 }else{
     header("Location: app/views/Login");
 } 

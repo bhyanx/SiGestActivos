@@ -1,0 +1,3843 @@
+USE [bdActivos]
+GO
+/****** Object:  Table [dbo].[tUsuarios]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tUsuarios](
+	[CodUsuario] [nvarchar](15) NOT NULL,
+	[CodEmpleado] [nvarchar](15) NOT NULL,
+	[IdRol] [int] NOT NULL,
+	[ClaveAcceso] [nvarchar](10) NULL,
+	[UrlUltimaSession] [nvarchar](max) NULL,
+	[Activo] [bit] NOT NULL,
+	[UserUpdate] [varchar](50) NULL,
+	[FechaUpdate] [datetime] NULL,
+ CONSTRAINT [PK_tUsuarios] PRIMARY KEY CLUSTERED 
+(
+	[CodUsuario] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vAccesoLogin]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vAccesoLogin]
+AS
+SELECT  u.CodUsuario,u.CodEmpleado,u.ClaveAcceso,u.IdRol,
+		c.ApellidoPaterno,c.ApellidoMaterno,c.PrimerNombre,c.SegundoNombre,c.NombreTrabajador,
+		c.CorreoPersonal,c.FechaNacimiento,c.CodGenero,c.DescripGenero, c.Celular,c.DescripcionTT,
+		c.Foto,c.Firma,U.UrlUltimaSession
+FROM tUsuarios u
+INNER JOIN bdRecursosHumanos.dbo.vcontratos c on u.CodEmpleado = c.codTrabajador
+where 
+--u.CodUsuario =  AND 
+--u.ClaveAcceso = ? AND
+u.Activo = '1' AND
+c.EstadoActual not in ('ve','fi');
+GO
+/****** Object:  Table [dbo].[tMenu]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tMenu](
+	[CodMenu] [int] IDENTITY(1,1) NOT NULL,
+	[NombreMenu] [nvarchar](250) NOT NULL,
+	[MenuRuta] [nvarchar](250) NOT NULL,
+	[MenuIdentificador] [nvarchar](150) NOT NULL,
+	[MenuIcono] [nvarchar](50) NOT NULL,
+	[MenuGrupo] [nvarchar](100) NOT NULL,
+	[MenuGrupoIcono] [nvarchar](50) NOT NULL,
+	[Estado] [bit] NOT NULL,
+	[UserUpdate] [nvarchar](15) NULL,
+	[FechaUpdate] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[CodMenu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tPermisos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tPermisos](
+	[CodPermiso] [int] IDENTITY(1,1) NOT NULL,
+	[CodMenu] [int] NOT NULL,
+	[IdRol] [int] NOT NULL,
+	[Permiso] [bit] NOT NULL,
+	[UserUpdate] [nvarchar](15) NULL,
+	[FechaUpdate] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[CodPermiso] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vMenuGrupo]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vMenuGrupo] AS 
+SELECT DISTINCT MenuGrupo, MenuGrupoIcono, tpermisos.Permiso, tPermisos.IdRol FROM tMenu
+    inner join tPermisos on tmenu.CodMenu = tpermisos.CodMenu
+    where tpermisos.Permiso = '1'
+GO
+/****** Object:  Table [dbo].[tRoles]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tRoles](
+	[IdRol] [int] IDENTITY(1,1) NOT NULL,
+	[NombreRol] [nvarchar](100) NOT NULL,
+	[Estado] [bit] NOT NULL,
+	[UserUpdate] [nvarchar](15) NULL,
+	[FechaUpdate] [datetime] NULL,
+ CONSTRAINT [PK_tRoles] PRIMARY KEY CLUSTERED 
+(
+	[IdRol] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY],
+ CONSTRAINT [UQ_tRoles_Nombre] UNIQUE NONCLUSTERED 
+(
+	[NombreRol] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vMenuRol]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vMenuRol] AS
+SELECT  tpermisos.CodPermiso, tpermisos.CodMenu, tpermisos.IdRol, tpermisos.Permiso, tmenu.NombreMenu, tmenu.MenuRuta,
+		tmenu.MenuIdentificador, tmenu.MenuIcono, tmenu.MenuGrupo, tmenu.MenuGrupoIcono, tmenu.Estado as EstadoMenu, tRoles.NombreRol 
+FROM tPermisos
+inner join tMenu on tpermisos.CodMenu = tmenu.CodMenu
+inner join tRoles on tpermisos.IdRol = tRoles.IdRol
+where tpermisos.Permiso = '1' and tmenu.Estado = '1' 
+GO
+/****** Object:  View [dbo].[vEntidadExternaGeneralProveedor]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vEntidadExternaGeneralProveedor]
+AS
+SELECT  Id, RazonSocial, codTipo, DescTipoEntExt,TipoDoc, 
+        Documento, CodTipoDocId, idGenero, (CASE EsProveedor WHEN '1' THEN 'Si' ELSE 'No' END) 
+		AS Prov, (CASE EsCliente WHEN '1' THEN 'Sí' ELSE 'No' END) AS Clie, (CASE EsTransportista WHEN '1' THEN 'Sí' ELSE 'No' END) AS Trans, 
+		(CASE EsComprador WHEN '1' THEN 'Sí' ELSE 'No' END) AS Comp, (CASE EsAgenteRetencion WHEN '<> 0' THEN 'Sí' ELSE 'No' END) AS ARS, EsCliente, 
+		EsTransportista, EsComprador, EsProveedor, EsAgenteRetencion, Genero, EstReg, 
+		COALESCE (nCodTipoPrecio, '0') AS nnCodTipoPrecio, CorreoFacturacion, FechaNacimiento, CodTipoDocIdSunat, 
+		ReqCompSinIGV, EstRegDoc, EsEmpresaTransportePublico
+ FROM bdGestionLubriseng.dbo.vEntidadExternaGeneral 
+GO
+/****** Object:  View [dbo].[vListadoDeArticulosPorDocIngresoAlmacen]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[vListadoDeArticulosPorDocIngresoAlmacen]
+AS
+SELECT 
+    ia.idIngAlmacen AS IdIngAlmMax, 
+    ia.FechaIngreso AS FechaIng, 
+    art.idarticulo, 
+    dia.FechaEmision AS FechaEmi, 
+    dia.idDocIngAlmacen, 
+    ee.RazonSocial, 
+    mon.NombreMoneda, 
+    det.CantIng, 
+    umv.AbreUMVenta, 
+    dia.TasaIGV, 
+    CONVERT(numeric(7, 2), det.PrecioUnitario) AS PrecioSinIgv, -- Corrección: Usar PrecioUnitario
+    CONVERT(numeric(7, 2), det.PrecioUnitario * (dia.TasaIGV / 100 + 1)) AS PrecioMasIgv, 
+    CONVERT(numeric(7, 2), det.PrecioUnitario * (dia.TasaIGV / 100 + 1) * det.CantIng) AS ImporteTotal, 
+    mon.codMoneda, 
+    un.cod_UnidadNeg, 
+    dia.NumeroDocumento, 
+    dia.SerieDocumento, 
+    eia.IdTipoEstadoIngreso, 
+    un.Cod_Empresa, 
+    eia.EstActual, 
+    umv.CodUMBase, 
+    um.AbrevUM, 
+    umv.CantEquivalenteBase, 
+    CONVERT(numeric(7, 2), det.PrecioUnitario * (dia.TasaIGV / 100 + 1) / umv.CantEquivalenteBase) AS PrecioUMBaseIGV, 
+    dia.RefPrecios, 
+    tcm.Compra AS tcCompra, 
+    tcm.Venta AS tcVenta, 
+    un.Nombre_local, 
+    dia.idTipoComp, 
+    ae.codAlmacen, 
+    det.CantIng * umv.CantEquivalenteBase AS CantTotalIngresadaEquivalente, 
+    art.idGrupoProd, 
+    ga.idLineaProd
+FROM bdGestionLubriseng.dbo.tEstadoIngresoAlmacen eia
+INNER JOIN bdGestionLubriseng.dbo.tUnidadMedVenta umv
+INNER JOIN bdGestionLubriseng.dbo.tArticulo art
+INNER JOIN bdGestionLubriseng.dbo.tGrupoArticulo ga ON art.idGrupoProd = ga.idGrupoProd
+INNER JOIN bdGestionLubriseng.dbo.tDetalleIngAlmacen det ON art.idarticulo = det.idArticulo ON umv.CodUMVenta = det.CodUMVenta
+INNER JOIN bdGestionLubriseng.dbo.TIngresoAlmacen ia
+INNER JOIN bdGestionLubriseng.dbo.tDocumentoIngresoAlmacen dia
+INNER JOIN bdGestionLubriseng.dbo.tMoneda mon ON dia.CodMoneda = mon.codMoneda
+INNER JOIN bdGestionLubriseng.dbo.tEntidadExterna ee ON dia.idEntidadExterna = ee.idEntidadExterna ON ia.idIngAlmacen = dia.idIngAlmacen ON det.idIngAlmacen = ia.idIngAlmacen ON eia.idIngAlmacen = ia.idIngAlmacen
+INNER JOIN bdGestionLubriseng.dbo.tAlmacenEmpresa ae
+INNER JOIN bdGestionLubriseng.dbo.tUnidadNegocio un ON ae.codUnidadNeg = un.cod_UnidadNeg ON ia.codAlmacen = ae.codAlmacen
+INNER JOIN bdGestionLubriseng.dbo.tUnidad_Medida um ON umv.CodUMBase = um.CodUM
+LEFT OUTER JOIN bdGestionLubriseng.dbo.tTipoCambioMoneda tcm ON dia.FechaEmision = tcm.Fecha
+WHERE 
+    (eia.EstActual = '1') 
+    AND (dia.RefPrecios = '1') 
+    AND (det.EsPromocion NOT IN ('1')) 
+    AND (ga.idLineaProd = 11)
+    AND (YEAR(ia.FechaIngreso) = YEAR(GETDATE()));
+GO
+/****** Object:  Table [dbo].[tEstadoActivo]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tEstadoActivo](
+	[idEstadoActivo] [int] IDENTITY(1,1) NOT NULL,
+	[nombre] [nvarchar](50) NOT NULL,
+	[descripcion] [nvarchar](255) NULL,
+	[esFinal] [bit] NOT NULL,
+ CONSTRAINT [PK_tEstadoActivo] PRIMARY KEY CLUSTERED 
+(
+	[idEstadoActivo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY],
+ CONSTRAINT [UQ_tEstadoActivo_Nombre] UNIQUE NONCLUSTERED 
+(
+	[nombre] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vArticulos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vArticulos] AS
+SELECT DISTINCT idarticulo, Descripcion_articulo, Descripcion_impresion, 
+                Descripcion_usos, EsOriginal, EnMaestro, mar.codMarca, 
+                idGrupoProd, cod_articulo, CodStockWin, mar.DescripcionMarca,
+				mar.Mercado, Nro_Parte, codUMBase, um.AbrevUM, 
+                te.codSunatTipoExistencia, te.DescripcionTipoExist,
+			    PesoKgUMBase
+FROM bdGestionLubriseng.dbo.tArticulo ar
+INNER JOIN bdGestionLubriseng.dbo.tMarca mar ON ar.codMarca = mar.codMarca 
+INNER JOIN bdGestionLubriseng.dbo.tUnidad_Medida um ON codUMBase = um.CodUM 
+INNER JOIN bdGestionLubriseng.dbo.tTipoExistencia te ON ar.IdTipoExistencia = te.idTipoExistencia
+WHERE (mar.ParaArticulos = '1')
+GO
+/****** Object:  Table [dbo].[tCategoriasActivo]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tCategoriasActivo](
+	[idCategoria] [int] IDENTITY(1,1) NOT NULL,
+	[nombre] [nvarchar](100) NOT NULL,
+	[descripcion] [nvarchar](255) NULL,
+	[vidaUtilEstandar] [int] NULL,
+	[estado] [bit] NOT NULL,
+	[fechaRegistro] [datetime] NOT NULL,
+	[fechaMod] [datetime] NULL,
+	[userMod] [nvarchar](15) NULL,
+ CONSTRAINT [PK_tCategoriasActivo] PRIMARY KEY CLUSTERED 
+(
+	[idCategoria] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY],
+ CONSTRAINT [UQ_tCategoriasActivo_Nombre] UNIQUE NONCLUSTERED 
+(
+	[nombre] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tSucursales]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tSucursales](
+	[cod_UnidadNeg] [int] NOT NULL,
+	[nombre] [nvarchar](200) NOT NULL,
+	[direccion] [nvarchar](max) NULL,
+	[estado] [bit] NOT NULL,
+	[fechaRegistro] [datetime] NOT NULL,
+	[fechaMod] [datetime] NULL,
+	[userMod] [nvarchar](15) NULL,
+ CONSTRAINT [PK_tSucursales] PRIMARY KEY CLUSTERED 
+(
+	[cod_UnidadNeg] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tAmbiente]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tAmbiente](
+	[idAmbiente] [int] IDENTITY(1,1) NOT NULL,
+	[nombre] [nvarchar](100) NOT NULL,
+	[descripcion] [nvarchar](255) NULL,
+	[idSucursal] [int] NOT NULL,
+	[estado] [bit] NOT NULL,
+	[fechaRegistro] [datetime] NOT NULL,
+	[fechaMod] [datetime] NULL,
+	[userMod] [nvarchar](15) NULL,
+ CONSTRAINT [PK_tAmbiente] PRIMARY KEY CLUSTERED 
+(
+	[idAmbiente] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tActivos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tActivos](
+	[idActivo] [int] IDENTITY(1,1) NOT NULL,
+	[idDocIngresoAlm] [int] NULL,
+	[idArticulo] [int] NULL,
+	[codigo] [nvarchar](50) NOT NULL,
+	[serie] [nvarchar](100) NULL,
+	[idEstado] [int] NOT NULL,
+	[enUso] [bit] NOT NULL,
+	[idActivoPadre] [int] NULL,
+	[idResponsable] [nchar](10) NULL,
+	[idSucursal] [int] NOT NULL,
+	[idAmbiente] [int] NULL,
+	[idCategoria] [int] NOT NULL,
+	[vidaUtil] [int] NOT NULL,
+	[valorAdquisicion] [decimal](12, 2) NULL,
+	[fechaAdquisicion] [date] NOT NULL,
+	[garantia] [bit] NOT NULL,
+	[fechaFinGarantia] [date] NULL,
+	[idProveedor] [int] NOT NULL,
+	[observaciones] [nvarchar](max) NULL,
+	[fechaRegistro] [datetime] NOT NULL,
+	[fechaMod] [datetime] NULL,
+	[userMod] [nvarchar](15) NULL,
+ CONSTRAINT [PK_Activos] PRIMARY KEY CLUSTERED 
+(
+	[idActivo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY],
+ CONSTRAINT [UQ_Activos_Codigo] UNIQUE NONCLUSTERED 
+(
+	[codigo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vActivos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   VIEW [dbo].[vActivos]
+AS
+SELECT 
+    a.idActivo,
+    a.codigo AS CodigoActivo,
+    a.serie AS NumeroSerie,
+    a.idDocIngresoAlm AS DocIngresoAlmacen,
+    a.idArticulo,
+    art.Descripcion_articulo AS NombreArticulo,
+    art.DescripcionMarca AS MarcaArticulo,
+    a.idEstado,
+    ea.nombre AS Estado,
+    a.enUso,
+    a.idSucursal,
+    s.nombre AS Sucursal,
+    a.idAmbiente,
+    amb.nombre AS Ambiente,
+    a.idCategoria,
+    cat.nombre AS Categoria,
+    a.vidaUtil,
+    di.NombreMoneda,
+    ISNULL(di.PrecioUMBaseIGV, 0) AS PrecioBase,
+    ISNULL(
+        CASE 
+            WHEN di.NombreMoneda = 'Dólares' THEN di.PrecioUMBaseIGV * 3.64
+            WHEN di.NombreMoneda = 'Soles' THEN di.PrecioUMBaseIGV
+            ELSE 0 
+        END, 
+        0
+    ) AS valorSoles,
+    a.fechaAdquisicion,
+    a.garantia,
+    a.fechaFinGarantia,
+    ISNULL(p.RazonSocial, 'Sin proveedor') AS Proveedor,
+    a.observaciones,
+    a.fechaRegistro
+FROM dbo.tActivos AS a
+LEFT OUTER JOIN dbo.vListadoDeArticulosPorDocIngresoAlmacen AS di 
+    ON a.idDocIngresoAlm = di.idDocIngAlmacen AND a.idArticulo = di.idarticulo
+LEFT OUTER JOIN dbo.tEstadoActivo AS ea 
+    ON a.idEstado = ea.idEstadoActivo
+LEFT OUTER JOIN dbo.vArticulos AS art 
+    ON a.idArticulo = art.idarticulo
+LEFT OUTER JOIN dbo.tSucursales AS s 
+    ON a.idSucursal = s.cod_UnidadNeg
+LEFT OUTER JOIN dbo.tAmbiente AS amb 
+    ON a.idAmbiente = amb.idAmbiente
+LEFT OUTER JOIN dbo.tCategoriasActivo AS cat 
+    ON a.idCategoria = cat.idCategoria
+LEFT OUTER JOIN dbo.vEntidadExternaGeneralProveedor AS p 
+    ON a.idProveedor = p.Id;
+GO
+/****** Object:  View [dbo].[vActivosEnUso]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vActivosEnUso]
+AS
+SELECT 
+    a.idActivo,
+    a.CodigoActivo,
+    a.NumeroSerie,
+    a.NombreArticulo,
+    a.MarcaArticulo,
+    a.idEstado,
+    a.Estado,
+    a.idSucursal,
+    a.Sucursal,
+    a.idAmbiente,
+    a.Ambiente,
+    a.idCategoria,
+    a.Categoria,
+    a.valorSoles,
+    a.fechaAdquisicion,
+    a.Proveedor
+FROM dbo.vActivos AS a
+WHERE a.enUso = 1;
+GO
+/****** Object:  View [dbo].[vActivosBaja]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vActivosBaja]
+AS
+SELECT 
+    a.idActivo,
+    a.CodigoActivo,
+    a.NumeroSerie,
+    a.NombreArticulo,
+    a.MarcaArticulo,
+    a.idSucursal,
+    a.Sucursal,
+    a.idCategoria,
+    a.Categoria,
+    a.valorSoles,
+    a.fechaAdquisicion,
+    a.observaciones
+FROM dbo.vActivos AS a
+WHERE a.idEstado = 3;
+GO
+/****** Object:  View [dbo].[vCantidadActivosPorSucursal]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vCantidadActivosPorSucursal]
+AS
+SELECT 
+    s.cod_UnidadNeg,
+    s.nombre,
+    COUNT(a.idActivo) AS TotalActivos,
+    SUM(a.valorSoles) AS ValorTotalSoles
+FROM dbo.vActivos AS a
+INNER JOIN dbo.tSucursales AS s 
+    ON a.idSucursal = s.cod_UnidadNeg
+GROUP BY s.cod_UnidadNeg, s.nombre;
+GO
+/****** Object:  Table [dbo].[tMovimientos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tMovimientos](
+	[idMovimiento] [int] IDENTITY(1,1) NOT NULL,
+	[FechaMovimiento] [datetime] NOT NULL,
+	[idTipoMovimiento] [int] NOT NULL,
+	[idAutorizador] [nvarchar](15) NOT NULL,
+	[idSucursalOrigen] [int] NOT NULL,
+	[idSucursalDestino] [int] NOT NULL,
+	[observaciones] [nvarchar](max) NULL,
+ CONSTRAINT [PK_Movimientos] PRIMARY KEY CLUSTERED 
+(
+	[idMovimiento] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vEmpleados]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vEmpleados]
+AS
+SELECT        FechaRegistro, codTrabajador, AbreviaturaTDI, NroDocumento, ApellidoPaterno, ApellidoMaterno, PrimerNombre, SegundoNombre, NombreTrabajador, Direccion, Foto, Firma, Cv, Clave, Celular, CorreoPersonal, CodGenero, 
+                         DescripGenero, FechaNacimiento, Estado, UserUpdate, FechaUpdate, TipoSangre, DescripEC, codPais, codSunatPais, NombrePais, codDpto, CodDptoSunat, NombreDpto, codProv, codProvSunat, NombreProvincia, CodDistrito, 
+                         codDistSunat, NombreDistrito, CodTipoVia, CodTipoViaSunat, DescripcionTipoVia, NombreVia, NroVia, CodZona, codZRSunat, DescripcionZR, NombreZona, CodTipoDireccion, DescripcionTD, Referencia, CodNacionalidad, 
+                         DescripcionNac, CodTipoDocIdentidad
+FROM            bdRecursosHumanos.dbo.vtrabajador
+GO
+/****** Object:  View [dbo].[vCantidadActivosBajaPorResponsable]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vCantidadActivosBajaPorResponsable]
+AS
+SELECT 
+    COALESCE(m.idResponsableNuevo, m.idResponsableAnterior, 'Sin responsable') AS idResponsable,
+    ISNULL(e.NombreTrabajador, 'Sin responsable') AS Responsable,
+    COUNT(a.idActivo) AS TotalActivosBaja,
+    SUM(a.valorSoles) AS ValorTotalSoles
+FROM dbo.vActivos AS a
+INNER JOIN dbo.tMovimientos AS m 
+    ON a.idActivo = m.idActivo
+LEFT OUTER JOIN dbo.vEmpleados AS e 
+    ON e.codTrabajador = COALESCE(m.idResponsableNuevo, m.idResponsableAnterior)
+WHERE a.idEstado = 3
+GROUP BY m.idResponsableNuevo, m.idResponsableAnterior, e.NombreTrabajador;
+GO
+/****** Object:  View [dbo].[vDashboardResumenActivos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vDashboardResumenActivos]
+AS
+SELECT 
+    s.cod_UnidadNeg,
+    s.nombre,
+    COUNT(CASE WHEN a.idEstado = 1 THEN a.idActivo END) AS TotalOperativos,
+    COUNT(CASE WHEN a.idEstado = 2 THEN a.idActivo END) AS TotalEnMantenimiento,
+    COUNT(CASE WHEN a.idEstado = 3 THEN a.idActivo END) AS TotalBaja,
+    COUNT(a.idActivo) AS TotalActivos,
+    SUM(a.valorSoles) AS ValorTotalSoles
+FROM dbo.vActivos AS a
+INNER JOIN dbo.tSucursales AS s 
+    ON a.idSucursal = s.cod_UnidadNeg
+GROUP BY s.cod_UnidadNeg, s.nombre;
+GO
+/****** Object:  View [dbo].[vDashboardActivosPorCategoria]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vDashboardActivosPorCategoria]
+AS
+SELECT 
+    c.idCategoria,
+    c.nombre AS Categoria,
+    COUNT(a.idActivo) AS TotalActivos,
+    SUM(a.valorSoles) AS ValorTotalSoles
+FROM dbo.vActivos AS a
+INNER JOIN dbo.tCategoriasActivo AS c 
+    ON a.idCategoria = c.idCategoria
+GROUP BY c.idCategoria, c.nombre;
+GO
+/****** Object:  Table [dbo].[tDetalleMovimiento]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tDetalleMovimiento](
+	[IdDetalleMovimiento] [int] IDENTITY(1,1) NOT NULL,
+	[IdMovimiento] [int] NOT NULL,
+	[IdActivo] [int] NOT NULL,
+	[idAutorizador] [nvarchar](15) NULL,
+	[IdSucursal_Anterior] [int] NULL,
+	[IdSucursal_Nueva] [int] NULL,
+	[IdAmbiente_Anterior] [int] NULL,
+	[IdAmbiente_Nuevo] [int] NULL,
+	[IdResponsable_Anterior] [nvarchar](15) NULL,
+	[IdResponsable_Nuevo] [nvarchar](15) NULL,
+	[IdActivoPadre_Anterior] [int] NULL,
+	[IdActivoPadre_Nuevo] [int] NULL,
+ CONSTRAINT [PK__tDetalle__CF20C8D22A29AB8E] PRIMARY KEY CLUSTERED 
+(
+	[IdDetalleMovimiento] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vDashboardMovimientosRecientes]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   VIEW [dbo].[vDashboardMovimientosRecientes]
+AS
+SELECT TOP 10
+    m.idMovimiento,
+    m.FechaMovimiento,
+    a.CodigoActivo,
+    a.NombreArticulo,
+    so.nombre AS SucursalOrigen,
+    sd.nombre AS SucursalDestino,
+    m.observaciones
+FROM dbo.tMovimientos m
+INNER JOIN dbo.tDetalleMovimiento dm ON m.idMovimiento = dm.IdMovimiento
+INNER JOIN dbo.vActivos a ON dm.IdActivo = a.idActivo
+INNER JOIN dbo.tSucursales so ON m.idSucursalOrigen = so.cod_UnidadNeg
+INNER JOIN dbo.tSucursales sd ON m.idSucursalDestino = sd.cod_UnidadNeg
+WHERE m.FechaMovimiento >= DATEADD(DAY, -30, GETDATE())
+ORDER BY m.FechaMovimiento DESC;
+GO
+/****** Object:  View [dbo].[vActivosPorProveedor]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vActivosPorProveedor]
+AS
+SELECT 
+    p.Id AS idProveedor,
+    p.RazonSocial AS Proveedor,
+    COUNT(a.idActivo) AS TotalActivos,
+    SUM(a.valorSoles) AS ValorTotalSoles,
+    AVG(CAST(a.vidaUtil AS FLOAT)) AS VidaUtilPromedio
+FROM dbo.vActivos AS a
+INNER JOIN dbo.vEntidadExternaGeneralProveedor AS p 
+    ON a.Proveedor = p.Id
+GROUP BY p.Id, p.RazonSocial;
+GO
+/****** Object:  Table [dbo].[tDepreciacion]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tDepreciacion](
+	[idDepreciacion] [int] IDENTITY(1,1) NOT NULL,
+	[idActivo] [int] NOT NULL,
+	[fechaDepreciacion] [date] NOT NULL,
+	[montoDepreciacionMensual] [decimal](12, 2) NOT NULL,
+	[montoDepreciacionAcumulada] [decimal](12, 2) NOT NULL,
+	[valorNeto] [decimal](12, 2) NOT NULL,
+	[metodoDepreciacion] [nvarchar](50) NOT NULL,
+	[fechaRegistro] [datetime] NOT NULL,
+	[userMod] [nvarchar](15) NULL,
+ CONSTRAINT [PK_tDepreciacion] PRIMARY KEY CLUSTERED 
+(
+	[idDepreciacion] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vDepreciacionAcumuladaPorCategoria]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vDepreciacionAcumuladaPorCategoria]
+AS
+SELECT 
+    c.idCategoria,
+    c.nombre AS Categoria,
+    COUNT(a.idActivo) AS TotalActivos,
+    SUM(d.montoDepreciacionAcumulada) AS DepreciacionAcumulada,
+    SUM(d.valorNeto) AS ValorNetoTotal
+FROM dbo.tActivos AS a
+INNER JOIN dbo.tCategoriasActivo AS c 
+    ON a.idCategoria = c.idCategoria
+INNER JOIN dbo.tDepreciacion AS d 
+    ON a.idActivo = d.idActivo
+GROUP BY c.idCategoria, c.nombre;
+GO
+/****** Object:  View [dbo].[vActivosPorResponsable]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vActivosPorResponsable]
+AS
+SELECT 
+    COALESCE(m.idResponsableNuevo, m.idResponsableAnterior, 'Sin responsable') AS idResponsable,
+    ISNULL(e.NombreTrabajador, 'Sin responsable') AS Responsable,
+    COUNT(a.idActivo) AS TotalActivos,
+    SUM(a.valorSoles) AS ValorTotalSoles
+FROM dbo.vActivos AS a
+INNER JOIN dbo.tMovimientos AS m 
+    ON a.idActivo = m.idActivo
+LEFT OUTER JOIN dbo.vEmpleados AS e 
+    ON e.codTrabajador = COALESCE(m.idResponsableNuevo, m.idResponsableAnterior)
+GROUP BY m.idResponsableNuevo, m.idResponsableAnterior, e.NombreTrabajador;
+GO
+/****** Object:  Table [dbo].[tDocumentoAdjunto]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tDocumentoAdjunto](
+	[idDocumento] [int] IDENTITY(1,1) NOT NULL,
+	[tipoReferencia] [nvarchar](50) NULL,
+	[idReferencia] [int] NULL,
+	[nombreArchivo] [nvarchar](255) NULL,
+	[urlArchivo] [nvarchar](255) NULL,
+	[fechaRegistro] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[idDocumento] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vDocumentosPorActivo]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vDocumentosPorActivo]
+AS
+SELECT 
+    a.idActivo,
+    a.CodigoActivo,
+    a.NombreArticulo,
+    d.idDocumento,
+    d.nombreArchivo,
+    d.urlArchivo,
+    d.fechaRegistro
+FROM dbo.vActivos AS a
+INNER JOIN dbo.tDocumentoAdjunto AS d 
+    ON d.idReferencia = a.idActivo AND d.tipoReferencia = 'Activo';
+GO
+/****** Object:  View [dbo].[vMenusPorUsuario]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vMenusPorUsuario]
+AS
+SELECT u.CodUsuario, u.CodEmpleado, r.NombreRol, m.NombreMenu, m.MenuRuta, m.MenuIcono, m.MenuGrupo
+FROM tUsuarios u
+INNER JOIN tRoles r ON u.IdRol = r.IdRol
+INNER JOIN tPermisos p ON r.IdRol = p.IdRol
+INNER JOIN tMenu m ON p.CodMenu = m.CodMenu
+WHERE p.Permiso = 1 AND m.Estado = 1;
+GO
+/****** Object:  View [dbo].[vHistorialMovimientosPorActivo]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   VIEW [dbo].[vHistorialMovimientosPorActivo]
+AS
+SELECT 
+    m.idMovimiento,
+    m.fechaMovimiento,
+    m.idActivo, -- Agregado explícitamente
+    m.idAmbienteOrigen, -- Agregado explícitamente
+    m.idAmbienteDestino, -- Agregado explícitamente
+    a.CodigoActivo,
+    a.NombreArticulo,
+    ao.nombre AS AmbienteOrigen,
+    ad.nombre AS AmbienteDestino,
+    so.nombre AS SucursalOrigen,
+    sd.nombre AS SucursalDestino,
+    m.idResponsableNuevo,
+    m.idAutorizador,
+    m.observaciones
+FROM tMovimientos m
+INNER JOIN vActivos a ON m.idActivo = a.idActivo
+LEFT JOIN tAmbiente ao ON m.idAmbienteOrigen = ao.idAmbiente
+LEFT JOIN tAmbiente ad ON m.idAmbienteDestino = ad.idAmbiente
+LEFT JOIN tSucursales so ON ao.idSucursal = so.cod_UnidadNeg
+LEFT JOIN tSucursales sd ON ad.idSucursal = sd.cod_UnidadNeg;
+GO
+/****** Object:  View [dbo].[vContratos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vContratos] AS
+SELECT * FROM bdRecursosHumanos.dbo.vcontratos
+GO
+/****** Object:  View [dbo].[vEmpresas]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vEmpresas]
+AS
+SELECT   cod_empresa, Razon_empresa, Direccion_empresa, Ruc_empresa, fono_empresa, idEntExterna, AbreEmpresa, EmisionElectronica, correofacturacion
+FROM         bdGestionLubriseng.dbo.vEmpresas AS vEmpresas_1
+GO
+/****** Object:  View [dbo].[vUnidadesEmpresa]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vUnidadesEmpresa]
+AS
+SELECT   cod_empresa, Razon_empresa, Direccion_empresa, Ruc_empresa, fono_empresa, cod_UnidadNeg, codUbigeo, Nombre_local, Direccion_local, fono_local, Movil_local, 
+                         estadoFuncionamiento, Pais, NombreDptoRegion, NombreProvincia, NombreDistrito, CodUbigeoSunat, idLocacionEntExterna, idEntExterna, CodUnidadNegocioSUNAT
+FROM         bdGestionLubriseng.dbo.vUnidadesEmpresa AS vUnidadesEmpresa_1
+GO
+/****** Object:  View [dbo].[vZonasGeograficas]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vZonasGeograficas]
+AS
+SELECT   CodUbigeo, Pais, NombreDptoRegion, NombreProvincia, NombreDistrito, Local, codPaisLetras, CodDptoSunat, CodProvSunat, CodUbigeoSunat, CodProvincia, CodPais, 
+                         codDptoRegion
+FROM         bdGestionLubriseng.dbo.vZonasGeograficas AS vZonasGeograficas_1
+GO
+/****** Object:  Table [dbo].[tComponenteActivo]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tComponenteActivo](
+	[idComponenteActivo] [int] IDENTITY(1,1) NOT NULL,
+	[nombre] [nvarchar](100) NULL,
+	[marca] [nvarchar](100) NULL,
+	[modelo] [nvarchar](100) NULL,
+	[serie] [nvarchar](100) NULL,
+	[estado] [nvarchar](50) NULL,
+	[tipoComponente] [nvarchar](100) NULL,
+	[fechaRegistro] [datetime] NULL,
+	[userMod] [nvarchar](50) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[idComponenteActivo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tCondicionActivo]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tCondicionActivo](
+	[idCondicion] [int] IDENTITY(1,1) NOT NULL,
+	[idMovimiento] [int] NULL,
+	[esAntes] [bit] NULL,
+	[descripcion] [nvarchar](max) NULL,
+	[estado] [nvarchar](50) NULL,
+	[urlImagen] [nvarchar](255) NULL,
+	[fechaRegistro] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[idCondicion] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tEstadoMovimientoActivo]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tEstadoMovimientoActivo](
+	[idEstadoMovimientoActivo] [int] IDENTITY(1,1) NOT NULL,
+	[nombre] [nvarchar](50) NOT NULL,
+	[descripcion] [nvarchar](255) NULL,
+ CONSTRAINT [PK_tEstadoMovimientoActivo] PRIMARY KEY CLUSTERED 
+(
+	[idEstadoMovimientoActivo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY],
+ CONSTRAINT [UQ_tEstadoMovimientoActivo_Nombre] UNIQUE NONCLUSTERED 
+(
+	[nombre] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tLogAuditoria]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tLogAuditoria](
+	[idLog] [int] IDENTITY(1,1) NOT NULL,
+	[usuario] [nvarchar](50) NULL,
+	[accion] [nvarchar](50) NULL,
+	[tabla] [nvarchar](100) NULL,
+	[idRegistro] [int] NULL,
+	[fecha] [datetime] NULL,
+	[detalle] [nvarchar](max) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[idLog] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tMantenimientos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tMantenimientos](
+	[idMantenimiento] [int] IDENTITY(1,1) NOT NULL,
+	[idActivo] [int] NOT NULL,
+	[tipoMantenimiento] [nvarchar](50) NOT NULL,
+	[fechaProgramada] [date] NULL,
+	[fechaRealizada] [date] NULL,
+	[costo] [decimal](12, 2) NULL,
+	[descripcion] [nvarchar](max) NULL,
+	[idResponsable] [nvarchar](15) NOT NULL,
+	[estado] [nvarchar](50) NOT NULL,
+	[fechaRegistro] [datetime] NOT NULL,
+	[fechaMod] [datetime] NULL,
+	[userMod] [nvarchar](15) NULL,
+ CONSTRAINT [PK_tMantenimientos] PRIMARY KEY CLUSTERED 
+(
+	[idMantenimiento] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tProveedor]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tProveedor](
+	[idProveedor] [int] IDENTITY(1,1) NOT NULL,
+	[ruc] [nvarchar](11) NOT NULL,
+	[nombre] [nvarchar](200) NOT NULL,
+	[direccion] [nvarchar](max) NULL,
+	[telefono] [nvarchar](20) NULL,
+	[email] [nvarchar](100) NULL,
+	[estado] [bit] NOT NULL,
+	[fechaRegistro] [datetime] NOT NULL,
+	[fechaMod] [datetime] NULL,
+	[userMod] [nvarchar](15) NULL,
+ CONSTRAINT [PK_tProveedor] PRIMARY KEY CLUSTERED 
+(
+	[idProveedor] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY],
+ CONSTRAINT [UQ_tProveedor_RUC] UNIQUE NONCLUSTERED 
+(
+	[ruc] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tTipoMovimiento]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tTipoMovimiento](
+	[idTipoMovimiento] [int] IDENTITY(1,1) NOT NULL,
+	[nombre] [nvarchar](50) NOT NULL,
+	[descripcion] [nvarchar](255) NULL,
+ CONSTRAINT [PK_tTipoMovimiento] PRIMARY KEY CLUSTERED 
+(
+	[idTipoMovimiento] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY],
+ CONSTRAINT [UQ_tTipoMovimiento_Nombre] UNIQUE NONCLUSTERED 
+(
+	[nombre] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[tActivos] ADD  CONSTRAINT [DF__tActivos__enUso__6A3BB341]  DEFAULT ((1)) FOR [enUso]
+GO
+ALTER TABLE [dbo].[tActivos] ADD  CONSTRAINT [DF__tActivos__garant__6E0C4425]  DEFAULT ((0)) FOR [garantia]
+GO
+ALTER TABLE [dbo].[tActivos] ADD  CONSTRAINT [DF__tActivos__fechaR__6F00685E]  DEFAULT (getdate()) FOR [fechaRegistro]
+GO
+ALTER TABLE [dbo].[tAmbiente] ADD  CONSTRAINT [DF__tAmbiente__estad__638EB5B2]  DEFAULT ((1)) FOR [estado]
+GO
+ALTER TABLE [dbo].[tAmbiente] ADD  CONSTRAINT [DF__tAmbiente__fecha__6482D9EB]  DEFAULT (getdate()) FOR [fechaRegistro]
+GO
+ALTER TABLE [dbo].[tCategoriasActivo] ADD  CONSTRAINT [DF__tCategori__estad__5ECA0095]  DEFAULT ((1)) FOR [estado]
+GO
+ALTER TABLE [dbo].[tCategoriasActivo] ADD  CONSTRAINT [DF__tCategori__fecha__5FBE24CE]  DEFAULT (getdate()) FOR [fechaRegistro]
+GO
+ALTER TABLE [dbo].[tComponenteActivo] ADD  DEFAULT (getdate()) FOR [fechaRegistro]
+GO
+ALTER TABLE [dbo].[tCondicionActivo] ADD  DEFAULT (getdate()) FOR [fechaRegistro]
+GO
+ALTER TABLE [dbo].[tDepreciacion] ADD  CONSTRAINT [DF__tDeprecia__fecha__0AA882D3]  DEFAULT (getdate()) FOR [fechaRegistro]
+GO
+ALTER TABLE [dbo].[tDocumentoAdjunto] ADD  DEFAULT (getdate()) FOR [fechaRegistro]
+GO
+ALTER TABLE [dbo].[tEstadoActivo] ADD  DEFAULT ((0)) FOR [esFinal]
+GO
+ALTER TABLE [dbo].[tLogAuditoria] ADD  DEFAULT (getdate()) FOR [fecha]
+GO
+ALTER TABLE [dbo].[tMantenimientos] ADD  CONSTRAINT [DF__tMantenim__fecha__1249A49B]  DEFAULT (getdate()) FOR [fechaRegistro]
+GO
+ALTER TABLE [dbo].[tProveedor] ADD  CONSTRAINT [DF__tProveedo__estad__544C7222]  DEFAULT ((1)) FOR [estado]
+GO
+ALTER TABLE [dbo].[tProveedor] ADD  CONSTRAINT [DF__tProveedo__fecha__5540965B]  DEFAULT (getdate()) FOR [fechaRegistro]
+GO
+ALTER TABLE [dbo].[tRoles] ADD  CONSTRAINT [DF__tRoles__estado__41399DAE]  DEFAULT ((1)) FOR [Estado]
+GO
+ALTER TABLE [dbo].[tSucursales] ADD  CONSTRAINT [DF__tSucursal__estad__5911273F]  DEFAULT ((1)) FOR [estado]
+GO
+ALTER TABLE [dbo].[tSucursales] ADD  CONSTRAINT [DF__tSucursal__fecha__5A054B78]  DEFAULT (getdate()) FOR [fechaRegistro]
+GO
+ALTER TABLE [dbo].[tUsuarios] ADD  CONSTRAINT [DF_tUsuarios_Activo]  DEFAULT ((1)) FOR [Activo]
+GO
+ALTER TABLE [dbo].[tActivos]  WITH CHECK ADD  CONSTRAINT [FK_Activos_Ambiente] FOREIGN KEY([idAmbiente])
+REFERENCES [dbo].[tAmbiente] ([idAmbiente])
+GO
+ALTER TABLE [dbo].[tActivos] CHECK CONSTRAINT [FK_Activos_Ambiente]
+GO
+ALTER TABLE [dbo].[tActivos]  WITH CHECK ADD  CONSTRAINT [FK_Activos_Categoria] FOREIGN KEY([idCategoria])
+REFERENCES [dbo].[tCategoriasActivo] ([idCategoria])
+GO
+ALTER TABLE [dbo].[tActivos] CHECK CONSTRAINT [FK_Activos_Categoria]
+GO
+ALTER TABLE [dbo].[tActivos]  WITH CHECK ADD  CONSTRAINT [FK_Activos_Estado] FOREIGN KEY([idEstado])
+REFERENCES [dbo].[tEstadoActivo] ([idEstadoActivo])
+GO
+ALTER TABLE [dbo].[tActivos] CHECK CONSTRAINT [FK_Activos_Estado]
+GO
+ALTER TABLE [dbo].[tActivos]  WITH CHECK ADD  CONSTRAINT [FK_Activos_Sucursal] FOREIGN KEY([idSucursal])
+REFERENCES [dbo].[tSucursales] ([cod_UnidadNeg])
+GO
+ALTER TABLE [dbo].[tActivos] CHECK CONSTRAINT [FK_Activos_Sucursal]
+GO
+ALTER TABLE [dbo].[tActivos]  WITH CHECK ADD  CONSTRAINT [FK_Activos_Usuario] FOREIGN KEY([userMod])
+REFERENCES [dbo].[tUsuarios] ([CodUsuario])
+GO
+ALTER TABLE [dbo].[tActivos] CHECK CONSTRAINT [FK_Activos_Usuario]
+GO
+ALTER TABLE [dbo].[tActivos]  WITH CHECK ADD  CONSTRAINT [FK_tActivos_tAmbiente] FOREIGN KEY([idAmbiente])
+REFERENCES [dbo].[tAmbiente] ([idAmbiente])
+GO
+ALTER TABLE [dbo].[tActivos] CHECK CONSTRAINT [FK_tActivos_tAmbiente]
+GO
+ALTER TABLE [dbo].[tActivos]  WITH CHECK ADD  CONSTRAINT [FK_tActivos_tCategoriasActivo] FOREIGN KEY([idCategoria])
+REFERENCES [dbo].[tCategoriasActivo] ([idCategoria])
+GO
+ALTER TABLE [dbo].[tActivos] CHECK CONSTRAINT [FK_tActivos_tCategoriasActivo]
+GO
+ALTER TABLE [dbo].[tActivos]  WITH CHECK ADD  CONSTRAINT [FK_tActivos_tEstadoActivo] FOREIGN KEY([idEstado])
+REFERENCES [dbo].[tEstadoActivo] ([idEstadoActivo])
+GO
+ALTER TABLE [dbo].[tActivos] CHECK CONSTRAINT [FK_tActivos_tEstadoActivo]
+GO
+ALTER TABLE [dbo].[tActivos]  WITH CHECK ADD  CONSTRAINT [FK_tActivos_tSucursales] FOREIGN KEY([idSucursal])
+REFERENCES [dbo].[tSucursales] ([cod_UnidadNeg])
+GO
+ALTER TABLE [dbo].[tActivos] CHECK CONSTRAINT [FK_tActivos_tSucursales]
+GO
+ALTER TABLE [dbo].[tAmbiente]  WITH CHECK ADD  CONSTRAINT [FK_tAmbiente_Sucursal] FOREIGN KEY([idSucursal])
+REFERENCES [dbo].[tSucursales] ([cod_UnidadNeg])
+GO
+ALTER TABLE [dbo].[tAmbiente] CHECK CONSTRAINT [FK_tAmbiente_Sucursal]
+GO
+ALTER TABLE [dbo].[tAmbiente]  WITH CHECK ADD  CONSTRAINT [FK_tAmbiente_tSucursales] FOREIGN KEY([idSucursal])
+REFERENCES [dbo].[tSucursales] ([cod_UnidadNeg])
+GO
+ALTER TABLE [dbo].[tAmbiente] CHECK CONSTRAINT [FK_tAmbiente_tSucursales]
+GO
+ALTER TABLE [dbo].[tAmbiente]  WITH CHECK ADD  CONSTRAINT [FK_tAmbiente_Usuario] FOREIGN KEY([userMod])
+REFERENCES [dbo].[tUsuarios] ([CodUsuario])
+GO
+ALTER TABLE [dbo].[tAmbiente] CHECK CONSTRAINT [FK_tAmbiente_Usuario]
+GO
+ALTER TABLE [dbo].[tCategoriasActivo]  WITH CHECK ADD  CONSTRAINT [FK_tCategoriasActivo_Usuario] FOREIGN KEY([userMod])
+REFERENCES [dbo].[tUsuarios] ([CodUsuario])
+GO
+ALTER TABLE [dbo].[tCategoriasActivo] CHECK CONSTRAINT [FK_tCategoriasActivo_Usuario]
+GO
+ALTER TABLE [dbo].[tCondicionActivo]  WITH CHECK ADD  CONSTRAINT [FK__tCondicio__idMov__383A4359] FOREIGN KEY([idMovimiento])
+REFERENCES [dbo].[tMovimientos] ([idMovimiento])
+GO
+ALTER TABLE [dbo].[tCondicionActivo] CHECK CONSTRAINT [FK__tCondicio__idMov__383A4359]
+GO
+ALTER TABLE [dbo].[tCondicionActivo]  WITH CHECK ADD  CONSTRAINT [FK_tCondicionActivo_tMovimientos] FOREIGN KEY([idMovimiento])
+REFERENCES [dbo].[tMovimientos] ([idMovimiento])
+GO
+ALTER TABLE [dbo].[tCondicionActivo] CHECK CONSTRAINT [FK_tCondicionActivo_tMovimientos]
+GO
+ALTER TABLE [dbo].[tDepreciacion]  WITH CHECK ADD  CONSTRAINT [FK_tDepreciacion_Activo] FOREIGN KEY([idActivo])
+REFERENCES [dbo].[tActivos] ([idActivo])
+GO
+ALTER TABLE [dbo].[tDepreciacion] CHECK CONSTRAINT [FK_tDepreciacion_Activo]
+GO
+ALTER TABLE [dbo].[tDepreciacion]  WITH CHECK ADD  CONSTRAINT [FK_tDepreciacion_tActivos] FOREIGN KEY([idActivo])
+REFERENCES [dbo].[tActivos] ([idActivo])
+GO
+ALTER TABLE [dbo].[tDepreciacion] CHECK CONSTRAINT [FK_tDepreciacion_tActivos]
+GO
+ALTER TABLE [dbo].[tDepreciacion]  WITH CHECK ADD  CONSTRAINT [FK_tDepreciacion_Usuario] FOREIGN KEY([userMod])
+REFERENCES [dbo].[tUsuarios] ([CodUsuario])
+GO
+ALTER TABLE [dbo].[tDepreciacion] CHECK CONSTRAINT [FK_tDepreciacion_Usuario]
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento]  WITH CHECK ADD  CONSTRAINT [FK__tDetalleM__IdAct__013F142A] FOREIGN KEY([IdActivo])
+REFERENCES [dbo].[tActivos] ([idActivo])
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento] CHECK CONSTRAINT [FK__tDetalleM__IdAct__013F142A]
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento]  WITH CHECK ADD  CONSTRAINT [FK__tDetalleM__IdAct__0603C947] FOREIGN KEY([IdActivoPadre_Anterior])
+REFERENCES [dbo].[tActivos] ([idActivo])
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento] CHECK CONSTRAINT [FK__tDetalleM__IdAct__0603C947]
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento]  WITH CHECK ADD  CONSTRAINT [FK__tDetalleM__IdAct__06F7ED80] FOREIGN KEY([IdActivoPadre_Nuevo])
+REFERENCES [dbo].[tActivos] ([idActivo])
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento] CHECK CONSTRAINT [FK__tDetalleM__IdAct__06F7ED80]
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento]  WITH CHECK ADD  CONSTRAINT [FK__tDetalleM__IdAmb__041B80D5] FOREIGN KEY([IdAmbiente_Anterior])
+REFERENCES [dbo].[tAmbiente] ([idAmbiente])
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento] CHECK CONSTRAINT [FK__tDetalleM__IdAmb__041B80D5]
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento]  WITH CHECK ADD  CONSTRAINT [FK__tDetalleM__IdAmb__050FA50E] FOREIGN KEY([IdAmbiente_Nuevo])
+REFERENCES [dbo].[tAmbiente] ([idAmbiente])
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento] CHECK CONSTRAINT [FK__tDetalleM__IdAmb__050FA50E]
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento]  WITH CHECK ADD  CONSTRAINT [FK__tDetalleM__IdMov__004AEFF1] FOREIGN KEY([IdMovimiento])
+REFERENCES [dbo].[tMovimientos] ([idMovimiento])
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento] CHECK CONSTRAINT [FK__tDetalleM__IdMov__004AEFF1]
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento]  WITH CHECK ADD  CONSTRAINT [FK__tDetalleM__IdSuc__02333863] FOREIGN KEY([IdSucursal_Anterior])
+REFERENCES [dbo].[tSucursales] ([cod_UnidadNeg])
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento] CHECK CONSTRAINT [FK__tDetalleM__IdSuc__02333863]
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento]  WITH CHECK ADD  CONSTRAINT [FK__tDetalleM__IdSuc__03275C9C] FOREIGN KEY([IdSucursal_Nueva])
+REFERENCES [dbo].[tSucursales] ([cod_UnidadNeg])
+GO
+ALTER TABLE [dbo].[tDetalleMovimiento] CHECK CONSTRAINT [FK__tDetalleM__IdSuc__03275C9C]
+GO
+ALTER TABLE [dbo].[tMantenimientos]  WITH CHECK ADD  CONSTRAINT [FK_tMantenimientos_Activo] FOREIGN KEY([idActivo])
+REFERENCES [dbo].[tActivos] ([idActivo])
+GO
+ALTER TABLE [dbo].[tMantenimientos] CHECK CONSTRAINT [FK_tMantenimientos_Activo]
+GO
+ALTER TABLE [dbo].[tMantenimientos]  WITH CHECK ADD  CONSTRAINT [FK_tMantenimientos_Responsable] FOREIGN KEY([idResponsable])
+REFERENCES [dbo].[tUsuarios] ([CodUsuario])
+GO
+ALTER TABLE [dbo].[tMantenimientos] CHECK CONSTRAINT [FK_tMantenimientos_Responsable]
+GO
+ALTER TABLE [dbo].[tMantenimientos]  WITH CHECK ADD  CONSTRAINT [FK_tMantenimientos_tActivos] FOREIGN KEY([idActivo])
+REFERENCES [dbo].[tActivos] ([idActivo])
+GO
+ALTER TABLE [dbo].[tMantenimientos] CHECK CONSTRAINT [FK_tMantenimientos_tActivos]
+GO
+ALTER TABLE [dbo].[tMantenimientos]  WITH CHECK ADD  CONSTRAINT [FK_tMantenimientos_tUsuarios_Responsable] FOREIGN KEY([idResponsable])
+REFERENCES [dbo].[tUsuarios] ([CodUsuario])
+GO
+ALTER TABLE [dbo].[tMantenimientos] CHECK CONSTRAINT [FK_tMantenimientos_tUsuarios_Responsable]
+GO
+ALTER TABLE [dbo].[tMantenimientos]  WITH CHECK ADD  CONSTRAINT [FK_tMantenimientos_Usuario] FOREIGN KEY([userMod])
+REFERENCES [dbo].[tUsuarios] ([CodUsuario])
+GO
+ALTER TABLE [dbo].[tMantenimientos] CHECK CONSTRAINT [FK_tMantenimientos_Usuario]
+GO
+ALTER TABLE [dbo].[tPermisos]  WITH CHECK ADD FOREIGN KEY([CodMenu])
+REFERENCES [dbo].[tMenu] ([CodMenu])
+GO
+ALTER TABLE [dbo].[tPermisos]  WITH CHECK ADD FOREIGN KEY([IdRol])
+REFERENCES [dbo].[tRoles] ([IdRol])
+GO
+ALTER TABLE [dbo].[tPermisos]  WITH CHECK ADD  CONSTRAINT [FK_tPermisos_tMenu] FOREIGN KEY([CodMenu])
+REFERENCES [dbo].[tMenu] ([CodMenu])
+GO
+ALTER TABLE [dbo].[tPermisos] CHECK CONSTRAINT [FK_tPermisos_tMenu]
+GO
+ALTER TABLE [dbo].[tPermisos]  WITH CHECK ADD  CONSTRAINT [FK_tPermisos_tRoles] FOREIGN KEY([IdRol])
+REFERENCES [dbo].[tRoles] ([IdRol])
+GO
+ALTER TABLE [dbo].[tPermisos] CHECK CONSTRAINT [FK_tPermisos_tRoles]
+GO
+ALTER TABLE [dbo].[tProveedor]  WITH CHECK ADD  CONSTRAINT [FK_tProveedor_Usuario] FOREIGN KEY([userMod])
+REFERENCES [dbo].[tUsuarios] ([CodUsuario])
+GO
+ALTER TABLE [dbo].[tProveedor] CHECK CONSTRAINT [FK_tProveedor_Usuario]
+GO
+ALTER TABLE [dbo].[tSucursales]  WITH CHECK ADD  CONSTRAINT [FK_tSucursales_Usuario] FOREIGN KEY([userMod])
+REFERENCES [dbo].[tUsuarios] ([CodUsuario])
+GO
+ALTER TABLE [dbo].[tSucursales] CHECK CONSTRAINT [FK_tSucursales_Usuario]
+GO
+ALTER TABLE [dbo].[tUsuarios]  WITH CHECK ADD  CONSTRAINT [FK_tUsuarios_Rol] FOREIGN KEY([IdRol])
+REFERENCES [dbo].[tRoles] ([IdRol])
+GO
+ALTER TABLE [dbo].[tUsuarios] CHECK CONSTRAINT [FK_tUsuarios_Rol]
+GO
+ALTER TABLE [dbo].[tUsuarios]  WITH CHECK ADD  CONSTRAINT [FK_tUsuarios_tRoles] FOREIGN KEY([IdRol])
+REFERENCES [dbo].[tRoles] ([IdRol])
+GO
+ALTER TABLE [dbo].[tUsuarios] CHECK CONSTRAINT [FK_tUsuarios_tRoles]
+GO
+ALTER TABLE [dbo].[tActivos]  WITH CHECK ADD  CONSTRAINT [CK__tActivos__valorA__6D181FEC] CHECK  (([valorAdquisicion]>=(0)))
+GO
+ALTER TABLE [dbo].[tActivos] CHECK CONSTRAINT [CK__tActivos__valorA__6D181FEC]
+GO
+ALTER TABLE [dbo].[tActivos]  WITH CHECK ADD  CONSTRAINT [CK__tActivos__vidaUt__6C23FBB3] CHECK  (([vidaUtil]>(0)))
+GO
+ALTER TABLE [dbo].[tActivos] CHECK CONSTRAINT [CK__tActivos__vidaUt__6C23FBB3]
+GO
+ALTER TABLE [dbo].[tDepreciacion]  WITH CHECK ADD  CONSTRAINT [CK__tDeprecia__monto__07CC1628] CHECK  (([montoDepreciacionMensual]>=(0)))
+GO
+ALTER TABLE [dbo].[tDepreciacion] CHECK CONSTRAINT [CK__tDeprecia__monto__07CC1628]
+GO
+ALTER TABLE [dbo].[tDepreciacion]  WITH CHECK ADD  CONSTRAINT [CK__tDeprecia__monto__08C03A61] CHECK  (([montoDepreciacionAcumulada]>=(0)))
+GO
+ALTER TABLE [dbo].[tDepreciacion] CHECK CONSTRAINT [CK__tDeprecia__monto__08C03A61]
+GO
+ALTER TABLE [dbo].[tDepreciacion]  WITH CHECK ADD  CONSTRAINT [CK__tDeprecia__valor__09B45E9A] CHECK  (([valorNeto]>=(0)))
+GO
+ALTER TABLE [dbo].[tDepreciacion] CHECK CONSTRAINT [CK__tDeprecia__valor__09B45E9A]
+GO
+ALTER TABLE [dbo].[tMantenimientos]  WITH CHECK ADD  CONSTRAINT [CK__tMantenim__costo__10615C29] CHECK  (([costo]>=(0)))
+GO
+ALTER TABLE [dbo].[tMantenimientos] CHECK CONSTRAINT [CK__tMantenim__costo__10615C29]
+GO
+ALTER TABLE [dbo].[tMantenimientos]  WITH CHECK ADD  CONSTRAINT [CK__tMantenim__estad__11558062] CHECK  (([estado]='Cancelado' OR [estado]='Completado' OR [estado]='Pendiente'))
+GO
+ALTER TABLE [dbo].[tMantenimientos] CHECK CONSTRAINT [CK__tMantenim__estad__11558062]
+GO
+ALTER TABLE [dbo].[tMantenimientos]  WITH CHECK ADD  CONSTRAINT [CK__tMantenim__tipoM__0F6D37F0] CHECK  (([tipoMantenimiento]='Correctivo' OR [tipoMantenimiento]='Preventivo'))
+GO
+ALTER TABLE [dbo].[tMantenimientos] CHECK CONSTRAINT [CK__tMantenim__tipoM__0F6D37F0]
+GO
+/****** Object:  StoredProcedure [dbo].[sp_BackupBDActivos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE Procedure [dbo].[sp_BackupBDActivos]
+as
+Begin
+	declare @fecha varchar(20)
+	declare @hora varchar(20)
+	declare @Nombre varchar(50)
+
+	Set @fecha=cast(getdate() as date)
+	Set @hora=datepart(hour,getdate())
+
+	Set @Nombre='CUANDO ME ASIGNEN RUTA' +@fecha+@hora+'.bak'
+	Backup Database bdActivos
+		to Disk=@Nombre
+	with FOrmat
+end
+GO
+/****** Object:  StoredProcedure [dbo].[sp_ConsultarActivos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_ConsultarActivos]
+    @pCodigo NVARCHAR(50) = NULL,
+    @pIdSucursal NUMERIC(18,0) = NULL,
+    @pIdCategoria INT = NULL,
+    @pIdEstado INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT a.*, s.nombre AS Sucursal, c.nombre AS Categoria, e.nombre AS Estado
+    FROM vActivos a
+    INNER JOIN tSucursales s ON a.idSucursal = s.cod_UnidadNeg
+    INNER JOIN tCategoriasActivo c ON a.idCategoria = c.idCategoria
+    INNER JOIN tEstadoActivo e ON a.idEstado = e.idEstadoActivo
+    WHERE (@pCodigo IS NULL OR a.CodigoActivo = @pCodigo)
+      AND (@pIdSucursal IS NULL OR a.idSucursal = @pIdSucursal)
+      AND (@pIdCategoria IS NULL OR a.idCategoria = @pIdCategoria)
+      AND (@pIdEstado IS NULL OR a.idEstado = @pIdEstado);
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_GenerarGuiaRemision]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_GenerarGuiaRemision]
+    @pIdFicha INT,
+    @pSerie NVARCHAR(10),
+    @pNumero NVARCHAR(20),
+    @pFechaEmision DATE,
+    @pPuntoPartida NVARCHAR(255),
+    @pPuntoLlegada NVARCHAR(255),
+    @pRucTransportista NVARCHAR(11),
+    @pRazonSocialTransportista NVARCHAR(255),
+    @pPlaca NVARCHAR(10),
+    @pUserMod NVARCHAR(15)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO tGuiaRemision (
+            idFicha, serie, numero, fechaEmision, puntoPartida, puntoLlegada,
+            rucTransportista, razonSocialTransportista, placa, fechaRegistro
+        )
+        VALUES (
+            @pIdFicha, @pSerie, @pNumero, @pFechaEmision, @pPuntoPartida, @pPuntoLlegada,
+            @pRucTransportista, @pRazonSocialTransportista, @pPlaca, GETDATE()
+        );
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_GestionActivos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_GestionActivos]
+    @pAccion NVARCHAR(20),
+    @idActivo INT = NULL,
+    @idDocIngresoAlm INT = NULL,
+    @idArticulo INT = NULL,
+    @codigo NVARCHAR(50) = NULL,
+    @serie NVARCHAR(100) = NULL,
+    @idEstado INT = NULL,
+    @enUso BIT = NULL,
+    @esCompuesto BIT = NULL,
+    @idActivoPadre INT = NULL,
+    @idSucursal NUMERIC(18, 0) = NULL,
+    @idAmbiente INT = NULL,
+    @idCategoria INT = NULL,
+    @vidaUtil INT = NULL,
+    @valorAdquisicion DECIMAL(12, 2) = NULL,
+    @fechaAdquisicion DATE = NULL,
+    @garantia BIT = NULL,
+    @fechaFinGarantia DATE = NULL,
+    @idProveedor INT = NULL,
+    @observaciones NVARCHAR(MAX) = NULL,
+    @fechaInicio DATE = NULL,
+    @fechaFin DATE = NULL,
+    @userMod NVARCHAR(50) = NULL,
+    @idGenerado INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        -- Validar acción
+        IF @pAccion NOT IN ('INSERTAR', 'ACTUALIZAR', 'CONSULTAR', 'BAJA', 'CAMBIAR_ESTADO', 'CAMBIAR_USO')
+            THROW 50001, 'Acción no válida. Use: INSERTAR, ACTUALIZAR, CONSULTAR, BAJA, CAMBIAR_ESTADO, CAMBIAR_USO.', 1;
+
+        -- Validar userMod para auditoría
+        IF @userMod IS NULL AND @pAccion IN ('INSERTAR', 'ACTUALIZAR', 'BAJA', 'CAMBIAR_ESTADO', 'CAMBIAR_USO')
+            THROW 50002, 'El usuario modificador (@userMod) es obligatorio para acciones que modifican datos.', 1;
+
+        -- INSERTAR
+        IF @pAccion = 'INSERTAR'
+        BEGIN
+            -- Validar campos obligatorios
+            IF @codigo IS NULL OR @idEstado IS NULL OR @idSucursal IS NULL OR @idCategoria IS NULL OR 
+               @vidaUtil IS NULL OR @valorAdquisicion IS NULL OR @fechaAdquisicion IS NULL OR @idProveedor IS NULL OR 
+               @idDocIngresoAlm IS NULL OR @idArticulo IS NULL
+                THROW 50003, 'Campos obligatorios faltantes para INSERTAR.', 1;
+
+            -- Validar código único
+            IF EXISTS (SELECT 1 FROM tActivos WHERE codigo = @codigo)
+                THROW 50004, 'El código ya existe.', 1;
+
+            -- Validar artículo
+            IF NOT EXISTS (SELECT 1 FROM vArticulos WHERE idarticulo = @idArticulo)
+                THROW 50005, 'El artículo no existe.', 1;
+
+            -- Validar documento de ingreso
+            IF NOT EXISTS (SELECT 1 FROM vListadoDeArticulosPorDocIngresoAlmacen 
+                           WHERE idDocIngAlmacen = @idDocIngresoAlm AND idarticulo = @idArticulo)
+                THROW 50006, 'El artículo no está vinculado al documento de ingreso.', 1;
+
+            -- Validar sucursal
+            IF NOT EXISTS (SELECT 1 FROM tSucursales WHERE cod_UnidadNeg = @idSucursal)
+                THROW 50007, 'La sucursal no existe.', 1;
+
+            -- Validar categoría
+            IF NOT EXISTS (SELECT 1 FROM tCategoriasActivo WHERE idCategoria = @idCategoria)
+                THROW 50008, 'La categoría no existe.', 1;
+
+            -- Validar proveedor
+            IF NOT EXISTS (SELECT 1 FROM vEntidadExternaGeneralProveedor WHERE Id = @idProveedor)
+                THROW 50009, 'El proveedor no existe.', 1;
+
+            -- Validar ambiente (si se proporciona)
+            IF @idAmbiente IS NOT NULL AND NOT EXISTS (SELECT 1 FROM tAmbiente WHERE idAmbiente = @idAmbiente)
+                THROW 50010, 'El ambiente no existe.', 1;
+
+            -- Validar activo padre (si se proporciona)
+            IF @idActivoPadre IS NOT NULL AND NOT EXISTS (SELECT 1 FROM tActivos WHERE idActivo = @idActivoPadre)
+                THROW 50011, 'El activo padre no existe.', 1;
+
+            INSERT INTO tActivos (
+                idDocIngresoAlm, idArticulo, codigo, serie, idEstado, enUso, idSucursal, idAmbiente,
+                idCategoria, vidaUtil, valorAdquisicion, fechaAdquisicion, garantia, fechaFinGarantia,
+                idProveedor, observaciones, fechaRegistro, userMod
+            )
+            VALUES (
+                @idDocIngresoAlm, @idArticulo, @codigo, @serie, @idEstado, COALESCE(@enUso, 1),
+                @idSucursal, @idAmbiente, @idCategoria, @vidaUtil, @valorAdquisicion, @fechaAdquisicion,
+                COALESCE(@garantia, 0), @fechaFinGarantia, @idProveedor, @observaciones, GETDATE(), @userMod
+            );
+
+            SET @idGenerado = SCOPE_IDENTITY();
+
+            -- Registrar auditoría
+            DECLARE @detalleInsert NVARCHAR(200) = 'Nuevo activo creado: ' + COALESCE(@codigo, 'Código no especificado');
+            EXEC sp_InsertLogAuditoria @userMod, 'INSERT', 'tActivos', @idGenerado, @detalleInsert;
+        END
+
+        -- ACTUALIZAR
+        ELSE IF @pAccion = 'ACTUALIZAR'
+        BEGIN
+            IF @idActivo IS NULL
+                THROW 50012, 'El idActivo es obligatorio para ACTUALIZAR.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tActivos WHERE idActivo = @idActivo)
+                THROW 50013, 'El activo no existe.', 1;
+
+            -- Validar artículo (si se proporciona)
+            IF @idArticulo IS NOT NULL AND NOT EXISTS (SELECT 1 FROM vArticulos WHERE idarticulo = @idArticulo)
+                THROW 50014, 'El artículo no existe.', 1;
+
+            -- Validar documento de ingreso (si se proporciona)
+            IF @idDocIngresoAlm IS NOT NULL AND @idArticulo IS NOT NULL AND 
+               NOT EXISTS (SELECT 1 FROM vListadoDeArticulosPorDocIngresoAlmacen 
+                           WHERE idDocIngAlmacen = @idDocIngresoAlm AND idarticulo = @idArticulo)
+                THROW 50015, 'El artículo no está vinculado al documento de ingreso.', 1;
+
+            -- Validar sucursal (si se proporciona)
+            IF @idSucursal IS NOT NULL AND NOT EXISTS (SELECT 1 FROM tSucursales WHERE cod_UnidadNeg = @idSucursal)
+                THROW 50016, 'La sucursal no existe.', 1;
+
+            -- Validar categoría (si se proporciona)
+            IF @idCategoria IS NOT NULL AND NOT EXISTS (SELECT 1 FROM tCategoriasActivo WHERE idCategoria = @idCategoria)
+                THROW 50017, 'La categoría no existe.', 1;
+
+            -- Validar proveedor (si se proporciona)
+            IF @idProveedor IS NOT NULL AND NOT EXISTS (SELECT 1 FROM vEntidadExternaGeneralProveedor WHERE Id = @idProveedor)
+                THROW 50018, 'El proveedor no existe.', 1;
+
+            -- Validar ambiente (si se proporciona)
+            IF @idAmbiente IS NOT NULL AND NOT EXISTS (SELECT 1 FROM tAmbiente WHERE idAmbiente = @idAmbiente)
+                THROW 50019, 'El ambiente no existe.', 1;
+
+            -- Validar activo padre (si se proporciona)
+            IF @idActivoPadre IS NOT NULL AND NOT EXISTS (SELECT 1 FROM tActivos WHERE idActivo = @idActivoPadre)
+                THROW 50020, 'El activo padre no existe.', 1;
+
+            UPDATE tActivos
+            SET 
+                idDocIngresoAlm = COALESCE(@idDocIngresoAlm, idDocIngresoAlm),
+                idArticulo = COALESCE(@idArticulo, idArticulo),
+                codigo = COALESCE(@codigo, codigo),
+                serie = COALESCE(@serie, serie),
+                --esCompuesto = COALESCE(@esCompuesto, esCompuesto),
+                --idActivoPadre = COALESCE(@idActivoPadre, idActivoPadre),
+                idSucursal = COALESCE(@idSucursal, idSucursal),
+                idAmbiente = COALESCE(@idAmbiente, idAmbiente),
+                idCategoria = COALESCE(@idCategoria, idCategoria),
+                vidaUtil = COALESCE(@vidaUtil, vidaUtil),
+                valorAdquisicion = COALESCE(@valorAdquisicion, valorAdquisicion),
+                fechaAdquisicion = COALESCE(@fechaAdquisicion, fechaAdquisicion),
+                garantia = COALESCE(@garantia, garantia),
+                fechaFinGarantia = COALESCE(@fechaFinGarantia, fechaFinGarantia),
+                idProveedor = COALESCE(@idProveedor, idProveedor),
+                observaciones = COALESCE(@observaciones, observaciones),
+                fechaMod = GETDATE(),
+                userMod = @userMod
+            WHERE idActivo = @idActivo;
+
+            SET @idGenerado = @idActivo;
+
+            -- Registrar auditoría
+            DECLARE @detalleUpdate NVARCHAR(200) = 'Activo actualizado: ' + COALESCE(@codigo, CAST(@idActivo AS NVARCHAR(10)));
+            EXEC sp_InsertLogAuditoria @userMod, 'UPDATE', 'tActivos', @idGenerado, @detalleUpdate;
+        END
+
+        -- CONSULTAR
+        ELSE IF @pAccion = 'CONSULTAR'
+        BEGIN
+            SELECT * FROM vActivos
+            WHERE (@idActivo IS NULL OR idActivo = @idActivo)
+                AND (@idDocIngresoAlm IS NULL OR DocIngresoAlmacen = @idDocIngresoAlm)
+                AND (@idArticulo IS NULL OR idArticulo = @idArticulo)
+                AND (@codigo IS NULL OR CodigoActivo = @codigo)
+                AND (@idSucursal IS NULL OR idSucursal = @idSucursal)
+                AND (@idEstado IS NULL OR idEstado = @idEstado)
+                AND (@enUso IS NULL OR enUso = @enUso)
+                AND (@fechaInicio IS NULL OR fechaRegistro >= @fechaInicio)
+                AND (@fechaFin IS NULL OR fechaRegistro <= @fechaFin);
+        END
+
+        -- BAJA
+        ELSE IF @pAccion = 'BAJA'
+        BEGIN
+            IF @idActivo IS NULL OR @idEstado IS NULL
+                THROW 50021, 'idActivo e idEstado son obligatorios para BAJA.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tActivos WHERE idActivo = @idActivo)
+                THROW 50022, 'El activo no existe.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tEstadoActivo WHERE idEstadoActivo = @idEstado AND esFinal = 1)
+                THROW 50023, 'El estado especificado no es un estado final válido para baja.', 1;
+
+            UPDATE tActivos
+            SET 
+                idEstado = @idEstado,
+                enUso = 0,
+                fechaMod = GETDATE(),
+                userMod = @userMod,
+                observaciones = COALESCE(@observaciones, observaciones)
+            WHERE idActivo = @idActivo;
+
+            SET @idGenerado = @idActivo;
+
+            -- Registrar auditoría
+            DECLARE @detalleBaja NVARCHAR(200) = 'Activo dado de baja: ' + CAST(@idActivo AS NVARCHAR(10));
+            EXEC sp_InsertLogAuditoria @userMod, 'UPDATE', 'tActivos', @idGenerado, @detalleBaja;
+        END
+
+        -- CAMBIAR_ESTADO
+        ELSE IF @pAccion = 'CAMBIAR_ESTADO'
+        BEGIN
+            IF @idActivo IS NULL OR @idEstado IS NULL
+                THROW 50024, 'idActivo e idEstado son obligatorios para CAMBIAR_ESTADO.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tActivos WHERE idActivo = @idActivo)
+                THROW 50025, 'El activo no existe.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tEstadoActivo WHERE idEstadoActivo = @idEstado)
+                THROW 50026, 'El estado especificado no existe.', 1;
+
+            UPDATE tActivos
+            SET 
+                idEstado = @idEstado,
+                fechaMod = GETDATE(),
+                userMod = @userMod,
+                observaciones = COALESCE(@observaciones, observaciones)
+            WHERE idActivo = @idActivo;
+
+            SET @idGenerado = @idActivo;
+
+            -- Registrar auditoría
+            DECLARE @detalleEstado NVARCHAR(200) = 'Cambio de estado para activo: ' + CAST(@idActivo AS NVARCHAR(10));
+            EXEC sp_InsertLogAuditoria @userMod, 'UPDATE', 'tActivos', @idGenerado, @detalleEstado;
+        END
+
+        -- CAMBIAR_USO
+        ELSE IF @pAccion = 'CAMBIAR_USO'
+        BEGIN
+            IF @idActivo IS NULL OR @enUso IS NULL
+                THROW 50027, 'idActivo y enUso son obligatorios para CAMBIAR_USO.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tActivos WHERE idActivo = @idActivo)
+                THROW 50028, 'El activo no existe.', 1;
+
+            IF EXISTS (SELECT 1 FROM tActivos a 
+                       JOIN tEstadoActivo ea ON a.idEstado = ea.idEstadoActivo 
+                       WHERE a.idActivo = @idActivo AND ea.esFinal = 1 AND @enUso = 1)
+                THROW 50029, 'No se puede marcar como en uso un activo en estado final.', 1;
+
+            UPDATE tActivos
+            SET 
+                enUso = @enUso,
+                fechaMod = GETDATE(),
+                userMod = @userMod,
+                observaciones = COALESCE(@observaciones, observaciones)
+            WHERE idActivo = @idActivo;
+
+            SET @idGenerado = @idActivo;
+
+            -- Registrar auditoría
+            DECLARE @detalleUso NVARCHAR(200) = 'Cambio de uso para activo: ' + CAST(@idActivo AS NVARCHAR(10));
+            EXEC sp_InsertLogAuditoria @userMod, 'UPDATE', 'tActivos', @idGenerado, @detalleUso;
+        END
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_GestionDepreciacion]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_GestionDepreciacion]
+    @pAccion NVARCHAR(20),
+    @idActivo INT = NULL,
+    @fechaDepreciacion DATE = NULL,
+    @montoDepreciacionMensual DECIMAL(12, 2) = NULL,
+    @metodoDepreciacion NVARCHAR(50) = NULL,
+    @userMod NVARCHAR(50) = NULL,
+    @idGenerado INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        IF @pAccion NOT IN ('REGISTRAR', 'CONSULTAR')
+            THROW 50001, 'Acción no válida. Use: REGISTRAR, CONSULTAR.', 1;
+
+        -- REGISTRAR: Registrar un cálculo de depreciación
+        IF @pAccion = 'REGISTRAR'
+        BEGIN
+            IF @idActivo IS NULL OR @fechaDepreciacion IS NULL OR @metodoDepreciacion IS NULL
+                THROW 50002, 'Campos obligatorios faltantes para REGISTRAR.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tActivos WHERE idActivo = @idActivo)
+                THROW 50003, 'El activo no existe.', 1;
+
+            DECLARE @valorAdquisicion DECIMAL(12, 2), @vidaUtil INT, @depreAcumulada DECIMAL(12, 2);
+            SELECT @valorAdquisicion = valorAdquisicion, @vidaUtil = vidaUtil 
+            FROM tActivos WHERE idActivo = @idActivo;
+
+            IF @montoDepreciacionMensual IS NULL
+                SET @montoDepreciacionMensual = @valorAdquisicion / (@vidaUtil * 12);
+
+            SET @depreAcumulada = (SELECT COALESCE(SUM(montoDepreciacionMensual), 0) 
+                                  FROM tDepreciacion WHERE idActivo = @idActivo) + @montoDepreciacionMensual;
+
+            IF @depreAcumulada > @valorAdquisicion
+                THROW 50004, 'La depreciación acumulada no puede superar el valor de adquisición.', 1;
+
+            INSERT INTO tDepreciacion (
+                idActivo, fechaDepreciacion, montoDepreciacionMensual, montoDepreciacionAcumulada,
+                valorNeto, metodoDepreciacion, fechaRegistro, userMod
+            )
+            VALUES (
+                @idActivo, @fechaDepreciacion, @montoDepreciacionMensual, @depreAcumulada,
+                @valorAdquisicion - @depreAcumulada, @metodoDepreciacion, GETDATE(), @userMod
+            );
+
+            SET @idGenerado = SCOPE_IDENTITY();
+        END
+
+        -- CONSULTAR: Consultar la depreciación de un activo
+        ELSE IF @pAccion = 'CONSULTAR'
+        BEGIN
+            IF @idActivo IS NULL
+                THROW 50005, 'El idActivo es obligatorio para CONSULTAR.', 1;
+
+            SELECT 
+                d.idDepreciacion,
+                d.fechaDepreciacion,
+                d.montoDepreciacionMensual,
+                d.montoDepreciacionAcumulada,
+                d.valorNeto,
+                d.metodoDepreciacion,
+                a.codigo AS CodigoActivo,
+                art.Descripcion_articulo AS NombreArticulo
+            FROM tDepreciacion d
+            JOIN tActivos a ON d.idActivo = a.idActivo
+            LEFT JOIN vArticulos art ON a.idArticulo = art.idArticulo
+            WHERE d.idActivo = @idActivo
+            ORDER BY d.fechaDepreciacion DESC;
+        END
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_GestionEstadoActivo]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_GestionEstadoActivo]
+    @pAccion NVARCHAR(20),
+    @idEstadoActivo INT = NULL,
+    @nombre NVARCHAR(50) = NULL,
+    @descripcion NVARCHAR(255) = NULL,
+    @esFinal BIT = NULL,
+    @idGenerado INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        IF @pAccion NOT IN ('INSERTAR', 'ACTUALIZAR', 'CONSULTAR')
+            THROW 50001, 'Acción no valida. Ingrese para usar: INSERTAR, ACTUALIZAR, CONSULTAR.', 1;
+
+        IF @pAccion = 'INSERTAR'
+        BEGIN
+            IF @nombre IS NULL
+                THROW 50002, 'El nombre es obligatorio para INSERTAR.', 1;
+
+            IF EXISTS (SELECT 1 FROM tEstadoActivo WHERE nombre = @nombre)
+                THROW 50003, 'El nombre ya existe.', 1;
+
+            INSERT INTO tEstadoActivo (nombre, descripcion, esFinal)
+            VALUES (@nombre, @descripcion, COALESCE(@esFinal, 0));
+
+            SET @idGenerado = SCOPE_IDENTITY();
+        END
+
+        ELSE IF @pAccion = 'ACTUALIZAR'
+        BEGIN
+            IF @idEstadoActivo IS NULL
+                THROW 50004, 'El idEstadoActivo es obligatorio para ACTUALIZAR.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tEstadoActivo WHERE idEstadoActivo = @idEstadoActivo)
+                THROW 50005, 'El estado no existe.', 1;
+
+            UPDATE tEstadoActivo
+            SET 
+                nombre = COALESCE(@nombre, nombre),
+                descripcion = COALESCE(@descripcion, descripcion),
+                esFinal = COALESCE(@esFinal, esFinal)
+            WHERE idEstadoActivo = @idEstadoActivo;
+
+            SET @idGenerado = @idEstadoActivo;
+        END
+
+        ELSE IF @pAccion = 'CONSULTAR'
+        BEGIN
+            SELECT 
+                idEstadoActivo,
+                nombre,
+                descripcion,
+                esFinal
+            FROM tEstadoActivo
+            WHERE 
+                (@idEstadoActivo IS NULL OR idEstadoActivo = @idEstadoActivo)
+                AND (@nombre IS NULL OR nombre LIKE '%' + @nombre + '%')
+                AND (@esFinal IS NULL OR esFinal = @esFinal);
+        END
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_GestionEstadoMovimientoActivo]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_GestionEstadoMovimientoActivo]
+    @pAccion NVARCHAR(20),
+    @idEstadoMovimientoActivo INT = NULL,
+    @nombre NVARCHAR(50) = NULL,
+    @descripcion NVARCHAR(255) = NULL,
+    @idGenerado INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        IF @pAccion NOT IN ('INSERTAR', 'ACTUALIZAR', 'CONSULTAR')
+            THROW 50001, 'Acción no válida. Use: INSERTAR, ACTUALIZAR, CONSULTAR.', 1;
+
+        IF @pAccion = 'INSERTAR'
+        BEGIN
+            IF @nombre IS NULL
+                THROW 50002, 'El nombre es obligatorio para INSERTAR.', 1;
+
+            IF EXISTS (SELECT 1 FROM tEstadoMovimientoActivo WHERE nombre = @nombre)
+                THROW 50003, 'El nombre ya existe.', 1;
+
+            INSERT INTO tEstadoMovimientoActivo (nombre, descripcion)
+            VALUES (@nombre, @descripcion);
+
+            SET @idGenerado = SCOPE_IDENTITY();
+        END
+
+        ELSE IF @pAccion = 'ACTUALIZAR'
+        BEGIN
+            IF @idEstadoMovimientoActivo IS NULL
+                THROW 50004, 'El idEstadoMovimientoActivo es obligatorio para ACTUALIZAR.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tEstadoMovimientoActivo WHERE idEstadoMovimientoActivo = @idEstadoMovimientoActivo)
+                THROW 50005, 'El estado no existe.', 1;
+
+            UPDATE tEstadoMovimientoActivo
+            SET 
+                nombre = COALESCE(@nombre, nombre),
+                descripcion = COALESCE(@descripcion, descripcion)
+            WHERE idEstadoMovimientoActivo = @idEstadoMovimientoActivo;
+
+            SET @idGenerado = @idEstadoMovimientoActivo;
+        END
+
+        ELSE IF @pAccion = 'CONSULTAR'
+        BEGIN
+            SELECT 
+                idEstadoMovimientoActivo,
+                nombre,
+                descripcion
+            FROM tEstadoMovimientoActivo
+            WHERE 
+                (@idEstadoMovimientoActivo IS NULL OR idEstadoMovimientoActivo = @idEstadoMovimientoActivo)
+                AND (@nombre IS NULL OR nombre LIKE '%' + @nombre + '%');
+        END
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_GestionFichaMovimiento]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_GestionFichaMovimiento]
+    @pAccion NVARCHAR(20),
+    @idFicha INT = NULL,
+    @idSucursalOrigen NUMERIC(18, 0) = NULL,
+    @idSucursalDestino NUMERIC(18, 0) = NULL,
+    @idAutorizador NVARCHAR(50) = NULL,
+    @idActivo INT = NULL,
+    @observaciones NVARCHAR(MAX) = NULL,
+    @userMod NVARCHAR(50) = NULL,
+    @idGenerado INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        IF @pAccion NOT IN ('REGISTRAR', 'CONSULTAR', 'ASOCIAR_ACTIVO')
+            THROW 50001, 'Acción no válida. Use: REGISTRAR, CONSULTAR, ASOCIAR_ACTIVO.', 1;
+
+        IF @pAccion = 'REGISTRAR'
+        BEGIN
+            IF @idSucursalOrigen IS NULL OR @idSucursalDestino IS NULL OR @idAutorizador IS NULL
+                THROW 50002, 'Campos obligatorios faltantes para REGISTRAR.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tSucursales WHERE cod_UnidadNeg = @idSucursalOrigen)
+                THROW 50003, 'La sucursal de origen no existe.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tSucursales WHERE cod_UnidadNeg = @idSucursalDestino)
+                THROW 50004, 'La sucursal de destino no existe.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tUsuarios WHERE idUsuario = @idAutorizador)
+                THROW 50005, 'El autorizador no existe.', 1;
+
+            INSERT INTO tFichaMovimiento (
+                idSucursalOrigen, idSucursalDestino, idAutorizador, observaciones, fechaRegistro, userMod
+            )
+            VALUES (
+                @idSucursalOrigen, @idSucursalDestino, @idAutorizador, @observaciones, GETDATE(), @userMod
+            );
+
+            SET @idGenerado = SCOPE_IDENTITY();
+        END
+
+        ELSE IF @pAccion = 'CONSULTAR'
+        BEGIN
+            SELECT 
+                f.idFicha,
+                f.idSucursalOrigen,
+                so.nombre AS SucursalOrigen,
+                f.idSucursalDestino,
+                sd.nombre AS SucursalDestino,
+                f.idAutorizador,
+                e.NombreTrabajador AS Autorizador,
+                f.fechaFicha,
+                f.observaciones,
+                a.idActivo,
+                act.codigo AS CodigoActivo
+            FROM tFichaMovimiento f
+            JOIN tSucursales so ON f.idSucursalOrigen = so.cod_UnidadNeg
+            JOIN tSucursales sd ON f.idSucursalDestino = sd.cod_UnidadNeg
+            JOIN vEmpleados E ON f.idAutorizador = e.codTrabajador
+            LEFT JOIN tFichaMovimientoActivos a ON f.idFicha = a.idFicha
+            LEFT JOIN tActivos act ON a.idActivo = act.idActivo
+            WHERE 
+                (@idFicha IS NULL OR f.idFicha = @idFicha)
+                AND (@idSucursalOrigen IS NULL OR f.idSucursalOrigen = @idSucursalOrigen)
+                AND (@idSucursalDestino IS NULL OR f.idSucursalDestino = @idSucursalDestino);
+        END
+
+        ELSE IF @pAccion = 'ASOCIAR_ACTIVO'
+        BEGIN
+            IF @idFicha IS NULL OR @idActivo IS NULL
+                THROW 50006, 'idFicha e idActivo son obligatorios para ASOCIAR_ACTIVO.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tFichaMovimiento WHERE idFicha = @idFicha)
+                THROW 50007, 'La ficha no existe.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tActivos WHERE idActivo = @idActivo)
+                THROW 50008, 'El activo no existe.', 1;
+
+            -- Validar que el activo pertenece a la sucursal de origen de la ficha
+            DECLARE @idSucursalOrigenFicha NUMERIC(18, 0);
+            SELECT @idSucursalOrigenFicha = idSucursalOrigen FROM tFichaMovimiento WHERE idFicha = @idFicha;
+
+            IF NOT EXISTS (SELECT 1 FROM vActivos WHERE idActivo = @idActivo AND idSucursal = @idSucursalOrigenFicha)
+                THROW 50009, 'El activo no pertenece a la sucursal de origen de la ficha.', 1;
+
+            IF EXISTS (SELECT 1 FROM tFichaMovimientoActivos WHERE idFicha = @idFicha AND idActivo = @idActivo)
+                THROW 50010, 'El activo ya está asociado a esta ficha.', 1;
+
+            INSERT INTO tFichaMovimientoActivos (idFicha, idActivo)
+            VALUES (@idFicha, @idActivo);
+
+            SET @idGenerado = SCOPE_IDENTITY();
+        END
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_GestionMovimientos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_GestionMovimientos]
+	@pAccion NVARCHAR(20),
+	@pTipoRegistro NVARCHAR(20) = 'INDIVIDUAL',
+	@idMovimiento INT = NULL,
+    @idFicha INT = NULL,
+    @idActivo INT = NULL,
+    @idTipoMovimiento INT = NULL,
+    @idAmbienteOrigen INT = NULL,
+    @idAmbienteDestino INT = NULL,
+    @idActivoPadreOrigen INT = NULL,
+    @idActivoPadreDestino INT = NULL,
+    @idResponsableAnterior NVARCHAR(50) = NULL,
+    @idResponsableNuevo NVARCHAR(50) = NULL,
+    @idEstadoMovimiento INT = NULL,
+    @observaciones NVARCHAR(MAX) = NULL,
+    @userMod NVARCHAR(50) = NULL,
+    @idGenerado INT OUTPUT
+
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	BEGIN TRY
+		IF @pAccion NOT IN ('REGISTRAR', 'HISTORIAL')
+			THROW 50001, 'Acción no valida. Use: REGISTRAR, HISTORIAL.', 1;
+
+		IF @pAccion = 'REGISTRAR'
+		BEGIN 
+			IF @idFicha IS NULL OR @idTipoMovimiento IS NULL OR @idEstadoMovimiento IS NULL
+				THROW 50002, 'Campos Obligatorios faltantes para REGISTRAR (idFicha, idTipoMovimiento, idEstadoMovimiento).', 1;
+
+			IF NOT EXISTS (SELECT 1 FROM tFichaMovimiento WHERE idFicha = @idFicha)
+				THROW 50003, 'La ficha no existe.', 1;
+
+			IF @pTipoRegistro NOT IN ('INDIVIDUAL', 'MASIVO')
+				THROW 50004, 'Tipo de registro no válido. Use: INDIVIDUAL, MASIVO.', 1;
+
+			IF @pTipoRegistro = 'INDIVIDUAL'
+			BEGIN
+				IF @idActivo IS NULL
+					THROW 50005, 'idActivo es obligatorio para un registro INDIVIDUAL.', 1;
+
+				IF NOT EXISTS (SELECT 1 FROM tActivos WHERE idActivo = @idActivo)
+					THROW 50006, 'El activo no existe.', 1;
+
+				IF NOT EXISTS (SELECT 1 FROM tFichaMovimientoActivos WHERE idFicha = @idFicha AND idActivo = @idActivo)
+					THROW 50007, 'El activo no está asociado a la ficha.', 1;
+
+				INSERT INTO tMovimientos (
+					idFicha, idActivo, idTipoMovimiento, idAmbienteOrigen, idAmbienteDestino, idActivoPadreOrigen,
+					idActivoPadreDestino, idResponsableAnterior, idResponsableNuevo, idEstadoMovimiento, observaciones,
+					fechaRegistro, userMod
+				)
+				VALUES(
+					@idFicha, @idActivo, @idTipoMovimiento, @idAmbienteOrigen, @idAmbienteDestino, @idActivoPadreOrigen,
+					@idActivoPadreDestino, @idResponsableAnterior, @idResponsableNuevo, @idEstadoMovimiento, @observaciones,
+					GETDATE(), @userMod
+				);
+
+				SET @idGenerado = SCOPE_IDENTITY();
+
+				IF @idEstadoMovimiento = (SELECT idEstadoMovimientoActivo FROM tEstadoMovimientoActivo WHERE nombre = 'Confirmado')
+				BEGIN
+					DECLARE @idSucursalDestino NUMERIC(18,0);
+					SELECT @idSucursalDestino = idSucursalDestino FROM tFichaMovimiento WHERE idFicha = @idFicha;
+
+					UPDATE tActivos
+					SET
+						idSucursal = @idSucursalDestino,
+						idAmbiente = COALESCE(@idAmbienteDestino, idAmbiente),
+						idActivoPadre = COALESCE(@idActivoPadreDestino, idActivoPadre),
+						fechaMod = GETDATE(),
+						userMod = @userMod
+					WHERE idActivo = @idActivo;
+				END
+			END
+
+			ELSE IF @pTipoRegistro = 'MASIVO'
+			BEGIN
+				IF NOT EXISTS (SELECT 1 FROM tFichaMovimientoActivos WHERE idFicha = @idFicha)
+					THROW 50008, 'No hay activos asociados a la ficha para un registro MASIVO.', 1;
+
+				INSERT INTO tMovimientos (
+					idFicha, idActivo, idTipoMovimiento, idAmbienteOrigen, idAmbienteDestino, idActivoPadreOrigen,
+					idActivoPadreDestino, idResponsableAnterior, idResponsableNuevo, idEstadoMovimiento, observaciones,
+					fechaRegistro, userMod
+				)
+				SELECT
+					@idFicha, @idActivo, @idTipoMovimiento, @idAmbienteOrigen, @idAmbienteDestino, @idActivoPadreOrigen,
+					@idActivoPadreDestino, @idResponsableAnterior, @idResponsableNuevo, @idEstadoMovimiento, @observaciones,
+					GETDATE(), @userMod
+				FROM tFichaMovimientoActivos
+				WHERE idFicha = @idFicha;
+
+				SET @idGenerado = SCOPE_IDENTITY(); --PARA DEVOLVER EL ULTIMO ID GENERADO
+
+				IF @idEstadoMovimiento = (SELECT idEstadoMovimientoActivo FROM tEstadoMovimientoActivo WHERE nombre = 'Confirmado')
+				BEGIN
+					DECLARE @idSucursalDestinoMasivo NUMERIC(18,0);
+					SELECT @idSucursalDestinoMasivo = idSucursalDestino FROM tFichaMovimiento WHERE idFicha =  @idFicha;
+
+					UPDATE tActivos
+					SET
+						idSucursal = @idSucursalDestinoMasivo,
+						idAmbiente = COALESCE(@idAmbienteDestino, idAmbiente),
+						idActivoPadre = COALESCE(@idActivoPadreDestino, idActivoPadre),
+						fechaMod = GETDATE(),
+						userMod = @userMod
+
+					WHERE idActivo IN (SELECT idActivo FROM tFichaMovimientoActivos WHERE idFicha = @idFicha);
+				END
+			END
+		END
+
+        ELSE IF @pAccion = 'HISTORIAL'
+        BEGIN
+            IF @idFicha IS NULL AND @idActivo IS NULL
+                THROW 50009, 'Se requiere idFicha o idActivo para HISTORIAL.', 1;
+
+            SELECT 
+                m.idMovimiento,
+                m.idFicha,
+                f.idSucursalOrigen,
+                so.nombre AS SucursalOrigen,
+                f.idSucursalDestino,
+                sd.nombre AS SucursalDestino,
+                m.idActivo,
+                a.codigo AS CodigoActivo,
+                tm.nombre AS TipoMovimiento,
+                m.idAmbienteOrigen,
+                ao.nombre AS AmbienteOrigen,
+                m.idAmbienteDestino,
+                ad.nombre AS AmbienteDestino,
+                m.idActivoPadreOrigen,
+                po.codigo AS ActivoPadreOrigen,
+                m.idActivoPadreDestino,
+                pd.codigo AS ActivoPadreDestino,
+                m.idResponsableAnterior,
+                m.idResponsableNuevo,
+                f.idAutorizador,
+                ema.nombre AS EstadoMovimiento,
+                m.observaciones
+            FROM tMovimientos m
+            JOIN tFichaMovimiento f ON m.idFicha = f.idFicha
+            JOIN tTipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento
+            JOIN tEstadoMovimientoActivo ema ON m.idEstadoMovimiento = ema.idEstadoMovimientoActivo
+            JOIN tActivos a ON m.idActivo = a.idActivo
+            JOIN tSucursales so ON f.idSucursalOrigen = so.cod_UnidadNeg
+            JOIN tSucursales sd ON f.idSucursalDestino = sd.cod_UnidadNeg
+            LEFT JOIN tAmbiente ao ON m.idAmbienteOrigen = ao.idAmbiente
+            LEFT JOIN tAmbiente ad ON m.idAmbienteDestino = ad.idAmbiente
+            LEFT JOIN tActivos po ON m.idActivoPadreOrigen = po.idActivo
+            LEFT JOIN tActivos pd ON m.idActivoPadreDestino = pd.idActivo
+            WHERE 
+                (@idFicha IS NULL OR m.idFicha = @idFicha)
+                AND (@idActivo IS NULL OR m.idActivo = @idActivo)
+            ORDER BY f.fechaFicha DESC, m.idMovimiento;
+        END
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_GestionPermisos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   PROCEDURE [dbo].[sp_GestionPermisos]
+    @pAccion VARCHAR(20),
+    @CodPermiso INT = NULL,
+    @CodMenu INT = NULL,
+    @IdRol INT = NULL,
+    @Permiso BIT = NULL,
+    @UserMod NVARCHAR(15) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    IF @pAccion = 'INSERTAR'
+    BEGIN
+        INSERT INTO tPermisos (CodMenu, IdRol, Permiso, UserUpdate, FechaUpdate)
+        VALUES (@CodMenu, @IdRol, @Permiso, @UserMod, GETDATE());
+    END
+    ELSE IF @pAccion = 'ACTUALIZAR'
+    BEGIN
+        UPDATE tPermisos
+        SET CodMenu = @CodMenu,
+            IdRol = @IdRol,
+            Permiso = @Permiso,
+            UserUpdate = @UserMod,
+            FechaUpdate = GETDATE()
+        WHERE CodPermiso = @CodPermiso;
+    END
+    ELSE IF @pAccion = 'ELIMINAR'
+    BEGIN
+        DELETE FROM tPermisos WHERE CodPermiso = @CodPermiso;
+    END
+    ELSE IF @pAccion = 'CONSULTAR'
+    BEGIN
+        SELECT p.CodPermiso, p.CodMenu, m.NombreMenu, p.IdRol, r.NombreRol, p.Permiso
+        FROM tPermisos p
+        INNER JOIN tMenu m ON p.CodMenu = m.CodMenu
+        INNER JOIN tRoles r ON p.IdRol = r.IdRol
+        WHERE (@IdRol IS NULL OR p.IdRol = @IdRol)
+          AND (@CodMenu IS NULL OR p.CodMenu = @CodMenu);
+    END
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_GestionRoles]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_GestionRoles]
+    @pAccion NVARCHAR(20),
+    @idRol INT = NULL,
+    @nombre NVARCHAR(50) = NULL,
+    @descripcion NVARCHAR(255) = NULL,
+    @estado BIT = NULL,
+    @idGenerado INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        IF @pAccion NOT IN ('INSERTAR', 'ACTUALIZAR', 'CONSULTAR', 'DESACTIVAR')
+            THROW 50001, 'Acción no válida. Use: INSERTAR, ACTUALIZAR, CONSULTAR, DESACTIVAR.', 1;
+
+        IF @pAccion = 'INSERTAR'
+        BEGIN
+            IF @nombre IS NULL
+                THROW 50002, 'El nombre es obligatorio para INSERTAR.', 1;
+
+            IF EXISTS (SELECT 1 FROM tRoles WHERE nombre = @nombre)
+                THROW 50003, 'El nombre ya existe.', 1;
+
+            INSERT INTO tRoles (nombre, descripcion, estado)
+            VALUES (@nombre, @descripcion, COALESCE(@estado, 1));
+
+            SET @idGenerado = SCOPE_IDENTITY();
+        END
+
+        ELSE IF @pAccion = 'ACTUALIZAR'
+        BEGIN
+            IF @idRol IS NULL
+                THROW 50004, 'El idRol es obligatorio para ACTUALIZAR.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tRoles WHERE idRol = @idRol)
+                THROW 50005, 'El rol no existe.', 1;
+
+            UPDATE tRoles
+            SET 
+                nombre = COALESCE(@nombre, nombre),
+                descripcion = COALESCE(@descripcion, descripcion),
+                estado = COALESCE(@estado, estado)
+            WHERE idRol = @idRol;
+
+            SET @idGenerado = @idRol;
+        END
+
+        ELSE IF @pAccion = 'CONSULTAR'
+        BEGIN
+            SELECT 
+                idRol,
+                nombre,
+                descripcion,
+                estado
+            FROM tRoles
+            WHERE 
+                (@idRol IS NULL OR idRol = @idRol)
+                AND (@nombre IS NULL OR nombre LIKE '%' + @nombre + '%')
+                AND (@estado IS NULL OR estado = @estado);
+        END
+
+        ELSE IF @pAccion = 'DESACTIVAR'
+        BEGIN
+            IF @idRol IS NULL
+                THROW 50006, 'El idRol es obligatorio para DESACTIVAR.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tRoles WHERE idRol = @idRol)
+                THROW 50007, 'El rol no existe.', 1;
+
+            UPDATE tRoles
+            SET estado = 0
+            WHERE idRol = @idRol;
+
+            SET @idGenerado = @idRol;
+        END
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_GestionTipoMovimiento]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_GestionTipoMovimiento]
+    @pAccion NVARCHAR(20),
+    @idTipoMovimiento INT = NULL,
+    @nombre NVARCHAR(50) = NULL,
+    @descripcion NVARCHAR(255) = NULL,
+    @idGenerado INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        IF @pAccion NOT IN ('INSERTAR', 'ACTUALIZAR', 'CONSULTAR')
+            THROW 50001, 'Acción no válida. Use: INSERTAR, ACTUALIZAR, CONSULTAR.', 1;
+
+        IF @pAccion = 'INSERTAR'
+        BEGIN
+            IF @nombre IS NULL
+                THROW 50002, 'El nombre es obligatorio para INSERTAR.', 1;
+
+            IF EXISTS (SELECT 1 FROM tTipoMovimiento WHERE nombre = @nombre)
+                THROW 50003, 'El nombre ya existe.', 1;
+
+            INSERT INTO tTipoMovimiento (nombre, descripcion)
+            VALUES (@nombre, @descripcion);
+
+            SET @idGenerado = SCOPE_IDENTITY();
+        END
+
+        ELSE IF @pAccion = 'ACTUALIZAR'
+        BEGIN
+            IF @idTipoMovimiento IS NULL
+                THROW 50004, 'El idTipoMovimiento es obligatorio para ACTUALIZAR.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tTipoMovimiento WHERE idTipoMovimiento = @idTipoMovimiento)
+                THROW 50005, 'El tipo de movimiento no existe.', 1;
+
+            UPDATE tTipoMovimiento
+            SET 
+                nombre = COALESCE(@nombre, nombre),
+                descripcion = COALESCE(@descripcion, descripcion)
+            WHERE idTipoMovimiento = @idTipoMovimiento;
+
+            SET @idGenerado = @idTipoMovimiento;
+        END
+
+        ELSE IF @pAccion = 'CONSULTAR'
+        BEGIN
+            SELECT 
+                idTipoMovimiento,
+                nombre,
+                descripcion
+            FROM tTipoMovimiento
+            WHERE 
+                (@idTipoMovimiento IS NULL OR idTipoMovimiento = @idTipoMovimiento)
+                AND (@nombre IS NULL OR nombre LIKE '%' + @nombre + '%');
+        END
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_GestionUsuarios]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   PROCEDURE [dbo].[sp_GestionUsuarios]
+    @pAccion NVARCHAR(20),
+    @CodUsuario NVARCHAR(15) = NULL,
+    @NombreTrabajador NVARCHAR(200) = NULL,
+    @ClaveAcceso NVARCHAR(10) = NULL,
+    @IdRol INT = NULL,
+    @Activo BIT = NULL,
+    @UserMod NVARCHAR(50) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        IF @pAccion NOT IN ('INSERTAR', 'ACTUALIZAR', 'CONSULTAR', 'DESACTIVAR')
+            THROW 50001, 'Acción no válida. Use: INSERTAR, ACTUALIZAR, CONSULTAR, DESACTIVAR.', 1;
+
+        IF @pAccion = 'INSERTAR'
+        BEGIN
+            IF @CodUsuario IS NULL OR @ClaveAcceso IS NULL OR @IdRol IS NULL
+                THROW 50002, 'Campos obligatorios faltantes para INSERTAR.', 1;
+
+            IF EXISTS (SELECT 1 FROM tUsuarios WHERE CodUsuario = @CodUsuario)
+                THROW 50003, 'El usuario ya existe.', 1;
+
+            INSERT INTO tUsuarios (CodUsuario, CodEmpleado, IdRol, ClaveAcceso, Activo, UserUpdate, FechaUpdate)
+            VALUES (@CodUsuario, @CodUsuario, @IdRol, @ClaveAcceso, COALESCE(@Activo, 1), @UserMod, GETDATE());
+        END
+
+        ELSE IF @pAccion = 'ACTUALIZAR'
+        BEGIN
+            IF @CodUsuario IS NULL
+                THROW 50004, 'El CodUsuario es obligatorio para ACTUALIZAR.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tUsuarios WHERE CodUsuario = @CodUsuario)
+                THROW 50005, 'El usuario no existe.', 1;
+
+            UPDATE tUsuarios
+            SET 
+                IdRol = COALESCE(@IdRol, IdRol),
+                ClaveAcceso = COALESCE(@ClaveAcceso, ClaveAcceso),
+                Activo = COALESCE(@Activo, Activo),
+                UserUpdate = @UserMod,
+                FechaUpdate = GETDATE()
+            WHERE CodUsuario = @CodUsuario;
+        END
+
+        ELSE IF @pAccion = 'CONSULTAR'
+        BEGIN
+            SELECT 
+                u.CodUsuario,
+                c.NombreTrabajador,
+                r.NombreRol AS Rol,
+                u.Activo
+            FROM tUsuarios u
+            JOIN tRoles r ON u.IdRol = r.IdRol
+            JOIN bdRecursosHumanos.dbo.vcontratos c ON u.CodEmpleado = c.codTrabajador
+            WHERE 
+                (@CodUsuario IS NULL OR u.CodUsuario = @CodUsuario)
+                AND (@NombreTrabajador IS NULL OR c.NombreTrabajador LIKE '%' + @NombreTrabajador + '%')
+                AND (@Activo IS NULL OR u.Activo = @Activo);
+        END
+
+        ELSE IF @pAccion = 'DESACTIVAR'
+        BEGIN
+            IF @CodUsuario IS NULL
+                THROW 50006, 'El CodUsuario es obligatorio para DESACTIVAR.', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM tUsuarios WHERE CodUsuario = @CodUsuario)
+                THROW 50007, 'El usuario no existe.', 1;
+
+            UPDATE tUsuarios
+            SET 
+                Activo = 0,
+                UserUpdate = @UserMod,
+                FechaUpdate = GETDATE()
+            WHERE CodUsuario = @CodUsuario;
+        END
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_GuardarActivo]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   PROCEDURE [dbo].[sp_GuardarActivo]
+    @pIdActivo INT = NULL,
+    @pIdDocIngresoAlm INT = NULL,
+    @pIdArticulo INT = NULL,
+    @pCodigo NVARCHAR(50) = NULL,
+    @pSerie NVARCHAR(100) = NULL,
+    @pIdEstado INT = NULL,
+    @pGarantia BIT = 0,
+    @pFechaFinGarantia DATE = NULL,
+    @pIdProveedor INT = NULL,
+    @pObservaciones NVARCHAR(MAX) = NULL,
+    @pIdSucursal INT = NULL,
+    @pIdAmbiente INT = NULL,
+    @pIdCategoria INT = NULL,
+    @pVidaUtil INT = NULL,
+    @pValorAdquisicion DECIMAL(12,2) = NULL,
+    @pFechaAdquisicion DATE = NULL,
+    @pUserMod NVARCHAR(15) = NULL,
+    @pAccion NUMERIC(18,0)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        -- Validar existencia de sucursal
+        IF @pIdSucursal IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[tSucursales] WHERE cod_UnidadNeg = @pIdSucursal)
+        BEGIN
+            RAISERROR ('La sucursal no existe.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END;
+
+        -- Validar existencia de ambiente
+        IF @pIdAmbiente IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[tAmbiente] WHERE idAmbiente = @pIdAmbiente)
+        BEGIN
+            RAISERROR ('El ambiente no existe.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END;
+
+        -- Validar existencia de categoría
+        IF @pIdCategoria IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[tCategoriasActivo] WHERE idCategoria = @pIdCategoria)
+        BEGIN
+            RAISERROR ('La categoría no existe.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END;
+
+        -- Validar existencia de estado
+        IF @pIdEstado IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[tEstadoActivo] WHERE idEstadoActivo = @pIdEstado)
+        BEGIN
+            RAISERROR ('El estado no existe.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END;
+
+        -- Validar existencia de proveedor
+        IF @pIdProveedor IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[vEntidadExternaGeneralProveedor] WHERE Id = @pIdProveedor)
+        BEGIN
+            RAISERROR ('El proveedor no existe.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END;
+
+        -- Validar existencia de documento de ingreso
+        IF @pIdDocIngresoAlm IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[vListadoDeArticulosPorDocIngresoAlmacen] WHERE idDocIngAlmacen = @pIdDocIngresoAlm)
+        BEGIN
+            RAISERROR ('El documento de ingreso no existe.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END;
+
+        -- Validar existencia de artículo
+        IF @pIdArticulo IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[vArticulos] WHERE idarticulo = @pIdArticulo)
+        BEGIN
+            RAISERROR ('El artículo no existe.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END;
+
+        -- 1. Insertar un activo
+        IF @pAccion = 1
+        BEGIN
+            IF EXISTS (SELECT 1 FROM [dbo].[tActivos] WHERE codigo = @pCodigo)
+            BEGIN
+                RAISERROR ('El código del activo ya existe.', 16, 1);
+                ROLLBACK TRANSACTION;
+                RETURN;
+            END;
+
+            INSERT INTO [dbo].[tActivos] (
+                idDocIngresoAlm, idArticulo, codigo, serie, idEstado, enUso, idSucursal, idAmbiente, idCategoria,
+                vidaUtil, valorAdquisicion, fechaAdquisicion, garantia, fechaFinGarantia, idProveedor,
+                observaciones, fechaRegistro, userMod
+            )
+            VALUES (
+                @pIdDocIngresoAlm, @pIdArticulo, @pCodigo, @pSerie, @pIdEstado, 1, @pIdSucursal, @pIdAmbiente, @pIdCategoria,
+                @pVidaUtil, @pValorAdquisicion, @pFechaAdquisicion, @pGarantia, @pFechaFinGarantia, @pIdProveedor,
+                @pObservaciones, GETDATE(), @pUserMod
+            );
+
+            DECLARE @NewIdActivo INT = SCOPE_IDENTITY();
+
+            -- Registrar en auditoría
+            INSERT INTO dbo.tLogAuditoria (usuario, accion, tabla, idRegistro, fecha, detalle)
+            VALUES (@pUserMod, 'INSERT', 'tActivos', @NewIdActivo, GETDATE(), 'Nuevo activo creado: ' + @pCodigo + ', DocIngreso: ' + COALESCE(CAST(@pIdDocIngresoAlm AS NVARCHAR(10)), 'N/A'));
+        END
+
+        -- 2. Actualizar un activo
+        ELSE IF @pAccion = 2
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM [dbo].[tActivos] WHERE idActivo = @pIdActivo)
+            BEGIN
+                RAISERROR ('El idActivo no existe.', 16, 1);
+                ROLLBACK TRANSACTION;
+                RETURN;
+            END;
+
+            UPDATE [dbo].[tActivos]
+            SET 
+                idDocIngresoAlm = COALESCE(@pIdDocIngresoAlm, idDocIngresoAlm),
+                idArticulo = COALESCE(@pIdArticulo, idArticulo),
+                codigo = COALESCE(@pCodigo, codigo),
+                serie = COALESCE(@pSerie, serie),
+                idEstado = COALESCE(@pIdEstado, idEstado),
+                idSucursal = COALESCE(@pIdSucursal, idSucursal),
+                idAmbiente = COALESCE(@pIdAmbiente, idAmbiente),
+                idCategoria = COALESCE(@pIdCategoria, idCategoria),
+                vidaUtil = COALESCE(@pVidaUtil, vidaUtil),
+                valorAdquisicion = COALESCE(@pValorAdquisicion, valorAdquisicion),
+                fechaAdquisicion = COALESCE(@pFechaAdquisicion, fechaAdquisicion),
+                garantia = COALESCE(@pGarantia, garantia),
+                fechaFinGarantia = COALESCE(@pFechaFinGarantia, fechaFinGarantia),
+                idProveedor = COALESCE(@pIdProveedor, idProveedor),
+                observaciones = COALESCE(@pObservaciones, observaciones),
+                fechaMod = GETDATE(),
+                userMod = @pUserMod
+            WHERE idActivo = @pIdActivo;
+
+            -- Registrar en auditoría
+            INSERT INTO dbo.tLogAuditoria (usuario, accion, tabla, idRegistro, fecha, detalle)
+            VALUES (@pUserMod, 'UPDATE', 'tActivos', @pIdActivo, GETDATE(), 'Activo actualizado: ' + @pCodigo + ', DocIngreso: ' + COALESCE(CAST(@pIdDocIngresoAlm AS NVARCHAR(10)), 'N/A'));
+        END
+
+        -- 3. Cambiar el estado de un activo
+        ELSE IF @pAccion = 3
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM [dbo].[tActivos] WHERE idActivo = @pIdActivo)
+            BEGIN
+                RAISERROR ('El idActivo no existe.', 16, 1);
+                ROLLBACK TRANSACTION;
+                RETURN;
+            END;
+
+            UPDATE [dbo].[tActivos]
+            SET 
+                idEstado = @pIdEstado,
+                fechaMod = GETDATE(),
+                userMod = @pUserMod
+            WHERE idActivo = @pIdActivo;
+
+            -- Registrar en auditoría
+            INSERT INTO dbo.tLogAuditoria (usuario, accion, tabla, idRegistro, fecha, detalle)
+            VALUES (@pUserMod, 'UPDATE', 'tActivos', @pIdActivo, GETDATE(), 'Estado de activo cambiado: ' + @pCodigo);
+        END
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR (@ErrorMessage, 16, 1);
+    END CATCH;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_InfromacionDashboard]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_InfromacionDashboard]
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT 
+        (SELECT COUNT(*) FROM dbo.vActivos) AS TotalActivos,
+        (SELECT SUM(valorSoles) FROM dbo.vActivos) AS ValorTotalSoles,
+        (SELECT COUNT(*) FROM dbo.vActivos WHERE idEstado = 1) AS TotalOperativos,
+        (SELECT COUNT(*) FROM dbo.vActivos WHERE idEstado = 2) AS TotalEnMantenimiento,
+        (SELECT COUNT(*) FROM dbo.vActivos WHERE idEstado = 3) AS TotalBaja,
+        (SELECT COUNT(*) FROM dbo.tMovimientos WHERE fechaMovimiento >= DATEADD(DAY, -30, GETDATE())) AS MovimientosRecientes;
+END
+GO
+/****** Object:  StoredProcedure [dbo].[sp_InsertActivo]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[sp_InsertActivo]
+    @Codigo NVARCHAR(50),
+    @Serie NVARCHAR(100),
+    @idEstado INT,
+    @idSucursal NUMERIC(18,0),
+    @idCategoria INT,
+    @valorAdquisicion DECIMAL(12,2),
+    @fechaAdquisicion DATE,
+    @idProveedor INT,
+    @userMod NVARCHAR(15),
+    @idActivo INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    -- Validar código único
+    IF EXISTS (SELECT 1 FROM dbo.tActivos WHERE codigo = @Codigo)
+        THROW 50001, 'El código del activo ya existe.', 1;
+    -- Validar sucursal
+    IF NOT EXISTS (SELECT 1 FROM dbo.tSucursales WHERE cod_UnidadNeg = @idSucursal)
+        THROW 50002, 'La sucursal no existe.', 1;
+    -- Validar estado
+    IF NOT EXISTS (SELECT 1 FROM dbo.tEstadoActivo WHERE idEstadoActivo = @idEstado)
+        THROW 50003, 'El estado no es válido.', 1;
+    -- Validar categoría
+    IF NOT EXISTS (SELECT 1 FROM dbo.tCategoriasActivo WHERE idCategoria = @idCategoria)
+        THROW 50004, 'La categoría no es válida.', 1;
+    -- Validar proveedor
+    IF NOT EXISTS (SELECT 1 FROM dbo.vEntidadExternaGeneralProveedor WHERE Id = @idProveedor)
+        THROW 50005, 'El proveedor no existe.', 1;
+
+    INSERT INTO dbo.tActivos (
+        codigo, serie, idEstado, enUso, idSucursal, idCategoria, 
+        valorAdquisicion, fechaAdquisicion, garantia, idProveedor, 
+        fechaRegistro, userMod
+    )
+    VALUES (
+        @Codigo, @Serie, @idEstado, 0, @idSucursal, @idCategoria, 
+        @valorAdquisicion, @fechaAdquisicion, 0, @idProveedor, 
+        GETDATE(), @userMod
+    );
+
+    SET @idActivo = SCOPE_IDENTITY();
+
+    -- Registrar en auditoría
+    INSERT INTO dbo.tLogAuditoria (usuario, accion, tabla, idRegistro, fecha, detalle)
+    VALUES (@userMod, 'INSERT', 'tActivos', @idActivo, GETDATE(), 'Nuevo activo creado: ' + @Codigo);
+END
+GO
+/****** Object:  StoredProcedure [dbo].[sp_InsertLogAuditoria]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_InsertLogAuditoria]
+    @usuario NVARCHAR(50),
+    @accion NVARCHAR(50),
+    @tabla NVARCHAR(100),
+    @idRegistro INT,
+    @detalle NVARCHAR(MAX)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO dbo.tLogAuditoria (usuario, accion, tabla, idRegistro, fecha, detalle)
+    VALUES (@usuario, @accion, @tabla, @idRegistro, GETDATE(), @detalle);
+END
+GO
+/****** Object:  StoredProcedure [dbo].[sp_ListadoDashboard]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_ListadoDashboard]
+	@pAccion NVARCHAR(20)
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	BEGIN TRY
+		IF @pAccion NOT IN ('TOTAL_ACTIVOS','ACTIVOS_ACTIVOS')
+			THROW 50001, 'Acción no valida. Use: TOTAL_ACTIVOS, ACTIVOS_ACTIVOS',1;
+
+		IF @pAccion = 'TOTAL_ACTIVOS'
+		BEGIN
+			SELECT COUNT(*) as CantidadActivos FROM VActivos
+		END
+		IF @pAccion = 'ACTIVOS_ACTIVOS'
+		BEGIN
+			SELECT COUNT(*) as ActivosOperativos FROM vActivos
+			WHERE idEstado = 1 AND enUso =1
+		END
+	END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+
+
+
+
+GO
+/****** Object:  StoredProcedure [dbo].[sp_ListadoEmpleados]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   PROCEDURE [dbo].[sp_ListadoEmpleados]
+    @pCodUsuario NVARCHAR(15) = NULL,
+    @pClaveAcceso NVARCHAR(10) = NULL,
+    @pAccion NUMERIC(18,0)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        -- Listar todos los empleados
+        IF @pAccion = 1
+        BEGIN
+            SELECT 
+                e.codTrabajador,
+                e.NombreTrabajador,
+                e.ApellidoPaterno,
+                e.ApellidoMaterno,
+                e.CorreoPersonal,
+                e.Celular,
+                u.Activo
+            FROM vEmpleados e
+            LEFT JOIN tUsuarios u ON e.codTrabajador = u.CodEmpleado
+            WHERE 
+                (@pCodUsuario IS NULL OR u.CodUsuario = @pCodUsuario)
+                AND (@pClaveAcceso IS NULL OR u.ClaveAcceso = @pClaveAcceso);
+        END
+
+        -- Listar empleados activos
+        ELSE IF @pAccion = 2
+        BEGIN
+            SELECT 
+                e.codTrabajador,
+                e.NombreTrabajador,
+                e.ApellidoPaterno,
+                e.ApellidoMaterno,
+                e.CorreoPersonal,
+                e.Celular,
+                u.Activo
+            FROM vEmpleados e
+            LEFT JOIN tUsuarios u ON e.codTrabajador = u.CodEmpleado
+            WHERE 
+                u.Activo = 1
+                AND (@pCodUsuario IS NULL OR u.CodUsuario = @pCodUsuario)
+                AND (@pClaveAcceso IS NULL OR u.ClaveAcceso = @pClaveAcceso);
+        END
+
+        -- Listar empleados con rol
+        ELSE IF @pAccion = 3
+        BEGIN
+            SELECT DISTINCT 
+                e.codTrabajador,
+                e.NombreTrabajador,
+                r.NombreRol
+            FROM vEmpleados e
+            LEFT JOIN tUsuarios u ON e.codTrabajador = u.CodEmpleado
+            LEFT JOIN tRoles r ON u.IdRol = r.IdRol
+            WHERE 
+                (@pCodUsuario IS NULL OR u.CodUsuario = @pCodUsuario)
+            ORDER BY e.codTrabajador ASC;
+        END
+
+        -- Listar empleados con rol (activos)
+        ELSE IF @pAccion = 4
+        BEGIN
+            SELECT DISTINCT 
+                e.codTrabajador,
+                e.NombreTrabajador,
+                r.NombreRol
+            FROM vEmpleados e
+            LEFT JOIN tUsuarios u ON e.codTrabajador = u.CodEmpleado
+            LEFT JOIN tRoles r ON u.IdRol = r.IdRol
+            WHERE 
+                u.Activo = 1
+                AND (@pCodUsuario IS NULL OR u.CodUsuario = @pCodUsuario)
+            ORDER BY e.codTrabajador ASC;
+        END
+
+        -- Listar empleados con detalles completos
+        ELSE IF @pAccion = 5
+        BEGIN
+            SELECT 
+                ROW_NUMBER() OVER (ORDER BY e.codTrabajador ASC) AS Orden,
+                e.codTrabajador,
+                e.NombreTrabajador,
+                e.ApellidoPaterno,
+                e.ApellidoMaterno,
+                e.CorreoPersonal,
+                e.Celular,
+                r.NombreRol,
+                u.Activo,
+                u.ClaveAcceso
+            FROM vEmpleados e
+            LEFT JOIN tUsuarios u ON e.codTrabajador = u.CodEmpleado
+            LEFT JOIN tRoles r ON u.IdRol = r.IdRol
+            WHERE 
+                (@pCodUsuario IS NULL OR u.CodUsuario = @pCodUsuario);
+        END
+
+        -- Listar empleados con detalles completos (activos)
+        ELSE IF @pAccion = 6
+        BEGIN
+            SELECT 
+                ROW_NUMBER() OVER (ORDER BY e.codTrabajador ASC) AS Orden,
+                e.codTrabajador,
+                e.NombreTrabajador,
+                e.ApellidoPaterno,
+                e.ApellidoMaterno,
+                e.CorreoPersonal,
+                e.Celular,
+                r.NombreRol,
+                u.Activo,
+                u.ClaveAcceso
+            FROM vEmpleados e
+            LEFT JOIN tUsuarios u ON e.codTrabajador = u.CodEmpleado
+            LEFT JOIN tRoles r ON u.IdRol = r.IdRol
+            WHERE 
+                u.Activo = 1
+                AND (@pCodUsuario IS NULL OR u.CodUsuario = @pCodUsuario);
+        END
+
+        ELSE
+        BEGIN
+            THROW 50008, 'Acción no válida. Use: 1, 2, 3, 4, 5, 6.', 1;
+        END
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_ListadoEmpresas]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE proc  [dbo].[sp_ListadoEmpresas]
+	@pcodEmpresa as numeric(18,0)=null,
+	@pAccion as numeric(18,0)
+as
+begin
+	begin tran Acc01
+		if @pAccion=1
+			begin -- inicio accion 1
+				Select *  
+				from vEmpresas 
+				where ((@pcodEmpresa is null) or (cod_empresa = @pcodEmpresa) or (idEntExterna=@pcodEmpresa))
+				order by cod_empresa  asc
+			end -- fin de accion
+	commit tran Acc01
+end
+GO
+/****** Object:  StoredProcedure [dbo].[sp_ListadoUnidadesEmpresa]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create proc  [dbo].[sp_ListadoUnidadesEmpresa]
+	@pcodEmpresa as numeric(18,0)=null,
+	@pcodUnidadNeg as numeric(18,0)=null,
+	@pAccion as numeric(18,0)=null
+as
+begin
+	if @pAccion =1
+		Select cod_UnidadNeg, Nombre_local, Direccion_local,fono_local, movil_local, estadoFuncionamiento,
+		cod_empresa, Razon_Empresa, idLocacionEntExterna,codunidadNegocioSunat
+		from vUnidadesEmpresa 
+		where ((@pcodEmpresa is null) or (cod_Empresa = @pcodEmpresa)) and
+		((@pcodUnidadNeg is null) or (cod_UnidadNeg = @pcodUnidadNeg)) 
+		
+	if @pAccion =2
+		Select cod_UnidadNeg, Nombre_local, Direccion_local,fono_local, movil_local, estadoFuncionamiento,
+		cod_empresa, Razon_Empresa,idLocacionEntExterna,codunidadNegocioSunat
+		from vUnidadesEmpresa 
+		where ((@pcodEmpresa is null) or (cod_Empresa = @pcodEmpresa)) and
+		((cod_UnidadNeg = 1)) 
+
+	if @pAccion =3
+		Select *
+		from vUnidadesEmpresa 
+		where ((@pcodEmpresa is null) or (cod_Empresa = @pcodEmpresa)) and
+		((@pcodUnidadNeg is null) or (cod_UnidadNeg = @pcodUnidadNeg)) 
+
+	if @pAccion =4
+	begin
+		Select  '0' as checked, convert(varchar(10), cod_UnidadNeg) as fCodigo,Nombre_local as fNombre,cod_UnidadNeg as fId from vUnidadesEmpresa;
+	end
+
+end
+GO
+/****** Object:  StoredProcedure [dbo].[sp_RegistrarActivos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_RegistrarActivos]
+    @Codigo NVARCHAR(50),
+    @Serie NVARCHAR(100),
+    @idEstado INT,
+    @idSucursal NUMERIC(18,0),
+    @idCategoria INT,
+    @valorAdquisicion DECIMAL(12,2),
+    @fechaAdquisicion DATE,
+    @idProveedor INT,
+    @userMod NVARCHAR(15),
+    @idActivo INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    -- Validar código único
+    IF EXISTS (SELECT 1 FROM dbo.tActivos WHERE codigo = @Codigo)
+        THROW 50001, 'El código del activo ya existe.', 1;
+    -- Validar sucursal
+    IF NOT EXISTS (SELECT 1 FROM dbo.tSucursales WHERE cod_UnidadNeg = @idSucursal)
+        THROW 50002, 'La sucursal no existe.', 1;
+    -- Validar estado
+    IF NOT EXISTS (SELECT 1 FROM dbo.tEstadoActivo WHERE idEstadoActivo = @idEstado)
+        THROW 50003, 'El estado no es válido.', 1;
+    -- Validar categoría
+    IF NOT EXISTS (SELECT 1 FROM dbo.tCategoriasActivo WHERE idCategoria = @idCategoria)
+        THROW 50004, 'La categoría no es válida.', 1;
+    -- Validar proveedor
+    IF NOT EXISTS (SELECT 1 FROM dbo.vEntidadExternaGeneralProveedor WHERE Id = @idProveedor)
+        THROW 50005, 'El proveedor no existe.', 1;
+
+    INSERT INTO dbo.tActivos (
+        codigo, serie, idEstado, enUso, idSucursal, idCategoria, 
+        valorAdquisicion, fechaAdquisicion, garantia, idProveedor, 
+        fechaRegistro, userMod
+    )
+    VALUES (
+        @Codigo, @Serie, @idEstado, 0, @idSucursal, @idCategoria, 
+        @valorAdquisicion, @fechaAdquisicion, 0, @idProveedor, 
+        GETDATE(), @userMod
+    );
+
+    SET @idActivo = SCOPE_IDENTITY();
+
+    -- Registrar en auditoría
+    INSERT INTO dbo.tLogAuditoria (usuario, accion, tabla, idRegistro, fecha, detalle)
+    VALUES (@userMod, 'INSERT', 'tActivos', @idActivo, GETDATE(), 'Nuevo activo creado: ' + @Codigo);
+END
+GO
+/****** Object:  StoredProcedure [dbo].[sp_RegistrarDepreciacion]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_RegistrarDepreciacion]
+    @pIdActivo INT,
+    @pFechaDepreciacion DATE,
+    @pMetodoDepreciacion NVARCHAR(50),
+    @pUserMod NVARCHAR(15)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        DECLARE @ValorAdquisicion DECIMAL(12,2);
+        DECLARE @VidaUtil INT;
+        DECLARE @MontoDepreciacionMensual DECIMAL(12,2);
+        DECLARE @MontoDepreciacionAcumulada DECIMAL(12,2);
+        DECLARE @ValorNeto DECIMAL(12,2);
+
+        -- Obtener datos del activo
+        SELECT @ValorAdquisicion = valorAdquisicion, @VidaUtil = vidaUtil
+        FROM tActivos
+        WHERE idActivo = @pIdActivo;
+
+        -- Calcular depreciación (ejemplo: método lineal)
+        SET @MontoDepreciacionMensual = @ValorAdquisicion / (@VidaUtil * 12); -- Mensual
+        SET @MontoDepreciacionAcumulada = (
+            SELECT SUM(montoDepreciacionMensual)
+            FROM tDepreciacion
+            WHERE idActivo = @pIdActivo
+        ) + @MontoDepreciacionMensual;
+        SET @ValorNeto = @ValorAdquisicion - @MontoDepreciacionAcumulada;
+
+        -- Validar
+        IF @MontoDepreciacionAcumulada > @ValorAdquisicion
+            THROW 50001, 'La depreciación acumulada no puede exceder el valor de adquisición.', 1;
+
+        -- Insertar
+        INSERT INTO tDepreciacion (
+            idActivo, fechaDepreciacion, montoDepreciacionMensual,
+            montoDepreciacionAcumulada, valorNeto, metodoDepreciacion, fechaRegistro, userMod
+        )
+        VALUES (
+            @pIdActivo, @pFechaDepreciacion, @MontoDepreciacionMensual,
+            @MontoDepreciacionAcumulada, @ValorNeto, @pMetodoDepreciacion, GETDATE(), @pUserMod
+        );
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_RegistrarDetalleMovimiento]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_RegistrarDetalleMovimiento]
+    @IdMovimiento INT,
+    @IdActivo INT,
+    @IdSucursal_Nueva INT,
+    @IdAmbiente_Nueva INT,
+    @IdResponsable_Nueva NVARCHAR(15),
+    @IdActivoPadre_Nuevo INT = NULL
+AS
+BEGIN
+    DECLARE
+		@idAutorizador NVARCHAR(15),
+        @IdSucursal_Anterior INT,
+        @IdAmbiente_Anterior INT,
+        @IdResponsable_Anterior NVARCHAR(15),
+        @IdActivoPadre_Anterior INT;
+
+    -- Obtener estado actual del activo
+    SELECT
+        @IdSucursal_Anterior = IdSucursal,
+        @IdAmbiente_Anterior = IdAmbiente,
+        @IdResponsable_Anterior = idResponsable,
+        @IdActivoPadre_Anterior = IdActivoPadre
+    FROM tActivos
+    WHERE IdActivo = @IdActivo;
+
+    -- Insertar detalle de movimiento
+    INSERT INTO tDetalleMovimiento (
+        IdMovimiento, IdActivo, IdAutorizador,
+        IdSucursal_Anterior, IdSucursal_Nueva,
+        IdAmbiente_Anterior, IdAmbiente_Nuevo,
+        IdResponsable_Anterior, IdResponsable_Nuevo,
+        IdActivoPadre_Anterior, IdActivoPadre_Nuevo
+    )
+    VALUES (
+        @IdMovimiento, @IdActivo, @IdAutorizador,
+        @IdSucursal_Anterior, @IdSucursal_Nueva,
+        @IdAmbiente_Anterior, @IdAmbiente_Nueva,
+        @IdResponsable_Anterior, @IdResponsable_Nueva,
+        @IdActivoPadre_Anterior, @IdActivoPadre_Nuevo
+    );
+
+    -- Actualizar el activo con nuevos valores
+    UPDATE tActivos
+    SET
+        IdSucursal = @IdSucursal_Nueva,
+        IdAmbiente = @IdAmbiente_Nueva,
+        IdResponsable = @IdResponsable_Nueva,
+        IdActivoPadre = @IdActivoPadre_Nuevo
+    WHERE IdActivo = @IdActivo;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_RegistrarMovimiento]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_RegistrarMovimiento]
+    @pIdFicha INT = NULL,
+    @pIdActivo INT = NULL,
+    @pIdTipoMovimiento INT,
+    @pIdAmbienteOrigen INT = NULL,
+    @pIdAmbienteDestino INT = NULL,
+    @pIdActivoPadreOrigen INT = NULL,
+    @pIdActivoPadreDestino INT = NULL,
+    @pIdResponsableAnterior NVARCHAR(50) = NULL,
+    @pIdResponsableNuevo NVARCHAR(50) = NULL,
+    @pIdAutorizador NVARCHAR(15),
+    @pIdEstadoMovimiento INT,
+    @pObservaciones NVARCHAR(MAX) = NULL,
+    @pUserMod NVARCHAR(15),
+    @pIdRazonMovimiento INT = NULL,
+    @pAccion NVARCHAR(20)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        IF @pAccion = 'INDIVIDUAL'
+        BEGIN
+            INSERT INTO tMovimientos (
+                idFicha, idActivo, idTipoMovimiento, fechaMovimiento, idAmbienteOrigen,
+                idAmbienteDestino, idActivoPadreOrigen, idActivoPadreDestino,
+                idResponsableAnterior, idResponsableNuevo, idAutorizador,
+                idEstadoMovimiento, observaciones, fechaRegistro, userMod, idRazonMovimiento
+            )
+            VALUES (
+                @pIdFicha, @pIdActivo, @pIdTipoMovimiento, GETDATE(), @pIdAmbienteOrigen,
+                @pIdAmbienteDestino, @pIdActivoPadreOrigen, @pIdActivoPadreDestino,
+                @pIdResponsableAnterior, @pIdResponsableNuevo, @pIdAutorizador,
+                @pIdEstadoMovimiento, @pObservaciones, GETDATE(), @pUserMod, @pIdRazonMovimiento
+            );
+
+            -- Actualizar tActivos
+            UPDATE tActivos
+            SET idAmbiente = @pIdAmbienteDestino,
+                idSucursal = (SELECT idSucursal FROM tAmbiente WHERE idAmbiente = @pIdAmbienteDestino),
+                fechaMod = GETDATE(),
+                userMod = @pUserMod
+            WHERE idActivo = @pIdActivo;
+
+            -- Registrar en historial de custodia
+            IF @pIdResponsableNuevo IS NOT NULL
+            BEGIN
+                INSERT INTO tHistorialCustodia (idActivo, idUsuarioAnterior, idUsuarioNuevo, fechaCambio)
+                VALUES (@pIdActivo, @pIdResponsableAnterior, @pIdResponsableNuevo, GETDATE());
+            END;
+        END
+        ELSE IF @pAccion = 'MASIVO'
+        BEGIN
+            INSERT INTO tFichaMovimiento (
+                idSucursalOrigen, idSucursalDestino, idAutorizador, fechaFicha, observaciones, fechaRegistro, userMod
+            )
+            VALUES (
+                (SELECT idSucursal FROM tAmbiente WHERE idAmbiente = @pIdAmbienteOrigen),
+                (SELECT idSucursal FROM tAmbiente WHERE idAmbiente = @pIdAmbienteDestino),
+                @pIdAutorizador, GETDATE(), @pObservaciones, GETDATE(), @pUserMod
+            );
+            DECLARE @NewIdFicha INT = SCOPE_IDENTITY();
+
+            -- Insertar en tFichaMovimientoActivos (requiere una lista de activos, ajustar según interfaz)
+            -- Ejemplo: INSERT INTO tFichaMovimientoActivos (idFicha, idActivo) VALUES (@NewIdFicha, @pIdActivo);
+
+            INSERT INTO tMovimientos (
+                idFicha, idActivo, idTipoMovimiento, fechaMovimiento, idAmbienteOrigen,
+                idAmbienteDestino, idAutorizador, idEstadoMovimiento, observaciones, fechaRegistro, userMod
+            )
+            VALUES (
+                @NewIdFicha, @pIdActivo, @pIdTipoMovimiento, GETDATE(), @pIdAmbienteOrigen,
+                @pIdAmbienteDestino, @pIdAutorizador, @pIdEstadoMovimiento, @pObservaciones, GETDATE(), @pUserMod
+            );
+
+            -- Actualizar tActivos
+            UPDATE tActivos
+            SET idAmbiente = @pIdAmbienteDestino,
+                idSucursal = (SELECT idSucursal FROM tAmbiente WHERE idAmbiente = @pIdAmbienteDestino),
+                fechaMod = GETDATE(),
+                userMod = @pUserMod
+            WHERE idActivo = @pIdActivo;
+        END
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_ReporteMovimientos]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   PROCEDURE [dbo].[sp_ReporteMovimientos]
+    @pIdActivo INT = NULL,
+    @pFechaInicio DATE = NULL,
+    @pFechaFin DATE = NULL,
+    @pIdResponsable NVARCHAR(50) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT 
+        m.idMovimiento,
+        m.fechaMovimiento,
+        m.CodigoActivo,
+        m.NombreArticulo,
+        m.AmbienteOrigen,
+        m.AmbienteDestino,
+        m.idResponsableNuevo,
+        m.idAutorizador,
+        m.observaciones
+    FROM vHistorialMovimientosPorActivo m
+    WHERE (@pIdActivo IS NULL OR m.idActivo = @pIdActivo)
+      AND (@pFechaInicio IS NULL OR m.fechaMovimiento >= @pFechaInicio)
+      AND (@pFechaFin IS NULL OR m.fechaMovimiento <= @pFechaFin)
+      AND (@pIdResponsable IS NULL OR m.idResponsableNuevo = @pIdResponsable);
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[sp_ValidarUsuario]    Script Date: 7/05/2025 11:08:11 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   PROCEDURE [dbo].[sp_ValidarUsuario]
+    @pAccion NVARCHAR(20),
+    @CodUsuario NVARCHAR(15),
+    @ClaveAcceso NVARCHAR(10)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        IF @pAccion NOT IN ('VERIFICAR')
+            THROW 50001, 'Acción no válida. Use: VERIFICAR', 1;
+
+        IF @pAccion = 'VERIFICAR'
+        BEGIN
+            SELECT 
+                u.CodUsuario,
+                u.CodEmpleado,
+                u.IdRol,
+                c.NombreTrabajador,
+                c.CorreoPersonal,
+                c.Foto,
+                c.Firma,
+                u.UrlUltimaSession
+            FROM tUsuarios u
+            INNER JOIN bdRecursosHumanos.dbo.vcontratos c ON u.CodEmpleado = c.codTrabajador
+            WHERE 
+                u.CodUsuario = @CodUsuario
+                AND u.ClaveAcceso = @ClaveAcceso
+                AND u.Activo = 1
+                AND c.EstadoActual NOT IN ('ve', 'fi');
+        END
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPane1', @value=N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
+Begin DesignProperties = 
+   Begin PaneConfigurations = 
+      Begin PaneConfiguration = 0
+         NumPanes = 4
+         Configuration = "(H (1[46] 4[3] 2[4] 3) )"
+      End
+      Begin PaneConfiguration = 1
+         NumPanes = 3
+         Configuration = "(H (1 [50] 4 [25] 3))"
+      End
+      Begin PaneConfiguration = 2
+         NumPanes = 3
+         Configuration = "(H (1 [50] 2 [25] 3))"
+      End
+      Begin PaneConfiguration = 3
+         NumPanes = 3
+         Configuration = "(H (4 [30] 2 [40] 3))"
+      End
+      Begin PaneConfiguration = 4
+         NumPanes = 2
+         Configuration = "(H (1 [56] 3))"
+      End
+      Begin PaneConfiguration = 5
+         NumPanes = 2
+         Configuration = "(H (2 [66] 3))"
+      End
+      Begin PaneConfiguration = 6
+         NumPanes = 2
+         Configuration = "(H (4 [50] 3))"
+      End
+      Begin PaneConfiguration = 7
+         NumPanes = 1
+         Configuration = "(V (3))"
+      End
+      Begin PaneConfiguration = 8
+         NumPanes = 3
+         Configuration = "(H (1[56] 4[18] 2) )"
+      End
+      Begin PaneConfiguration = 9
+         NumPanes = 2
+         Configuration = "(H (1 [75] 4))"
+      End
+      Begin PaneConfiguration = 10
+         NumPanes = 2
+         Configuration = "(H (1[66] 2) )"
+      End
+      Begin PaneConfiguration = 11
+         NumPanes = 2
+         Configuration = "(H (4 [60] 2))"
+      End
+      Begin PaneConfiguration = 12
+         NumPanes = 1
+         Configuration = "(H (1) )"
+      End
+      Begin PaneConfiguration = 13
+         NumPanes = 1
+         Configuration = "(V (4))"
+      End
+      Begin PaneConfiguration = 14
+         NumPanes = 1
+         Configuration = "(V (2))"
+      End
+      ActivePaneConfig = 0
+   End
+   Begin DiagramPane = 
+      Begin Origin = 
+         Top = 0
+         Left = 0
+      End
+      Begin Tables = 
+         Begin Table = "vtrabajador (bdRecursosHumanos.dbo)"
+            Begin Extent = 
+               Top = 6
+               Left = 38
+               Bottom = 321
+               Right = 256
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+      End
+   End
+   Begin SQLPane = 
+   End
+   Begin DataPane = 
+      Begin ParameterDefaults = ""
+      End
+      Begin ColumnWidths = 35
+         Width = 284
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+      End
+   End
+   Begin CriteriaPane = 
+      Begin ColumnWidths = 11
+         Column = 3660
+         Alias = 900
+         Table = 1170
+         Output = 720
+         Append = 1400
+         NewValue = 1170
+         SortType = 1350
+         SortOrder = 1410
+         GroupBy = 1350
+         Filter = 1350
+         Or = 1350
+         Or = 1350
+         Or = 1350
+      End
+   End
+End
+' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vEmpleados'
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPaneCount', @value=1 , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vEmpleados'
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPane1', @value=N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
+Begin DesignProperties = 
+   Begin PaneConfigurations = 
+      Begin PaneConfiguration = 0
+         NumPanes = 4
+         Configuration = "(H (1[40] 4[20] 2[20] 3) )"
+      End
+      Begin PaneConfiguration = 1
+         NumPanes = 3
+         Configuration = "(H (1 [50] 4 [25] 3))"
+      End
+      Begin PaneConfiguration = 2
+         NumPanes = 3
+         Configuration = "(H (1 [50] 2 [25] 3))"
+      End
+      Begin PaneConfiguration = 3
+         NumPanes = 3
+         Configuration = "(H (4 [30] 2 [40] 3))"
+      End
+      Begin PaneConfiguration = 4
+         NumPanes = 2
+         Configuration = "(H (1 [56] 3))"
+      End
+      Begin PaneConfiguration = 5
+         NumPanes = 2
+         Configuration = "(H (2 [66] 3))"
+      End
+      Begin PaneConfiguration = 6
+         NumPanes = 2
+         Configuration = "(H (4 [50] 3))"
+      End
+      Begin PaneConfiguration = 7
+         NumPanes = 1
+         Configuration = "(V (3))"
+      End
+      Begin PaneConfiguration = 8
+         NumPanes = 3
+         Configuration = "(H (1[56] 4[18] 2) )"
+      End
+      Begin PaneConfiguration = 9
+         NumPanes = 2
+         Configuration = "(H (1 [75] 4))"
+      End
+      Begin PaneConfiguration = 10
+         NumPanes = 2
+         Configuration = "(H (1[66] 2) )"
+      End
+      Begin PaneConfiguration = 11
+         NumPanes = 2
+         Configuration = "(H (4 [60] 2))"
+      End
+      Begin PaneConfiguration = 12
+         NumPanes = 1
+         Configuration = "(H (1) )"
+      End
+      Begin PaneConfiguration = 13
+         NumPanes = 1
+         Configuration = "(V (4))"
+      End
+      Begin PaneConfiguration = 14
+         NumPanes = 1
+         Configuration = "(V (2))"
+      End
+      ActivePaneConfig = 0
+   End
+   Begin DiagramPane = 
+      Begin Origin = 
+         Top = 0
+         Left = 0
+      End
+      Begin Tables = 
+         Begin Table = "vEmpresas_1"
+            Begin Extent = 
+               Top = 6
+               Left = 38
+               Bottom = 136
+               Right = 247
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+      End
+   End
+   Begin SQLPane = 
+   End
+   Begin DataPane = 
+      Begin ParameterDefaults = ""
+      End
+      Begin ColumnWidths = 9
+         Width = 284
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+      End
+   End
+   Begin CriteriaPane = 
+      Begin ColumnWidths = 11
+         Column = 1440
+         Alias = 900
+         Table = 1170
+         Output = 720
+         Append = 1400
+         NewValue = 1170
+         SortType = 1350
+         SortOrder = 1410
+         GroupBy = 1350
+         Filter = 1350
+         Or = 1350
+         Or = 1350
+         Or = 1350
+      End
+   End
+End
+' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vEmpresas'
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPaneCount', @value=1 , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vEmpresas'
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPane1', @value=N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
+Begin DesignProperties = 
+   Begin PaneConfigurations = 
+      Begin PaneConfiguration = 0
+         NumPanes = 4
+         Configuration = "(H (1[26] 4[4] 2[4] 3) )"
+      End
+      Begin PaneConfiguration = 1
+         NumPanes = 3
+         Configuration = "(H (1 [50] 4 [25] 3))"
+      End
+      Begin PaneConfiguration = 2
+         NumPanes = 3
+         Configuration = "(H (1 [50] 2 [25] 3))"
+      End
+      Begin PaneConfiguration = 3
+         NumPanes = 3
+         Configuration = "(H (4 [30] 2 [40] 3))"
+      End
+      Begin PaneConfiguration = 4
+         NumPanes = 2
+         Configuration = "(H (1 [56] 3))"
+      End
+      Begin PaneConfiguration = 5
+         NumPanes = 2
+         Configuration = "(H (2 [66] 3))"
+      End
+      Begin PaneConfiguration = 6
+         NumPanes = 2
+         Configuration = "(H (4 [50] 3))"
+      End
+      Begin PaneConfiguration = 7
+         NumPanes = 1
+         Configuration = "(V (3))"
+      End
+      Begin PaneConfiguration = 8
+         NumPanes = 3
+         Configuration = "(H (1[56] 4[18] 2) )"
+      End
+      Begin PaneConfiguration = 9
+         NumPanes = 2
+         Configuration = "(H (1 [75] 4))"
+      End
+      Begin PaneConfiguration = 10
+         NumPanes = 2
+         Configuration = "(H (1[66] 2) )"
+      End
+      Begin PaneConfiguration = 11
+         NumPanes = 2
+         Configuration = "(H (4 [60] 2))"
+      End
+      Begin PaneConfiguration = 12
+         NumPanes = 1
+         Configuration = "(H (1) )"
+      End
+      Begin PaneConfiguration = 13
+         NumPanes = 1
+         Configuration = "(V (4))"
+      End
+      Begin PaneConfiguration = 14
+         NumPanes = 1
+         Configuration = "(V (2))"
+      End
+      ActivePaneConfig = 0
+   End
+   Begin DiagramPane = 
+      Begin Origin = 
+         Top = 0
+         Left = 0
+      End
+      Begin Tables = 
+         Begin Table = "alm"
+            Begin Extent = 
+               Top = 6
+               Left = 38
+               Bottom = 136
+               Right = 290
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+      End
+   End
+   Begin SQLPane = 
+   End
+   Begin DataPane = 
+      Begin ParameterDefaults = ""
+      End
+      Begin ColumnWidths = 9
+         Width = 284
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+      End
+   End
+   Begin CriteriaPane = 
+      Begin ColumnWidths = 11
+         Column = 1440
+         Alias = 900
+         Table = 1170
+         Output = 720
+         Append = 1400
+         NewValue = 1170
+         SortType = 1350
+         SortOrder = 1410
+         GroupBy = 1350
+         Filter = 1350
+         Or = 1350
+         Or = 1350
+         Or = 1350
+      End
+   End
+End
+' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vListadoDeArticulosPorDocIngresoAlmacen'
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPaneCount', @value=1 , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vListadoDeArticulosPorDocIngresoAlmacen'
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPane1', @value=N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
+Begin DesignProperties = 
+   Begin PaneConfigurations = 
+      Begin PaneConfiguration = 0
+         NumPanes = 4
+         Configuration = "(H (1[40] 4[20] 2[20] 3) )"
+      End
+      Begin PaneConfiguration = 1
+         NumPanes = 3
+         Configuration = "(H (1 [50] 4 [25] 3))"
+      End
+      Begin PaneConfiguration = 2
+         NumPanes = 3
+         Configuration = "(H (1 [50] 2 [25] 3))"
+      End
+      Begin PaneConfiguration = 3
+         NumPanes = 3
+         Configuration = "(H (4 [30] 2 [40] 3))"
+      End
+      Begin PaneConfiguration = 4
+         NumPanes = 2
+         Configuration = "(H (1 [56] 3))"
+      End
+      Begin PaneConfiguration = 5
+         NumPanes = 2
+         Configuration = "(H (2 [66] 3))"
+      End
+      Begin PaneConfiguration = 6
+         NumPanes = 2
+         Configuration = "(H (4 [50] 3))"
+      End
+      Begin PaneConfiguration = 7
+         NumPanes = 1
+         Configuration = "(V (3))"
+      End
+      Begin PaneConfiguration = 8
+         NumPanes = 3
+         Configuration = "(H (1[56] 4[18] 2) )"
+      End
+      Begin PaneConfiguration = 9
+         NumPanes = 2
+         Configuration = "(H (1 [75] 4))"
+      End
+      Begin PaneConfiguration = 10
+         NumPanes = 2
+         Configuration = "(H (1[66] 2) )"
+      End
+      Begin PaneConfiguration = 11
+         NumPanes = 2
+         Configuration = "(H (4 [60] 2))"
+      End
+      Begin PaneConfiguration = 12
+         NumPanes = 1
+         Configuration = "(H (1) )"
+      End
+      Begin PaneConfiguration = 13
+         NumPanes = 1
+         Configuration = "(V (4))"
+      End
+      Begin PaneConfiguration = 14
+         NumPanes = 1
+         Configuration = "(V (2))"
+      End
+      ActivePaneConfig = 0
+   End
+   Begin DiagramPane = 
+      Begin Origin = 
+         Top = 0
+         Left = 0
+      End
+      Begin Tables = 
+         Begin Table = "vUnidadesEmpresa_1"
+            Begin Extent = 
+               Top = 6
+               Left = 38
+               Bottom = 136
+               Right = 270
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+      End
+   End
+   Begin SQLPane = 
+   End
+   Begin DataPane = 
+      Begin ParameterDefaults = ""
+      End
+      Begin ColumnWidths = 9
+         Width = 284
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+      End
+   End
+   Begin CriteriaPane = 
+      Begin ColumnWidths = 11
+         Column = 1440
+         Alias = 900
+         Table = 1170
+         Output = 720
+         Append = 1400
+         NewValue = 1170
+         SortType = 1350
+         SortOrder = 1410
+         GroupBy = 1350
+         Filter = 1350
+         Or = 1350
+         Or = 1350
+         Or = 1350
+      End
+   End
+End
+' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vUnidadesEmpresa'
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPaneCount', @value=1 , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vUnidadesEmpresa'
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPane1', @value=N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
+Begin DesignProperties = 
+   Begin PaneConfigurations = 
+      Begin PaneConfiguration = 0
+         NumPanes = 4
+         Configuration = "(H (1[40] 4[20] 2[20] 3) )"
+      End
+      Begin PaneConfiguration = 1
+         NumPanes = 3
+         Configuration = "(H (1 [50] 4 [25] 3))"
+      End
+      Begin PaneConfiguration = 2
+         NumPanes = 3
+         Configuration = "(H (1 [50] 2 [25] 3))"
+      End
+      Begin PaneConfiguration = 3
+         NumPanes = 3
+         Configuration = "(H (4 [30] 2 [40] 3))"
+      End
+      Begin PaneConfiguration = 4
+         NumPanes = 2
+         Configuration = "(H (1 [56] 3))"
+      End
+      Begin PaneConfiguration = 5
+         NumPanes = 2
+         Configuration = "(H (2 [66] 3))"
+      End
+      Begin PaneConfiguration = 6
+         NumPanes = 2
+         Configuration = "(H (4 [50] 3))"
+      End
+      Begin PaneConfiguration = 7
+         NumPanes = 1
+         Configuration = "(V (3))"
+      End
+      Begin PaneConfiguration = 8
+         NumPanes = 3
+         Configuration = "(H (1[56] 4[18] 2) )"
+      End
+      Begin PaneConfiguration = 9
+         NumPanes = 2
+         Configuration = "(H (1 [75] 4))"
+      End
+      Begin PaneConfiguration = 10
+         NumPanes = 2
+         Configuration = "(H (1[66] 2) )"
+      End
+      Begin PaneConfiguration = 11
+         NumPanes = 2
+         Configuration = "(H (4 [60] 2))"
+      End
+      Begin PaneConfiguration = 12
+         NumPanes = 1
+         Configuration = "(H (1) )"
+      End
+      Begin PaneConfiguration = 13
+         NumPanes = 1
+         Configuration = "(V (4))"
+      End
+      Begin PaneConfiguration = 14
+         NumPanes = 1
+         Configuration = "(V (2))"
+      End
+      ActivePaneConfig = 0
+   End
+   Begin DiagramPane = 
+      Begin Origin = 
+         Top = 0
+         Left = 0
+      End
+      Begin Tables = 
+         Begin Table = "vZonasGeograficas_1"
+            Begin Extent = 
+               Top = 6
+               Left = 38
+               Bottom = 136
+               Right = 247
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+      End
+   End
+   Begin SQLPane = 
+   End
+   Begin DataPane = 
+      Begin ParameterDefaults = ""
+      End
+      Begin ColumnWidths = 11
+         Width = 284
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+      End
+   End
+   Begin CriteriaPane = 
+      Begin ColumnWidths = 11
+         Column = 1440
+         Alias = 900
+         Table = 1170
+         Output = 720
+         Append = 1400
+         NewValue = 1170
+         SortType = 1350
+         SortOrder = 1410
+         GroupBy = 1350
+         Filter = 1350
+         Or = 1350
+         Or = 1350
+         Or = 1350
+      End
+   End
+End
+' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vZonasGeograficas'
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPaneCount', @value=1 , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vZonasGeograficas'
+GO

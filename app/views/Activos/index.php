@@ -116,6 +116,11 @@
                     </div>
                 </div>
             </section>
+        </div>
+    </div>
+
+    <?php require_once "../Layouts/Footer.php" ?>
+
 </body>
 
 </html>

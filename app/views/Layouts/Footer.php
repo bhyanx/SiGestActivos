@@ -13,7 +13,7 @@
 <!-- MDB -->
 <!-- jQuery -->
 <script src="/public/js/lib/jquery/jquery-3.7.1.min.js"></script>
-<!-- jQuery UI 1.11.4 -->
+<!-- jQuery UI -->
 <script src="/public/plugins/jquery-ui/jquery-ui.min.js"></script>
 <!-- Bootstrap 4 -->
 <script src="/public/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -48,7 +48,8 @@
 <!-- AdminLTE App -->
 <script src="/public/js/adminlte.js"></script>
 <!-- SweetAlert2 -->
-<script src="/public/plugins/sweetalert2/dist/sweetalert2.all.min.js"></script>
+<!-- SweetAlert2 -->
+<script src="/public/plugins/sweetalert2/sweetalert2.all.min.js"></script>
 <!-- xlsx.js -->
 <script src="/public/plugins/xlsx/jszip.js"></script>
 <script src="/public/plugins/xlsx/xlsx.js"></script>
@@ -63,7 +64,8 @@
 <!-- Bootbox -->
 <script src="/public/plugins/bootbox/bootbox.all.min.js"></script>
 <!-- date-range-picker -->
-<script src="/public/plugins/daterangepicker/daterangepicker.js"></script>
+<!-- Eliminar esta línea duplicada -->
+<!-- <script src="/public/plugins/daterangepicker/daterangepicker.js"></script> -->
 <!-- bootstrap color picker -->
 
 <script src="/public/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
@@ -88,7 +90,7 @@
 
 <!-- <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script> -->
-<script>
+<!-- <script>
     /// TODO: Abrir menus y dar estilo actiado al modulo del menu izquierdo
     // var nomview = window.location.pathname.split('/')
     // var url = window.location.href;
@@ -236,4 +238,4 @@
     //     });
 
     // }
-</script>
+</script> -->

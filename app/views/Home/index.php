@@ -186,7 +186,7 @@
     </div>
 
     <?php require_once "../Layouts/Footer.php"; ?>
-    <!-- <script src="Home.js"></script> -->
+   
 </body>
 
 </html>
