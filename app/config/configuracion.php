@@ -19,6 +19,16 @@ class Conectar
             die();
         }
     }
+    public function ConexionBdPruebas(){
+        try {
+            $conectar = $this->dbh = new PDO("sqlsrv:Server="); // CONEXION DE MI LAPTOP - AVANCE EN CASA
+            return $conectar;
+            echo "Conexion Exitosa";
+        } catch (Exception $e){
+            echo "Error en cacdena de conexion Conexion(): " . $e->getMessage();
+            die();
+        }
+    }
 
     // protected function ConexionPhpMyadmin()
     // {
