@@ -1,21 +1,28 @@
 <?php
-// TODO: VALIDAR MENU Y PERSMISO DE USUSARIO
-// $tienepermiso = false;
+ob_start();
+// Validar menu y permisos de usuario
+if (!isset($_SESSION['Permisos'])) {
+    ob_end_clean();
+    header('Location: /app/views/Logout/');
+    exit();
+}
 
-// $rutaactual = basename(getcwd());
+$tienePermiso = false;
+$rutaActual = basename(getcwd());
 
-// if(!isset($_SESSION['permisos'])){
-//     header('Location: '.Conectar::ruta().'Logout/logout.php');
-//     die();
-// }else{
-//     foreach ($_SESSION['permisos'] as $permiso) {
-//         if ($permiso['MenuIdentificador'] == $rutaactual) {
-//             $tienepermiso = true;
-//         }
-//     }
-// }
+foreach ($_SESSION['Permisos'] as $permiso) {
+    if ($permiso['MenuIdentificador'] == $rutaActual) {
+        $tienePermiso = true;
+        break;
+    }
+}
+
+if (!$tienePermiso) {
+    ob_end_clean();
+    header('Location: /Home/');
+    exit();
+}
 ?>
-
 <!-- Preloader -->
 
 <div class="preloader flex-column justify-content-center align-items-center">
@@ -44,8 +51,8 @@
     <ul class="navbar-nav ml-auto">
         <!-- Notifications Dropdown Menu -->
         <li class="nav-item dropdown">
-            <li class="nav-item">
-                <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+        <li class="nav-item">
+            <a class="nav-link" data-widget="fullscreen" href="#" role="button">
                 <i class="fas fa-expand-arrows-alt"></i>
             </a>
         </li>
@@ -55,17 +62,21 @@
         </a>
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
 
-                <!-- CODEMPLEADO/CODUSUARIO CREADO POR SESSION -->
-                <input type="hidden" name="CodUsuario" id="CodUsuario" value="<?= $_SESSION["cod_user"] ?>">
-                <input type="hidden" name="CodEmpleado" id="CodEmpleado" value="<?= $_SESSION["CodEmpleado"] ?>">
-                <input type="hidden" name="NomEmpleado" id="NomEmpleado" value="<?= $_SESSION["Empleado"] ?>">
+            <!-- CODEMPLEADO/CODUSUARIO CREADO POR SESSION -->
+            <span class="dropdown-item dropdown-header"><?php echo $_SESSION["CodUsuario"] ?></span>
 
-                <div class="dropdown-divider"></div>
-                
-                <div class="dropdown-divider"></div>
-                <a href="../Logout/logout.php" class="dropdown-item dropdown-footer"><i class="fas fa-sign-out-alt"></i> Cerrar Sessión</a>
-            </div>
+            <div class="dropdown-divider"></div>
+
+            <input type="hidden" name="CodUsuario" id="CodUsuario" value="<?php echo $_SESSION["CodUsuario"]; ?>">
+
+
+            <div class="dropdown-divider"></div>
+            <a href="../Logout/" class="dropdown-item dropdown-footer"><i class="fas fa-sign-out-alt"></i> Cerrar Sessión</a>
+        </div>
         </li>
     </ul>
 </nav>
 <!-- /.navbar -->
+<?php
+ob_end_flush();
+?>

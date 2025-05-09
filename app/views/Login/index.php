@@ -1,5 +1,7 @@
 <?php
+require_once("../../config/configuracion.php");
 
+if(!isset($_SESSION["IdRol"])){
 ?>
 
 <!DOCTYPE html>
@@ -71,50 +73,33 @@
 
                             <div class="mb-md-5 mt-md-4 pb-5">
                                 <div class="text-center">
-                                    <img src="/public//img/Logo-Lubriseng.png"
+                                    <img src="/public/img/Logo-Lubriseng.png"
                                         style="width: 200px;" alt="logo">
                                     <h2 class="mt-3 mb-2 pb-1">Iniciar Sesión</h2>
                                     <p class="text-white-50 mb-5">Por favor ingrese correctamente su código de usuario y contraseña</p>
                                 </div>
 
-                                <!-- <hr class="my-4"> -->
+                                <form id="login_form">
+                                    <div data-mdb-input-init class="form-outline form-white mb-4">
+                                        <input type="text" id="CodUsuario" name="CodUsuario" class="form-control form-control-lg" required />
+                                        <label class="form-label" for="CodUsuario">Codigo de Usuario</label>
+                                    </div>
 
-                                <!-- <h2 class="fw-bold mb-2 text-uppercase">Login</h2>
-                                <p class="text-white-50 mb-5">Please enter your login and password!</p> -->
+                                    <div data-mdb-input-init class="form-outline form-white mb-4">
+                                        <input type="password" id="ClaveAcceso" name="ClaveAcceso" class="form-control form-control-lg" />
+                                        <label class="form-label" for="ClaveAcceso">Contraseña</label>
+                                    </div>
 
-                                <div data-mdb-input-init class="form-outline form-white mb-4">
-                                    <input type="text" id="typeEmailX" class="form-control form-control-lg" />
-                                    <label class="form-label" for="typeEmailX">Codigo de Usuario</label>
-                                </div>
+                                    <div class="divider d-flex align-items-center my-4">
+                                        <!-- <p class="text-center fw-bold mx-3 mb-0 text-muted">OR</p> -->
+                                        <i class="fa-solid fa-gear mx-3" style="color: #09A603;"></i>
+                                    </div>
 
-                                <div data-mdb-input-init class="form-outline form-white mb-4">
-                                    <input type="password" id="typePasswordX" class="form-control form-control-lg" />
-                                    <label class="form-label" for="typePasswordX">Contraseña</label>
-                                </div>
-
-                                <div class="divider d-flex align-items-center my-4">
-                                    <!-- <p class="text-center fw-bold mx-3 mb-0 text-muted">OR</p> -->
-                                    <i class="fa-solid fa-gear mx-3" style="color: #09A603;"></i>
-                                </div>
-
-                                <!-- <p class="small mb-5 pb-lg-2"><a class="text-white-50" href="#!">Forgot password?</a></p> -->
-
-                                <a href="./Home/">
                                     <button data-mdb-button-init data-mdb-ripple-init class="btn mt-5 btn-outline-light btn-lg px-5 btn-login" type="submit">Ingresar</button>
-                                </a>
 
-                                <!-- <div class="d-flex justify-content-center text-center mt-4 pt-1">
-                                    <a href="#!" class="text-white"><i class="fab fa-facebook-f fa-lg"></i></a>
-                                    <a href="#!" class="text-white"><i class="fab fa-twitter fa-lg mx-4 px-2"></i></a>
-                                    <a href="#!" class="text-white"><i class="fab fa-google fa-lg"></i></a>
-                                </div> -->
+                                </form>
 
                             </div>
-
-                            <!-- <div>
-                                <p class="mb-0">Don't have an account? <a href="#!" class="text-white-50 fw-bold">Sign Up</a>
-                                </p>
-                            </div> -->
 
                         </div>
                     </div>
@@ -122,7 +107,13 @@
             </div>
         </div>
     </section>
-
+    <?php require_once '../Layouts/Footer.php' ?>
+    <script src="/app/views/Login/login.js"></script>
 </body>
 
 </html>
+<?php
+} else {
+    header("Location: ../views/Home/");
+    exit();
+}

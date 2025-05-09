@@ -7,7 +7,7 @@ if (!empty($_SESSION['CodUsuario']) && !empty($_SESSION['ClaveAcceso'])){
 }else{
     header("Location: app/views/Login");
 } 
-
+ob_end_flush();
 ?>
 
 

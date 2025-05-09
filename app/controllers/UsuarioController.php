@@ -8,60 +8,54 @@ $action = $_GET['action'] ?? $_POST['action'] ?? 'Consultar';
 
 //* USO DE SWITCH CASE PARA REALIZAR ACCIONES EN BASE A LA PETICION DEL USUARIO
 
-switch($action){
+switch ($action) {
 
     //* CASE PARA PODER INICIAR SESSIÓN EN EL SISTEMA, DEPENDIENDO DE SUS ROLES Y PERMISOS
 
     case 'AccesoUsuario':
+        header('Content-Type: application/json');
         $datos = $usuario->login($_POST["CodUsuario"], $_POST["ClaveAcceso"]);
-        if (is_array($datos) == true and count($datos) > 0) {
-            foreach ($datos as $row){
-                $_SESSION["CodUsuario"] = $row["CodUsuario"];
-                $_SESSION["CodEmpleado"] = $row["CodEmpleado"];
-                $_SESSION["IdRol"] = $row["IdRol"];
-                $_SESSION["UrlUltimaSession"] = $row["UrlUltimaSession"];
-                $_SESSION["ClaveAcceso"] = $row["ClaveAcceso"];
-                $_SESSION["ApellidoPaterno"] = $row["ApellidoPaterno"];
-                $_SESSION["ApellidoMaterno"] = $row["ApellidoMaterno"];
-                $_SESSION["PrimerNombre"] = $row["PrimerNombre"];
-                $_SESSION["SegundoNombre"] = $row["SegundoNombre"];
-                $_SESSION["NombreTrabajador"] = $row["NombreTrabajador"];
-                $_SESSION["CorreoPersonal"] = $row["CorreoPersonal"];
-                $_SESSION["FechaNacimiento"] = date("Y-m-d", strtotime($row["fechaNacimiento"]));
-                $_SESSION["CodGenero"] = $row["CodGenero"];
-                $_SESSION["Celular"] = $row["Celular"];
-                $_SESSION["Foto"] = $row["Foto"];
-                $_SESSION["Firma"] = $row["Firma"];
-            }
+        if ($datos && is_array($datos)) {
+            $row = $datos[0];
+            $_SESSION["CodUsuario"] = $row["CodUsuario"] ?? '';
+            $_SESSION["CodEmpleado"] = $row["CodEmpleado"] ?? '';
+            $_SESSION["IdRol"] = $row["IdRol"] ?? '';
+            $_SESSION["UrlUltimaSession"] = $row["UrlUltimaSession"] ?? '';
+            $_SESSION["ClaveAcceso"] = $row["ClaveAcceso"] ?? '';
 
+            //* DATOS OPCIONES PARA DEVOLVER DESPUÉS
+
+            // $_SESSION["ApellidoPaterno"] = $row["ApellidoPaterno"];
+            // $_SESSION["ApellidoMaterno"] = $row["ApellidoMaterno"];
             //* VERIFICAMOS LA URL DE LA ULTIMA SESSION DEL USUARIO, SI NO EXISTE REDIRECCIONAMOS A LA VISTA DE DASHBOARD
             //* SI EXISTE REDIRECCIONAMOS A LA URL QUE SE ENCUENTRA EN LA BASE DE DATOS
-            
-            if (empty($row["UrlUltimaSession"])){
-                $result = array('status' => true, 'msg' => '../views/Dashboard/');
-            } else {
-                $result = array('status' => true, 'msg' => $row["UrlUltimaSession"]);
-            }
 
-            //* OBTENEMOS LOS PERMISOS DEL USUARIO QUE SE ENCUENTA LOGUEADO
+            // Primero verificamos los permisos
             $datapermisos = $usuario->leerMenuRol($_SESSION['IdRol']);
-            if (is_array($datapermisos) == true and count($datapermisos) > 0){
+            if (is_array($datapermisos) == true and count($datapermisos) > 0) {
                 $_SESSION['Permisos'] = $datapermisos;
-            }else{
+                // Solo si tiene permisos, establecemos la URL de redirección
+                if (empty($row["UrlUltimaSession"])) {
+                    $result = array('status' => true, 'msg' => '../views/Home/');
+                } else {
+                    $result = array('status' => true, 'msg' => $row["UrlUltimaSession"]);
+                }
+            } else {
                 $result = array('status' => false, 'msg' => 'No se encontraron permisos para el usuario');
             }
-        }else{
-            $result = array('status' => false, 'msg' => 'Usuario o contraseña incorrectos');
+        } else {
+            $result = array('status' => false, 'msg' => 'Usuario o contraseña incorrectos');
         }
         echo json_encode($result);
+        exit();
         break;
 
-        
+
     //* CASE PARA PODER LEER CUALQUIER USUARIO SOLO INGRESANDO SU CODIGO DE USUARIO(DNI)
 
     case 'LeerUsuarioId':
         $data = $usuario->listarPorCodUsuario($_POST["CodUsuario"]);
-        if ($data){
+        if ($data) {
             $response = array('status' => true, 'data' => $data);
         } else {
             $response = array('status' => false, 'data' => $data);
@@ -73,7 +67,7 @@ switch($action){
     //* CASE PARA PODER LEER TODOS LOS USUARIOS QUE SE ENCUENTRAN EN LA BASE DE DATOS
     case 'LeerUsuarios':
         $data = $usuario->listarTodo();
-        if($data){
+        if ($data) {
             $response = array('status' => true, 'data' => $data);
         } else {
             $response = array('status' => false, 'data' => $data);

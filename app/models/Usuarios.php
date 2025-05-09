@@ -1,5 +1,7 @@
 <?php
 
+require_once(__DIR__ . "/../config/configuracion.php");
+
 class Usuarios
 {
     private $db;
@@ -12,11 +14,12 @@ class Usuarios
     public function login($codUsuario, $ClaveAcceso)
     {
         try {
-            $stmt = $this->db->prepare('SELECT * FROM tUsuarios WHERE codUsuario = ?');
-            $stmt->execute([$codUsuario]);
+            $stmt = $this->db->prepare('SELECT * FROM tUsuarios WHERE CodUsuario = ? AND ClaveAcceso = ?');
+            $stmt->execute([$codUsuario, $ClaveAcceso]);
             $usuario = $stmt->fetch(\PDO::FETCH_ASSOC);
-            if ($usuario && password_verify($ClaveAcceso, $usuario[$ClaveAcceso])) {
-                return $usuario;
+
+            if ($usuario) {
+                return [$usuario];
             }
             return false;
         } catch (\PDOException $e) {

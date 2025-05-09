@@ -20,7 +20,7 @@
 <!-- bs-custom-file-input -->
 <script src="/public/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
 <!-- Select2 -->
-<script src="/public/plugins/select2/dist/js/select2.min.js"></script>
+<!-- <script src="/public/plugins/select2/dist/js/select2.min.js"></script> -->
 <!-- ChartJS -->
 <script src="/public/plugins/chart.js/Chart.min.js"></script>
 <!-- Sparkline -->
