@@ -10,8 +10,18 @@ if (!isset($_SESSION['Permisos'])) {
 $tienePermiso = false;
 $rutaActual = basename(getcwd());
 
+// Obtener el identificador del menú actual
+$identificadorActual = '';
 foreach ($_SESSION['Permisos'] as $permiso) {
-    if ($permiso['MenuIdentificador'] == $rutaActual) {
+    if (strpos($permiso['MenuRuta'], $rutaActual) !== false) {
+        $identificadorActual = $permiso['MenuIdentificador'];
+        break;
+    }
+}
+
+// Verificar si el usuario tiene permiso para el identificador actual
+foreach ($_SESSION['Permisos'] as $permiso) {
+    if ($permiso['MenuIdentificador'] === $identificadorActual && $permiso['Permiso'] == 1) {
         $tienePermiso = true;
         break;
     }
@@ -19,7 +29,7 @@ foreach ($_SESSION['Permisos'] as $permiso) {
 
 if (!$tienePermiso) {
     ob_end_clean();
-    header('Location: /Home/');
+    header('Location: /app/views/Home/');
     exit();
 }
 ?>

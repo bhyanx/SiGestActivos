@@ -1,4 +1,7 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 //require_once("../config/configuracion.php");
 require_once("../models/Usuarios.php");
 
@@ -17,28 +20,52 @@ switch ($action) {
         $datos = $usuario->login($_POST["CodUsuario"], $_POST["ClaveAcceso"]);
         if ($datos && is_array($datos)) {
             $row = $datos[0];
+            
+            // Limpiar sesión anterior
+            session_unset();
+            session_destroy();
+            session_start();
+            
+            // Debug - Verificar datos antes de guardar en sesión
+            error_log("Datos a guardar en sesión: " . print_r($row, true));
+            
+            // Guardar datos en la sesión
             $_SESSION["CodUsuario"] = $row["CodUsuario"] ?? '';
             $_SESSION["CodEmpleado"] = $row["CodEmpleado"] ?? '';
             $_SESSION["IdRol"] = $row["IdRol"] ?? '';
             $_SESSION["UrlUltimaSession"] = $row["UrlUltimaSession"] ?? '';
             $_SESSION["ClaveAcceso"] = $row["ClaveAcceso"] ?? '';
-
-            //* DATOS OPCIONES PARA DEVOLVER DESPUÉS
-
-            // $_SESSION["ApellidoPaterno"] = $row["ApellidoPaterno"];
-            // $_SESSION["ApellidoMaterno"] = $row["ApellidoMaterno"];
-            //* VERIFICAMOS LA URL DE LA ULTIMA SESSION DEL USUARIO, SI NO EXISTE REDIRECCIONAMOS A LA VISTA DE DASHBOARD
-            //* SI EXISTE REDIRECCIONAMOS A LA URL QUE SE ENCUENTRA EN LA BASE DE DATOS
-
-            // Primero verificamos los permisos
+            $_SESSION["NombreTrabajador"] = $row["NombreTrabajador"] ?? '';
+            $_SESSION["PrimerNombre"] = $row["PrimerNombre"] ?? '';
+            $_SESSION["SegundoNombre"] = $row["SegundoNombre"] ?? '';
+            $_SESSION["ApellidoPaterno"] = $row["ApellidoPaterno"] ?? '';
+            $_SESSION["ApellidoMaterno"] = $row["ApellidoMaterno"] ?? '';
+            
+            // Debug - Verificar datos guardados en sesión
+            error_log("Datos guardados en sesión: " . print_r($_SESSION, true));
+            
+            // Cargar los permisos del usuario
             $datapermisos = $usuario->leerMenuRol($_SESSION['IdRol']);
-            if (is_array($datapermisos) == true and count($datapermisos) > 0) {
+            if (is_array($datapermisos) && count($datapermisos) > 0) {
                 $_SESSION['Permisos'] = $datapermisos;
-                // Solo si tiene permisos, establecemos la URL de redirección
-                if (empty($row["UrlUltimaSession"])) {
-                    $result = array('status' => true, 'msg' => '../views/Home/');
+                
+                // Verificar si el usuario tiene permisos para acceder
+                $tienePermisos = false;
+                foreach ($datapermisos as $permiso) {
+                    if ($permiso['Permiso'] == 1) {
+                        $tienePermisos = true;
+                        break;
+                    }
+                }
+
+                if ($tienePermisos) {
+                    if (empty($row["UrlUltimaSession"])) {
+                        $result = array('status' => true, 'msg' => '/app/views/Home/');
+                    } else {
+                        $result = array('status' => true, 'msg' => $row["UrlUltimaSession"]);
+                    }
                 } else {
-                    $result = array('status' => true, 'msg' => $row["UrlUltimaSession"]);
+                    $result = array('status' => false, 'msg' => 'No tiene permisos para acceder al sistema');
                 }
             } else {
                 $result = array('status' => false, 'msg' => 'No se encontraron permisos para el usuario');

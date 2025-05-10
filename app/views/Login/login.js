@@ -39,7 +39,12 @@ function Login(e){
         dataType: 'json',
         success: function(data){
             if(data.status){
-                window.location.href = data.msg;
+                // Asegurarse de que la URL sea absoluta
+                if(data.msg.startsWith('/')){
+                    window.location.href = data.msg;
+                } else {
+                    window.location.href = '/' + data.msg;
+                }
             } else {
                 Swal.fire({
                     icon: 'error',

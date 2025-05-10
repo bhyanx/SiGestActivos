@@ -1,31 +1,32 @@
 <?php
-ob_start();
-session_start();
+// Verificar si la sesión ya está iniciada
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
+// Configuración de la base de datos
 class Conectar
 {
-
     protected $dbh;
 
     public function ConexionBdPracticante()
     {
         try {
-            
-            $conectar = $this->dbh = new PDO("sqlsrv:Server=192.168.1.35;Database=bdActivos", "practsistAlfa", "Calichin2025"); // CONEXION LOCAL PC PRACTICANTE
-            return $conectar;
-            echo "Conexion Exitosa";
-        } catch (Exception $e) {
-            echo "Error en cacdena de conexion Conexion(): " . $e->getMessage();
-            die();
+            $conexion = new PDO("sqlsrv:Server=192.168.1.35;Database=bdActivos", "practsistAlfa", "Calichin2025");
+            $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            return $conexion;
+        } catch (PDOException $e) {
+            error_log("Error de conexión: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
         }
     }
+
     public function ConexionBdPruebas(){
         try {
-            $conectar = $this->dbh = new PDO("sqlsrv:Server="); // CONEXION DE MI LAPTOP - AVANCE EN CASA
+            $conectar = $this->dbh = new PDO("sqlsrv:Server=DESKTOP-5QKJ7QK;Database=SiGestActivos", "", "");
             return $conectar;
-            echo "Conexion Exitosa";
         } catch (Exception $e){
-            echo "Error en cacdena de conexion Conexion(): " . $e->getMessage();
+            echo "Error en cadena de conexión Conexion(): " . $e->getMessage();
             die();
         }
     }
@@ -56,3 +57,11 @@ class Conectar
         return $_SERVER["DOCUMENT_ROOT"] . '/SiGestActivos/';
     }
 }
+
+// Configuración de zona horaria
+date_default_timezone_set('America/Bogota');
+
+// Configuración de errores
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+?>
