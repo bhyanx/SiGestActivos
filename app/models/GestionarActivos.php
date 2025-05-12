@@ -1,8 +1,8 @@
 <?php
+require_once '../config/configuracion.php';
 
 class GestionarActivos
 {
-
     private $db;
 
     public function __construct()
@@ -10,18 +10,20 @@ class GestionarActivos
         $this->db = (new Conectar())->ConexionBdPracticante();
     }
 
-    //! CLASES PARA GESTIONAR ACTIVOS CON PROCEDIMIENTOS ALMACENADOS(escritura diferente)
-
-    //* FUNCION PARA CONSULTAR ACTIVOS CON PROCEDIMIENTOS ALMACENADOS
-
     public function consultarActivos($data)
     {
         try {
+            // Convertir cadenas vacías a null o enteros para parámetros numéricos
+            $pCodigo = empty($data['pCodigo']) ? null : $data['pCodigo'];
+            $pIdSucursal = empty($data['pIdSucursal']) ? null : (int)$data['pIdSucursal'];
+            $pIdCategoria = empty($data['pIdCategoria']) ? null : (int)$data['pIdCategoria'];
+            $pIdEstado = empty($data['pIdEstado']) ? null : (int)$data['pIdEstado'];
+
             $stmt = $this->db->prepare('EXEC sp_ConsultarActivos @pCodigo = ?, @pIdSucursal = ?, @pIdCategoria = ?, @pIdEstado = ?');
-            $stmt->bindParam(1, $data['pCodigo'], \PDO::PARAM_STR);
-            $stmt->bindParam(2, $data['pIdSucursal'], \PDO::PARAM_INT);
-            $stmt->bindParam(3, $data['pIdCategoria'], \PDO::PARAM_INT);
-            $stmt->bindParam(4, $data['pIdEstado'], \PDO::PARAM_INT);
+            $stmt->bindParam(1, $pCodigo, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(2, $pIdSucursal, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(3, $pIdCategoria, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(4, $pIdEstado, \PDO::PARAM_INT | \PDO::PARAM_NULL);
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
@@ -30,7 +32,6 @@ class GestionarActivos
         }
     }
 
-    //* FUNCION PARA REGISTRAR ACTIVOS CON PROCEDIMIENTOS ALMACENADOS
     public function registrarActivos($data)
     {
         try {
@@ -73,15 +74,11 @@ class GestionarActivos
             $stmt->bindParam(17, $data['UserMod'], \PDO::PARAM_STR);
             $stmt->execute();
             return true;
-
-
         } catch (\PDOException $e) {
             error_log("Error in registrarActivos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }
-
-    //* FUNCION PARA ACTUALIZAR ACTIVOS CON PROCEDIMIENTOS ALMACENADOS
 
     public function actualizarActivos($data)
     {
@@ -125,7 +122,6 @@ class GestionarActivos
             $stmt->bindParam(17, $data['UserMod'], \PDO::PARAM_STR);
             $stmt->execute();
             return true;
-            
         } catch (\PDOException $e) {
             error_log("Error in actualizarActivos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;

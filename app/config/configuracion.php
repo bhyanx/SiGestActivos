@@ -16,36 +16,21 @@ class Conectar
             $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $conexion;
         } catch (PDOException $e) {
-            error_log("Error de conexión: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            error_log("Error de conexión a bdActivos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }
 
-    public function ConexionBdPruebas(){
+    public function ConexionBdPruebas()
+    {
         try {
             $conectar = $this->dbh = new PDO("sqlsrv:Server=DESKTOP-5QKJ7QK;Database=SiGestActivos", "", "");
             return $conectar;
-        } catch (Exception $e){
-            echo "Error en cadena de conexión Conexion(): " . $e->getMessage();
+        } catch (Exception $e) {
+            echo "Error en cadena de conexión ConexionBdPruebas: " . $e->getMessage();
             die();
         }
     }
-
-    // protected function ConexionPhpMyadmin()
-    // {
-    //     try {
-    //         $conectarPHP = $this->dbh = new PDO("mysql:host=localhost;dbname=sis_tareo", 'root', '12345678');  // AMBIENTE QAQC
-    //         return $conectarPHP;
-    //     } catch (Exception $e) {
-    //         print "Error BD MYSQL: " . $e->getMessage() . "</br>";
-    //         die();
-    //     }
-    // }
-
-    // public function set_names()
-    // {
-    //     return $this->dbh->query("SET NAMES 'utf8'");
-    // }
 
     public static function ruta()
     {
@@ -63,5 +48,5 @@ date_default_timezone_set('America/Bogota');
 
 // Configuración de errores
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0); // Desactivado para evitar HTML en respuestas JSON
 ?>

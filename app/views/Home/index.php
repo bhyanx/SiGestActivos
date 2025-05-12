@@ -50,8 +50,8 @@ session_start();
                     <div class="col-md-6 col-lg-3 col-xl-2">
                         <div class="small-box bg-success shadow">
                             <div class="inner">
-                                <h3 id="lblcantdocumentosventas">0</h3>
-                                <p>Total Documentos de Ventas</p>
+                                <h3 id="lblcantidadactivos">0</h3>
+                                <p>Total Activos</p>
                             </div>
                             <div class="icon">
                                 <i class="fas fa-file-invoice-dollar"></i>
@@ -62,8 +62,8 @@ session_start();
                     <div class="col-md-6 col-lg-3 col-xl-2">
                         <div class="small-box bg-warning shadow">
                             <div class="inner">
-                                <h3 id="lblcantrequerimientos">0</h3>
-                                <p>Total Requerimientos</p>
+                                <h3 id="lblcantidadoperativos">0</h3>
+                                <p>Total Operativos</p>
                             </div>
                             <div class="icon">
                                 <i class="fas fa-file-alt"></i>
@@ -74,8 +74,8 @@ session_start();
                     <div class="col-md-6 col-lg-3 col-xl-2">
                         <div class="small-box bg-danger shadow">
                             <div class="inner">
-                                <h3 id="lblcantdocumentosventasxenviar">0</h3>
-                                <p>Pendientes de Envio</p>
+                                <h3 id="lblcantidadactivosmantenimiento">0</h3>
+                                <p>Total en Mantenimiento</p>
                             </div>
                             <div class="icon">
                                 <i class="far fa-bell"></i>
@@ -83,10 +83,23 @@ session_start();
                             <a href="#" class="small-box-footer">Más Detalles <i class="fas fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
+                    <div class="col-md-6 col-lg-3 col-xl-2">
+                        <div class="small-box bg-info shadow">
+                            <div class="inner">
+                                <h3 class="lblvalortotalactivos">0</h3>
+                                <p>Total valor de activos</p>
+                            </div>
+                            <div class="icon">
+                               <i class="far fa-bell"></i>
+                            </div>
+                            <a href="#" class="small-box-footer">Más Detalles <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-lg-12 col-xl-4 order-last">
-                        <div class="card bg-gradient-<?php // $_SESSION['TemaColor'] ?>">
+                        <div class="card bg-gradient-<?php // $_SESSION['TemaColor'] 
+                                                        ?>">
                             <div class="card-header border-0">
 
                                 <h3 class="card-title">
@@ -95,7 +108,8 @@ session_start();
                                 <!-- tools card -->
                                 <div class="card-tools">
                                     <!-- button with a dropdown -->
-                                    <button type="button" class="btn btn-<?php // $_SESSION['TemaColor'] ?> btn-sm" data-card-widget="collapse">
+                                    <button type="button" class="btn btn-<?php // $_SESSION['TemaColor'] 
+                                                                            ?> btn-sm" data-card-widget="collapse">
                                         <i class="fas fa-minus"></i>
                                     </button>
                                 </div>
@@ -124,13 +138,15 @@ session_start();
                                             <div class="col-md-4 col-lg-2">
                                                 <div class="form-group">
                                                     <label for="">Fecha Inicio:</label>
-                                                    <input type="date" name="" id="" class="form-control" value="<?php // date("Y-m-d") ?>">
+                                                    <input type="date" name="" id="" class="form-control" value="<?php // date("Y-m-d") 
+                                                                                                                    ?>">
                                                 </div>
                                             </div>
                                             <div class="col-md-4 col-lg-2">
                                                 <div class="form-group">
                                                     <label for="">Fecha Fin:</label>
-                                                    <input type="date" name="" id="" class="form-control" value="<?php // date("Y-m-d") ?>">
+                                                    <input type="date" name="" id="" class="form-control" value="<?php // date("Y-m-d") 
+                                                                                                                    ?>">
                                                 </div>
                                             </div>
                                             <div class="col-md-1 col-lg-1">
@@ -187,7 +203,7 @@ session_start();
     </div>
 
     <?php require_once "../Layouts/Footer.php"; ?>
-   
+
 </body>
 
 </html>

@@ -1,129 +1,43 @@
 USE [bdActivos]
 GO
-/****** Object:  Table [dbo].[tUsuarios]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tDetalleMovimiento]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[tUsuarios](
-	[CodUsuario] [nvarchar](15) NOT NULL,
-	[CodEmpleado] [nvarchar](15) NOT NULL,
-	[IdRol] [int] NOT NULL,
-	[ClaveAcceso] [nvarchar](10) NULL,
-	[UrlUltimaSession] [nvarchar](max) NULL,
-	[Activo] [bit] NOT NULL,
-	[UserUpdate] [varchar](50) NULL,
-	[FechaUpdate] [datetime] NULL,
- CONSTRAINT [PK_tUsuarios] PRIMARY KEY CLUSTERED 
+CREATE TABLE [dbo].[tDetalleMovimiento](
+	[IdDetalleMovimiento] [int] IDENTITY(1,1) NOT NULL,
+	[IdMovimiento] [int] NOT NULL,
+	[IdActivo] [int] NOT NULL,
+	[idAutorizador] [nvarchar](15) NULL,
+	[IdSucursal_Anterior] [int] NULL,
+	[IdSucursal_Nueva] [int] NULL,
+	[IdAmbiente_Anterior] [int] NULL,
+	[IdAmbiente_Nuevo] [int] NULL,
+	[IdResponsable_Anterior] [nvarchar](15) NULL,
+	[IdResponsable_Nuevo] [nvarchar](15) NULL,
+	[IdActivoPadre_Anterior] [int] NULL,
+	[IdActivoPadre_Nuevo] [int] NULL,
+ CONSTRAINT [PK__tDetalle__CF20C8D22A29AB8E] PRIMARY KEY CLUSTERED 
 (
-	[CodUsuario] ASC
+	[IdDetalleMovimiento] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+) ON [PRIMARY]
 GO
-/****** Object:  View [dbo].[vAccesoLogin]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vEmpleados]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE VIEW [dbo].[vAccesoLogin]
+CREATE VIEW [dbo].[vEmpleados]
 AS
-SELECT  u.CodUsuario,u.CodEmpleado,u.ClaveAcceso,u.IdRol,
-		c.ApellidoPaterno,c.ApellidoMaterno,c.PrimerNombre,c.SegundoNombre,c.NombreTrabajador,
-		c.CorreoPersonal,c.FechaNacimiento,c.CodGenero,c.DescripGenero, c.Celular,c.DescripcionTT,
-		c.Foto,c.Firma,U.UrlUltimaSession
-FROM tUsuarios u
-INNER JOIN bdRecursosHumanos.dbo.vcontratos c on u.CodEmpleado = c.codTrabajador
-where 
---u.CodUsuario =  AND 
---u.ClaveAcceso = ? AND
-u.Activo = '1' AND
-c.EstadoActual not in ('ve','fi');
+SELECT        FechaRegistro, codTrabajador, AbreviaturaTDI, NroDocumento, ApellidoPaterno, ApellidoMaterno, PrimerNombre, SegundoNombre, NombreTrabajador, Direccion, Foto, Firma, Cv, Clave, Celular, CorreoPersonal, CodGenero, 
+                         DescripGenero, FechaNacimiento, Estado, UserUpdate, FechaUpdate, TipoSangre, DescripEC, codPais, codSunatPais, NombrePais, codDpto, CodDptoSunat, NombreDpto, codProv, codProvSunat, NombreProvincia, CodDistrito, 
+                         codDistSunat, NombreDistrito, CodTipoVia, CodTipoViaSunat, DescripcionTipoVia, NombreVia, NroVia, CodZona, codZRSunat, DescripcionZR, NombreZona, CodTipoDireccion, DescripcionTD, Referencia, CodNacionalidad, 
+                         DescripcionNac, CodTipoDocIdentidad
+FROM            bdRecursosHumanos.dbo.vtrabajador
 GO
-/****** Object:  Table [dbo].[tMenu]    Script Date: 7/05/2025 11:08:11 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[tMenu](
-	[CodMenu] [int] IDENTITY(1,1) NOT NULL,
-	[NombreMenu] [nvarchar](250) NOT NULL,
-	[MenuRuta] [nvarchar](250) NOT NULL,
-	[MenuIdentificador] [nvarchar](150) NOT NULL,
-	[MenuIcono] [nvarchar](50) NOT NULL,
-	[MenuGrupo] [nvarchar](100) NOT NULL,
-	[MenuGrupoIcono] [nvarchar](50) NOT NULL,
-	[Estado] [bit] NOT NULL,
-	[UserUpdate] [nvarchar](15) NULL,
-	[FechaUpdate] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[CodMenu] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[tPermisos]    Script Date: 7/05/2025 11:08:11 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[tPermisos](
-	[CodPermiso] [int] IDENTITY(1,1) NOT NULL,
-	[CodMenu] [int] NOT NULL,
-	[IdRol] [int] NOT NULL,
-	[Permiso] [bit] NOT NULL,
-	[UserUpdate] [nvarchar](15) NULL,
-	[FechaUpdate] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[CodPermiso] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  View [dbo].[vMenuGrupo]    Script Date: 7/05/2025 11:08:11 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[vMenuGrupo] AS 
-SELECT DISTINCT MenuGrupo, MenuGrupoIcono, tpermisos.Permiso, tPermisos.IdRol FROM tMenu
-    inner join tPermisos on tmenu.CodMenu = tpermisos.CodMenu
-    where tpermisos.Permiso = '1'
-GO
-/****** Object:  Table [dbo].[tRoles]    Script Date: 7/05/2025 11:08:11 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[tRoles](
-	[IdRol] [int] IDENTITY(1,1) NOT NULL,
-	[NombreRol] [nvarchar](100) NOT NULL,
-	[Estado] [bit] NOT NULL,
-	[UserUpdate] [nvarchar](15) NULL,
-	[FechaUpdate] [datetime] NULL,
- CONSTRAINT [PK_tRoles] PRIMARY KEY CLUSTERED 
-(
-	[IdRol] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY],
- CONSTRAINT [UQ_tRoles_Nombre] UNIQUE NONCLUSTERED 
-(
-	[NombreRol] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  View [dbo].[vMenuRol]    Script Date: 7/05/2025 11:08:11 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[vMenuRol] AS
-SELECT  tpermisos.CodPermiso, tpermisos.CodMenu, tpermisos.IdRol, tpermisos.Permiso, tmenu.NombreMenu, tmenu.MenuRuta,
-		tmenu.MenuIdentificador, tmenu.MenuIcono, tmenu.MenuGrupo, tmenu.MenuGrupoIcono, tmenu.Estado as EstadoMenu, tRoles.NombreRol 
-FROM tPermisos
-inner join tMenu on tpermisos.CodMenu = tmenu.CodMenu
-inner join tRoles on tpermisos.IdRol = tRoles.IdRol
-where tpermisos.Permiso = '1' and tmenu.Estado = '1' 
-GO
-/****** Object:  View [dbo].[vEntidadExternaGeneralProveedor]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vEntidadExternaGeneralProveedor]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -139,7 +53,7 @@ SELECT  Id, RazonSocial, codTipo, DescTipoEntExt,TipoDoc,
 		ReqCompSinIGV, EstRegDoc, EsEmpresaTransportePublico
  FROM bdGestionLubriseng.dbo.vEntidadExternaGeneral 
 GO
-/****** Object:  View [dbo].[vListadoDeArticulosPorDocIngresoAlmacen]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vListadoDeArticulosPorDocIngresoAlmacen]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -201,7 +115,7 @@ WHERE
     AND (ga.idLineaProd = 11)
     AND (YEAR(ia.FechaIngreso) = YEAR(GETDATE()));
 GO
-/****** Object:  Table [dbo].[tEstadoActivo]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tEstadoActivo]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -221,7 +135,7 @@ CREATE TABLE [dbo].[tEstadoActivo](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  View [dbo].[vArticulos]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vArticulos]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -239,7 +153,7 @@ INNER JOIN bdGestionLubriseng.dbo.tUnidad_Medida um ON codUMBase = um.CodUM
 INNER JOIN bdGestionLubriseng.dbo.tTipoExistencia te ON ar.IdTipoExistencia = te.idTipoExistencia
 WHERE (mar.ParaArticulos = '1')
 GO
-/****** Object:  Table [dbo].[tCategoriasActivo]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tCategoriasActivo]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -263,7 +177,7 @@ CREATE TABLE [dbo].[tCategoriasActivo](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tSucursales]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tSucursales]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -282,7 +196,7 @@ CREATE TABLE [dbo].[tSucursales](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tAmbiente]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tAmbiente]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -302,7 +216,7 @@ CREATE TABLE [dbo].[tAmbiente](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tActivos]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tActivos]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -340,65 +254,211 @@ CREATE TABLE [dbo].[tActivos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  View [dbo].[vActivos]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vActivos]    Script Date: 12/05/2025 09:55:52 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vActivos]
+AS
+SELECT        a.idActivo, a.codigo AS CodigoActivo, a.serie AS NumeroSerie, a.idDocIngresoAlm AS DocIngresoAlmacen, a.idArticulo, art.Descripcion_articulo AS NombreArticulo, art.DescripcionMarca AS MarcaArticulo, a.idEstado, 
+                         ea.nombre AS Estado, a.enUso, a.idSucursal, s.nombre AS Sucursal, a.idAmbiente, amb.nombre AS Ambiente, a.idCategoria, cat.nombre AS Categoria, a.vidaUtil, di.NombreMoneda, ISNULL(di.PrecioUMBaseIGV, 0) 
+                         AS PrecioBase, ISNULL(CASE WHEN di.NombreMoneda = 'Dólares' THEN di.PrecioUMBaseIGV * 3.64 WHEN di.NombreMoneda = 'Soles' THEN di.PrecioUMBaseIGV ELSE 0 END, 0) AS valorSoles, a.fechaAdquisicion, 
+                         a.garantia, a.fechaFinGarantia, ISNULL(p.RazonSocial, 'Sin proveedor') AS Proveedor, a.observaciones, a.fechaRegistro
+FROM            dbo.tActivos AS a LEFT OUTER JOIN
+                         dbo.vListadoDeArticulosPorDocIngresoAlmacen AS di ON a.idDocIngresoAlm = di.idDocIngAlmacen AND a.idArticulo = di.idarticulo LEFT OUTER JOIN
+                         dbo.tEstadoActivo AS ea ON a.idEstado = ea.idEstadoActivo LEFT OUTER JOIN
+                         dbo.vArticulos AS art ON a.idArticulo = art.idarticulo LEFT OUTER JOIN
+                         dbo.tSucursales AS s ON a.idSucursal = s.cod_UnidadNeg LEFT OUTER JOIN
+                         dbo.tAmbiente AS amb ON a.idAmbiente = amb.idAmbiente LEFT OUTER JOIN
+                         dbo.tCategoriasActivo AS cat ON a.idCategoria = cat.idCategoria LEFT OUTER JOIN
+                         dbo.vEntidadExternaGeneralProveedor AS p ON a.idProveedor = p.Id
+GO
+/****** Object:  View [dbo].[vDetalleMovimiento]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE   VIEW [dbo].[vActivos]
-AS
+CREATE   VIEW [dbo].[vDetalleMovimiento] AS
+
 SELECT 
-    a.idActivo,
-    a.codigo AS CodigoActivo,
-    a.serie AS NumeroSerie,
-    a.idDocIngresoAlm AS DocIngresoAlmacen,
-    a.idArticulo,
-    art.Descripcion_articulo AS NombreArticulo,
-    art.DescripcionMarca AS MarcaArticulo,
-    a.idEstado,
-    ea.nombre AS Estado,
-    a.enUso,
-    a.idSucursal,
-    s.nombre AS Sucursal,
-    a.idAmbiente,
-    amb.nombre AS Ambiente,
-    a.idCategoria,
-    cat.nombre AS Categoria,
-    a.vidaUtil,
-    di.NombreMoneda,
-    ISNULL(di.PrecioUMBaseIGV, 0) AS PrecioBase,
-    ISNULL(
-        CASE 
-            WHEN di.NombreMoneda = 'Dólares' THEN di.PrecioUMBaseIGV * 3.64
-            WHEN di.NombreMoneda = 'Soles' THEN di.PrecioUMBaseIGV
-            ELSE 0 
-        END, 
-        0
-    ) AS valorSoles,
-    a.fechaAdquisicion,
-    a.garantia,
-    a.fechaFinGarantia,
-    ISNULL(p.RazonSocial, 'Sin proveedor') AS Proveedor,
-    a.observaciones,
-    a.fechaRegistro
-FROM dbo.tActivos AS a
-LEFT OUTER JOIN dbo.vListadoDeArticulosPorDocIngresoAlmacen AS di 
-    ON a.idDocIngresoAlm = di.idDocIngAlmacen AND a.idArticulo = di.idarticulo
-LEFT OUTER JOIN dbo.tEstadoActivo AS ea 
-    ON a.idEstado = ea.idEstadoActivo
-LEFT OUTER JOIN dbo.vArticulos AS art 
-    ON a.idArticulo = art.idarticulo
-LEFT OUTER JOIN dbo.tSucursales AS s 
-    ON a.idSucursal = s.cod_UnidadNeg
-LEFT OUTER JOIN dbo.tAmbiente AS amb 
-    ON a.idAmbiente = amb.idAmbiente
-LEFT OUTER JOIN dbo.tCategoriasActivo AS cat 
-    ON a.idCategoria = cat.idCategoria
-LEFT OUTER JOIN dbo.vEntidadExternaGeneralProveedor AS p 
-    ON a.idProveedor = p.Id;
+    dm.IdDetalleMovimiento,
+    dm.IdActivo,
+    a.NombreArticulo,
+    
+    dm.IdSucursal_Anterior,
+    sa.Nombre AS SucursalAnterior,
+    dm.IdSucursal_Nueva,
+    sn.Nombre AS SucursalNueva,
+    
+    dm.IdAmbiente_Anterior,
+    aa.Nombre AS AmbienteAnterior,
+    dm.IdAmbiente_Nuevo,
+    an.Nombre AS AmbienteNuevo,
+    
+    dm.IdResponsable_Anterior,
+    ra.NombreTrabajador AS ResponsableAnterior,
+    dm.IdResponsable_Nuevo,
+    rn.NombreTrabajador AS ResponsableNuevo,
+    
+    dm.IdActivoPadre_Anterior
+FROM tDetalleMovimiento dm
+INNER JOIN vActivos a ON a.IdActivo = dm.IdActivo
+LEFT JOIN tSucursales sa ON sa.cod_UnidadNeg = dm.IdSucursal_Anterior
+LEFT JOIN tSucursales sn ON sn.cod_UnidadNeg = dm.IdSucursal_Nueva
+LEFT JOIN tAmbiente aa ON aa.IdAmbiente = dm.IdAmbiente_Anterior
+LEFT JOIN tAmbiente an ON an.IdAmbiente = dm.IdAmbiente_Nuevo
+LEFT JOIN vEmpleados ra ON ra.codTrabajador = dm.IdResponsable_Anterior
+LEFT JOIN vEmpleados rn ON rn.codTrabajador = dm.IdResponsable_Nuevo
 GO
-/****** Object:  View [dbo].[vActivosEnUso]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vAmbientes]    Script Date: 12/05/2025 09:55:52 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE   VIEW [dbo].[vAmbientes] AS
+SELECT am.nombre, am.descripcion, s.nombre AS NombreSucursal, am.estado
+FROM tAmbiente am
+INNER JOIN tSucursales s ON s.cod_UnidadNeg = am.idSucursal
+WHERE am.estado = 1;
+GO
+/****** Object:  Table [dbo].[tRoles]    Script Date: 12/05/2025 09:55:52 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tRoles](
+	[IdRol] [int] IDENTITY(1,1) NOT NULL,
+	[NombreRol] [nvarchar](100) NOT NULL,
+	[Estado] [bit] NOT NULL,
+	[UserUpdate] [nvarchar](15) NULL,
+	[FechaUpdate] [datetime] NULL,
+ CONSTRAINT [PK_tRoles] PRIMARY KEY CLUSTERED 
+(
+	[IdRol] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY],
+ CONSTRAINT [UQ_tRoles_Nombre] UNIQUE NONCLUSTERED 
+(
+	[NombreRol] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tUsuarios]    Script Date: 12/05/2025 09:55:52 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tUsuarios](
+	[CodUsuario] [nvarchar](15) NOT NULL,
+	[CodEmpleado] [nvarchar](15) NOT NULL,
+	[IdRol] [int] NOT NULL,
+	[ClaveAcceso] [nvarchar](10) NULL,
+	[UrlUltimaSession] [nvarchar](max) NULL,
+	[Activo] [bit] NOT NULL,
+	[UserUpdate] [varchar](50) NULL,
+	[FechaUpdate] [datetime] NULL,
+ CONSTRAINT [PK_tUsuarios] PRIMARY KEY CLUSTERED 
+(
+	[CodUsuario] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vUsuarios]    Script Date: 12/05/2025 09:55:52 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vUsuarios]
+AS
+SELECT        u.CodUsuario, e.NombreTrabajador, dbo.tRoles.IdRol, dbo.tRoles.NombreRol, u.Activo
+FROM            dbo.tUsuarios AS u INNER JOIN
+                         dbo.vEmpleados AS e ON u.CodUsuario = e.codTrabajador INNER JOIN
+                         dbo.tRoles ON u.IdRol = dbo.tRoles.IdRol AND u.IdRol = dbo.tRoles.IdRol
+GO
+/****** Object:  View [dbo].[vAccesoLogin]    Script Date: 12/05/2025 09:55:52 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vAccesoLogin]
+AS
+SELECT  u.CodUsuario,u.CodEmpleado,u.ClaveAcceso,u.IdRol,
+		c.ApellidoPaterno,c.ApellidoMaterno,c.PrimerNombre,c.SegundoNombre,c.NombreTrabajador,
+		c.CorreoPersonal,c.FechaNacimiento,c.CodGenero,c.DescripGenero, c.Celular,c.DescripcionTT,
+		c.Foto,c.Firma,U.UrlUltimaSession
+FROM tUsuarios u
+INNER JOIN bdRecursosHumanos.dbo.vcontratos c on u.CodEmpleado = c.codTrabajador
+where 
+--u.CodUsuario =  AND 
+--u.ClaveAcceso = ? AND
+u.Activo = '1' AND
+c.EstadoActual not in ('ve','fi');
+GO
+/****** Object:  Table [dbo].[tMenu]    Script Date: 12/05/2025 09:55:52 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tMenu](
+	[CodMenu] [int] IDENTITY(1,1) NOT NULL,
+	[NombreMenu] [nvarchar](250) NOT NULL,
+	[MenuRuta] [nvarchar](250) NOT NULL,
+	[MenuIdentificador] [nvarchar](150) NOT NULL,
+	[MenuIcono] [nvarchar](50) NOT NULL,
+	[MenuGrupo] [nvarchar](100) NOT NULL,
+	[MenuGrupoIcono] [nvarchar](50) NOT NULL,
+	[Estado] [bit] NOT NULL,
+	[UserUpdate] [nvarchar](15) NULL,
+	[FechaUpdate] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[CodMenu] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tPermisos]    Script Date: 12/05/2025 09:55:52 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tPermisos](
+	[CodPermiso] [int] IDENTITY(1,1) NOT NULL,
+	[CodMenu] [int] NOT NULL,
+	[IdRol] [int] NOT NULL,
+	[Permiso] [bit] NOT NULL,
+	[UserUpdate] [nvarchar](15) NULL,
+	[FechaUpdate] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[CodPermiso] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vMenuGrupo]    Script Date: 12/05/2025 09:55:52 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vMenuGrupo] AS 
+SELECT DISTINCT MenuGrupo, MenuGrupoIcono, tpermisos.Permiso, tPermisos.IdRol FROM tMenu
+    inner join tPermisos on tmenu.CodMenu = tpermisos.CodMenu
+    where tpermisos.Permiso = '1'
+GO
+/****** Object:  View [dbo].[vMenuRol]    Script Date: 12/05/2025 09:55:52 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vMenuRol] AS
+SELECT  tpermisos.CodPermiso, tpermisos.CodMenu, tpermisos.IdRol, tpermisos.Permiso, tmenu.NombreMenu, tmenu.MenuRuta,
+		tmenu.MenuIdentificador, tmenu.MenuIcono, tmenu.MenuGrupo, tmenu.MenuGrupoIcono, tmenu.Estado as EstadoMenu, tRoles.NombreRol 
+FROM tPermisos
+inner join tMenu on tpermisos.CodMenu = tmenu.CodMenu
+inner join tRoles on tpermisos.IdRol = tRoles.IdRol
+where tpermisos.Permiso = '1' and tmenu.Estado = '1' 
+GO
+/****** Object:  View [dbo].[vActivosEnUso]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -425,7 +485,7 @@ SELECT
 FROM dbo.vActivos AS a
 WHERE a.enUso = 1;
 GO
-/****** Object:  View [dbo].[vActivosBaja]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vActivosBaja]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -448,7 +508,7 @@ SELECT
 FROM dbo.vActivos AS a
 WHERE a.idEstado = 3;
 GO
-/****** Object:  View [dbo].[vCantidadActivosPorSucursal]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vCantidadActivosPorSucursal]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -465,7 +525,7 @@ INNER JOIN dbo.tSucursales AS s
     ON a.idSucursal = s.cod_UnidadNeg
 GROUP BY s.cod_UnidadNeg, s.nombre;
 GO
-/****** Object:  Table [dbo].[tMovimientos]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tMovimientos]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -484,20 +544,7 @@ CREATE TABLE [dbo].[tMovimientos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  View [dbo].[vEmpleados]    Script Date: 7/05/2025 11:08:11 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[vEmpleados]
-AS
-SELECT        FechaRegistro, codTrabajador, AbreviaturaTDI, NroDocumento, ApellidoPaterno, ApellidoMaterno, PrimerNombre, SegundoNombre, NombreTrabajador, Direccion, Foto, Firma, Cv, Clave, Celular, CorreoPersonal, CodGenero, 
-                         DescripGenero, FechaNacimiento, Estado, UserUpdate, FechaUpdate, TipoSangre, DescripEC, codPais, codSunatPais, NombrePais, codDpto, CodDptoSunat, NombreDpto, codProv, codProvSunat, NombreProvincia, CodDistrito, 
-                         codDistSunat, NombreDistrito, CodTipoVia, CodTipoViaSunat, DescripcionTipoVia, NombreVia, NroVia, CodZona, codZRSunat, DescripcionZR, NombreZona, CodTipoDireccion, DescripcionTD, Referencia, CodNacionalidad, 
-                         DescripcionNac, CodTipoDocIdentidad
-FROM            bdRecursosHumanos.dbo.vtrabajador
-GO
-/****** Object:  View [dbo].[vCantidadActivosBajaPorResponsable]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vCantidadActivosBajaPorResponsable]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -517,7 +564,7 @@ LEFT OUTER JOIN dbo.vEmpleados AS e
 WHERE a.idEstado = 3
 GROUP BY m.idResponsableNuevo, m.idResponsableAnterior, e.NombreTrabajador;
 GO
-/****** Object:  View [dbo].[vDashboardResumenActivos]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vDashboardResumenActivos]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -537,7 +584,7 @@ INNER JOIN dbo.tSucursales AS s
     ON a.idSucursal = s.cod_UnidadNeg
 GROUP BY s.cod_UnidadNeg, s.nombre;
 GO
-/****** Object:  View [dbo].[vDashboardActivosPorCategoria]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vDashboardActivosPorCategoria]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -554,31 +601,7 @@ INNER JOIN dbo.tCategoriasActivo AS c
     ON a.idCategoria = c.idCategoria
 GROUP BY c.idCategoria, c.nombre;
 GO
-/****** Object:  Table [dbo].[tDetalleMovimiento]    Script Date: 7/05/2025 11:08:11 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[tDetalleMovimiento](
-	[IdDetalleMovimiento] [int] IDENTITY(1,1) NOT NULL,
-	[IdMovimiento] [int] NOT NULL,
-	[IdActivo] [int] NOT NULL,
-	[idAutorizador] [nvarchar](15) NULL,
-	[IdSucursal_Anterior] [int] NULL,
-	[IdSucursal_Nueva] [int] NULL,
-	[IdAmbiente_Anterior] [int] NULL,
-	[IdAmbiente_Nuevo] [int] NULL,
-	[IdResponsable_Anterior] [nvarchar](15) NULL,
-	[IdResponsable_Nuevo] [nvarchar](15) NULL,
-	[IdActivoPadre_Anterior] [int] NULL,
-	[IdActivoPadre_Nuevo] [int] NULL,
- CONSTRAINT [PK__tDetalle__CF20C8D22A29AB8E] PRIMARY KEY CLUSTERED 
-(
-	[IdDetalleMovimiento] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  View [dbo].[vDashboardMovimientosRecientes]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vDashboardMovimientosRecientes]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -602,7 +625,7 @@ INNER JOIN dbo.tSucursales sd ON m.idSucursalDestino = sd.cod_UnidadNeg
 WHERE m.FechaMovimiento >= DATEADD(DAY, -30, GETDATE())
 ORDER BY m.FechaMovimiento DESC;
 GO
-/****** Object:  View [dbo].[vActivosPorProveedor]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vActivosPorProveedor]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -620,7 +643,7 @@ INNER JOIN dbo.vEntidadExternaGeneralProveedor AS p
     ON a.Proveedor = p.Id
 GROUP BY p.Id, p.RazonSocial;
 GO
-/****** Object:  Table [dbo].[tDepreciacion]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tDepreciacion]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -641,7 +664,7 @@ CREATE TABLE [dbo].[tDepreciacion](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  View [dbo].[vDepreciacionAcumuladaPorCategoria]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vDepreciacionAcumuladaPorCategoria]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -661,7 +684,7 @@ INNER JOIN dbo.tDepreciacion AS d
     ON a.idActivo = d.idActivo
 GROUP BY c.idCategoria, c.nombre;
 GO
-/****** Object:  View [dbo].[vActivosPorResponsable]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vActivosPorResponsable]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -680,7 +703,7 @@ LEFT OUTER JOIN dbo.vEmpleados AS e
     ON e.codTrabajador = COALESCE(m.idResponsableNuevo, m.idResponsableAnterior)
 GROUP BY m.idResponsableNuevo, m.idResponsableAnterior, e.NombreTrabajador;
 GO
-/****** Object:  Table [dbo].[tDocumentoAdjunto]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tDocumentoAdjunto]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -698,7 +721,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  View [dbo].[vDocumentosPorActivo]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vDocumentosPorActivo]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -717,7 +740,7 @@ FROM dbo.vActivos AS a
 INNER JOIN dbo.tDocumentoAdjunto AS d 
     ON d.idReferencia = a.idActivo AND d.tipoReferencia = 'Activo';
 GO
-/****** Object:  View [dbo].[vMenusPorUsuario]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vMenusPorUsuario]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -731,7 +754,7 @@ INNER JOIN tPermisos p ON r.IdRol = p.IdRol
 INNER JOIN tMenu m ON p.CodMenu = m.CodMenu
 WHERE p.Permiso = 1 AND m.Estado = 1;
 GO
-/****** Object:  View [dbo].[vHistorialMovimientosPorActivo]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vHistorialMovimientosPorActivo]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -761,7 +784,7 @@ LEFT JOIN tAmbiente ad ON m.idAmbienteDestino = ad.idAmbiente
 LEFT JOIN tSucursales so ON ao.idSucursal = so.cod_UnidadNeg
 LEFT JOIN tSucursales sd ON ad.idSucursal = sd.cod_UnidadNeg;
 GO
-/****** Object:  View [dbo].[vContratos]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vContratos]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -769,7 +792,7 @@ GO
 CREATE VIEW [dbo].[vContratos] AS
 SELECT * FROM bdRecursosHumanos.dbo.vcontratos
 GO
-/****** Object:  View [dbo].[vEmpresas]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vEmpresas]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -779,7 +802,7 @@ AS
 SELECT   cod_empresa, Razon_empresa, Direccion_empresa, Ruc_empresa, fono_empresa, idEntExterna, AbreEmpresa, EmisionElectronica, correofacturacion
 FROM         bdGestionLubriseng.dbo.vEmpresas AS vEmpresas_1
 GO
-/****** Object:  View [dbo].[vUnidadesEmpresa]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vUnidadesEmpresa]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -790,7 +813,7 @@ SELECT   cod_empresa, Razon_empresa, Direccion_empresa, Ruc_empresa, fono_empres
                          estadoFuncionamiento, Pais, NombreDptoRegion, NombreProvincia, NombreDistrito, CodUbigeoSunat, idLocacionEntExterna, idEntExterna, CodUnidadNegocioSUNAT
 FROM         bdGestionLubriseng.dbo.vUnidadesEmpresa AS vUnidadesEmpresa_1
 GO
-/****** Object:  View [dbo].[vZonasGeograficas]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  View [dbo].[vZonasGeograficas]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -801,7 +824,7 @@ SELECT   CodUbigeo, Pais, NombreDptoRegion, NombreProvincia, NombreDistrito, Loc
                          codDptoRegion
 FROM         bdGestionLubriseng.dbo.vZonasGeograficas AS vZonasGeograficas_1
 GO
-/****** Object:  Table [dbo].[tComponenteActivo]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tComponenteActivo]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -822,7 +845,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tCondicionActivo]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tCondicionActivo]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -841,7 +864,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tEstadoMovimientoActivo]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tEstadoMovimientoActivo]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -860,7 +883,7 @@ CREATE TABLE [dbo].[tEstadoMovimientoActivo](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tLogAuditoria]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tLogAuditoria]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -879,7 +902,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tMantenimientos]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tMantenimientos]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -903,7 +926,7 @@ CREATE TABLE [dbo].[tMantenimientos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tProveedor]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tProveedor]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -929,7 +952,7 @@ CREATE TABLE [dbo].[tProveedor](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tTipoMovimiento]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  Table [dbo].[tTipoMovimiento]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1211,7 +1234,7 @@ ALTER TABLE [dbo].[tMantenimientos]  WITH CHECK ADD  CONSTRAINT [CK__tMantenim__
 GO
 ALTER TABLE [dbo].[tMantenimientos] CHECK CONSTRAINT [CK__tMantenim__tipoM__0F6D37F0]
 GO
-/****** Object:  StoredProcedure [dbo].[sp_BackupBDActivos]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_BackupBDActivos]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1233,7 +1256,7 @@ Begin
 	with FOrmat
 end
 GO
-/****** Object:  StoredProcedure [dbo].[sp_ConsultarActivos]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_ConsultarActivos]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1247,7 +1270,7 @@ CREATE PROCEDURE [dbo].[sp_ConsultarActivos]
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT a.*, s.nombre AS Sucursal, c.nombre AS Categoria, e.nombre AS Estado
+    SELECT a.*
     FROM vActivos a
     INNER JOIN tSucursales s ON a.idSucursal = s.cod_UnidadNeg
     INNER JOIN tCategoriasActivo c ON a.idCategoria = c.idCategoria
@@ -1258,7 +1281,7 @@ BEGIN
       AND (@pIdEstado IS NULL OR a.idEstado = @pIdEstado);
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_GenerarGuiaRemision]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_GenerarGuiaRemision]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1293,7 +1316,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_GestionActivos]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_GestionActivos]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1569,7 +1592,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_GestionDepreciacion]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_GestionDepreciacion]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1652,7 +1675,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_GestionEstadoActivo]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_GestionEstadoActivo]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1724,7 +1747,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_GestionEstadoMovimientoActivo]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_GestionEstadoMovimientoActivo]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1792,7 +1815,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_GestionFichaMovimiento]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_GestionFichaMovimiento]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1898,7 +1921,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_GestionMovimientos]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_GestionMovimientos]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2068,7 +2091,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_GestionPermisos]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_GestionPermisos]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2114,7 +2137,7 @@ BEGIN
     END
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_GestionRoles]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_GestionRoles]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2201,7 +2224,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_GestionTipoMovimiento]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_GestionTipoMovimiento]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2269,7 +2292,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_GestionUsuarios]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_GestionUsuarios]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2358,7 +2381,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_GuardarActivo]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_GuardarActivo]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2541,7 +2564,7 @@ BEGIN
     END CATCH;
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_InfromacionDashboard]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_InfromacionDashboard]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2560,7 +2583,7 @@ BEGIN
         (SELECT COUNT(*) FROM dbo.tMovimientos WHERE fechaMovimiento >= DATEADD(DAY, -30, GETDATE())) AS MovimientosRecientes;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[sp_InsertActivo]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_InsertActivo]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2613,7 +2636,7 @@ BEGIN
     VALUES (@userMod, 'INSERT', 'tActivos', @idActivo, GETDATE(), 'Nuevo activo creado: ' + @Codigo);
 END
 GO
-/****** Object:  StoredProcedure [dbo].[sp_InsertLogAuditoria]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_InsertLogAuditoria]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2632,7 +2655,7 @@ BEGIN
     VALUES (@usuario, @accion, @tabla, @idRegistro, GETDATE(), @detalle);
 END
 GO
-/****** Object:  StoredProcedure [dbo].[sp_ListadoDashboard]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_ListadoDashboard]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2667,7 +2690,7 @@ END;
 
 
 GO
-/****** Object:  StoredProcedure [dbo].[sp_ListadoEmpleados]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_ListadoEmpleados]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2803,7 +2826,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_ListadoEmpresas]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_ListadoEmpresas]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2829,7 +2852,7 @@ begin
 	commit tran Acc01
 end
 GO
-/****** Object:  StoredProcedure [dbo].[sp_ListadoUnidadesEmpresa]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_ListadoUnidadesEmpresa]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2867,7 +2890,7 @@ begin
 
 end
 GO
-/****** Object:  StoredProcedure [dbo].[sp_RegistrarActivos]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_RegistrarActivos]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2921,7 +2944,7 @@ BEGIN
     VALUES (@userMod, 'INSERT', 'tActivos', @idActivo, GETDATE(), 'Nuevo activo creado: ' + @Codigo);
 END
 GO
-/****** Object:  StoredProcedure [dbo].[sp_RegistrarDepreciacion]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_RegistrarDepreciacion]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2975,7 +2998,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_RegistrarDetalleMovimiento]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_RegistrarDetalleMovimiento]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3032,7 +3055,7 @@ BEGIN
     WHERE IdActivo = @IdActivo;
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_RegistrarMovimiento]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_RegistrarMovimiento]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3129,7 +3152,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_ReporteMovimientos]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_ReporteMovimientos]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3160,7 +3183,7 @@ BEGIN
       AND (@pIdResponsable IS NULL OR m.idResponsableNuevo = @pIdResponsable);
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[sp_ValidarUsuario]    Script Date: 7/05/2025 11:08:11 ******/
+/****** Object:  StoredProcedure [dbo].[sp_ValidarUsuario]    Script Date: 12/05/2025 09:55:52 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3202,6 +3225,201 @@ BEGIN
         THROW;
     END CATCH
 END;
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPane1', @value=N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
+Begin DesignProperties = 
+   Begin PaneConfigurations = 
+      Begin PaneConfiguration = 0
+         NumPanes = 4
+         Configuration = "(H (1[40] 4[20] 2[20] 3) )"
+      End
+      Begin PaneConfiguration = 1
+         NumPanes = 3
+         Configuration = "(H (1 [50] 4 [25] 3))"
+      End
+      Begin PaneConfiguration = 2
+         NumPanes = 3
+         Configuration = "(H (1 [50] 2 [25] 3))"
+      End
+      Begin PaneConfiguration = 3
+         NumPanes = 3
+         Configuration = "(H (4 [30] 2 [40] 3))"
+      End
+      Begin PaneConfiguration = 4
+         NumPanes = 2
+         Configuration = "(H (1 [56] 3))"
+      End
+      Begin PaneConfiguration = 5
+         NumPanes = 2
+         Configuration = "(H (2 [66] 3))"
+      End
+      Begin PaneConfiguration = 6
+         NumPanes = 2
+         Configuration = "(H (4 [50] 3))"
+      End
+      Begin PaneConfiguration = 7
+         NumPanes = 1
+         Configuration = "(V (3))"
+      End
+      Begin PaneConfiguration = 8
+         NumPanes = 3
+         Configuration = "(H (1[56] 4[18] 2) )"
+      End
+      Begin PaneConfiguration = 9
+         NumPanes = 2
+         Configuration = "(H (1 [75] 4))"
+      End
+      Begin PaneConfiguration = 10
+         NumPanes = 2
+         Configuration = "(H (1[66] 2) )"
+      End
+      Begin PaneConfiguration = 11
+         NumPanes = 2
+         Configuration = "(H (4 [60] 2))"
+      End
+      Begin PaneConfiguration = 12
+         NumPanes = 1
+         Configuration = "(H (1) )"
+      End
+      Begin PaneConfiguration = 13
+         NumPanes = 1
+         Configuration = "(V (4))"
+      End
+      Begin PaneConfiguration = 14
+         NumPanes = 1
+         Configuration = "(V (2))"
+      End
+      ActivePaneConfig = 0
+   End
+   Begin DiagramPane = 
+      Begin Origin = 
+         Top = 0
+         Left = 0
+      End
+      Begin Tables = 
+         Begin Table = "a"
+            Begin Extent = 
+               Top = 6
+               Left = 38
+               Bottom = 136
+               Right = 246
+            End
+            DisplayFlags = 280
+            TopColumn = 10
+         End
+         Begin Table = "di"
+            Begin Extent = 
+               Top = 138
+               Left = 38
+               Bottom = 268
+               Right = 290
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "ea"
+            Begin Extent = 
+               Top = 270
+               Left = 38
+               Bottom = 400
+               Right = 246
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "art"
+            Begin Extent = 
+               Top = 402
+               Left = 38
+               Bottom = 532
+               Right = 252
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "s"
+            Begin Extent = 
+               Top = 534
+               Left = 38
+               Bottom = 664
+               Right = 246
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "amb"
+            Begin Extent = 
+               Top = 666
+               Left = 38
+               Bottom = 796
+               Right = 246
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "cat"
+            Begin Extent = 
+               Top = 798
+               Left = 38
+               Bottom = 928
+               Right = 246
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+       ' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vActivos'
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPane2', @value=N'  End
+         Begin Table = "p"
+            Begin Extent = 
+               Top = 930
+               Left = 38
+               Bottom = 1060
+               Right = 279
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+      End
+   End
+   Begin SQLPane = 
+   End
+   Begin DataPane = 
+      Begin ParameterDefaults = ""
+      End
+      Begin ColumnWidths = 10
+         Width = 284
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+      End
+   End
+   Begin CriteriaPane = 
+      Begin ColumnWidths = 11
+         Column = 1440
+         Alias = 900
+         Table = 1170
+         Output = 720
+         Append = 1400
+         NewValue = 1170
+         SortType = 1350
+         SortOrder = 1410
+         GroupBy = 1350
+         Filter = 1350
+         Or = 1350
+         Or = 1350
+         Or = 1350
+      End
+   End
+End
+' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vActivos'
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPaneCount', @value=2 , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vActivos'
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPane1', @value=N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
 Begin DesignProperties = 
@@ -3716,6 +3934,148 @@ End
 ' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vUnidadesEmpresa'
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPaneCount', @value=1 , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vUnidadesEmpresa'
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPane1', @value=N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
+Begin DesignProperties = 
+   Begin PaneConfigurations = 
+      Begin PaneConfiguration = 0
+         NumPanes = 4
+         Configuration = "(H (1[40] 4[20] 2[20] 3) )"
+      End
+      Begin PaneConfiguration = 1
+         NumPanes = 3
+         Configuration = "(H (1 [50] 4 [25] 3))"
+      End
+      Begin PaneConfiguration = 2
+         NumPanes = 3
+         Configuration = "(H (1 [50] 2 [25] 3))"
+      End
+      Begin PaneConfiguration = 3
+         NumPanes = 3
+         Configuration = "(H (4 [30] 2 [40] 3))"
+      End
+      Begin PaneConfiguration = 4
+         NumPanes = 2
+         Configuration = "(H (1 [56] 3))"
+      End
+      Begin PaneConfiguration = 5
+         NumPanes = 2
+         Configuration = "(H (2 [66] 3))"
+      End
+      Begin PaneConfiguration = 6
+         NumPanes = 2
+         Configuration = "(H (4 [50] 3))"
+      End
+      Begin PaneConfiguration = 7
+         NumPanes = 1
+         Configuration = "(V (3))"
+      End
+      Begin PaneConfiguration = 8
+         NumPanes = 3
+         Configuration = "(H (1[56] 4[18] 2) )"
+      End
+      Begin PaneConfiguration = 9
+         NumPanes = 2
+         Configuration = "(H (1 [75] 4))"
+      End
+      Begin PaneConfiguration = 10
+         NumPanes = 2
+         Configuration = "(H (1[66] 2) )"
+      End
+      Begin PaneConfiguration = 11
+         NumPanes = 2
+         Configuration = "(H (4 [60] 2))"
+      End
+      Begin PaneConfiguration = 12
+         NumPanes = 1
+         Configuration = "(H (1) )"
+      End
+      Begin PaneConfiguration = 13
+         NumPanes = 1
+         Configuration = "(V (4))"
+      End
+      Begin PaneConfiguration = 14
+         NumPanes = 1
+         Configuration = "(V (2))"
+      End
+      ActivePaneConfig = 0
+   End
+   Begin DiagramPane = 
+      Begin Origin = 
+         Top = 0
+         Left = 0
+      End
+      Begin Tables = 
+         Begin Table = "u"
+            Begin Extent = 
+               Top = 6
+               Left = 38
+               Bottom = 229
+               Right = 246
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "e"
+            Begin Extent = 
+               Top = 6
+               Left = 288
+               Bottom = 301
+               Right = 496
+            End
+            DisplayFlags = 280
+            TopColumn = 7
+         End
+         Begin Table = "tRoles"
+            Begin Extent = 
+               Top = 244
+               Left = 51
+               Bottom = 416
+               Right = 259
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+      End
+   End
+   Begin SQLPane = 
+   End
+   Begin DataPane = 
+      Begin ParameterDefaults = ""
+      End
+      Begin ColumnWidths = 9
+         Width = 284
+         Width = 1500
+         Width = 3150
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+         Width = 1500
+      End
+   End
+   Begin CriteriaPane = 
+      Begin ColumnWidths = 11
+         Column = 1440
+         Alias = 900
+         Table = 1170
+         Output = 720
+         Append = 1400
+         NewValue = 1170
+         SortType = 1350
+         SortOrder = 1410
+         GroupBy = 1350
+         Filter = 1350
+         Or = 1350
+         Or = 1350
+         Or = 1350
+      End
+   End
+End
+' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vUsuarios'
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPaneCount', @value=1 , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vUsuarios'
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPane1', @value=N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
 Begin DesignProperties = 
