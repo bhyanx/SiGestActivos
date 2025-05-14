@@ -8,7 +8,8 @@ if(!isset($_SESSION["IdRol"])){
 <html lang="en">
 
 <head>
-    <?php require_once '../Layouts/Header.php' ?>
+    <?php //require_once '../Layouts/Header.php' ?>
+    <link href="https://cdn.jsdelivr.net/npm/mdb-ui-kit@9.0.0/css/mdb.min.css" rel="stylesheet" />
     <title>Login | Sistema Activos</title>
 </head>
 <style>
