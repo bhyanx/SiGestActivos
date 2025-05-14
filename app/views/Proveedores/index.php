@@ -1,6 +1,7 @@
 <?php
-ob_start();
+
 session_start();
+
 ?>
 
 <!DOCTYPE html>
@@ -9,10 +10,10 @@ session_start();
 <head>
     <?php require_once("../Layouts/Header.php") ?>
 
-    <title>Document</title>
+    <title>Proveedores - Sistema Gestion de Activos</title>
 </head>
 
-<body>
+<body class="sidebar-mini control-sidebar-slide-open layout-navbar-fixed layout-fixed sidebar-mini-xs sidebar-mini-md sidebar-collapse">
     <div class="wrapper">
         <?php require_once("../Layouts/Head-Body.php"); ?>
         <?php require_once("../Layouts/SideBar.php"); ?>
@@ -22,7 +23,7 @@ session_start();
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1> Proveedores </h1>
+                            <h1>Administración de Proveedores</h1>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">

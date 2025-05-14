@@ -49,13 +49,41 @@ if (!$tienePermiso) {
 
 
 <!-- Navbar -->
-<nav class="main-header navbar navbar-expand border-bottom-0" style="background-color: #28a745 !important;">   <!-- SI EL COLOR NO SE LEE BIEN, USAR CLASES -->
+<nav class="main-header navbar navbar-expand border-bottom-0" style="background-color: #28a745 !important;"> <!-- SI EL COLOR NO SE LEE BIEN, USAR CLASES -->
     <!-- Left navbar links -->
+
     <ul class="navbar-nav">
         <li class="nav-item">
             <a class="nav-link text-light" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
     </ul>
+
+    <div class="user-panel d-flex">
+        <div class="image">
+            <i class="fa fa-user fa-lg text-light" style="padding-left: 7px"></i>
+        </div>
+        <div class="info">
+            <span class="d-block text-light text-sm">
+                <?php
+                if (isset($_SESSION["NombreTrabajador"]) && !empty($_SESSION["NombreTrabajador"])) {
+                    echo $_SESSION["NombreTrabajador"];
+                } else if (isset($_SESSION["PrimerNombre"]) && isset($_SESSION["ApellidoPaterno"])) {
+                    $nombre = $_SESSION["PrimerNombre"];
+                    if (!empty($_SESSION["SegundoNombre"])) {
+                        $nombre .= " " . $_SESSION["SegundoNombre"];
+                    }
+                    $nombre .= " " . $_SESSION["ApellidoPaterno"];
+                    if (!empty($_SESSION["ApellidoMaterno"])) {
+                        $nombre .= " " . $_SESSION["ApellidoMaterno"];
+                    }
+                    echo $nombre;
+                } else {
+                    echo $_SESSION["CodUsuario"];
+                }
+                ?>
+            </span>
+        </div>
+    </div>
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">

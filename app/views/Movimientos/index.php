@@ -1,6 +1,10 @@
 <?php
 session_start();
 
+// ? VISTA PARA GESTIONAR LOS MOVIMIENTOS DE LOS ACTIVOS
+
+//! FALTA FUNCIONAMIENTO Y PONER CAMPOS REFERENCIALES A LOS MOVIMIENTOS A NUESTRA VISTA
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -10,7 +14,7 @@ session_start();
     <title>Movimientos - Sistema Gestion de activos</title>
 </head>
 
-<body class="sidebar-mini control-sidebar-slide-open layout-navbar-ficed sidebar-mini-xs sidebar-mini-md sidebar-collapse">
+<body class="sidebar-mini control-sidebar-slide-open layout-navbar-fixed layout-fixed sidebar-mini-xs sidebar-mini-md sidebar-collapse">
     <div class="wrapper">
         <?php require_once("../Layouts/Head-Body.php"); ?>
         <?php require_once("../Layouts/SideBar.php"); ?>
@@ -81,7 +85,7 @@ session_start();
             </section>
         </div>
         <?php require_once("../Layouts/Footer.php"); ?>
-        <script src="activos.js"></script>
+        <script src="movimientos.js"></script>
     </div>
 </body>
 
