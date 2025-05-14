@@ -2,13 +2,15 @@
 session_start();
 // require_once("../../config/configuracion.php");
 // if (isset($_SESSION["CodEmpleado"])) {
- ?>
+?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <?php require_once("../Layouts/Header.php"); ?>
     <title>Activos - Sistema Gestion de activos</title>
 </head>
+
 <body class="sidebar-mini control-sidebar-slide-open layout-navbar-fixed layout-fixed sidebar-mini-xs sidebar-mini-md sidebar-collapse">
     <div class="wrapper">
         <?php require_once("../Layouts/Head-Body.php"); ?>
@@ -210,6 +212,7 @@ session_start();
         <script src="activos.js"></script>
     </div>
 </body>
+
 </html>
 <?php
 // } else {

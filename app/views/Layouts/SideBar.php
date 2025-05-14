@@ -34,7 +34,7 @@ function isCurrentRoute($menuRuta) {
                 <i class="fa fa-user fa-lg text-light" style="padding-left: 7px"></i>
             </div>
             <div class="info">
-                <span class="d-block text-light text-sm"></span>
+                <span class="d-block text-light text-sm">
                     <?php 
                     if (isset($_SESSION["NombreTrabajador"]) && !empty($_SESSION["NombreTrabajador"])) {
                         echo $_SESSION["NombreTrabajador"];
@@ -84,7 +84,7 @@ function isCurrentRoute($menuRuta) {
                             foreach ($datapermisos as $permiso) {                            
                                 if ($menugrupo['MenuGrupo'] == $permiso['MenuGrupo'] && $permiso['Permiso'] == 1) {
                                     $isActive = isCurrentRoute($permiso['MenuRuta']);
-                                    echo '<li class="nav-item">
+                                    echo '<li class="nav-item ml-1">
                                             <a href="'.$permiso['MenuRuta'].'" class="nav-link'.($isActive ? ' active' : '').'" id="'.$permiso['MenuIdentificador'].'">
                                                 <i class="fas '.$permiso['MenuIcono'].' nav-icon"></i>
                                                 <p>'.$permiso['NombreMenu'].'</p>

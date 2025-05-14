@@ -52,7 +52,7 @@ switch ($action) {
                     'UserMod' => $_SESSION['CodEmpleado']
                 ];
                 $activos->registrarActivos($data);
-                echo json_encode(['status' => true, 'message' => 'Activo registrado con éxito.']);
+                echo json_encode(array('status' => true, 'message' => 'Activo registrado con Exito.'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
             } catch (Exception $e) {
                 error_log("Error Registrar: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
                 echo json_encode(['status' => false, 'message' => 'Error al registrar activo: ' . $e->getMessage()]);
@@ -101,7 +101,7 @@ switch ($action) {
             ];
             $resultados = $activos->consultarActivos($filtros);
             $activo = array_filter($resultados, function ($item) {
-                return $item['IdActivo'] == $_POST['IdActivo'];
+                return $item['idActivo'] == $_POST['idActivo'];
             });
             $activo = array_values($activo)[0] ?? null;
             error_log("Get Activo: " . print_r($activo, true), 3, __DIR__ . '/../../logs/debug.log');

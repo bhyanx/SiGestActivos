@@ -49,24 +49,24 @@ if (!$tienePermiso) {
 
 
 <!-- Navbar -->
-<nav class="main-header navbar navbar-expand navbar-dark border-bottom-0">
+<nav class="main-header navbar navbar-expand border-bottom-0" style="background-color: #28a745 !important;">   <!-- SI EL COLOR NO SE LEE BIEN, USAR CLASES -->
     <!-- Left navbar links -->
     <ul class="navbar-nav">
         <li class="nav-item">
-            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+            <a class="nav-link text-light" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
     </ul>
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
         <!-- Notifications Dropdown Menu -->
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown text-light">
         <li class="nav-item">
-            <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+            <a class="nav-link text-light" data-widget="fullscreen" href="#" role="button">
                 <i class="fas fa-expand-arrows-alt"></i>
             </a>
         </li>
-        <a class="nav-link" data-toggle="dropdown" href="#">
+        <a class="nav-link text-light" data-toggle="dropdown" href="#">
             <i class="fas fa-user-cog"></i>
             <!-- <span class="badge badge-warning navbar-badge">15</span> -->
         </a>

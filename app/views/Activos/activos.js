@@ -37,7 +37,7 @@ function ListarCombos() {
 
                 $("#IdDocIngresoAlm, #IdArticulo, #IdEstado, #IdProveedor, #IdSucursal, #IdAmbiente, #IdCategoria").select2({
                     theme: "bootstrap4",
-                    dropdownParent: $("#ModalMantenimiento"),
+                    dropdownParent: $("#ModalMantenimiento .modal-content"),
                 });
             } else {
                 Swal.fire('Mantenimiento Activos', 'No se pudieron cargar los combos: ' + res.message, 'warning');
@@ -165,17 +165,17 @@ function guardaryeditar(e) {
     e.preventDefault();
     var frmmantenimiento = new FormData($("#frmmantenimiento")[0]);
     frmmantenimiento.append('UserMod', '<?php echo $_SESSION["CodEmpleado"]; ?>');
-    frmmantenimiento.append('action', $("#IdActivo").val() == '0' ? 'Registrar' : 'Actualizar');
+    frmmantenimiento.append('action', $("#idActivo").val() == '0' ? 'Registrar' : 'Actualizar');
 
     $.ajax({
-        url: '../../controllers/GestionarActivosController.php',
+        url: '../../controllers/GestionarActivosController.php?action=Registrar',
         type: 'POST',
         data: frmmantenimiento,
         contentType: false,
         processData: false,
         success: (res) => {
             console.log('Guardar response:', res);
-            res = JSON.parse(res);
+            res = JSON.parse(JSON.stringify(res));
             if (res.status) {
                 $("#frmmantenimiento")[0].reset();
                 $("#tblregistros").DataTable().ajax.reload();
@@ -192,38 +192,39 @@ function guardaryeditar(e) {
     });
 }
 
-function editar(event, IdActivo) {
+
+function editar(event, idActivo) {
     event.preventDefault();
     $("#tituloModalMantenimiento").html('<i class="fa fa-edit"></i> Editar Activo');
     $.ajax({
         url: '../../controllers/GestionarActivosController.php?action=get_activo',
         type: 'POST',
-        data: { IdActivo: IdActivo },
+        data: { idActivo: idActivo },
         dataType: 'json',
         success: (res) => {
             console.log('Editar response:', res);
             if (res.status) {
                 let data = res.data;
-                $("#IdActivo").val(data.idActivo); // Cambiar a data.IdActivo si es necesario
-                $("#IdDocIngresoAlm").val(data.IdDocIngresoAlm).trigger('change');
+                $("#idActivo").val(data.idActivo); // Cambiar a data.IdActivo si es necesario
+                $("#IdDocIngresoAlm").val(data.IdDocIngresoAlm);
                 if (data.IdDocIngresoAlm) {
                     cargarArticulosPorDocIngreso(data.IdDocIngresoAlm, () => {
-                        $("#IdArticulo").val(data.IdArticulo).trigger('change');
+                        $("#IdArticulo").val(data.IdArticulo);
                     });
                 }
                 $("#Codigo").val(data.CodigoActivo); // Cambiar a data.Codigo si es necesario
                 $("#Serie").val(data.NumeroSerie); // Cambiar a data.Serie si es necesario
-                $("#IdEstado").val(data.idEstado).trigger('change'); // Cambiar a data.IdEstado
-                $("#Garantia").val(data.garantia); // Cambiar a data.Garantia
-                $("#FechaFinGarantia").val(data.fechaFinGarantia); // Cambiar a data.FechaFinGarantia
+                $("#IdEstado").val(data.IdEstado).trigger('change'); // Cambiar a data.IdEstado
+                $("#Garantia").val(data.Garantia); // Cambiar a data.Garantia
+                $("#FechaFinGarantia").val(data.FechaFinGarantia); // Cambiar a data.FechaFinGarantia
                 $("#IdProveedor").val(data.IdProveedor).trigger('change');
-                $("#Observaciones").val(data.observaciones); // Cambiar a data.Observaciones
-                $("#IdSucursal").val(data.idSucursal).trigger('change'); // Cambiar a data.IdSucursal
-                $("#IdAmbiente").val(data.idAmbiente).trigger('change'); // Cambiar a data.IdAmbiente
-                $("#IdCategoria").val(data.idCategoria).trigger('change'); // Cambiar a data.IdCategoria
-                $("#VidaUtil").val(data.vidaUtil); // Cambiar a data.VidaUtil
-                $("#ValorAdquisicion").val(data.valorSoles); // Cambiar a data.ValorAdquisicion
-                $("#FechaAdquisicion").val(data.fechaAdquisicion); // Cambiar a data.FechaAdquisicion
+                $("#Observaciones").val(data.Observaciones); // Cambiar a data.Observaciones
+                $("#IdSucursal").val(data.IdSucursal).trigger('change'); // Cambiar a data.IdSucursal
+                $("#IdAmbiente").val(data.IdAmbiente).trigger('change'); // Cambiar a data.IdAmbiente
+                $("#IdCategoria").val(data.IdCategoria).trigger('change'); // Cambiar a data.IdCategoria
+                $("#VidaUtil").val(data.VidaUtil); // Cambiar a data.VidaUtil
+                $("#ValorAdquisicion").val(data.ValorSoles); // Cambiar a data.ValorAdquisicion
+                $("#FechaAdquisicion").val(data.FechaAdquisicion); // Cambiar a data.FechaAdquisicion
                 $("#ModalMantenimiento").modal('show');
             } else {
                 Swal.fire('Mantenimiento Activos', 'No se pudo obtener el activo: ' + res.message, 'warning');
