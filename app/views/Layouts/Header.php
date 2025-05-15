@@ -43,3 +43,7 @@ ob_start();
 <link href="/public/plugins/dropzone/dropzone.css" rel="stylesheet" type="text/css" />
 <link href="/public/plugins/fancybox/dist/fancybox/fancybox.css" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="/public/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css" />
+
+<link rel="stylesheet" href="/public/plugins/select2/css/select2.min.css">
+
+<link rel="stylesheet" href="/public/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">

@@ -21,23 +21,23 @@ $(document).ready(() => {
 
 function ListarCombos() {
     $.ajax({
-        url: '../../controllers/GestionarActivosController.php?action=combos', // Ruta corregida
+        url: '../../controllers/GestionarActivosController.php?action=combos',
         type: 'POST',
         dataType: 'json',
         success: (res) => {
             console.log('Combos response:', res);
             if (res.status) {
-                $("#IdDocIngresoAlm").html(res.data.docIngresoAlm);
-                $("#IdEstado").html(res.data.estados);
-                $("#IdProveedor").html(res.data.proveedores);
-                $("#IdSucursal").html(res.data.sucursales);
-                $("#IdAmbiente").html(res.data.ambientes);
-                $("#IdCategoria").html(res.data.categorias);
+                $("#IdDocIngresoAlm").html(res.data.docIngresoAlm).trigger('change');
+                $("#IdEstado").html(res.data.estados).trigger('change');
+                $("#IdProveedor").html(res.data.proveedores).trigger('change');
+                $("#IdSucursal").html(res.data.sucursales).trigger('change');
+                $("#IdAmbiente").html(res.data.ambientes).trigger('change');
+                $("#IdCategoria").html(res.data.categorias).trigger('change');
                 $("#IdArticulo").html('<option value="">Seleccione un documento primero</option>');
-
                 $("#IdDocIngresoAlm, #IdArticulo, #IdEstado, #IdProveedor, #IdSucursal, #IdAmbiente, #IdCategoria").select2({
                     theme: "bootstrap4",
                     dropdownParent: $("#ModalMantenimiento .modal-content"),
+                    width: "100%"
                 });
             } else {
                 Swal.fire('Mantenimiento Activos', 'No se pudieron cargar los combos: ' + res.message, 'warning');
@@ -50,27 +50,27 @@ function ListarCombos() {
     });
 }
 
-function cargarArticulosPorDocIngreso(IdDocIngresoAlm) {
-    $.ajax({
-        url: '../../controllers/GestionarActivosController.php?action=articulos_por_doc',
-        type: 'POST',
-        data: { IdDocIngresoAlm: IdDocIngresoAlm },
-        dataType: 'json',
-        success: (res) => {
-            console.log('Artículos response:', res);
-            if (res.status) {
-                $("#IdArticulo").html(res.data.articulos).trigger('change');
-            } else {
-                $("#IdArticulo").html('<option value="">No hay artículos disponibles</option>').trigger('change');
-                Swal.fire('Mantenimiento Activos', res.message, 'warning');
-            }
-        },
-        error: (xhr, status, error) => {
-            console.log('Error en artículos:', xhr.responseText, status, error);
-            Swal.fire('Mantenimiento Activos', 'Error al cargar artículos: ' + error, 'error');
-        }
-    });
-}
+// function cargarArticulosPorDocIngreso(IdDocIngresoAlm) {
+//     $.ajax({
+//         url: '../../controllers/GestionarActivosController.php?action=articulos_por_doc',
+//         type: 'POST',
+//         data: { IdDocIngresoAlm: IdDocIngresoAlm },
+//         dataType: 'json',
+//         success: (res) => {
+//             console.log('Artículos response:', res);
+//             if (res.status) {
+//                 $("#IdArticulo").html(res.data.articulos).trigger('change');
+//             } else {
+//                 $("#IdArticulo").html('<option value="">No hay artículos disponibles</option>').trigger('change');
+//                 Swal.fire('Mantenimiento Activos', res.message, 'warning');
+//             }
+//         },
+//         error: (xhr, status, error) => {
+//             console.log('Error en artículos:', xhr.responseText, status, error);
+//             Swal.fire('Mantenimiento Activos', 'Error al cargar artículos: ' + error, 'error');
+//         }
+//     });
+// }
 
 function Listar() {
     tabla = $("#tblregistros").dataTable({
@@ -237,17 +237,17 @@ function editar(event, idActivo) {
     });
 }
 
-function cargarArticulosPorDocIngreso(IdDocIngresoAlm, callback) {
+function cargarArticulosPorDocIngreso(IdDocIngresoAlm, callback = null) {
     $.ajax({
         url: '../../controllers/GestionarActivosController.php?action=articulos_por_doc',
         type: 'POST',
-        data: { IdDocIngresoAlm: IdDocIngresoAlm },
+        data: { IdDocIngresoAlm },
         dataType: 'json',
         success: (res) => {
             console.log('Artículos response:', res);
             if (res.status) {
                 $("#IdArticulo").html(res.data.articulos).trigger('change');
-                if (callback) callback();
+                if (typeof callback === 'function') callback();
             } else {
                 $("#IdArticulo").html('<option value="">No hay artículos disponibles</option>').trigger('change');
                 Swal.fire('Mantenimiento Activos', res.message, 'warning');
@@ -259,5 +259,37 @@ function cargarArticulosPorDocIngreso(IdDocIngresoAlm, callback) {
         }
     });
 }
+
+// function ListarCombos() {
+//     $.ajax({
+//         url: '../../controllers/GestionarActivosController.php?action=combos',
+//         type: 'POST',
+//         dataType: 'json',
+//         success: (res) => {
+//             console.log('Combos response:', res);
+//             if (res.status) {
+//                 $("#IdDocIngresoAlm").html(res.data.docIngresoAlm).trigger('change');
+//                 $("#IdEstado").html(res.data.estados).trigger('change');
+//                 $("#IdProveedor").html(res.data.proveedores).trigger('change');
+//                 $("#IdSucursal").html(res.data.sucursales).trigger('change');
+//                 $("#IdAmbiente").html(res.data.ambientes).trigger('change');
+//                 $("#IdCategoria").html(res.data.categorias).trigger('change');
+//                 $("#IdArticulo").html('<option value="">Seleccione un documento primero</option>');
+
+//                 $("#IdDocIngresoAlm, #IdArticulo, #IdEstado, #IdProveedor, #IdSucursal, #IdAmbiente, #IdCategoria").select2({
+//                     theme: "bootstrap4",
+//                     dropdownParent: $("#ModalMantenimiento .modal-content"),
+//                 });
+//             } else {
+//                 Swal.fire('Mantenimiento Activos', 'No se pudieron cargar los combos: ' + res.message, 'warning');
+//             }
+//         },
+//         error: (xhr, status, error) => {
+//             console.log('Error en combos:', xhr.responseText, status, error);
+//             Swal.fire('Mantenimiento Activos', 'Error al cargar combos: ' + error, 'error');
+//         }
+//     });
+// }
+
 
 init();

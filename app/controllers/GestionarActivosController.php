@@ -2,8 +2,10 @@
 session_start();
 require_once '../config/configuracion.php';
 require_once '../models/GestionarActivos.php';
+require_once '../models/Combos.php';
 
 $activos = new GestionarActivos();
+$combo = new Combos();
 $action = $_GET['action'] ?? $_POST['action'] ?? 'Consultar';
 
 // Desactivar display_errors para evitar HTML en respuestas JSON
@@ -115,49 +117,74 @@ switch ($action) {
     case 'combos':
         try {
             $db = (new Conectar())->ConexionBdPracticante(); // Usar bdActivos
-            $combos = [];
 
             // Documentos de ingreso al almacén
             $stmt = $db->query("SELECT idDocIngAlmacen AS IdDocIngresoAlm FROM vListadoDeArticulosPorDocIngresoAlmacen GROUP BY idDocIngAlmacen");
             $combos['docIngresoAlm'] = '<option value="">Seleccione</option>';
             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $combos['docIngresoAlm'] .= "<option value='{$row['IdDocIngresoAlm']}'></option>";
+                $combos['docIngresoAlm'] .= "<option value='{$row['IdDocIngresoAlm']}'>{$row['IdDocIngresoAlm']}</option>";
             }
 
             // Estados
-            $stmt = $db->query("SELECT IdEstadoActivo, Nombre FROM tEstadoActivo ORDER BY Nombre");
+            $estados = $combo->comboEstadoActivo();
             $combos['estados'] = '<option value="">Seleccione</option>';
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $combos['estados'] .= "<option value='{$row['IdEstadoActivo']}'>{$row['Nombre']}</option>";
+            foreach ($estados as $row) {
+                $combos['estados'] .= "<option value='{$row['idEstadoActivo']}'>{$row['nombre']}</option>";
             }
-
+            
             // Proveedores
-            $stmt = $db->query("SELECT IdProveedor, Nombre FROM tProveedor ORDER BY Nombre");
+            $proveedores = $combo->comboProveedor();
             $combos['proveedores'] = '<option value="">Seleccione</option>';
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $combos['proveedores'] .= "<option value='{$row['IdProveedor']}'>{$row['Nombre']}</option>";
+            foreach ($proveedores as $row) {
+                $combos['proveedores'] .= "<option value='{$row['Documento']}'>{$row['RazonSocial']}</option>";
             }
 
             // Sucursales
-            $stmt = $db->query("SELECT cod_UnidadNeg, Nombre FROM tSucursales ORDER BY Nombre");
+            $sucursales = $combo->comboSucursal();
             $combos['sucursales'] = '<option value="">Seleccione</option>';
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $combos['sucursales'] .= "<option value='{$row['cod_UnidadNeg']}'>{$row['Nombre']}</option>";
+            foreach ($sucursales as $row) {
+                $combos['sucursales'] .= "<option value='{$row['cod_UnidadNeg']}'>{$row['nombre']}</option>";
             }
 
             // Ambientes
-            $stmt = $db->query("SELECT IdAmbiente, Nombre FROM tAmbiente ORDER BY Nombre");
+            $ambientes = $combo->comboAmbiente();
             $combos['ambientes'] = '<option value="">Seleccione</option>';
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $combos['ambientes'] .= "<option value='{$row['IdAmbiente']}'>{$row['Nombre']}</option>";
+            foreach ($ambientes as $row) {
+                $combos['ambientes'] .= "<option value='{$row['idAmbiente']}'>{$row['nombre']}</option>";
             }
 
             // Categorías
-            $stmt = $db->query("SELECT IdCategoria, Nombre FROM tCategoriasActivo ORDER BY Nombre");
+            $categorias = $combo->comboCategoria();
             $combos['categorias'] = '<option value="">Seleccione</option>';
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            foreach ($categorias as $row) {
                 $combos['categorias'] .= "<option value='{$row['IdCategoria']}'>{$row['Nombre']}</option>";
             }
+
+            // ANTERIOR MANEJO DE COMBOS
+            // $stmt = $db->query("SELECT IdAmbiente, Nombre FROM tAmbiente ORDER BY Nombre");
+            // $combos['ambientes'] = '<option value="">Seleccione</option>';
+            // foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            //     $combos['ambientes'] .= "<option value='{$row['IdAmbiente']}'>{$row['Nombre']}</option>";
+            // }
+
+            // $stmt = $db->query("SELECT IdEstadoActivo, Nombre FROM tEstadoActivo ORDER BY Nombre");
+            // $combos['estados'] = '<option value="">Seleccione</option>';
+            // foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            //     $combos['estados'] .= "<option value='{$row['IdEstadoActivo']}'>{$row['Nombre']}</option>";
+            // }
+
+            // $stmt = $db->query("SELECT IdCategoria, Nombre FROM tCategoriasActivo ORDER BY Nombre");
+            // $combos['categorias'] = '<option value="">Seleccione</option>';
+            // foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            //     $combos['categorias'] .= "<option value='{$row['IdCategoria']}'>{$row['Nombre']}</option>";
+            // }
+
+            // $stmt = $db->query("SELECT IdProveedor, Nombre FROM tProveedor ORDER BY Nombre");
+            // $combos['proveedores'] = '<option value="">Seleccione</option>';
+            // foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            //     $combos['proveedores'] .= "<option value='{$row['IdProveedor']}'>{$row['Nombre']}</option>";
+            // }
+
 
             error_log("Combos generados: " . print_r($combos, true), 3, __DIR__ . '/../../logs/debug.log');
             echo json_encode(['status' => true, 'data' => $combos, 'message' => 'Combos cargados correctamente.']);

@@ -30,7 +30,7 @@ session_start();
                             <ol class="breadcrumb float-sm-right">
                                 <li class="breadcrumb-item"><a href="#">Inicio</a></li>
                                 <li
-                                class="breadcrumb-item active">Movimientos</li>
+                                    class="breadcrumb-item active">Movimientos</li>
                             </ol>
                         </div>
                     </div>
@@ -44,7 +44,7 @@ session_start();
                             <div class="card">
                                 <div class="card-header">
                                     <h3 class="card-title"><i class="fa fa-list"></i>
-                                    Lista de activos
+                                        Lista de Movimientos Realizados
                                     </h3>
                                 </div>
                                 <div class="card-body">
@@ -53,24 +53,34 @@ session_start();
                                             <div class="row">
                                                 <div class="col-md-3 offset-md-9">
                                                     <div class="form-group">
-                                                        <button class="btn btn-primary btn-block" id="btnnuevo"><i class="fa fa-plus"></i> Nuevo</button>
+                                                        <button class="btn btn-primary btn-block" id="btnnuevo"><i class="fa fa-plus"></i> Crear Movimiento</button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="table-responsive">
-                                                <table id="tblregistros" class="table table-bordered table-striped">
+                                                <table id="tblMovimientos" class="table table-bordered table-striped">
                                                     <thead>
                                                         <tr>
                                                             <th><i class="fa fa-cogs"></i></th>
+                                                            <th>Id DetalleMovimiento</th>
                                                             <th>Id Activo</th>
-                                                            <th>Código</th>
-                                                            <th>Serie</th>
-                                                            <th>Articulo</th>
-                                                            <th>Sucursal</th>
+                                                            <!-- <th>Código</th>
+                                                            <th>Serie</th> -->
+                                                            <th>Nombre Activo</th>
+                                                            <th>Tipo Movimiento</th>
+                                                            <th>Sucursal Anterior</th>
+                                                            <th>Sucursal Nueva</th>
+                                                            <th>Ambiente Anterior</th>
+                                                            <th>Ambiente Nueva</th>
+                                                            <th>Autorizador</th>
+                                                            <th>Responsable Anterior</th>
+                                                            <th>Responsable Nueva</th>
+                                                            <th>Fecha Movimiento</th>
+                                                            <th>Responsable Origen</th>
+                                                            <th>Responsable Destino</th>
                                                             <th>Estado</th>
-                                                            <th>Valor Adquisicional</th>
                                                         </tr>
                                                     </thead>
                                                 </table>
@@ -81,11 +91,72 @@ session_start();
                             </div>
                         </div>
                     </div>
+                    <!-- Modal para Registrar/Editar Movimiento -->
+                    <div class="modal fade" id="ModalMovimiento" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <form id="frmMovimiento" name="frmMovimiento" method="POST">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title" id="tituloModalMovimiento"><i class="fa fa-plus-circle"></i> Nuevo Movimiento</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="hidden" name="idMovimiento" id="idMovimiento" value="0">
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="IdTipo">Tipo de Movimiento:</label>
+                                                    <select class="form-control select2" id="IdTipo" name="IdTipo" required></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="autorizador">Autorizador:</label>
+                                                    <select class="form-control select2" id="autorizador" name="autorizador" required></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="sucursal_origen">Sucursal Origen:</label>
+                                                    <select class="form-control select2" id="sucursal_origen" name="sucursal_origen" required></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="sucursal_destino">Sucursal Destino:</label>
+                                                    <select class="form-control select2" id="sucursal_destino" name="sucursal_destino" required></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label for="observacion">Observaciones:</label>
+                                                    <textarea class="form-control" id="observacion" name="observacion" rows="3"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Activos a Mover:</label><br>
+                                                    <select class="form-control select2" id="activos" name="activos[]" multiple="multiple" required></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Guardar</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
         <?php require_once("../Layouts/Footer.php"); ?>
-        <script src="movimientos.js"></script>
+        <script src="movimiento.js"></script>
     </div>
 </body>
 

@@ -107,13 +107,13 @@ session_start();
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="IdDocIngresoAlm">Doc. Ingreso Almacén:</label>
-                                                    <select name="IdDocIngresoAlm" id="IdDocIngresoAlm" class="form-control" required></select>
+                                                    <select name="IdDocIngresoAlm" id="IdDocIngresoAlm" class="form-control select-2" required></select>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="IdArticulo">Artículo:</label>
-                                                    <select name="IdArticulo" id="IdArticulo" class="form-control" required></select>
+                                                    <select name="IdArticulo" id="IdArticulo" class="form-select" required></select>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">

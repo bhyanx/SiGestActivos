@@ -29,14 +29,14 @@ function isCurrentRoute($menuRuta) {
     <!-- Sidebar -->
     <div class="sidebar">
         <!-- Sidebar user panel -->
-        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <!-- <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
                 <i class="fa fa-user fa-lg text-light" style="padding-left: 7px"></i>
             </div>
             <div class="info">
                 <span class="d-block text-light text-sm">
                     <?php 
-                    if (isset($_SESSION["NombreTrabajador"]) && !empty($_SESSION["NombreTrabajador"])) {
+                    /*if (isset($_SESSION["NombreTrabajador"]) && !empty($_SESSION["NombreTrabajador"])) {
                         echo $_SESSION["NombreTrabajador"];
                     } else if (isset($_SESSION["PrimerNombre"]) && isset($_SESSION["ApellidoPaterno"])) {
                         $nombre = $_SESSION["PrimerNombre"];
@@ -50,11 +50,11 @@ function isCurrentRoute($menuRuta) {
                         echo $nombre;
                     } else {
                         echo $_SESSION["CodUsuario"];
-                    }
+                    }*/
                     ?>
                 </span>
             </div>
-        </div>
+        </div> -->
 
         <!-- Sidebar Menu -->
         <nav class="mt-2">

@@ -2,13 +2,13 @@
 require_once '../config/configuracion.php';
 require_once '../models/RolModels.php';
 
-$objetoRol = new RolModels();
+$objetoRol = new Roles();
 $CodEmpleado = $_SESSION["CodEmpleado"];;
 $UserUpdate = $_SESSION["UserUpdate"];
 
 switch ($_GET['op']){
     case "combo":
-        $datos = $objetoRol->get_Rol();
+        $datos = $objetoRol->listarTodo();
         if (is_array($datos) AND count($datos)>0){
             $html = "<option value=''>Seleccione</option>";
             foreach ($datos as $row){
