@@ -66,11 +66,12 @@ session_start();
                                                     <thead>
                                                         <tr>
                                                             <th><i class="fa fa-cogs"></i></th>
-                                                            <th>Tabla de Usuarios</th>
-                                                            <th>Tabla de Usuarios</th>
-                                                            <th>Tabla de Usuarios</th>
-                                                            <th>Tabla de Usuarios</th>
-                                                            <th>Tabla de Usuarios</th>
+                                                            <th>DNI</th>
+                                                            <th>Nombres</th>
+                                                            <th>Apellidos</th>
+                                                            <th>Rol</th>
+                                                            <th>Clave</th>
+                                                            <th>Estado</th>
                                                         </tr>
                                                     </thead>
                                                 </table>

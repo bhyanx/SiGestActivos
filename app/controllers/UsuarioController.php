@@ -110,3 +110,13 @@ switch ($action) {
 }
 
 ?>
+
+
+
+USE [bdActivos]
+GO
+
+SELECT u.CodUsuario, e.PrimerNombre + ' ' + e.SegundoNombre AS Nombres,
+	   e.ApellidoPaterno + ' ' +e.ApellidoMaterno AS Apellidos
+FROM tUsuarios u
+INNER JOIN vEmpleados e ON u.CodUsuario = e.codTrabajador
