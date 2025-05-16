@@ -20,21 +20,21 @@ class Usuarios
             $stmt->bindParam(2, $ClaveAcceso);
             $stmt->execute();
             $resultado = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-            
+
             // Debug - Verificar datos retornados
             error_log("Datos retornados por login: " . print_r($resultado, true));
-            
+
             if (empty($resultado)) {
                 error_log("No se encontraron resultados para el usuario: " . $CodUsuario);
                 return false;
             }
-            
+
             // Verificar campos específicos
             $row = $resultado[0];
             error_log("NombreTrabajador: " . ($row['NombreTrabajador'] ?? 'no definido'));
             error_log("PrimerNombre: " . ($row['PrimerNombre'] ?? 'no definido'));
             error_log("ApellidoPaterno: " . ($row['ApellidoPaterno'] ?? 'no definido'));
-            
+
             return $resultado;
         } catch (\PDOException $e) {
             error_log("Error en login: " . $e->getMessage());
@@ -45,20 +45,22 @@ class Usuarios
     public function listarTodo()
     {
         try {
-            $stmt = $this->db->query('SELECT * FROM tUsuarios ORDER BY CodEmpleado');
+            $stmt = $this->db->query('SELECT CodUsuario, CodEmpleado, IdRol, ClaveAcceso,UrlUltimaSession, Activo, UserUpdate, FechaUpdate FROM tUsuarios ORDER BY CodEmpleado');
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            
         } catch (\PDOException $e) {
             error_log("Error in Usuarios::listarTodo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }
 
-    public function listarPorCodUsuario($IdCodUsuario){
+    public function listarPorCodUsuario($IdCodUsuario)
+    {
         try {
             $stmt = $this->db->prepare('SELECT * FROM tUsuarios WHERE CodUsuario = ?');
             $stmt->execute([$IdCodUsuario]);
             return $stmt->fetch(\PDO::FETCH_ASSOC);
-        }catch(\PDOException $e){
+        } catch (\PDOException $e) {
             error_log("Error in listarPorCodUsuario: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
@@ -149,8 +151,9 @@ class Usuarios
     }
 
     //* FUNCION PARA PODER OBTENER EL 
-    public function leerMenuGrupo($idRol){
-        try{
+    public function leerMenuGrupo($idRol)
+    {
+        try {
             $stmt = $this->db->prepare("SELECT DISTINCT m.MenuGrupo, m.MenuGrupoIcono 
                                         FROM tmenu m
                                         INNER JOIN tpermisos p ON m.CodMenu = p.CodMenu
@@ -158,12 +161,12 @@ class Usuarios
                                         ORDER BY m.MenuGrupo");
             $stmt->execute([$idRol]);
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        }catch(\PDOException $e){
+        } catch (\PDOException $e) {
             error_log("Error in leerMenuGrupo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }
-    
+
 
     //* FUNCION PARA PODER OBTENER EL ID DEL ROL DEL USUARIO QUE SE ENCUENTRA LOGUEADO
     public function leerMenuRol($idRol)
@@ -180,14 +183,14 @@ class Usuarios
                                        ORDER BY m.MenuGrupo, m.NombreMenu");
             $stmt->execute([$idRol]);
             $menus = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-            
+
             // Procesar las rutas
             foreach ($menus as &$menu) {
                 if (strpos($menu['MenuRuta'], '../') === 0) {
                     $menu['MenuRuta'] = '/app/views/' . substr($menu['MenuRuta'], 3);
                 }
             }
-            
+
             return $menus;
         } catch (\PDOException $e) {
             error_log("Error in leerMenuRol: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
