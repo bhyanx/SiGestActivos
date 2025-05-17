@@ -10,9 +10,9 @@ class Sucursales{
     }
 
     //* LISTAR TODO CON MI TABLA SUSUCURSALES
-    public function tlistarTodo(){
+    public function listarTodo(){
         try {
-            $stmt = $this->db->query('SELECT * FROM tSucursales ORDER BY nombre');
+            $stmt = $this->db->query('SELECT cod_UnidadNeg, nombre, direccion, estado FROM tSucursales');
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         }catch(\PDOException $e){
             error_log("Error in Sucursales::tlistarTodo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');

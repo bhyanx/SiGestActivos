@@ -6,6 +6,7 @@ require_once '../models/Combos.php';
 
 $activos = new GestionarActivos();
 $combo = new Combos();
+
 $action = $_GET['action'] ?? $_POST['action'] ?? 'Consultar';
 
 // Desactivar display_errors para evitar HTML en respuestas JSON

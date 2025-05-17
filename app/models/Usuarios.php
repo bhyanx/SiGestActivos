@@ -1,7 +1,5 @@
 <?php
 
-require_once(__DIR__ . "/../config/configuracion.php");
-
 class Usuarios
 {
     private $db;

@@ -1,9 +1,8 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-//require_once("../config/configuracion.php");
-require_once("../models/Usuarios.php");
+session_start();
+require_once '../config/configuracion.php';
+require_once '../models/Usuarios.php';
+require_once '../models/Combos.php';
 
 $usuario = new Usuarios();
 
