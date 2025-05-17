@@ -14,7 +14,7 @@ class Proveedores{
 
     public function listarTodo(){
         try{
-            $stmt = $this->db->query('SELECT * FROM vEntidadExternaGeneralProveedor ORDER BY Nombre');
+            $stmt = $this->db->query('SELECT Documento, RazonSocial, DescTipoEntExt FROM vEntidadExternaGeneralProveedor');
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         }catch(\PDOException $e){
             error_log("Error in Proveedores::listarTodo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');

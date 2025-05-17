@@ -71,20 +71,13 @@ session_start();
                                         </div>
                                         <div class="col-md-12" id="divtblarticulos">
                                             <div class="table-responsive">
-                                                <table id="tblrequerimientos" class="table table-bordered table-striped w-100">
+                                                <table id="tblProveedores" class="table table-bordered table-striped w-100">
                                                     <thead>
                                                         <tr>
                                                             <th><i class="fa fa-cogs" title="Acciones"></i></th>
-                                                            <th>#</th>
-                                                            <th>F. Registro</th>
-                                                            <th>Cod.</th>
-                                                            <th>Tipo</th>
-                                                            <th>Doc. Desp</th>
-                                                            <th>Empresa</th>
-                                                            <th>Und. Neg.</th>
-                                                            <th>Solicitante</th>
-                                                            <th>Observaciones</th>
-                                                            <th>Estado</th>
+                                                            <th>Nro. Documento</th>
+                                                            <th>Razon Social</th>
+                                                            <th>Tipo Entidad</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -92,16 +85,9 @@ session_start();
                                                     <tfoot>
                                                         <tr>
                                                             <th><i class="fa fa-cogs" title="Acciones"></i></th>
-                                                            <th>#</th>
-                                                            <th>F. Registro</th>
-                                                            <th>Cod.</th>
-                                                            <th>Tipo</th>
-                                                            <th>Doc. Desp</th>
-                                                            <th>Empresa</th>
-                                                            <th>Und. Neg.</th>
-                                                            <th>Solicitante</th>
-                                                            <th>Observaciones</th>
-                                                            <th>Estado</th>
+                                                            <th>Nro. Documento</th>
+                                                            <th>Razon Social</th>
+                                                            <th>Tipo Entidad</th>
                                                         </tr>
                                                     </tfoot>
                                                 </table>
@@ -119,6 +105,7 @@ session_start();
         </div> <!-- Cierre de content-wrapper -->
     </div> <!-- Cierre de wrapper -->
     <?php require_once "../Layouts/Footer.php"; ?>
+    <script src="proveedores.js"></script>
 
 </body>
 

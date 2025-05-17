@@ -19,16 +19,14 @@ switch ($action) {
             $data = $sucursal->listarTodo();
             error_log("LeerUsuarios resultados: " . print_r($data, true), 3, __DIR__ . '/../../logs/debug.log');
             echo json_encode($data ?: []);
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             error_log("Error Consultar: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             echo json_encode(['status' => false, 'message' => 'Error al consultar sucursales: ' . $e->getMessage()]);
         }
         break;
 
     default:
-        $result = array('status' => false, 'msg' => 'No se encontraron permisos para el usuario');
-        echo json_encode($result);
-        break;
+        echo json_encode(['status' => false, 'message' => 'Acción no válida.']);
 }
 
 
@@ -98,4 +96,4 @@ switch ($action) {
 // }
 
 
-// ?>
+// 

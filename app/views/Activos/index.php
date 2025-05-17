@@ -103,7 +103,7 @@ session_start();
                                 <form id="frmmantenimiento">
                                     <div class="modal-body">
                                         <div class="row">
-                                            <input type="hidden" name="IdActivo" id="IdActivo" value="0">
+                                            <input type="hidden" name="idActivo" id="dActivo" value="0">
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="IdDocIngresoAlm">Doc. Ingreso Almacén:</label>
@@ -209,6 +209,9 @@ session_start();
         </div>
 
         <?php require_once("../Layouts/Footer.php"); ?>
+        <script>
+            var userMod = "<?php echo isset($_SESSION['CodEmpleado']) ? $_SESSION['CodEmpleado'] : ''; ?>";
+        </script>
         <script src="activos.js"></script>
     </div>
 </body>

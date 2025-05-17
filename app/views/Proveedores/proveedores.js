@@ -1,11 +1,13 @@
 function init() {}
 
-$(document).ready(() => {
-  listarSucursales();
-});
 
-function listarSucursales() {
-  $("#tblSucursales").DataTable({
+//? INICIALIZAR MIS FUNCIONES
+$(document).ready(function () {
+    listarProveedores();
+})
+
+function listarProveedores() {
+  $("#tblProveedores").DataTable({
     dom: "Bfrtip",
     responsive: true,
     lengthChange: false,
@@ -14,7 +16,7 @@ function listarSucursales() {
     buttons: [
       {
         extend: "excelHtml5",
-        title: "Listado Sucursales",
+        title: "Listado Proveedores",
         text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
         autoFilter: true,
         sheetName: "Data",
@@ -25,14 +27,13 @@ function listarSucursales() {
       "pageLength",
     ],
     ajax: {
-      url: "../../controllers/SucursalesController.php?action=Listar",
+      url: "../../controllers/ProveedorController.php?action=ListarProveedores",
       type: "POST",
       dataType: "json",
       data: {
-        cod_UnidadNeg: "",
-        nombre: "",
-        direccion: "",
-        estado: "",
+        Documento: "",
+        RazonSocial: "",
+        DescTipoEntExt: "",
       },
       dataSrc: function (json) {
         console.log("Consultar response:", json); // Para depuración
@@ -41,7 +42,7 @@ function listarSucursales() {
       error: function (xhr, status, error) {
         console.log("Error en AJAX:", xhr.responseText, status, error);
         Swal.fire(
-          "Gestionar Sucursales",
+          "Gestionar Proveedores",
           "Error al cargar datos: " + error,
           "error"
         );
@@ -75,15 +76,14 @@ function listarSucursales() {
         render: function (data, type, row) {
           return (
             '<button class="btn btn-sm btn-primary" onclick="editar(event, ' +
-            row.cod_UnidadNeg +
+            row.Documento +
             ')"><i class="fa fa-edit"></i></button>'
           );
         },
       },
-      { targets: 1, data: "cod_UnidadNeg" },
-      { targets: 2, data: "nombre" },
-      { targets: 3, data: "direccion" },
-      { targets: 4, data: "estado" },
+      { targets: 1, data: "Documento"},
+      { targets: 2, data: "RazonSocial"},
+      { targets: 3, data: "DescTipoEntExt"},
     ],
   });
 }
