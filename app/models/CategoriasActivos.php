@@ -7,6 +7,7 @@ class CategoriasActivos{
     public function __construct()
     {
         $this->db = (new Conectar())->ConexionBdPracticante();
+        //$this->db = (new Conectar())->ConexionBdPruebas();
     }
 
     //* LISTAR TODO 

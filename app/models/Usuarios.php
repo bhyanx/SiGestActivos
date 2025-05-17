@@ -9,6 +9,7 @@ class Usuarios
     public function __construct()
     {
         $this->db = (new Conectar())->ConexionBdPracticante();
+        //$this->db = (new Conectar())->ConexionBdPruebas();
     }
 
     public function login($CodUsuario, $ClaveAcceso)
@@ -45,9 +46,12 @@ class Usuarios
     public function listarTodo()
     {
         try {
-            $stmt = $this->db->query('SELECT CodUsuario, CodEmpleado, IdRol, ClaveAcceso,UrlUltimaSession, Activo, UserUpdate, FechaUpdate FROM tUsuarios ORDER BY CodEmpleado');
+            $stmt = $this->db->query("SELECT u.CodUsuario, e.PrimerNombre + ' ' + e.SegundoNombre AS Nombres,
+	   e.ApellidoPaterno + ' ' +e.ApellidoMaterno AS Apellidos, r.NombreRol, u.ClaveAcceso, Activo
+FROM tUsuarios u
+INNER JOIN vEmpleados e ON u.CodUsuario = e.codTrabajador
+LEFT JOIN tRoles r ON u.IdRol = r.IdRol");
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-            
         } catch (\PDOException $e) {
             error_log("Error in Usuarios::listarTodo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;

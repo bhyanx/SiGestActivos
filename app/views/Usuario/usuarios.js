@@ -186,8 +186,11 @@ function listarUsuarios() {
           },
         },
         { targets: 1, data: "CodUsuario" },
-        { targets: 2, data: "IdRol" },
-        { targets: 3, data: "ClaveAcceso" }
+        { targets: 2, data: "Nombres" },
+        { targets: 3, data: "Apellidos" },
+        { targets: 4, data: "NombreRol" },
+        { targets: 5, data: "ClaveAcceso" },
+        { targets: 6, data: "Activo" },
       ],
     })
 }

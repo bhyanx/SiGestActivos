@@ -6,6 +6,7 @@ class EstadoActivo{
 
     public function __construct(){
         $this->db = (new Conectar())->ConexionBdPracticante();
+        //$this->db = (new Conectar())->ConexionBdPruebas();
     }
 
     //* FUNCIÓN PARA LISTAR ESTADOS DE ACTIVOS

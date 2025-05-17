@@ -6,6 +6,7 @@ class Auditorias {
     public function __construct()
     {
         $this->db = (new Conectar())->ConexionBdPracticante();
+        //$this->db = (new Conectar())->ConexionBdPruebas();
     }
 
     //! LISTAR LOGS MULTIPLES CONSULTAS CON PROCEDIMIENTOS ALMACENADOS

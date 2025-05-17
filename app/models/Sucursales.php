@@ -6,6 +6,7 @@ class Sucursales{
     public function __construct()
     {
         $this->db = (new Conectar())->ConexionBdPracticante();
+        //$this->db = (new Conectar())->ConexionBdPruebas();
     }
 
     //* LISTAR TODO CON MI TABLA SUSUCURSALES

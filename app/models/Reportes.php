@@ -6,6 +6,7 @@ class Reportes {
     public function __construct()
     {
         $this->db = (new Conectar())->ConexionBdPracticante();
+        //$this->db = (new Conectar())->ConexionBdPruebas();
     }
 
     //! LISTAR REPORTES CON PROCEDIMIENTOS ALMACENADOS (escritura diferente)

@@ -7,6 +7,7 @@ class Roles{
     public function __construct()
     {
         $this->db = (new Conectar())->ConexionBdPracticante();
+        //$this->db = (new Conectar())->ConexionBdPruebas();
     }
 
     //* LISTAR ROLES DE USUARIOS

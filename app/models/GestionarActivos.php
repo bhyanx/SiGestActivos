@@ -8,6 +8,7 @@ class GestionarActivos
     public function __construct()
     {
         $this->db = (new Conectar())->ConexionBdPracticante();
+        //$this->db = (new Conectar())->ConexionBdPruebas();
     }
 
     public function consultarActivos($data)
