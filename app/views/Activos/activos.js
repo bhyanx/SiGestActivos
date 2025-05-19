@@ -82,7 +82,7 @@ function Listar() {
       autoWidth: true,
       buttons: [
         {
-          extends: "copyHtml5",
+          extend: "copyHtml5",
           title: "Prueba de listado",
           text: '<i class="fas fa-copy"></i> Copiar',
           title: "Copiar",
