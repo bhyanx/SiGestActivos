@@ -65,8 +65,10 @@ session_start();
                                                             <th>Id Activo</th>
                                                             <th>Código</th>
                                                             <th>Serie</th>
-                                                            <th>Artículo</th>
+                                                            <th>Nombre</th>
+                                                            <th>Marca</th>
                                                             <th>Sucursal</th>
+                                                            <th>Proveedor</th>
                                                             <th>Estado</th>
                                                             <th>Valor Adquisición</th>
                                                         </tr>
@@ -79,8 +81,10 @@ session_start();
                                                             <th>Id Activo</th>
                                                             <th>Código</th>
                                                             <th>Serie</th>
-                                                            <th>Artículo</th>
+                                                            <th>Nombre</th>
+                                                            <th>Marca</th>
                                                             <th>Sucursal</th>
+                                                            <th>Proveedor</th>
                                                             <th>Estado</th>
                                                             <th>Valor Adquisición</th>
                                                         </tr>
@@ -103,7 +107,7 @@ session_start();
                                 <form id="frmmantenimiento">
                                     <div class="modal-body">
                                         <div class="row">
-                                            <input type="hidden" name="idActivo" id="dActivo" value="0">
+                                            <input type="hidden" name="IdActivo" id="idActivo" value="0">
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="IdDocIngresoAlm">Doc. Ingreso Almacén:</label>

@@ -62,9 +62,9 @@ class GestionarActivos
             $stmt->bindParam(4, $data['Codigo'], \PDO::PARAM_STR);
             $stmt->bindParam(5, $data['Serie'], \PDO::PARAM_STR);
             $stmt->bindParam(6, $data['IdEstado'], \PDO::PARAM_INT);
-            $stmt->bindParam(7, $data['Garantia'], \PDO::PARAM_STR);
+            $stmt->bindParam(7, $data['Garantia'], \PDO::PARAM_INT);
             $stmt->bindParam(8, $data['FechaFinGarantia'], \PDO::PARAM_STR);
-            $stmt->bindParam(9, $data['IdProveedor'], \PDO::PARAM_INT);
+            $stmt->bindParam(9, $data['IdProveedor'], \PDO::PARAM_STR);
             $stmt->bindParam(10, $data['Observaciones'], \PDO::PARAM_STR);
             $stmt->bindParam(11, $data['IdSucursal'], \PDO::PARAM_INT);
             $stmt->bindParam(12, $data['IdAmbiente'], \PDO::PARAM_INT);
@@ -112,7 +112,7 @@ class GestionarActivos
             $stmt->bindParam(6, $data['IdEstado'], \PDO::PARAM_INT);
             $stmt->bindParam(7, $data['Garantia'], \PDO::PARAM_STR);
             $stmt->bindParam(8, $data['FechaFinGarantia'], \PDO::PARAM_STR);
-            $stmt->bindParam(9, $data['IdProveedor'], \PDO::PARAM_INT);
+            $stmt->bindParam(9, $data['IdProveedor'], \PDO::PARAM_STR);
             $stmt->bindParam(10, $data['Observaciones'], \PDO::PARAM_STR);
             $stmt->bindParam(11, $data['IdSucursal'], \PDO::PARAM_INT);
             $stmt->bindParam(12, $data['IdAmbiente'], \PDO::PARAM_INT);

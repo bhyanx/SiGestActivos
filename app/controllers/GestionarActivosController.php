@@ -64,10 +64,11 @@ switch ($action) {
         break;
 
     case 'Actualizar':
-        var_dump($_POST); exit;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
+                // Normaliza el idActivo para que siempre llegue como int y con el nombre correcto
+                $data['IdActivo'] = isset($_POST['IdActivo']) ? (int)$_POST['idActivo'] : null;
                 $data = [
                     'IdActivo' => $_POST['IdActivo'],
                     'IdDocIngresoAlm' => $_POST['IdDocIngresoAlm'],
@@ -134,7 +135,7 @@ switch ($action) {
             foreach ($estados as $row) {
                 $combos['estados'] .= "<option value='{$row['idEstadoActivo']}'>{$row['nombre']}</option>";
             }
-            
+
             // Proveedores
             $proveedores = $combo->comboProveedor();
             $combos['proveedores'] = '<option value="">Seleccione</option>';
@@ -230,4 +231,3 @@ switch ($action) {
         echo json_encode(['status' => false, 'message' => 'Acción no válida.']);
         break;
 }
-?>

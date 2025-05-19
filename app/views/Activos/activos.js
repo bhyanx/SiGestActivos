@@ -72,13 +72,25 @@ function ListarCombos() {
 function Listar() {
   tabla = $("#tblregistros")
     .dataTable({
+      aProcessing: true,
+      aServerSide: true,
       dom: "Bfrtip",
       searching: true,
-      responsive: true,
+      responsive: false,
       lengthChange: false,
-      colReorder: true,
-      autoWidth: false,
+      colReorder: false,
+      autoWidth: true,
       buttons: [
+        {
+          extends: "copyHtml5",
+          title: "Prueba de listado",
+          text: '<i class="fas fa-copy"></i> Copiar',
+          title: "Copiar",
+          sheetName: "Data",
+          exportOptions: {
+            columns: [1, 2, 3, 4, 5, 6, 7],
+          },
+        },
         {
           extend: "excelHtml5",
           title: "Listado Activos",
@@ -140,20 +152,59 @@ function Listar() {
           targets: 0,
           data: null,
           render: function (data, type, row) {
-            return (
-              '<button class="btn btn-sm btn-primary" onclick="editar(event, ' +
-              row.idActivo +
-              ')"><i class="fa fa-edit"></i></button>'
-            );
+            return `
+      <div class="btn-group">
+        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fa fa-cogs"></i>
+        </button>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="#" onclick="editar(event, ${row.idActivo})"><i class="fa fa-edit"></i> Editar</a>
+          <a class="dropdown-item" href="#" onclick="detalleActivo(${row.idActivo})"><i class="fa fa-eye"></i> Detalle</a>
+          <a class="dropdown-item" href="#" onclick="fichaActivo(${row.idActivo})"><i class="fa fa-file"></i> Ficha</a>
+        </div>
+      </div>
+    `;
           },
         },
         { targets: 1, data: "idActivo" },
         { targets: 2, data: "CodigoActivo" },
         { targets: 3, data: "NumeroSerie" },
         { targets: 4, data: "NombreArticulo" },
-        { targets: 5, data: "Sucursal" },
-        { targets: 6, data: "Estado" },
-        { targets: 7, data: "valorSoles" },
+        { targets: 5, data: "MarcaArticulo" },
+        { targets: 6, data: "Sucursal" },
+        { targets: 7, data: "Proveedor" },
+        {
+          targets: 8,
+          data: "Estado",
+          render: function (data, type, row) {
+            let clase = "";
+            switch (data) {
+              case "Operativa":
+                clase = "badge-success";
+                break;
+              case "Reparación":
+                clase = "bg-warning text-dark";
+                break;
+              case "Baja":
+                clase = "bg-danger";
+                break;
+              case "Vendido":
+                clase = "bg-secondary";
+                break;
+              case "Regular":
+                clase = "bg-info text-dark";
+                break;
+              case "Malo":
+                clase = "bg-danger";
+                break;
+
+              default:
+                clase = "bg-light text-dark";
+            }
+            return `<span class="badge ${clase}">${data}</span>`;
+          },
+        },
+        { targets: 9, data: "valorSoles" },
       ],
     })
     .DataTable();
@@ -175,7 +226,8 @@ $("#btnnuevo").click(() => {
 function guardarActivo(e) {
   e.preventDefault();
   let frmmantenimiento = new FormData($("#frmmantenimiento")[0]);
-  frmmantenimiento.append("UserMod", '<?php echo $_SESSION["CodEmpleado"]; ?>');
+  //frmmantenimiento.append("UserMod", '<?php echo $_SESSION["CodEmpleado"]; ?>');
+  frmmantenimiento.append("UserMod", userMod);
   frmmantenimiento.append("action", "Registrar");
 
   $.ajax({
@@ -206,7 +258,7 @@ function guardarActivo(e) {
 function editarActivo(e) {
   e.preventDefault();
   let frmmantenimiento = new FormData($("#frmmantenimiento")[0]);
-  frmmantenimiento.append("UserMod", '<?php echo $_SESSION["CodEmpleado"]; ?>');
+  frmmantenimiento.append("UserMod", userMod);
   frmmantenimiento.append("action", "Actualizar");
 
   $.ajax({
@@ -323,6 +375,7 @@ function editar(event, idActivo) {
       success: (res) => {
         if (res.status) {
           let data = res.data;
+          console.log("Datos del activo:", data);
           $("#idActivo").val(data.idActivo);
           $("#Codigo").val(data.CodigoActivo);
           $("#Serie").val(data.NumeroSerie);
@@ -346,7 +399,7 @@ function editar(event, idActivo) {
           }, 300);
 
           $("#IdEstado").val(data.idEstado).trigger("change");
-          $("#IdProveedor").val(data.Proveedor).trigger("change");
+          $("#IdProveedor").val(data.Documento).trigger("change");
           $("#IdSucursal").val(data.idSucursal).trigger("change");
           $("#IdAmbiente").val(data.idAmbiente).trigger("change");
           $("#IdCategoria").val(data.idCategoria).trigger("change");
