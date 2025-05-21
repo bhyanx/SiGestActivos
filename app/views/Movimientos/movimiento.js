@@ -1,137 +1,191 @@
+$(document).ready(function () {
+  init();
+});
+
 function init() {
-  // Registrar movimiento
-  $("#frmMovimiento").on("submit", function (e) {
-    e.preventDefault();
-    guardaryeditarMovimiento(e);
+  listarMovimientos();
+  ListarCombos();
+  ListarCombosFiltros();
+
+  // Botón para abrir modal de nuevo movimiento
+  $("#btnnuevo").click(() => {
+    $("#tituloModalMovimiento").html('<i class="fa fa-plus-circle"></i> Registrar Movimiento');
+    $("#frmMovimiento")[0].reset();
+    $("#ModalMovimiento").modal("show");
   });
 
-  // Cargar detalles de movimiento si se selecciona uno
-  $("#idMovimientoDetalle").on("change", function () {
-    let idMovimiento = $(this).val();
-    if (idMovimiento) {
-      cargarDetallesMovimiento(idMovimiento);
+  // Guardar movimiento principal
+  $("#frmMovimiento").on("submit", function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    $.ajax({
+      url: "../../controllers/GestionarMovimientoController.php?action=RegistrarMovimientoSolo",
+      type: "POST",
+      data: formData,
+      contentType: false,
+      processData: false,
+      dataType: "json",
+      success: function (res) {
+        if (res.status) {
+          // Guardar el ID del movimiento para el detalle
+          $("#IdMovimientoDetalle").val(res.idMovimiento);
+          // Autocompletar campos de destino en el modal de detalle
+          setDestinoDetalle();
+          $("#ModalMovimiento").modal("hide");
+          $("#frmDetalleMovimiento")[0].reset();
+          $("#ModalDetalleMovimiento").modal("show");
+        } else {
+          Swal.fire("Error", res.message, "error");
+        }
+      },
+      error: function () {
+        Swal.fire("Error", "No se pudo registrar el movimiento.", "error");
+      },
+    });
+  });
+
+  // Al abrir el modal de detalle, autocompleta los campos de destino
+  $("#ModalDetalleMovimiento").on("show.bs.modal", function () {
+    setDestinoDetalle();
+  });
+
+  // Al seleccionar un activo, autocompleta los datos de ese activo
+  $("#IdActivo").on("change", function () {
+    let idActivo = $(this).val();
+    if (idActivo) {
+      $.ajax({
+        url: "../../controllers/GestionarActivosController.php?action=obtenerInfoActivo",
+        type: "POST",
+        data: { idActivo: idActivo },
+        dataType: "json",
+        success: function (res) {
+          if (res.status) {
+            $("#CodigoActivo").val(res.data.CodigoActivo || "");
+            $("#SucursalActual").val(res.data.SucursalActual || "");
+            $("#AmbienteActual").val(res.data.AmbienteActual || "");
+          } else {
+            $("#CodigoActivo, #SucursalActual, #AmbienteActual").val("");
+          }
+        },
+        error: function () {
+          $("#CodigoActivo, #SucursalActual, #AmbienteActual").val("");
+        },
+      });
     } else {
-      $("#detallesMovimiento").html(
-        "<p>Seleccione un movimiento para ver detalles.</p>"
-      );
+      $("#CodigoActivo, #SucursalActual, #AmbienteActual").val("");
     }
+  });
+
+  // Guardar detalle (agregar activo al movimiento)
+  $("#frmDetalleMovimiento").on("submit", function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    $.ajax({
+      url: "../../controllers/GestionarMovimientoController.php?action=AgregarDetalle",
+      type: "POST",
+      data: formData,
+      contentType: false,
+      processData: false,
+      dataType: "json",
+      success: function (res) {
+        if (res.status) {
+          Swal.fire("Éxito", "Activo agregado al movimiento", "success");
+          // Limpia solo el select de activo y los campos visuales
+          $("#IdActivo").val("").trigger("change");
+          $("#CodigoActivo, #SucursalActual, #AmbienteActual").val("");
+        } else {
+          Swal.fire("Error", res.message, "error");
+        }
+      },
+      error: function () {
+        Swal.fire("Error", "No se pudo agregar el activo.", "error");
+      },
+    });
+  });
+
+  // Botón para agregar otro activo (limpia el formulario de detalle)
+  $("#btnAgregarOtroActivo").on("click", function () {
+    $("#frmDetalleMovimiento")[0].reset();
+    setDestinoDetalle();
+    $("#CodigoActivo, #SucursalActual, #AmbienteActual").val("");
   });
 }
 
-$(document).ready(() => {
-  listarMovimientos(); // Cargar listado inicial
-  ListarCombos(); // Cargar combos
-});
+// Autocompleta los campos de destino en el modal de detalle
+function setDestinoDetalle() {
+  // Toma el texto seleccionado en el formulario principal
+  $("#SucursalDestino").val($("#sucursal_destino option:selected").text());
+  $("#AmbienteDestino").val($("#ambiente_destino option:selected").text());
+}
 
-// Botón nuevo movimiento
-$("#btnnuevo").click(() => {
-  $("#tituloModalMovimiento").html(
-    '<i class="fa fa-plus-circle"></i> Registrar Movimiento'
-  );
-  $("#frmMovimiento")[0].reset(); // Usamos el mismo ID que en el form
-  $("#activos").val("").trigger("change"); // Limpiar select múltiple
-  $("#ModalMovimiento").modal("show");
-});
+function ListarCombosFiltros() {
+  $.ajax({
+    url: "../../controllers/GestionarMovimientoController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    success: (res) => {
+      if (res.status){
+        $("#filtroTipoMovimiento").html(res.data.tipoMovimiento).trigger("change");
+        $("#filtroSucursal").html(res.data.sucursales).trigger("change");
+        $("#filtroAmbiente").html(res.data.ambientes).trigger("change");
+        // $("#filtroSucursalDestino").html(res.data.sucursales).trigger("change");
 
+        $("#filtroTipoMovimiento, #filtroSucursal, #filtroAmbiente").select2({
+          theme: "bootstrap4",
+          //dropdownParent: $("#ModalFiltros .modal-body"),
+          width: "100%",
+        });
+      } else {
+        Swal.fire("Filtro de movimientos", "No se pudieron cargar los combos: " + res.message, "warning");
+      }
+    },
+    error: (xhr, status, error) => {
+      Swal.fire("Filtros de movimientos", "Error al cargar combos: " + error, "error");
+    }
+  })
+}
+
+// Cargar combos principales
 function ListarCombos() {
   $.ajax({
     url: "../../controllers/GestionarMovimientoController.php?action=combos",
     type: "POST",
     dataType: "json",
-
     success: (res) => {
-      console.log("Combos response:", res);
       if (res.status) {
         $("#IdTipo").html(res.data.tipoMovimiento).trigger("change");
         $("#sucursal_origen").html(res.data.sucursales).trigger("change");
         $("#sucursal_destino").html(res.data.sucursales).trigger("change");
         $("#autorizador").html(res.data.autorizador).trigger("change");
 
-
         $("#sucursal_origen, #sucursal_destino, #IdTipo, #autorizador").select2({
-            theme: "bootstrap4",
-            dropdownParent: $("#ModalMovimiento .modal-body"),
-            width: "100%"
+          theme: "bootstrap4",
+          dropdownParent: $("#ModalMovimiento .modal-body"),
+          width: "100%",
         });
-        
       } else {
-        Swal.fire(
-          "Movimiento de activos",
-          "No se pudieron cargar los combos: " + res.message,
-          "warning"
-        );
+        Swal.fire("Movimiento de activos", "No se pudieron cargar los combos: " + res.message, "warning");
       }
     },
     error: (xhr, status, error) => {
-      console.log("Error en combos:", xhr.responseText, status, error);
-      Swal.fire(
-        "Movimiento de activos",
-        "Error al cargar combos: " + error,
-        "error"
-      );
-    },
-  });
-}
-
-// Función para guardar o editar movimiento
-function guardaryeditarMovimiento(e) {
-  e.preventDefault();
-
-  const formData = new FormData($("#frmMovimiento")[0]);
-
-  // Añadir UserMod desde PHP (si usas sesión)
-  formData.append(
-    "userMod",
-    "<?php echo $_SESSION['CodEmpleado'] ?? 'usuario_desconocido'; ?>"
-  );
-
-  $.ajax({
-    url: "../../controllers/GestionarMovimientoController.php",
-    type: "POST",
-    data: formData,
-    contentType: false,
-    processData: false,
-    success: (res) => {
-      console.log("Respuesta servidor:", res);
-      try {
-        const response = JSON.parse(res);
-        if (response.status) {
-          Swal.fire("Movimiento", response.message, "success");
-          $("#frmMovimiento")[0].reset(); // Limpiar formulario
-          $("#tblMovimientos").DataTable().ajax.reload(); // Recargar tabla
-          $("#ModalMovimiento").modal("hide"); // Cerrar modal
-        } else {
-          Swal.fire("Error", response.message, "error");
-        }
-      } catch (e) {
-        Swal.fire(
-          "Error",
-          "Hubo un problema procesando la respuesta.",
-          "error"
-        );
-        console.error("No se pudo parsear la respuesta:", res);
-      }
-    },
-    error: (xhr, status, error) => {
-      console.error("Error AJAX:", xhr.responseText, status, error);
-      Swal.fire("Error", "No se pudo registrar el movimiento.", "error");
+      Swal.fire("Movimiento de activos", "Error al cargar combos: " + error, "error");
     },
   });
 }
 
 // Listar movimientos en una tabla DataTable
 function listarMovimientos() {
-  $("#tblregistros").DataTable({
-    // Cambiado a #tblregistros (como en tu HTML)
+  $("#tblMovimientos").DataTable({
     dom: "Bfrtip",
     responsive: true,
     destroy: true,
     ajax: {
-      url: "../../controllers/GestionarMovimientoController.php?action=listar",
+      url: "../../controllers/GestionarMovimientoController.php?action=Consultar",
       type: "POST",
       dataType: "json",
       dataSrc: function (json) {
-        console.log("Datos recibidos:", json);
         return json || [];
       },
     },
@@ -153,7 +207,6 @@ function listarMovimientos() {
       { data: "ResponsableAnterior" },
       { data: "ResponsableNuevo" },
       { data: "FechaMovimiento" },
-      { data: "TipoMovimiento" },
       { data: "ResponsableOrigen" },
       { data: "ResponsableDestino" },
       { data: "Estado" },
@@ -169,50 +222,3 @@ function listarMovimientos() {
     ],
   });
 }
-
-// Cargar detalles de un movimiento específico
-function cargarDetallesMovimiento(idMovimiento) {
-  $.ajax({
-    url: "../../controllers/GestionarMovimientoController.php?action=listar_detalle",
-    type: "POST",
-    data: { idMovimiento: idMovimiento },
-    dataType: "json",
-    success: (res) => {
-      console.log("Detalles recibidos:", res);
-      if (res.status && res.data.length > 0) {
-        let html = "<ul>";
-        res.data.forEach((detalle) => {
-          html += `
-                        <li>
-                            Activo: ${detalle.NombreActivo} <br>
-                            Sucursal Anterior: ${detalle.SucursalAnterior} → Nueva: ${detalle.SucursalNueva} <br>
-                            Responsable: ${detalle.ResponsableNuevo}
-                        </li>
-                    `;
-        });
-        html += "</ul>";
-        $("#detallesMovimiento").html(html);
-      } else {
-        $("#detallesMovimiento").html("<p>No hay detalles disponibles.</p>");
-      }
-    },
-    error: (xhr, status, error) => {
-      console.error("Error al cargar detalles:", xhr.responseText);
-      $("#detallesMovimiento").html("<p>Error al cargar detalles.</p>");
-    },
-  });
-}
-
-// function ListarCombos() {
-//   $.ajax({
-//     url: "../../controllers/",
-//   });
-// }
-
-// Mostrar detalles desde tabla
-function verDetalles(idMovimiento) {
-  $("#idMovimientoDetalle").val(idMovimiento).trigger("change");
-  $("#movimientoDetalleModal").modal("show");
-}
-
-init();

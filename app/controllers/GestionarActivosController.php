@@ -97,6 +97,22 @@ switch ($action) {
         }
         break;
 
+    case 'obtenerInfoActivo':
+        try {
+            $idActivo = $_POST['idActivo'];
+            $info = $activos->obtenerInfoActivo($idActivo); // Este método debe existir en tu modelo
+            echo json_encode([
+                'status' => true,
+                'data' => $info
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+        
     case 'get_activo':
         try {
             $filtros = [

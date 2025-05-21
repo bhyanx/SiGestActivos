@@ -33,6 +33,14 @@ class GestionarActivos
         }
     }
 
+    public function obtenerInfoActivo($idActivo)
+    {
+        $stmt = $this->db->prepare("SELECT Codigo AS CodigoActivo, Sucursal AS SucursalActual, Ambiente AS AmbienteActual FROM tActivos WHERE IdActivo = ?");
+        $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function registrarActivos($data)
     {
         try {

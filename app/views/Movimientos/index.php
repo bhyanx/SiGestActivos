@@ -12,6 +12,15 @@ session_start();
 <head>
     <?php require_once("../Layouts/Header.php"); ?>
     <title>Movimientos - Sistema Gestion de activos</title>
+    <style>
+        .swal2-container {
+            z-index: 9999 !important;
+        }
+
+        .dropdown-menu .show {
+            position: fixed !important;
+        }
+    </style>
 </head>
 
 <body class="sidebar-mini control-sidebar-slide-open layout-navbar-fixed layout-fixed sidebar-mini-xs sidebar-mini-md sidebar-collapse">
@@ -40,117 +49,115 @@ session_start();
             <section class="content">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-12">
+                        <div class="col-md-10 offset-md-1 mb-4" id="divlistadomovimientos">
+                            <form action="#" method="post" id="frmbusqueda">
+                                <div class="row">
+                                    <div class="col-md-12" id="divfiltros">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="filtroTipoMovimiento">Tipo Movimiento:</label>
+                                                    <select class="form-control" name="filtroTipoMovimiento" id="filtroTipoMovimiento"></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="filtroSucursal">Sucursal:</label>
+                                                    <select class="form-control" name="filtroSucursal" id="filtroSucursal"></select>
+                                                </div>
+                                            </div>
+                                            <!-- <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="filtroAmbiente">Ambiente Destino:</label>
+                                                    <select class="form-control" name="filtroAmbiente"id="filtroAmbiente"></select>
+                                                </div>
+                                            </div> -->
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="filtroFecha">Fecha Movimiento:</label>
+                                                    <input type="date" class="form-control" name="filtroFecha" id="filtroFecha" value="<?php echo date('Y-m-d'); ?>">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2 offset-md-8">
+                                                <div class="form-group mb-0">
+                                                    <label for="">&nbsp;</label>
+                                                    <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">
+                                                        <i class="fa fa-search"></i> Buscar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group mb-0">
+                                                    <label for="">&nbsp;</label>
+                                                    <button type="button" class="btn btn-success btn-sm btn-block" id="btnnuevo">
+                                                        <i class="fa fa-plus"></i> Nuevo Movimiento
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-12" id="divtblmovimientos" style="display: none;">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title"><i class="fa fa-list"></i>
-                                        Lista de Movimientos Realizados
-                                    </h3>
+                                    <h3 class="card-title"><i class="fa fa-list"></i> Lista de Movimientos Realizados</h3>
                                 </div>
                                 <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-12" id="divfiltros">
-                                            <div class="row">
-                                                <div class="col-md-3 offset-md-9">
-                                                    <div class="form-group">
-                                                        <button class="btn btn-primary btn-block" id="btnnuevo"><i class="fa fa-plus"></i> Crear Movimiento</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="table-responsive">
-                                                <table id="tblMovimientos" class="table table-bordered table-striped">
-                                                    <thead>
-                                                        <tr>
-                                                            <th><i class="fa fa-cogs"></i></th>
-                                                            <th>Id DetalleMovimiento</th>
-                                                            <th>Id Activo</th>
-                                                            <!-- <th>Código</th>
-                                                            <th>Serie</th> -->
-                                                            <th>Nombre Activo</th>
-                                                            <th>Tipo Movimiento</th>
-                                                            <th>Sucursal Anterior</th>
-                                                            <th>Sucursal Nueva</th>
-                                                            <th>Ambiente Anterior</th>
-                                                            <th>Ambiente Nueva</th>
-                                                            <th>Autorizador</th>
-                                                            <th>Responsable Anterior</th>
-                                                            <th>Responsable Nueva</th>
-                                                            <th>Fecha Movimiento</th>
-                                                            <th>Responsable Origen</th>
-                                                            <th>Responsable Destino</th>
-                                                            <th>Estado</th>
-                                                        </tr>
-                                                    </thead>
-                                                </table>
-                                            </div>
+                                    <div class="col-md-12">
+                                        <div class="table-responsive">
+                                            <table id="tblMovimientos" class="table table-bordered table-striped w-100 h-100">
+                                                <thead>
+                                                    <tr>
+                                                        <th><i class="fa fa-cogs" title="Acciones"></i></th>
+                                                        <th>Id DetalleMovimiento</th>
+                                                        <th>Id Activo</th>
+                                                        <th>Nombre Activo</th>
+                                                        <th>Tipo Movimiento</th>
+                                                        <th>Sucursal Anterior</th>
+                                                        <th>Sucursal Nueva</th>
+                                                        <th>Ambiente Anterior</th>
+                                                        <th>Ambiente Nueva</th>
+                                                        <th>Autorizador</th>
+                                                        <th>Responsable Anterior</th>
+                                                        <th>Responsable Nueva</th>
+                                                        <th>Fecha Movimiento</th>
+                                                        <th>Responsable Origen</th>
+                                                        <th>Responsable Destino</th>
+                                                        <th>Estado</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th><i class="fa fa-cogs" title="Acciones"></i></th>
+                                                        <th>Id DetalleMovimiento</th>
+                                                        <th>Id Activo</th>
+                                                        <th>Nombre Activo</th>
+                                                        <th>Tipo Movimiento</th>
+                                                        <th>Sucursal Anterior</th>
+                                                        <th>Sucursal Nueva</th>
+                                                        <th>Ambiente Anterior</th>
+                                                        <th>Ambiente Nueva</th>
+                                                        <th>Autorizador</th>
+                                                        <th>Responsable Anterior</th>
+                                                        <th>Responsable Nueva</th>
+                                                        <th>Fecha Movimiento</th>
+                                                        <th>Responsable Origen</th>
+                                                        <th>Responsable Destino</th>
+                                                        <th>Estado</th>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- Modal para Registrar/Editar Movimiento -->
-                    <div class="modal fade" id="ModalMovimiento" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg" role="document">
-                            <div class="modal-content">
-                                <form id="frmMovimiento" name="frmMovimiento" method="POST">
-                                    <div class="modal-header bg-primary text-white">
-                                        <h5 class="modal-title" id="tituloModalMovimiento"><i class="fa fa-plus-circle"></i> Nuevo Movimiento</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <input type="hidden" name="idMovimiento" id="idMovimiento" value="0">
-
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="IdTipo">Tipo de Movimiento:</label>
-                                                    <select class="form-control select2" id="IdTipo" name="IdTipo" required></select>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="autorizador">Autorizador:</label>
-                                                    <select class="form-control select2" id="autorizador" name="autorizador" required></select>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="sucursal_origen">Sucursal Origen:</label>
-                                                    <select class="form-control select2" id="sucursal_origen" name="sucursal_origen" required></select>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="sucursal_destino">Sucursal Destino:</label>
-                                                    <select class="form-control select2" id="sucursal_destino" name="sucursal_destino" required></select>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <label for="observacion">Observaciones:</label>
-                                                    <textarea class="form-control" id="observacion" name="observacion" rows="3"></textarea>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <label>Activos a Mover:</label><br>
-                                                    <select class="form-control select2" id="activos" name="activos[]" multiple="multiple" required></select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Guardar</button>
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+                        <!-- Aquí puedes agregar los modales para registrar/editar movimientos y detalles, igual que en tu estructura actual -->
+                        <?php //require_once("modals_movimientos.php"); 
+                        ?>
                     </div>
                 </div>
             </section>
@@ -158,6 +165,16 @@ session_start();
         <?php require_once("../Layouts/Footer.php"); ?>
         <script src="movimiento.js"></script>
     </div>
+    <script>
+        $(document).ready(function() {
+            $('#frmbusqueda').on('submit', function(e) {
+                e.preventDefault();
+                $('#divtblmovimientos').show();
+                // Si usas DataTable, aquí puedes recargarla:
+                if (typeof listarMovimientos === 'function') listarMovimientos();
+            });
+        });
+    </script>
 </body>
 
 </html>
