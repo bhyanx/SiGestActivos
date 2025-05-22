@@ -7,6 +7,10 @@ function init() {
   ListarCombosMov();
   ListarCombosFiltros();
 
+  $(document).on('change', '#IdSucursalOrigen, #IdSucursalDestino', function() {
+    setSucursalOrigenDestino();
+  });
+
   $(document).on("click", "#btnBuscarIdItem, .btnagregardet", function () {
     $("#ModalArticulos").modal("show");
     listarActivosModal();
@@ -50,15 +54,6 @@ function init() {
       $("#frmMovimiento")[0].reset();
       $("#ModalMovimiento").modal("show");
 
-      var sucursalOrigen = $("#IdSucursalOrigen").val();
-      var sucursalDestino = $("#IdSucursalDestino").val();
-
-      if (sucursalOrigen) {
-        $("#sucursal_origen").val(sucursalOrigen).trigger("change");
-      }
-      if (sucursalDestino) {
-        $("#sucursal_destino").val(sucursalDestino).trigger("change");
-      }
     });
 
   // Botón procesar en generarmov

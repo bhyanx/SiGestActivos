@@ -251,15 +251,15 @@ session_start();
                                             <div class="row">
                                                 <div class="col-md-12">
                                                     <div class="row">
-                                                        <div class="col-md-4">
+                                                        <div class="col-md-5">
                                                             <div class="form-group">
                                                                 <label for="sucursal_origen">Sucursal origen:</label>
                                                                 <input class="form-control" name="sucursal_origen" id="sucursal_origen" readonly>
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-8">
+                                                        <div class="col-md-7">
                                                             <div class="form-group">
-                                                                <label for="usuario_origen">Usuario que realiza el movimiento:</label>
+                                                                <label for="usuario_origen">Usuario realizando el movimiento:</label>
                                                                 <input type="text" class="form-control" name="usuario_origen" id="usuario_origen" value="<?php echo $_SESSION['PrimerNombre'] . ' ' . $_SESSION['ApellidoPaterno'] . ' ' . $_SESSION['ApellidoMaterno']; ?>" readonly>
                                                             </div>
                                                         </div>
@@ -268,13 +268,13 @@ session_start();
                                                         <div class="col-md-6">
                                                             <div class="form-group">
                                                                 <label for="fecha_salida">Fecha de salida:</label>
-                                                                <input type="date" class="form-control" name="fecha_salida" id="fecha_salida" value="<?php echo date('Y-m-d'); ?>" required>
+                                                                <input type="date" class="form-control" name="fecha_salida" id="fecha_salida" value="<?php echo date('Y-m-d'); ?>" required readonly>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <div class="form-group">
                                                                 <label for="hora_salida">Hora de salida:</label>
-                                                                <input type="time" class="form-control" name="hora_salida" id="hora_salida" value="<?php echo date('H:i'); ?>" required>
+                                                                <input type="time" class="form-control" name="hora_salida" id="hora_salida" value="<?php echo date('H:i'); ?>" required readonly>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -319,13 +319,13 @@ session_start();
                                                         <div class="col-md-6">
                                                             <div class="form-group">
                                                                 <label for="fecha_ingreso">Fecha de ingreso:</label>
-                                                                <input type="date" class="form-control" name="fecha_ingreso" id="fecha_ingreso" value="<?php echo date('Y-m-d'); ?>" required>
+                                                                <input type="date" class="form-control" name="fecha_ingreso" id="fecha_ingreso" value="<?php echo date('Y-m-d'); ?>" required readonly>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <div class="form-group">
                                                                 <label for="hora_ingreso">Hora de ingreso:</label>
-                                                                <input type="time" class="form-control" name="hora_ingreso" id="hora_ingreso" value="<?php echo date('H:i'); ?>" required>
+                                                                <input type="time" class="form-control" name="hora_ingreso" id="hora_ingreso" value="<?php echo date('H:i'); ?>" required readonly>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -339,7 +339,7 @@ session_start();
                                 </div>
                             </div>
                             <div class="col-md-12">
-                                <div class="card">
+                                <div class="card card-warning">
                                     <!-- /.card-header -->
                                     <div class="card-header">
                                         <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Detalle Movimiento de activos</h3>
