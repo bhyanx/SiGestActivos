@@ -174,17 +174,17 @@ session_start();
                                                 </div> -->
                                                 <div class="col-md-3">
                                                     <div class="form-group">
-                                                        <label for="tipo_mov">Tipo de Movimiento:</label>
-                                                        <select name="tipo_mov" id="tipo_mov" class="form-control"></select>
+                                                        <label for="IdTipoMovimientoMov">Tipo de Movimiento:</label>
+                                                        <select name="IdTipoMovimientoMov" id="IdTipoMovimientoMov" class="form-control"></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <div class="form-group"><label for="cod_autorizador">Autorizador:</label><select name="cod_autorizador" id="cod_autorizador" class="form-control"></select></div>
+                                                    <div class="form-group"><label for="CodAutorizador">Autorizador:</label><select name="CodAutorizador" id="CodAutorizador" class="form-control"></select></div>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <div class="form-group">
-                                                        <label for="IdSucursalSalida">Sucursal salida:</label>
-                                                        <select name="IdSucursalSalida" id="IdSucursalSalida" class="form-control">
+                                                        <label for="IdSucursalOrigen">Sucursal salida:</label>
+                                                        <select name="IdSucursalOrigen" id="IdSucursalOrigen" class="form-control">
                                                         </select>
                                                     </div>
                                                 </div>
@@ -235,9 +235,9 @@ session_start();
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <div class="card">
+                                    <div class="card card-primary">
                                         <div class="card-header">
-                                            <h3 class="card-title"><i class="fas fa-file-alt"></i> Datos de salida:</h3>
+                                            <h3 class="card-title"><i class="fas fa-file-alt"></i> Datos de Origen:</h3>
                                             <div class="card-tools">
                                                 <button type="button" class="btn btn-tool" data-card-widget="maximize">
                                                     <i class="fas fa-expand"></i>
@@ -253,8 +253,8 @@ session_start();
                                                     <div class="row">
                                                         <div class="col-md-4">
                                                             <div class="form-group">
-                                                                <label for="sucursal_origen">Sucursal de donde sale:</label>
-                                                                <select class="form-control" name="sucursal_origen" id="sucursal_origen" required></select>
+                                                                <label for="sucursal_origen">Sucursal origen:</label>
+                                                                <input class="form-control" name="sucursal_origen" id="sucursal_origen" readonly>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-8">
@@ -287,9 +287,9 @@ session_start();
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="card">
+                                    <div class="card card-success">
                                         <div class="card-header">
-                                            <h3 class="card-title"><i class="fas fa-file-alt"></i> Datos de salida:</h3>
+                                            <h3 class="card-title"><i class="fas fa-file-alt"></i> Datos de Destino:</h3>
                                             <div class="card-tools">
                                                 <button type="button" class="btn btn-tool" data-card-widget="maximize">
                                                     <i class="fas fa-expand"></i>
@@ -306,13 +306,14 @@ session_start();
                                                         <div class="col-md-4">
                                                             <div class="form-group">
                                                                 <label for="sucursal_destino">Sucursal destino:</label>
-                                                                <select class="form-control" name="sucursal_destino" id="sucursal_destino" required></select>
+                                                                <input class="form-control" name="sucursal_destino" id="sucursal_destino" readonly>
                                                             </div>
                                                         </div>
-                                                        <div class="form-group">
+
+                                                        <!-- <div class="form-group">
                                                             <label for="usuario_destino">Usuario que recibe:</label>
-                                                            <input type="text" class="form-control" name="usuario_destino" id="usuario_destino" placeholder="Usuario destino">
-                                                        </div>
+                                                            <select class="form-control" name="usuario_destino" id="usuario_destino" required></select>
+                                                        </div> -->
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-md-6">
@@ -399,11 +400,13 @@ session_start();
                                                         <thead>
                                                             <tr>
                                                                 <th>ID</th>
-                                                                <th>Código</th>
+                                                                <!-- <th>Código</th> -->
                                                                 <th>Nombre</th>
                                                                 <th>Marca</th>
                                                                 <th>Sucursal</th>
                                                                 <th>Ambiente</th>
+                                                                <th>Ambiente Destino</th>
+                                                                <th>Responsable Destino</th>
                                                                 <th>Acción</th>
                                                             </tr>
                                                         </thead>

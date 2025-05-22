@@ -95,6 +95,18 @@ switch ($action) {
                 $combos['autorizador'] .= "<option value='{$row['codTrabajador']}'>{$row['NombreTrabajador']}</option>";
             }
 
+            $responsable = $combo->comboResponsable();
+            $combos['responsable'] = '<option value="">Seleccione</option>';
+            foreach ($responsable as $row) {
+                $combos['responsable'] .= "<option value='{$row['codTrabajador']}'>{$row['NombreTrabajador']}</option>";
+            }
+
+            $ambientes = $combo->comboAmbiente();
+            $combos['ambientes'] = '<option value="">Seleccione</option>';
+            foreach ($ambientes as $row) {
+                $combos['ambientes'] .= "<option value='{$row['idAmbiente']}'>{$row['nombre']}</option>";
+            }
+
             echo json_encode(['status' => true, 'data' => $combos, 'message' => 'Combos cargados correctamente.']);
         } catch (Exception $e) {
             echo json_encode(['status' => false, 'message' => 'Error al cargar combos: ' . $e->getMessage()]);

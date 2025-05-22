@@ -4,7 +4,7 @@ $(document).ready(function () {
 
 function init() {
   listarMovimientos();
-  ListarCombos();
+  ListarCombosMov();
   ListarCombosFiltros();
 
   $(document).on("click", "#btnBuscarIdItem, .btnagregardet", function () {
@@ -37,7 +37,6 @@ function init() {
   $("#divregistroMovimiento").hide();
 
   // Botón para abrir el panel de generación de movimiento
-  // Botón para abrir el panel de generación de movimiento
   $("#btnnuevo")
     .off("click")
     .on("click", function () {
@@ -50,6 +49,16 @@ function init() {
       );
       $("#frmMovimiento")[0].reset();
       $("#ModalMovimiento").modal("show");
+
+      var sucursalOrigen = $("#IdSucursalOrigen").val();
+      var sucursalDestino = $("#IdSucursalDestino").val();
+
+      if (sucursalOrigen) {
+        $("#sucursal_origen").val(sucursalOrigen).trigger("change");
+      }
+      if (sucursalDestino) {
+        $("#sucursal_destino").val(sucursalDestino).trigger("change");
+      }
     });
 
   // Botón procesar en generarmov
@@ -92,13 +101,13 @@ function init() {
   });
 
   // Botón para abrir modal de nuevo movimiento
-  $("#btnnuevo").click(() => {
-    $("#tituloModalMovimiento").html(
-      '<i class="fa fa-plus-circle"></i> Registrar Movimiento'
-    );
-    $("#frmMovimiento")[0].reset();
-    $("#ModalMovimiento").modal("show");
-  });
+  // $("#btnnuevo").click(() => {
+  //   $("#tituloModalMovimiento").html(
+  //     '<i class="fa fa-plus-circle"></i> Registrar Movimiento'
+  //   );
+  //   $("#frmMovimiento")[0].reset();
+  //   $("#ModalMovimiento").modal("show");
+  // });
 
   // Guardar movimiento principal
   $("#frmMovimiento").on("submit", function (e) {
@@ -117,10 +126,13 @@ function init() {
           // Guardar el ID del movimiento para el detalle
           $("#IdMovimientoDetalle").val(res.idMovimiento);
           // Autocompletar campos de destino en el modal de detalle
+          setSucursalOrigenDestino();
           setDestinoDetalle();
           $("#ModalMovimiento").modal("hide");
           $("#frmDetalleMovimiento")[0].reset();
           $("#ModalDetalleMovimiento").modal("show");
+
+        
         } else {
           Swal.fire("Error", res.message, "error");
         }
@@ -133,6 +145,7 @@ function init() {
 
   // Al abrir el modal de detalle, autocompleta los campos de destino
   $("#ModalDetalleMovimiento").on("show.bs.modal", function () {
+    setSucursalOrigenDestino();
     setDestinoDetalle();
   });
 
@@ -202,6 +215,7 @@ function init() {
     var fila = $(this).closest("tr");
     var activo = {
       id: $(this).data("id"),
+      //codigo: fila.find("td:eq(0)").text(),
       nombre: fila.find("td:eq(1)").text(),
       marca: fila.find("td:eq(2)").text(),
       sucursal: fila.find("td:eq(3)").text(),
@@ -215,8 +229,14 @@ function init() {
   });
 }
 
+function setSucursalOrigenDestino() {
+  var sucursalOrigenText = $("#IdSucursalOrigen option:selected").text();
+  var sucursalDestinoText = $("#IdSucursalDestino option:selected").text();
+  $("#sucursal_origen").val(sucursalOrigenText);
+  $("#sucursal_destino").val(sucursalDestinoText);
+}
+
 function agregarActivoAlDetalle(activo) {
-  // activo: { id, codigo, nombre, marca, sucursal, ambiente }
   if ($(`#tbldetalleactivomov tbody tr[data-id='${activo.id}']`).length > 0) {
     NotificacionToast(
       "error",
@@ -224,19 +244,30 @@ function agregarActivoAlDetalle(activo) {
     );
     return false;
   }
+  var numeroFilas = $("#tbldetalleactivomov").find("tbody tr").length;
 
-  var nuevaFila = `<tr data-id='${
-    activo.id
-  }' class='table-success agregado-temp'>
+  // Usa el combo correcto que ya está poblado en el DOM
+  var opcionesAmbiente = $("#ambiente_destino").html(); // o el id correcto
+  var opcionesResponsable = $("#usuario_destino").html(); // o el id correcto
+
+  var selectAmbienteDestino = `<select class='form-control form-control-sm ambiente-destino' name='ambiente_destino[]' id="comboAmbiente${numeroFilas}"></select>`;
+  var selectResponsableDestino = `<select class='form-control form-control-sm responsable-destino' name='responsable_destino[]' id="comboResponsable${numeroFilas}"></select>`;
+
+  var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
     <td>${activo.id}</td>
-    <td>${activo.codigo ? activo.codigo : "-"}</td>
     <td>${activo.nombre}</td>
     <td>${activo.marca}</td>
     <td>${activo.sucursal}</td>
     <td>${activo.ambiente}</td>
+    <td>${selectAmbienteDestino}</td>
+    <td>${selectResponsableDestino}</td>
     <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
   </tr>`;
   $("#tbldetalleactivomov tbody").append(nuevaFila);
+  console.log(`comboAmbiente${numeroFilas}`);
+  ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
+  ListarCombosResponsable(`comboResponsable${numeroFilas}`);
+
   setTimeout(function () {
     $("#tbldetalleactivomov tbody tr.agregado-temp").removeClass(
       "table-success agregado-temp"
@@ -248,6 +279,73 @@ function agregarActivoAlDetalle(activo) {
     `Activo <b>${activo.nombre}</b> agregado al detalle.`
   );
   return true;
+}
+
+function ListarCombosResponsable(elemento) {
+  $.ajax({
+    url: "../../controllers/GestionarMovimientoController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    async: false,
+
+    success: (res) => {
+      if (res.status) {
+        $(`#${elemento}`).html(res.data.responsable).trigger("change");
+
+        $(`#${elemento}`).select2({
+          theme: "bootstrap4",
+          //dropdownParent: $("#ModalFiltros .modal-body"),
+          width: "100%",
+        });
+      } else {
+        Swal.fire(
+          "Filtro de movimientos",
+          "No se pudieron cargar los combos: " + res.message,
+          "warning"
+        );
+      }
+    },
+    error: (xhr, status, error) => {
+      Swal.fire(
+        "Filtros de movimientos",
+        "Error al cargar combos: " + error,
+        "error"
+      );
+    },
+  });
+}
+
+function ListarCombosAmbiente(elemento) {
+  $.ajax({
+    url: "../../controllers/GestionarMovimientoController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    async: false,
+    success: (res) => {
+      if (res.status) {
+        $(`#${elemento}`).html(res.data.ambientes).trigger("change");
+
+        $(`#${elemento}`).select2({
+          theme: "bootstrap4",
+          //dropdownParent: $("#ModalFiltros .modal-body"),
+          width: "100%",
+        });
+      } else {
+        Swal.fire(
+          "Filtro de movimientos",
+          "No se pudieron cargar los combos: " + res.message,
+          "warning"
+        );
+      }
+    },
+    error: (xhr, status, error) => {
+      Swal.fire(
+        "Filtros de movimientos",
+        "Error al cargar combos: " + error,
+        "error"
+      );
+    },
+  });
 }
 
 function NotificacionToast(tipo, mensaje) {
@@ -336,25 +434,29 @@ function ListarCombosFiltros() {
 }
 
 // Cargar combos principales
-function ListarCombos() {
+function ListarCombosMov() {
   $.ajax({
     url: "../../controllers/GestionarMovimientoController.php?action=combos",
     type: "POST",
     dataType: "json",
     success: (res) => {
       if (res.status) {
-        $("#IdTipo").html(res.data.tipoMovimiento).trigger("change");
-        $("#sucursal_origen").html(res.data.sucursales).trigger("change");
-        $("#sucursal_destino").html(res.data.sucursales).trigger("change");
-        $("#autorizador").html(res.data.autorizador).trigger("change");
+        $("#IdTipoMovimientoMov")
+          .html(res.data.tipoMovimiento)
+          .trigger("change");
+        $("#CodAutorizador").html(res.data.autorizador).trigger("change");
+        $("#IdSucursalOrigen").html(res.data.sucursales).trigger("change");
+        $("#IdSucursalDestino").html(res.data.sucursales).trigger("change");
+        // $("#ambiente_destino").html(res.data.ambientes).trigger("change");
+        // $("#usuario_destino").html(res.data.responsable).trigger("change");
 
-        $("#sucursal_origen, #sucursal_destino, #IdTipo, #autorizador").select2(
-          {
-            theme: "bootstrap4",
-            dropdownParent: $("#ModalMovimiento .modal-body"),
-            width: "100%",
-          }
-        );
+        $(
+          "#IdTipoMovimientoMov, #CodAutorizador, #IdSucursalOrigen, #IdSucursalDestino, #ambiente_destino, #usuario_destino"
+        ).select2({
+          theme: "bootstrap4",
+          //dropdownParent: $("#ModalMovimiento .modal-body"),
+          width: "100%",
+        });
       } else {
         Swal.fire(
           "Movimiento de activos",
@@ -372,6 +474,8 @@ function ListarCombos() {
     },
   });
 }
+
+// Function lis
 
 // Listar movimientos en una tabla DataTable
 function listarMovimientos() {
