@@ -112,7 +112,7 @@ switch ($action) {
             ]);
         }
         break;
-        
+
     case 'get_activo':
         try {
             $filtros = [
@@ -243,6 +243,28 @@ switch ($action) {
         }
         break;
 
+
+    // Listar activos para el modal de movimientos
+
+    case 'ListarParaMovimiento':
+        try {
+            $resultados = $activos->consultarActivos([]);
+            // Mapeo flexible para los nombres de campos
+            $data = array_map(function ($row) {
+                return [
+                    'IdActivo'  => $row['IdActivo'] ?? $row['idActivo'] ?? null,
+                    'Codigo'    => $row['Codigo'] ?? $row['CodigoActivo'] ?? null,
+                    'Nombre'    => $row['Nombre'] ?? $row['NombreArticulo'] ?? null,
+                    'Marca'     => $row['Marca'] ?? $row['MarcaArticulo'] ?? null,
+                    'Sucursal'  => $row['Sucursal'] ?? null,
+                    'Ambiente'  => $row['Ambiente'] ?? null
+                ];
+            }, $resultados ?: []);
+            echo json_encode(['data' => $data]);
+        } catch (Exception $e) {
+            echo json_encode(['data' => [], 'error' => $e->getMessage()]);
+        }
+        break;
     default:
         echo json_encode(['status' => false, 'message' => 'Acción no válida.']);
         break;

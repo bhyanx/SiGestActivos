@@ -155,17 +155,359 @@ session_start();
                                 </div>
                             </div>
                         </div>
-                        <!-- Aquí puedes agregar los modales para registrar/editar movimientos y detalles, igual que en tu estructura actual -->
-                        <?php //require_once("modals_movimientos.php"); 
-                        ?>
+                        <div class="col-12" id="divgenerarmov">
+                            <div class="card card-primary">
+                                <div class="card-header">
+                                    <h3 class="card-title"><i class="fas fa-building"></i> Generar Movimiento:</h3>
+                                </div>
+                                <!-- /.card-header -->
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-12" id="divfiltros">
+                                            <div class="row">
+                                                <!-- <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="cod_empresa">Empresa:</label>
+                                                        <select name="cod_empresa" id="cod_empresa" class="form-control">
+                                                        </select>
+                                                    </div>
+                                                </div> -->
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="tipo_mov">Tipo de Movimiento:</label>
+                                                        <select name="tipo_mov" id="tipo_mov" class="form-control"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group"><label for="cod_autorizador">Autorizador:</label><select name="cod_autorizador" id="cod_autorizador" class="form-control"></select></div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="IdSucursalSalida">Sucursal salida:</label>
+                                                        <select name="IdSucursalSalida" id="IdSucursalSalida" class="form-control">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="IdSucursalDestino">Sucursal Destino:</label>
+                                                        <select name="IdSucursalDestino" id="IdSucursalDestino" class="form-control"></select>
+                                                    </div>
+                                                </div>
+
+                                                <!-- <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="codAlmacen">Almacen:</label>
+                                                        <select name="codAlmacen" id="codAlmacen" class="form-control">
+                                                        </select>
+                                                    </div>
+                                                </div> -->
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">&nbsp;</label>
+                                                        <button type="button" class="btn btn-danger btn-block" id="btncancelarempresa">
+                                                            <i class="fas fa-reply"></i> Cancelar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">&nbsp;</label>
+                                                        <button type="button" class="btn btn-primary btn-block" id="btnprocesarempresa">
+                                                            <i class="fas fa-sync"></i> Procesar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="overlay" id="overlayart" style="display: none;">
+                                </div>
+                                <!-- /.card-body -->
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="divregistroMovimiento">
+                            <div class=" alert alert-info alert-dismissible">
+                                <span id="lbldatossucmovimiento"></span>
+                                <button type="button" class="close btn" id="btnchangedatasucmovimiento"><i class="fas fa-undo-alt"></i></button>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title"><i class="fas fa-file-alt"></i> Datos de salida:</h3>
+                                            <div class="card-tools">
+                                                <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                                                    <i class="fas fa-expand"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="sucursal_origen">Sucursal de donde sale:</label>
+                                                                <select class="form-control" name="sucursal_origen" id="sucursal_origen" required></select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <div class="form-group">
+                                                                <label for="usuario_origen">Usuario que realiza el movimiento:</label>
+                                                                <input type="text" class="form-control" name="usuario_origen" id="usuario_origen" value="<?php echo $_SESSION['PrimerNombre'] . ' ' . $_SESSION['ApellidoPaterno'] . ' ' . $_SESSION['ApellidoMaterno']; ?>" readonly>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="fecha_salida">Fecha de salida:</label>
+                                                                <input type="date" class="form-control" name="fecha_salida" id="fecha_salida" value="<?php echo date('Y-m-d'); ?>" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="hora_salida">Hora de salida:</label>
+                                                                <input type="time" class="form-control" name="hora_salida" id="hora_salida" value="<?php echo date('H:i'); ?>" required>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="overlay dark" id="overlay" style="display: none;">
+                                            <i class="fas fa-2x fa-sync-alt"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title"><i class="fas fa-file-alt"></i> Datos de salida:</h3>
+                                            <div class="card-tools">
+                                                <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                                                    <i class="fas fa-expand"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="sucursal_destino">Sucursal destino:</label>
+                                                                <select class="form-control" name="sucursal_destino" id="sucursal_destino" required></select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="usuario_destino">Usuario que recibe:</label>
+                                                            <input type="text" class="form-control" name="usuario_destino" id="usuario_destino" placeholder="Usuario destino">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="fecha_ingreso">Fecha de ingreso:</label>
+                                                                <input type="date" class="form-control" name="fecha_ingreso" id="fecha_ingreso" value="<?php echo date('Y-m-d'); ?>" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="hora_ingreso">Hora de ingreso:</label>
+                                                                <input type="time" class="form-control" name="hora_ingreso" id="hora_ingreso" value="<?php echo date('H:i'); ?>" required>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="overlay dark" id="overlay" style="display: none;">
+                                            <i class="fas fa-2x fa-sync-alt"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <!-- /.card-header -->
+                                    <div class="card-header">
+                                        <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Detalle Movimiento de activos</h3>
+                                        <div class="card-tools">
+                                            <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                                                <i class="fas fa-expand"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <!-- /.card-body -->
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="row">
+                                                    <div class="col-md-5 col-lg-4 col-xl-4">
+                                                        <div class="form-group">
+                                                            <label for="">
+                                                                Buscar Activo:&nbsp;
+                                                                <!-- <div class="custom-control custom-radio custom-control-inline">
+                                                                    <input type="radio" id="radioproducto" name="radiotipodetalle" class="custom-control-input" value="P" checked>
+                                                                    <label class="custom-control-label" for="radioproducto">Producto</label>
+                                                                </div> -->
+                                                                <!-- <div class="custom-control custom-radio custom-control-inline d-none">
+                                                                    <input type="radio" id="radioservicio" name="radiotipodetalle" class="custom-control-input" value="S" disabled>
+                                                                    <label class="custom-control-label" for="radioservicio">Servicio</label>
+                                                                </div> -->
+                                                            </label>
+                                                            <div class="input-group">
+                                                                <input type="text" name="txtbuscarartid" id="txtbuscarartid" placeholder="ID de Activo" class="form-control">
+                                                                <div class="input-group-append">
+                                                                    <button class="btn" type="button" id="btnBuscarIdItem"><i class="fa fa-plus"></i></button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-1 col-lg-1 col-xl-1">
+                                                        <div class="form-group">
+                                                            <label for="">Listar Art.</label>
+                                                            <button class="btn btn-primary btn-block btnagregardet" type="button">
+                                                                <i class="fa fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12" id="divdetalle">
+                                                <hr>
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <h5>Detalles</h5>
+                                                    </div>
+                                                </div>
+                                                <div class="table-responsive">
+                                                    <table id="tbldetalleactivomov" class="table table-hover table-bordered table-striped table-sm w-100">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>ID</th>
+                                                                <th>Código</th>
+                                                                <th>Nombre</th>
+                                                                <th>Marca</th>
+                                                                <th>Sucursal</th>
+                                                                <th>Ambiente</th>
+                                                                <th>Acción</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th colspan="9" style="text-align: right;" class="bg-<?= $_SESSION['TemaColor'] ?>">TOTAL DETALLE &nbsp;&nbsp;</th>
+                                                                <!-- <th style="text-align: right;"></th> -->
+                                                                <th class="text-center bg-<?= $_SESSION['TemaColor'] ?>">
+                                                                    <span id="TotalSinIgV">0.00</span>
+                                                                </th>
+
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 mt-3">
+                                <div class="card">
+                                    <div class="card-footer">
+                                        <div class="row">
+                                            <div class="col-12 col-md-6 mb-2 mb-md-0">
+                                                <button type="button" class="btn btn-danger btn-sm btn-block" id="btncancelarficha">
+                                                    <i class="fa fa-times"></i> Cerrar
+                                                </button>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <button type="button" class="btn btn-primary btn-sm btn-block" id="btnGuardarOC">
+                                                    <i class="fa fa-check"></i> Guardar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- Modal Articulos -->
+                            <div class="modal fade" id="ModalArticulos" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalArticulosTitle">
+                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header dragable_touch">
+                                            <h5 class="modal-title" id="ModalArticulosTitulo"><i class="fas fa-box"></i> Lista de artículos</h5>
+                                            <button class="close" data-dismiss="modal" aria-label="Close">
+                                                <span>&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="table-responsive">
+
+                                                        <table id="tbllistarActivos" class="table table-bordered table-striped display nowrap" style="width:100%">
+                                                            <thead>
+                                                                <tr>
+
+                                                                    <th>Id</th>
+                                                                    <!-- <th>Código</th> -->
+                                                                    <th>Nombre</th>
+                                                                    <th>Marca</th>
+                                                                    <th>Sucursal</th>
+                                                                    <th>Ambiente</th>
+                                                                    <th><i class="fa fa-cogs"></i></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <!-- Aquí se llenarán los datos dinámicamente -->
+                                                            </tbody>
+                                                            <tfoot>
+                                                                <tr>
+                                                                    <th>Id</th>
+                                                                    <!-- <th>Código</th> -->
+                                                                    <th>Nombre</th>
+                                                                    <th>Marca</th>
+                                                                    <th>Sucursal</th>
+                                                                    <th>Ambiente</th>
+                                                                    <th><i class="fa fa-cogs"></i></th>
+                                                                </tr>
+                                                            </tfoot>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
-                </div>
             </section>
         </div>
         <?php require_once("../Layouts/Footer.php"); ?>
         <script src="movimiento.js"></script>
     </div>
-    <script>
+
+    <!-- SCRIPT REMOVIDO PARA EL ARCHIVO JS -->
+    <!-- <script>
         $(document).ready(function() {
             $('#frmbusqueda').on('submit', function(e) {
                 e.preventDefault();
@@ -174,7 +516,7 @@ session_start();
                 if (typeof listarMovimientos === 'function') listarMovimientos();
             });
         });
-    </script>
+    </script> -->
 </body>
 
 </html>
