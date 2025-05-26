@@ -5,6 +5,7 @@ class TestConexion extends Conectar {
     public function probarConexion() {
         try {
             $conexion = $this->ConexionBdPracticante();
+            // $conexion = $this->ConexionBdPruebas();
             if ($conexion) {
                 echo "Conexión exitosa a la base de datos.";
             } else {

@@ -17,7 +17,7 @@ session_start();
 
         <?php require_once("../Layouts/Head-Body.php") ?>
 
-        <?php require_once("../Layouts/SideBar.php") ?>
+        <?php require_once("../Layouts/SideBar.php") ?>4
 
         <div class="content-wrapper">
             <!-- Content Header (Page header) -->
@@ -54,7 +54,7 @@ session_start();
                                 <p>Total Activos</p>
                             </div>
                             <div class="icon">
-                                <i class="fas fa-file-invoice-dollar"></i>
+                                <i class="fas fa-box"></i>
                             </div>
                             <a href="#" class="small-box-footer">Más Detalles <i class="fas fa-arrow-circle-right"></i></a>
                         </div>
@@ -63,10 +63,10 @@ session_start();
                         <div class="small-box bg-warning shadow">
                             <div class="inner">
                                 <h3 id="lblcantidadoperativos">0</h3>
-                                <p>Total Operativos</p>
+                                <p>Activos Operativos</p>
                             </div>
                             <div class="icon">
-                                <i class="fas fa-file-alt"></i>
+                                <i class="fas fa-clipboard-check"></i>
                             </div>
                             <a href="#" class="small-box-footer">Más Detalles <i class="fas fa-arrow-circle-right"></i></a>
                         </div>
@@ -75,10 +75,10 @@ session_start();
                         <div class="small-box bg-danger shadow">
                             <div class="inner">
                                 <h3 id="lblcantidadactivosmantenimiento">0</h3>
-                                <p>Total en Mantenimiento</p>
+                                <p>Activos Mantenimiento</p>
                             </div>
                             <div class="icon">
-                                <i class="far fa-bell"></i>
+                                <i class="fas fa-gears"></i>
                             </div>
                             <a href="#" class="small-box-footer">Más Detalles <i class="fas fa-arrow-circle-right"></i></a>
                         </div>
@@ -87,10 +87,10 @@ session_start();
                         <div class="small-box bg-info shadow">
                             <div class="inner">
                                 <h3 class="lblvalortotalactivos">0</h3>
-                                <p>Total valor de activos</p>
+                                <p>Valor total de activos</p>
                             </div>
                             <div class="icon">
-                               <i class="far fa-bell"></i>
+                               <i class="fas fa-chart-line"></i>
                             </div>
                             <a href="#" class="small-box-footer">Más Detalles <i class="fas fa-arrow-circle-right"></i></a>
                         </div>

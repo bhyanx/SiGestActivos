@@ -36,9 +36,8 @@ if (!$tienePermiso) {
 <!-- Preloader -->
 
 <div class="preloader flex-column justify-content-center align-items-center">
-    <img class="animation__shake" src="/public/img/Logo-Lubriseng.png" alt="AdminLTELogo" style="width: 50%">
+    <img class="rotate-loader" src="/public/img/Logo-Lubriseng.png" alt="AdminLTELogo" style="width: 50%">
     <i class="fas fa-5x fa-sync-alt"></i>
-
 </div>
 
 <div class="preloader flex-column justify-content-center align-items-center">

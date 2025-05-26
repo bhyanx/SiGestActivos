@@ -13,6 +13,7 @@ class Conectar
     {
         try {
             $conexion = new PDO("sqlsrv:Server=192.168.1.35;Database=bdActivos", "practsistAlfa", "Calichin2025");
+            // $conexion = new PDO("sqlsrv:Server=BHYANX;Database=bdActivos", "", "");
             $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $conexion;
         } catch (PDOException $e) {
@@ -21,16 +22,9 @@ class Conectar
         }
     }
 
-    public function ConexionBdPruebas()
-    {
-        try {
-            $conectar = $this->dbh = new PDO("sqlsrv:Server=DESKTOP-5QKJ7QK;Database=SiGestActivos", "", "");
-            return $conectar;
-        } catch (Exception $e) {
-            echo "Error en cadena de conexión ConexionBdPruebas: " . $e->getMessage();
-            die();
-        }
-    }
+    // public function ConexionBdLocal(){
+    //    $conexion = new PDO("sqlsrv:Server=BHYANX;Database=bdActivos", "", ""); 
+    // }
 
     public static function ruta()
     {
