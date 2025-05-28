@@ -15,10 +15,22 @@ function init() {
     }
   );
 
-  $(document).on("click", "#btnBuscarIdItem, .btnagregardet", function () {
-    $("#ModalArticulos").modal("show");
-    listarActivosModal();
+  // ...existing code...
+
+  $(document).on("click", "#btnBuscarDocIngreso", function () {
+    let docIngreso = $("#inputDocIngresoAlm").val().trim();
+    console.log("Data enviada a listarActivo:", docIngreso); // <-- aquí
+    if (!docIngreso) {
+      mostrarNotificacionModalActivos(
+        "Ingrese el Doc. Ingreso Almacén",
+        "danger"
+      );
+      return;
+    }
+    listarActivosModal(docIngreso);
   });
+
+  // ...existing code...
 
   $("#btnchangedatasucmovimiento")
     .off("click")
@@ -34,8 +46,10 @@ function init() {
         cancelButtonText: "No, continuar aquí",
       }).then((result) => {
         if (result.isConfirmed) {
-          $("#divregistroMovimiento").hide(); //seis
-          $("#divgenerarmov").show();
+          $("#divregistroMovimiento").hide();
+          $("#divlistadomovimientos").show();
+          $("#divtblactivos").show();
+          $("#tblRegistros").show();
         }
       });
     });
@@ -56,7 +70,7 @@ function init() {
         '<i class="fa fa-plus-circle"></i> Registrar Movimiento'
       );
       $("#frmMovimiento")[0].reset();
-      $("#ModalMovimiento").modal("show");
+      $("#ModalArticulos").modal("show");
     });
 
   // Botón procesar en generarmov
@@ -91,11 +105,19 @@ function init() {
   // Al buscar, mostrar la tabla y ocultar formularios
   $("#frmbusqueda").on("submit", function (e) {
     e.preventDefault();
-    $("#divtblactivos").show();
+
+    $("#divtblactivos").show(); // Asegura que el contenedor esté visible
     $("#divgenerarmov").hide();
-    $("#divregistroMovimiento").hide(); //cinco
+    $("#divregistroMovimiento").hide();
     $("#divlistadomovimientos").show();
-    if (typeof listarMovimientos === "function") listarMovimientos();
+
+    if ($.fn.DataTable.isDataTable("#tblRegistros")) {
+      $("#tblRegistros").DataTable().clear().destroy();
+    }
+
+    setTimeout(() => {
+      listarActivosTable();
+    }, 100); // Espera breve para asegurar visibilidad
   });
 
   // Botón para abrir modal de nuevo movimiento
@@ -222,6 +244,48 @@ function init() {
 
   $(document).on("click", ".btnQuitarActivo", function () {
     $(this).closest("tr").remove();
+  });
+}
+
+function listarActivosModal(docIngresoAlm) {
+  if ($.fn.DataTable.isDataTable("#tbllistarActivos")) {
+    $("#tbllistarActivos").DataTable().clear().destroy();
+  }
+  $("#tbllistarActivos").DataTable({
+    dom: "Bfrtip",
+    responsive: false,
+    destroy: true,
+    ajax: {
+      url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc",
+      type: "POST",
+      dataType: "json",
+      data: { IdDocIngresoAlm: docIngresoAlm },
+      dataSrc: function (json) {
+        console.log("Respuesta del backend: ", json);
+        return json.data || [];
+      },
+    },
+    columns: [
+      { data: "IdArticulo" },
+      { data: "Nombre" },
+      { data: "Marca" },
+      { data: "IdEmpresa" },
+      { data: "IdUnidadNegocio" },
+      { data: "NombreLocal" },
+      {
+        data: null,
+        render: function (data, type, row) {
+          return (
+            '<button class="btn btn-success btn-sm btnSeleccionarActivo" data-id="' +
+            row.IdArticulo +
+            '"><i class="fa fa-check"></i></button>'
+          );
+        },
+      },
+    ],
+    language: {
+      url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+    },
   });
 }
 
@@ -503,7 +567,7 @@ function listarActivosTable() {
       { data: "Sucursal" },
       { data: "Proveedor" },
       { data: "Estado" },
-      { data: "valorSoles"}
+      { data: "valorSoles" },
     ],
     language: {
       url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
@@ -517,39 +581,39 @@ function listarActivosTable() {
   });
 }
 
-function listarActivosModal() {
-  $("#tbllistarActivos").DataTable({
-    dom: "Bfrtip",
-    responsive: false,
-    destroy: true,
-    ajax: {
-      url: "../../controllers/GestionarActivosController.php?action=ListarParaMovimiento",
-      type: "POST",
-      dataType: "json",
-      dataSrc: function (json) {
-        return json.data || [];
-      },
-    },
-    columns: [
-      { data: "IdActivo" },
-      //{ data: "Codigo" },
-      { data: "Nombre" },
-      { data: "Marca" },
-      { data: "Sucursal" },
-      { data: "Ambiente" },
-      {
-        data: null,
-        render: function (data, type, row) {
-          return (
-            '<button class="btn btn-success btn-sm btnSeleccionarActivo" data-id="' +
-            row.IdActivo +
-            '"><i class="fa fa-check"></i></button>'
-          );
-        },
-      },
-    ],
-    language: {
-      url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
-    },
-  });
-}
+// function listarActivosModal() {
+//   $("#tbllistarActivos").DataTable({
+//     dom: "Bfrtip",
+//     responsive: false,
+//     destroy: true,
+//     ajax: {
+//       url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc",
+//       type: "POST",
+//       dataType: "json",
+//       dataSrc: function (json) {
+//         return json.data || [];
+//       },
+//     },
+//     columns: [
+//       { data: "IdArticulo" },
+//       { data: "Nombre" },
+//       { data: "Marca" },
+//       { data: "IdEmpresa" },
+//       { data: "IdUnidadNegocio" },
+//       { data: "NombreLocal" },
+//       {
+//         data: null,
+//         render: function (data, type, row) {
+//           return (
+//             '<button class="btn btn-success btn-sm btnSeleccionarActivo" data-id="' +
+//             row.IdActivo +
+//             '"><i class="fa fa-check"></i></button>'
+//           );
+//         },
+//       },
+//     ],
+//     language: {
+//       url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+//     },
+//   });
+// }

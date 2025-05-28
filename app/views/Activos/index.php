@@ -269,37 +269,23 @@ session_start();
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-md-12">
-                                                <div class="row">
-                                                    <div class="col-md-5 col-lg-4 col-xl-4">
-                                                        <div class="form-group">
-                                                            <label for="">
-                                                                Buscar Activo:&nbsp;
-                                                                <!-- <div class="custom-control custom-radio custom-control-inline">
-                                                                    <input type="radio" id="radioproducto" name="radiotipodetalle" class="custom-control-input" value="P" checked>
-                                                                    <label class="custom-control-label" for="radioproducto">Producto</label>
-                                                                </div> -->
-                                                                <!-- <div class="custom-control custom-radio custom-control-inline d-none">
-                                                                    <input type="radio" id="radioservicio" name="radiotipodetalle" class="custom-control-input" value="S" disabled>
-                                                                    <label class="custom-control-label" for="radioservicio">Servicio</label>
-                                                                </div> -->
-                                                            </label>
-                                                            <div class="input-group">
-                                                                <input type="text" name="txtbuscarartid" id="txtbuscarartid" placeholder="ID de Activo" class="form-control">
-                                                                <div class="input-group-append">
-                                                                    <button class="btn" type="button" id="btnBuscarIdItem"><i class="fa fa-plus"></i></button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-1 col-lg-1 col-xl-1">
-                                                        <div class="form-group">
-                                                            <label for="">Listar Art.</label>
-                                                            <button class="btn btn-primary btn-block btnagregardet" type="button">
-                                                                <i class="fa fa-search"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                <!-- ...existing code... -->
+<div class="row mb-2">
+    <div class="col-md-5 col-lg-4 col-xl-4">
+        <div class="form-group">
+            <label for="inputDocIngresoAlm">
+                Doc. Ingreso Almacén:&nbsp;
+            </label>
+            <div class="input-group">
+                <input type="text" id="inputDocIngresoAlm" placeholder="ID de Doc. Ingreso" class="form-control">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="button" id="btnBuscarDocIngreso"><i class="fa fa-search"></i> Buscar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ...la tabla aquí... -->
                                             </div>
                                             <div class="col-md-12" id="divdetalle">
                                                 <hr>

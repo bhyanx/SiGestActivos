@@ -214,6 +214,7 @@ switch ($action) {
         }
         break;
 
+    //Case para el modal y agregar 
     case 'articulos_por_doc':
         try {
             $db = (new Conectar())->ConexionBdPracticante(); // Usar bdActivos
@@ -223,25 +224,40 @@ switch ($action) {
             }
 
             $stmt = $db->prepare("
-                SELECT ing.idDocIngAlmacen AS IdDocIngresoAlm, ing.IdArticulo, a.Descripcion_articulo AS Nombre
-                FROM vListadoDeArticulosPorDocIngresoAlmacen ing
-                INNER JOIN vArticulos a ON ing.IdArticulo = a.IdArticulo
-                WHERE ing.idDocIngAlmacen = ?
-                ORDER BY a.Descripcion_articulo
-            ");
+            SELECT 
+        ing.idDocIngAlmacen AS IdDocIngresoAlm,
+        ing.idarticulo AS IdArticulo, -- <-- Cambia aquí el alias
+        a.Descripcion_articulo AS Nombre,
+        a.DescripcionMarca AS Marca,
+        ing.Cod_Empresa AS IdEmpresa,
+        ing.cod_UnidadNeg AS IdUnidadNegocio,
+        ing.Nombre_local AS NombreLocal
+    FROM vListadoDeArticulosPorDocIngresoAlmacen ing
+    INNER JOIN vArticulos a ON ing.IdArticulo = a.IdArticulo
+    WHERE ing.idDocIngAlmacen = ?
+    ORDER BY a.Descripcion_articulo;
+        ");
             $stmt->execute([$IdDocIngresoAlm]);
-            $articulos = '<option value="">Seleccione</option>';
+            $articulos = [];
             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $articulos .= "<option value='{$row['IdArticulo']}'>{$row['Nombre']}</option>";
+                $articulos[] = [
+                    'IdArticulo' => $row['IdArticulo'],
+                    'Nombre'     => $row['Nombre'],
+                    'Marca'      => $row['Marca'] ?? '',
+                    'IdEmpresa'  => $row['IdEmpresa'] ?? '',
+                    'IdUnidadNegocio' => $row['IdUnidadNegocio'],
+                    'NombreLocal' => $row['NombreLocal'],
+                ];
             }
 
-            error_log("Artículos por doc: IdDocIngresoAlm=$IdDocIngresoAlm, Resultados=" . substr($articulos, 0, 100), 3, __DIR__ . '/../../logs/debug.log');
-            echo json_encode(['status' => true, 'data' => ['articulos' => $articulos], 'message' => 'Artículos cargados correctamente.']);
+            error_log("Artículos por doc: IdDocIngresoAlm=$IdDocIngresoAlm, Resultados=" . json_encode($articulos), 3, __DIR__ . '/../../logs/debug.log');
+            echo json_encode(['status' => true, 'data' => $articulos, 'message' => 'Artículos cargados correctamente.']);
         } catch (Exception $e) {
             error_log("Error Artículos por doc: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             echo json_encode(['status' => false, 'message' => 'Error al cargar artículos: ' . $e->getMessage()]);
         }
         break;
+    // ...existing code...
 
 
     // Listar activos para el modal de movimientos
