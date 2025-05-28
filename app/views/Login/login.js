@@ -1,78 +1,133 @@
 let tabla;
 
 function init() {
-    $("#login_form").on("submit", function(e){
-        Login(e);
-    })
+  ListarCombosEmpresa("CodEmpresas");
+  $("#login_form").on("submit", function (e) {
+    Login(e);
+  });
+
+  // Cuando cambia la empresa, cargar las unidades de negocio correspondientes
+  $("#CodEmpresas").on("change", function () {
+    let codEmpresa = $(this).val();
+    $.ajax({
+      url: "../../controllers/UsuarioController.php?action=unidadnegocio",
+      type: "POST",
+      data: { cod_empresa: codEmpresa },
+      dataType: "json",
+      success: function (res) {
+        if (res.status) {
+          $("#CodUnidadNegocio").html(res.data).trigger("change");
+        } else {
+          $("#CodUnidadNegocio").html('<option value="">Seleccione</option>');
+        }
+      },
+      error: function () {
+        $("#CodUnidadNegocio").html('<option value="">Seleccione</option>');
+      },
+    });
+  });
 }
 
-function Login(e){
-    e.preventDefault();
+function ListarCombosEmpresa(elemento) {
+  $.ajax({
+    url: "../../controllers/UsuarioController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    async: false,
 
-    let usuario = $("#CodUsuario").val();
-    let clave = $("#ClaveAcceso").val();
+    success: (res) => {
+      if (res.status) {
+        $(`#${elemento}`).html(res.data.empresas).trigger("change");
+      } else {
+        Swal.fire(
+          "Filtro de movimientos",
+          "No se pudieron cargar los combos: " + res.message,
+          "warning"
+        );
+      }
+    },
+    error: (xhr, status, error) => {
+      Swal.fire(
+        "Filtros de movimientos",
+        "Error al cargar combos: " + error,
+        "error"
+      );
+    },
+  });
+}
 
-    if (!usuario || !clave){
-        Swal.fire({
-            icon: 'warning',
-            title: 'Atención',
-            text: 'Por favor complete todos los campos'
-        });
-        return;
-    }
+function Login(e) {
+  e.preventDefault();
 
+  let usuario = $("#CodUsuario").val();
+  let clave = $("#ClaveAcceso").val();
+  let codEmpresa = $("#CodEmpresas").val();
+  let codUnidadNegocio = $("#CodUnidadNegocio").val();
+
+  if (!usuario || !clave) {
     Swal.fire({
-        title: 'Validando sus datos',
-        timerProgressBar: true,
-        didOpen: () => {
-            Swal.showLoading()
-        }
+      icon: "warning",
+      title: "Atención",
+      text: "Por favor complete todos los campos",
     });
+    return;
+  }
 
-    $.ajax({
-        url: "/app/controllers/UsuarioController.php?action=AccesoUsuario",
-        type: "POST",
-        data: {
-            CodUsuario: usuario,
-            ClaveAcceso: clave
-        },
-        dataType: 'json',
-        success: function(data){
-            if(data.status){
-                // Asegurarse de que la URL sea absoluta
-                if(data.msg.startsWith('/')){
-                    window.location.href = data.msg;
-                } else {
-                    window.location.href = '/' + data.msg;
-                }
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: data.msg
-                });
-            }
-        },
-        error: function(xhr, status, error){
-            let errorMessage = 'Ocurrió un error al procesar la solicitud';
-            try {
-                // Try to get a meaningful error message if possible
-                const response = xhr.responseText;
-                if (response.includes('<br />')) {
-                    // If it's an HTML error, show a generic message
-                    errorMessage = 'Error en el servidor. Por favor contacte al administrador.';
-                }
-            } catch (e) {
-                console.error('Error parsing response:', e);
-            }
-            
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: errorMessage
-            });
-            console.error('Server Response:', xhr.responseText);
+  Swal.fire({
+    title: "Validando sus datos",
+    timerProgressBar: true,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+  });
+
+  $.ajax({
+    url: "/app/controllers/UsuarioController.php?action=AccesoUsuario",
+    type: "POST",
+    data: {
+      CodUsuario: usuario,
+      ClaveAcceso: clave,
+      CodEmpresa: codEmpresa,
+      CodUnidadNegocio: codUnidadNegocio
+    },
+    dataType: "json",
+    success: function (data) {
+      if (data.status) {
+        // Asegurarse de que la URL sea absoluta
+        if (data.msg.startsWith("/")) {
+          window.location.href = data.msg;
+        } else {
+          window.location.href = "/" + data.msg;
         }
-    });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: data.msg,
+        });
+      }
+    },
+    error: function (xhr, status, error) {
+      let errorMessage = "Ocurrió un error al procesar la solicitud";
+      try {
+        // Try to get a meaningful error message if possible
+        const response = xhr.responseText;
+        if (response.includes("<br />")) {
+          // If it's an HTML error, show a generic message
+          errorMessage =
+            "Error en el servidor. Por favor contacte al administrador.";
+        }
+      } catch (e) {
+        console.error("Error parsing response:", e);
+      }
+
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: errorMessage,
+      });
+      console.error("Server Response:", xhr.responseText);
+    },
+  });
 }
 init();

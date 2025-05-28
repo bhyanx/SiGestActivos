@@ -185,6 +185,7 @@ session_start();
                                                     <div class="form-group">
                                                         <label for="IdSucursalOrigen">Sucursal salida:</label>
                                                         <select name="IdSucursalOrigen" id="IdSucursalOrigen" class="form-control">
+                                                            <option value="<?php echo $_SESSION['idSucursal']; ?>" selected><?php echo $_SESSION['SucursalNombre']; ?></option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -213,7 +214,7 @@ session_start();
                                                 <div class="col-md-2">
                                                     <div class="form-group">
                                                         <label for="">&nbsp;</label>
-                                                        <button type="button" class="btn btn-primary btn-block" id="btnprocesarempresa">
+                                                        <button type="button" class="btn btn-primary btn-block" id="btnprocesarempresa" onclick="$('#IdTipoMovimiento').val($('#IdTipoMovimientoMov').val()); $('#IdAutorizador').val($('#CodAutorizador').val());">
                                                             <i class="fas fa-sync"></i> Procesar
                                                         </button>
                                                     </div>
@@ -222,18 +223,21 @@ session_start();
                                         </div>
                                     </div>
                                 </div>
-                                <div class="overlay" id="overlayart" style="display: none;">
+                                
                                 </div>
                                 <!-- /.card-body -->
                             </div>
                         </div>
 
                         <div class="col-12" id="divregistroMovimiento">
-                            <div class=" alert alert-info alert-dismissible">
-                                <span id="lbldatossucmovimiento"></span>
-                                <button type="button" class="close btn" id="btnchangedatasucmovimiento"><i class="fas fa-undo-alt"></i></button>
-                            </div>
-                            <div class="row">
+                                    <div class=" alert alert-info alert-dismissible">
+                                        <span id="lbldatossucmovimiento"></span>
+                                        <span id="lblautorizador"></span>
+                                        <button type="button" class="close btn" id="btnchangedatasucmovimiento"><i class="fas fa-undo-alt"></i></button>
+                                        <input type="hidden" name="IdTipoMovimiento" id="IdTipoMovimiento">
+                                        <input type="hidden" name="IdAutorizador" id="IdAutorizador">
+                                    </div>
+                                    <div class="row">
                                 <div class="col-md-6">
                                     <div class="card card-primary">
                                         <div class="card-header">

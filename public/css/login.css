@@ -100,7 +100,7 @@ html, body {
     background-color: var(--gray-800);
     border: 1px solid var(--gray-700);
     color: white;
-    padding: var(--space-4) var(--space-4) var(--space-4) var(--space-4);
+    /* padding: var(--space-4) var(--space-4) var(--space-4) var(--space-4); */
     font-size: 1rem;
     border-radius: var(--radius-lg);
     transition: border var(--transition) var(--ease), background var(--transition) var(--ease);

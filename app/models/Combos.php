@@ -78,23 +78,27 @@ WHERE estado = 1";
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public function comboRol(){
+    public function comboRol()
+    {
         $sql = "SELECT IdRol, NombreRol FROM tRoles WHERE Estado = 1";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function comboEmpresa()
+    {
+        $sql = "SELECT cod_empresa, Razon_empresa FROM vEmpresas";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function comboUnidadNegocio($codEmpresa)
+    {
+        $sql = "SELECT cod_UnidadNeg, Nombre_local FROM vUnidadesdeNegocio WHERE Cod_Empresa = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$codEmpresa]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }
-
-
-// $stmt = $db->query("SELECT IdCategoria, Nombre FROM tCategoriasActivo ORDER BY Nombre");
-//             $combos['categorias'] = '<option value="">Seleccione</option>';
-//             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-//                 $combos['categorias'] .= "<option value='{$row['IdCategoria']}'>{$row['Nombre']}</option>";
-//             }
-
-// $stmt = $db->query("SELECT IdProveedor, Nombre FROM tProveedor ORDER BY Nombre");
-//             $combos['proveedores'] = '<option value="">Seleccione</option>';
-//             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-//                 $combos['proveedores'] .= "<option value='{$row['IdProveedor']}'>{$row['Nombre']}</option>";
-//             }

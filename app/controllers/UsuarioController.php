@@ -5,6 +5,7 @@ require_once '../models/Usuarios.php';
 require_once '../models/Combos.php';
 
 $usuario = new Usuarios();
+$combo = new Combos();
 
 $action = $_GET['action'] ?? $_POST['action'] ?? 'Consultar';
 
@@ -19,15 +20,15 @@ switch ($action) {
         $datos = $usuario->login($_POST["CodUsuario"], $_POST["ClaveAcceso"]);
         if ($datos && is_array($datos)) {
             $row = $datos[0];
-            
+
             // Limpiar sesión anterior
             session_unset();
             session_destroy();
             session_start();
-            
+
             // Debug - Verificar datos antes de guardar en sesión
             error_log("Datos a guardar en sesión: " . print_r($row, true));
-            
+
             // Guardar datos en la sesión
             $_SESSION["CodUsuario"] = $row["CodUsuario"] ?? '';
             $_SESSION["CodEmpleado"] = $row["CodEmpleado"] ?? '';
@@ -39,15 +40,30 @@ switch ($action) {
             $_SESSION["SegundoNombre"] = $row["SegundoNombre"] ?? '';
             $_SESSION["ApellidoPaterno"] = $row["ApellidoPaterno"] ?? '';
             $_SESSION["ApellidoMaterno"] = $row["ApellidoMaterno"] ?? '';
-            
+
+
+            // En tu controlador, después del login exitoso:
+            $_SESSION['cod_empresa'] = $_POST['CodEmpresa'] ?? '';
+            $_SESSION['cod_UnidadNeg'] = $_POST['CodUnidadNegocio'] ?? '';
+
+            // Luego usa el modelo para obtener los nombres:
+            $_SESSION['Razon_empresa'] = !empty($_SESSION['cod_empresa'])
+                ? $usuario->obtenerNombreEmpresa($_SESSION['cod_empresa'])
+                : '';
+
+            $_SESSION['Nombre_local'] = !empty($_SESSION['cod_UnidadNeg'])
+                ? $usuario->obtenerNombreUnidadNegocio($_SESSION['cod_UnidadNeg'])
+                : '';
+
             // Debug - Verificar datos guardados en sesión
             error_log("Datos guardados en sesión: " . print_r($_SESSION, true));
-            
+            // error_log("Datos de login: " . print_r($row, true));
+
             // Cargar los permisos del usuario
             $datapermisos = $usuario->leerMenuRol($_SESSION['IdRol']);
             if (is_array($datapermisos) && count($datapermisos) > 0) {
                 $_SESSION['Permisos'] = $datapermisos;
-                
+
                 // Verificar si el usuario tiene permisos para acceder
                 $tienePermisos = false;
                 foreach ($datapermisos as $permiso) {
@@ -102,10 +118,40 @@ switch ($action) {
         }
         break;
 
+    case "combos":
+        try {
+            // Empresas
+            $empresas = $combo->comboEmpresa();
+            $combos['empresas'] = '<option value="">Seleccione</option>';
+            foreach ($empresas as $row) {
+                $combos['empresas'] .= "<option value='{$row['cod_empresa']}'>{$row['Razon_empresa']}</option>";
+            }
+
+
+            error_log("Combos generados: " . print_r($combos, true), 3, __DIR__ . '/../../logs/debug.log');
+            echo json_encode(['status' => true, 'data' => $combos, 'message' => 'Combos cargados correctamente.']);
+        } catch (\PDOException) {
+            error_log("Error Combos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode(['status' => false, 'message' => 'Error al cargar combos: ' . $e->getMessage()]);
+        }
+        break;
+
+    case "unidadnegocio":
+        try {
+            $codEmpresa = $_POST['cod_empresa'] ?? '';
+            $unidadNegocio = $combo->comboUnidadNegocio($codEmpresa);
+            $comboUnidad = '<option value="">Seleccione</option>';
+            foreach ($unidadNegocio as $row) {
+                $comboUnidad .= "<option value='{$row['cod_UnidadNeg']}'>{$row['Nombre_local']}</option>";
+            }
+            echo json_encode(['status' => true, 'data' => $comboUnidad]);
+        } catch (\PDOException $e) {
+            echo json_encode(['status' => false, 'message' => 'Error al cargar unidades de negocio: ' . $e->getMessage()]);
+        }
+        break;
+
     default:
         $result = array('status' => false, 'msg' => 'No se encontraron permisos para el usuario');
         echo json_encode($result);
         break;
 }
-
-?>

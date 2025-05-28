@@ -39,7 +39,7 @@ if (!isset($_SESSION["IdRol"])) {
                         <div class="form-group">
                             <div class="input-container">
                                 <i class="fa-solid fa-building input-icon"></i>
-                                <select name="CodEmpresa" id="CodEmpresa" class="form-input" placeholder="Empresa" require></select>
+                                <select name="CodEmpresas" id="CodEmpresas" class="form-input" placeholder="Empresa" require></select>
                             </div>
                         </div>
 

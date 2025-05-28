@@ -64,6 +64,8 @@ switch ($action) {
                     'IdActivo' => $_POST['IdActivo'],
                     'IdSucursal_Nueva' => $_POST['IdSucursalDestino'],
                     'IdAmbiente_Nueva' => $_POST['IdAmbienteDestino'],
+                    'IdTipo_Movimiento' => $_POST['IdTipoMovimiento'],
+                    'IdAutorizador' => $_POST['IdAutorizador'],
                     // Agrega aquí otros campos si los necesitas
                 ];
                 $movimientos->crearDetalleMovimiento($detalle);

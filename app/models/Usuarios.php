@@ -56,6 +56,24 @@ LEFT JOIN tRoles r ON u.IdRol = r.IdRol");
         }
     }
 
+    public function obtenerNombreEmpresa($cod_empresa)
+    {
+        $sql = "SELECT Razon_empresa FROM vEmpresas WHERE cod_empresa = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$cod_empresa]);
+        $empresa = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $empresa['Razon_empresa'] ?? '';
+    }
+
+    public function obtenerNombreUnidadNegocio($cod_UnidadNeg)
+    {
+        $sql = "SELECT Nombre_local FROM vUnidadesdeNegocio WHERE cod_UnidadNeg = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$cod_UnidadNeg]);
+        $unidad = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $unidad['Nombre_local'] ?? '';
+    }
+
     public function listarPorCodUsuario($IdCodUsuario)
     {
         try {

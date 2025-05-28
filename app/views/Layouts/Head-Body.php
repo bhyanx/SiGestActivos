@@ -57,12 +57,11 @@ if (!$tienePermiso) {
         </li>
     </ul>
 
+
     <div class="user-panel d-flex">
-        <div class="image">
-            <i class="fa fa-user fa-lg text-light" style="padding-left: 7px"></i>
-        </div>
         <div class="info">
-            <span class="d-block text-light text-sm">
+            <span class="text-light text-sm">
+                <i class="fa fa-user"></i>
                 <?php
                 if (isset($_SESSION["NombreTrabajador"]) && !empty($_SESSION["NombreTrabajador"])) {
                     echo $_SESSION["NombreTrabajador"];
@@ -80,9 +79,20 @@ if (!$tienePermiso) {
                     echo $_SESSION["CodUsuario"];
                 }
                 ?>
+                <?php
+                $empresa = $_SESSION["Razon_empresa"] ?? "";
+                $unidad = $_SESSION["Nombre_local"] ?? "";
+                if ($empresa) {
+                    echo "  |  <i class='fa fa-building'>  </i> <span class='text-sm'>" . $empresa . "</span>";
+                }
+                if ($unidad) {
+                    echo "  |  <i class='fa fa-city'>  </i> <span class='text-sm'>" . $unidad . "</span>";
+                }
+                ?>
             </span>
         </div>
     </div>
+
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">

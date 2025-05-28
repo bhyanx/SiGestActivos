@@ -20,6 +20,7 @@ switch ($_GET['op']){
         }
         break;
 
+
     case "listar" :
         $datos = $rol->get_Rol();
         $data = Array();
@@ -130,8 +131,3 @@ switch ($_GET['op']){
 }   
 
 ?>
- [IdRol]
-      ,[NombreRol]
-      ,[Estado]
-      ,[UserUpdate]
-      ,[FechaUpdate]

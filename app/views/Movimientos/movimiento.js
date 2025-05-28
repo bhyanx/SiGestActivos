@@ -62,6 +62,13 @@ function init() {
     .on("click", function () {
       $("#divregistroMovimiento").show();
       $("#divgenerarmov").hide();
+
+      // Transferir valores de los combos
+      $("#IdTipoMovimiento").val($("#IdTipoMovimientoMov").val());
+      var autorizadorNombre = $("#CodAutorizador option:selected").text();
+      $("#IdAutorizador").val($("#CodAutorizador").val());
+      $("#lblautorizador").text("Autorizador: " + autorizadorNombre);
+
       // Opcional: limpiar el formulario
       $("#frmMovimiento")[0].reset();
     });
