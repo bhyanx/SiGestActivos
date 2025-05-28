@@ -86,7 +86,7 @@ session_start();
                                 </div>
                             </form>
                         </div>
-                        <div class="col-12" id="divtblmovimientos" style="display: none;">
+                        <div class="col-12" id="divtblactivos" style="display: none;">
                             <div class="card">
                                 <div class="card-header">
                                     <h3 class="card-title"><i class="fa fa-list"></i> Lista de Movimientos Realizados</h3>
@@ -94,7 +94,7 @@ session_start();
                                 <div class="dataTables_wrapper dt-bootstrap4">
                                     <div class="card-body">
                                         <div class="row">
-                                            <div class="col-sm-12 col-md-6"></div>
+                                            <div class=""></div>
                                         </div>
                                         <div class="col-sm-12">
                                             <div class="table-responsive">

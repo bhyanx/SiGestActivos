@@ -34,7 +34,7 @@ function init() {
         cancelButtonText: "No, continuar aquí",
       }).then((result) => {
         if (result.isConfirmed) {
-          $("#divregistroMovimiento").hide();
+          $("#divregistroMovimiento").hide(); //seis
           $("#divgenerarmov").show();
         }
       });
@@ -42,14 +42,15 @@ function init() {
 
   // Ocultar secciones al cargar
   $("#divgenerarmov").hide();
-  $("#divregistroMovimiento").hide();
+  $("#divregistroMovimiento").hide(); //uno
 
   // Botón para abrir el panel de generación de movimiento
   $("#btnnuevo")
     .off("click")
     .on("click", function () {
-      $("#divregistroMovimiento").show();
-      $("#divtblmovimientos").hide();
+      $("#divregistroMovimiento").show(); //dos
+      $("#tblRegistros").hide();
+      $("#divtblactivos").hide();
       $("#divlistadomovimientos").hide(); // Oculta el formulario de búsqueda
       $("#tituloModalMovimiento").html(
         '<i class="fa fa-plus-circle"></i> Registrar Movimiento'
@@ -62,7 +63,7 @@ function init() {
   $("#btnprocesarempresa")
     .off("click")
     .on("click", function () {
-      $("#divregistroMovimiento").show();
+      $("#divregistroMovimiento").show(); //tres
       $("#divgenerarmov").hide();
       // Opcional: limpiar el formulario
       $("#frmMovimiento")[0].reset();
@@ -74,7 +75,7 @@ function init() {
     .off("click")
     .on("click", function () {
       $("#divgenerarmov").hide();
-      $("#divtblmovimientos").show();
+      $("#divtblactivos").show();
       $("#divlistadomovimientos").show(); // Muestra el formulario de búsqueda
     });
 
@@ -82,17 +83,17 @@ function init() {
   $("#btnCancelarMovimiento")
     .off("click")
     .on("click", function () {
-      $("#divregistroMovimiento").hide();
-      $("#divtblmovimientos").show();
+      $("#divregistroMovimiento").hide(); //cuatro
+      $("#divtblactivos").show();
       $("#divlistadomovimientos").show();
     });
 
   // Al buscar, mostrar la tabla y ocultar formularios
   $("#frmbusqueda").on("submit", function (e) {
     e.preventDefault();
-    $("#divtblmovimientos").show();
+    $("#divtblactivos").show();
     $("#divgenerarmov").hide();
-    $("#divregistroMovimiento").hide();
+    $("#divregistroMovimiento").hide(); //cinco
     $("#divlistadomovimientos").show();
     if (typeof listarMovimientos === "function") listarMovimientos();
   });
