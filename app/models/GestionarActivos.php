@@ -44,21 +44,21 @@ class GestionarActivos
     public function registrarActivos($data)
     {
         try {
-            $stmt = $this->db->prepare('EXEC sp_GuardarActivo
-                @pIdActivo = ?,
-                @pIdDocIngresoAlm = ?,
-                @pIdArticulo = ?,
-                @pCodigo = ?,
-                @pSerie = ?,
-                @pIdEstado = ?,
+            $stmt = $this->db->prepare('EXEC sp_GuardarActivo 
+                @pIdActivo = ?, 
+                @pIdDocIngresoAlm = ?, 
+                @pIdArticulo = ?, 
+                @pCodigo = ?, 
+                @pSerie = ?, 
+                @pIdEstado = 1, 
                 @pGarantia = ?, 
                 @pFechaFinGarantia = ?, 
                 @pIdProveedor = ?, 
                 @pObservaciones = ?, 
-                @pIdSucursal = ?, 
+                @pIdSucursal = 1, 
                 @pIdAmbiente = ?, 
-                @pIdCategoria = ?, 
-                @pVidaUtil = ?, 
+                @pIdCategoria = 1, 
+                @pVidaUtil = 2, 
                 @pValorAdquisicion = ?, 
                 @pFechaAdquisicion = ?, 
                 @pUserMod = ?, 

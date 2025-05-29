@@ -41,7 +41,7 @@ switch ($action) {
                     'IdArticulo' => $_POST['IdArticulo'],
                     'Codigo' => $_POST['Codigo'],
                     'Serie' => $_POST['Serie'],
-                    'IdEstado' => 1, // Setting default value for IdEstado
+                    'IdEstado' => $_POST['IdEstado'],
                     'Garantia' => $_POST['Garantia'],
                     'FechaFinGarantia' => $_POST['FechaFinGarantia'],
                     'IdProveedor' => $_POST['IdProveedor'],
@@ -54,25 +54,6 @@ switch ($action) {
                     'FechaAdquisicion' => $_POST['FechaAdquisicion'],
                     'UserMod' => $_SESSION['CodEmpleado']
                 ];
-
-                // 1. Get the necessary data from the POST request
-                $IdCategoria = $_POST['IdCategoria'];
-                $IdSucursal = $_POST['IdSucursal'];
-                $CodEmpleado = $_SESSION['CodEmpleado'];
-
-                // 2. Generate the EMP, CCC, and UBI components
-                $EMP = 'LUB'; // Assuming default LUB for Lubriseng.  This should come from session or config
-                $CCC = $activos->getCategoriaCode($IdCategoria);
-
-                $UBI = $activos->getSucursalCode($IdSucursal);
-
-                // 3. Generate the NNNNN (sequential number)
-                $NNNNN = $activos->getNextSequentialNumber($EMP, $CCC);
-                // 4. Combine the components to create the Codigo
-                $Codigo = "$EMP-$CCC-$NNNNN-$UBI";
-
-                $data['Codigo'] = $Codigo;
-
                 $activos->registrarActivos($data);
                 echo json_encode(array('status' => true, 'message' => 'Activo registrado con Exito.'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
             } catch (Exception $e) {
@@ -81,6 +62,7 @@ switch ($action) {
             }
         }
         break;
+
 
     case 'Actualizar':
 

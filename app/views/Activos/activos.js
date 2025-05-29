@@ -228,7 +228,6 @@ function init() {
     e.preventDefault();
     // Obtener los datos del formulario
     var formData = new FormData($("#frmRegistroActivo")[0]);
-    formData.delete("Codigo"); // Remove Codigo from form data
 
     // 🔍 Mostrar datos enviados
     console.log("Datos enviados:");
