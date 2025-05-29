@@ -146,6 +146,8 @@ switch ($action) {
             }
 
             // Estados
+
+            //! CORRECCIÓN FALTANTE PARA QUE LISTE ESTADO DE ACTIVOS EN MI TABLA DE REGISTROS DE ACTIVOS CON EL MODAL
             $estados = $combo->comboEstadoActivo();
             $combos['estados'] = '<option value="">Seleccione</option>';
             foreach ($estados as $row) {
@@ -179,31 +181,6 @@ switch ($action) {
             foreach ($categorias as $row) {
                 $combos['categorias'] .= "<option value='{$row['IdCategoria']}'>{$row['Nombre']}</option>";
             }
-
-            // ANTERIOR MANEJO DE COMBOS
-            // $stmt = $db->query("SELECT IdAmbiente, Nombre FROM tAmbiente ORDER BY Nombre");
-            // $combos['ambientes'] = '<option value="">Seleccione</option>';
-            // foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            //     $combos['ambientes'] .= "<option value='{$row['IdAmbiente']}'>{$row['Nombre']}</option>";
-            // }
-
-            // $stmt = $db->query("SELECT IdEstadoActivo, Nombre FROM tEstadoActivo ORDER BY Nombre");
-            // $combos['estados'] = '<option value="">Seleccione</option>';
-            // foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            //     $combos['estados'] .= "<option value='{$row['IdEstadoActivo']}'>{$row['Nombre']}</option>";
-            // }
-
-            // $stmt = $db->query("SELECT IdCategoria, Nombre FROM tCategoriasActivo ORDER BY Nombre");
-            // $combos['categorias'] = '<option value="">Seleccione</option>';
-            // foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            //     $combos['categorias'] .= "<option value='{$row['IdCategoria']}'>{$row['Nombre']}</option>";
-            // }
-
-            // $stmt = $db->query("SELECT IdProveedor, Nombre FROM tProveedor ORDER BY Nombre");
-            // $combos['proveedores'] = '<option value="">Seleccione</option>';
-            // foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            //     $combos['proveedores'] .= "<option value='{$row['IdProveedor']}'>{$row['Nombre']}</option>";
-            // }
 
 
             error_log("Combos generados: " . print_r($combos, true), 3, __DIR__ . '/../../logs/debug.log');

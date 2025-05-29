@@ -109,6 +109,12 @@ switch ($action) {
                 $combos['ambientes'] .= "<option value='{$row['idAmbiente']}'>{$row['nombre']}</option>";
             }
 
+            $estadoActivo = $combo->comboEstadoActivo();
+            $combos['estado'] = '<option value="">Seleccione</option>';
+            foreach ($estadoActivo as $row) {
+                $combos['estado'] .= "<option value='{$row['idEstadoActivo']}'>{$row['nombre']}</option>";
+            }
+
             echo json_encode(['status' => true, 'data' => $combos, 'message' => 'Combos cargados correctamente.']);
         } catch (Exception $e) {
             echo json_encode(['status' => false, 'message' => 'Error al cargar combos: ' . $e->getMessage()]);

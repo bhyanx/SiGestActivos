@@ -194,14 +194,14 @@ session_start();
                                                     <table id="tbldetalleactivomov" class="table table-hover table-bordered table-striped table-sm w-100">
                                                         <thead>
                                                             <tr>
-                                                                <th>ID</th>
-                                                                <!-- <th>Código</th> -->
+                                                                <th>Id. Articulo</th>
                                                                 <th>Nombre</th>
                                                                 <th>Marca</th>
-                                                                <th>Sucursal</th>
+                                                                <th>Código</th>
+                                                                <th>Serie</th>
+                                                                <th>Estado</th>
                                                                 <th>Ambiente</th>
-                                                                <th>Ambiente Destino</th>
-                                                                <th>Responsable Destino</th>
+                                                                <th>Observaciones</th>
                                                                 <th>Acción</th>
                                                             </tr>
                                                         </thead>

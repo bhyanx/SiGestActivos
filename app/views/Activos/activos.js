@@ -15,20 +15,21 @@ function init() {
     }
   );
 
-
-  $(document).on("click", "#btnBuscarDocIngreso", function () { 
+  $(document).on("click", "#btnBuscarDocIngreso", function () {
     let docIngreso = $("#inputDocIngresoAlm").val().trim();
     console.log("Data enviada a listarActivo:", docIngreso);
 
     if (!docIngreso) {
-        mostrarNotificacionModalActivos("Ingrese el Doc. Ingreso Almacén", "danger");
-        return;
+      mostrarNotificacionModalActivos(
+        "Ingrese el Doc. Ingreso Almacén",
+        "danger"
+      );
+      return;
     }
 
     $("#ModalArticulos").modal("show"); // 👈 Abre el modal aquí
     listarActivosModal(docIngreso);
-});
-
+  });
 
   // ...existing code...
 
@@ -228,7 +229,7 @@ function init() {
       listarActivosModal(docIngreso);
     }
   });
-  
+
   // Botón para agregar otro activo (limpia el formulario de detalle)
   $("#btnAgregarOtroActivo").on("click", function () {
     $("#frmDetalleMovimiento")[0].reset();
@@ -313,27 +314,29 @@ function agregarActivoAlDetalle(activo) {
   }
   var numeroFilas = $("#tbldetalleactivomov").find("tbody tr").length;
 
-  // Usa el combo correcto que ya está poblado en el DOM
-  var opcionesAmbiente = $("#ambiente_destino").html(); // o el id correcto
-  var opcionesResponsable = $("#usuario_destino").html(); // o el id correcto
-
   var selectAmbienteDestino = `<select class='form-control form-control-sm ambiente-destino' name='ambiente_destino[]' id="comboAmbiente${numeroFilas}"></select>`;
-  var selectResponsableDestino = `<select class='form-control form-control-sm responsable-destino' name='responsable_destino[]' id="comboResponsable${numeroFilas}"></select>`;
+  var selectEstadoActivo = `<select class='form-control form-control-sm estado-activo' name='estado_activo[]' id="comboEstado${numeroFilas}"></select>`;
 
   var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
     <td>${activo.id}</td>
     <td>${activo.nombre}</td>
     <td>${activo.marca}</td>
-    <td>${activo.sucursal}</td>
-    <td>${activo.ambiente}</td>
+    <td><input type="text" class="form-control form-control-sm" name="codigo[]" placeholder="Codigo" disabled></td>
+    <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie"></td>
+    <td>${selectEstadoActivo}</td>
     <td>${selectAmbienteDestino}</td>
-    <td>${selectResponsableDestino}</td>
+    <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea>
+</td>
+    
     <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
   </tr>`;
   $("#tbldetalleactivomov tbody").append(nuevaFila);
   console.log(`comboAmbiente${numeroFilas}`);
   ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
-  ListarCombosResponsable(`comboResponsable${numeroFilas}`);
+  console.log(`comboEstado${numeroFilas}`);
+  ListarCombosEstado(`comboEstado${numeroFilas}`);
+
+  // ListarCombosResponsable(`comboResponsable${numeroFilas}`);
 
   setTimeout(function () {
     $("#tbldetalleactivomov tbody tr.agregado-temp").removeClass(
@@ -348,25 +351,56 @@ function agregarActivoAlDetalle(activo) {
   return true;
 }
 
-function ListarCombosResponsable(elemento) {
+// function ListarCombosResponsable(elemento) {
+//   $.ajax({
+//     url: "../../controllers/GestionarMovimientoController.php?action=combos",
+//     type: "POST",
+//     dataType: "json",
+//     async: false,
+
+//     success: (res) => {
+//       if (res.status) {
+//         $(`#${elemento}`).html(res.data.responsable).trigger("change");
+
+//         $(`#${elemento}`).select2({
+//           theme: "bootstrap4",
+//           //dropdownParent: $("#ModalFiltros .modal-body"),
+//           width: "100%",
+//         });
+//       } else {
+//         Swal.fire(
+//           "Filtro de movimientos",
+//           "No se pudieron cargar los combos: " + res.message,
+//           "warning"
+//         );
+//       }
+//     },
+//     error: (xhr, status, error) => {
+//       Swal.fire(
+//         "Filtros de movimientos",
+//         "Error al cargar combos: " + error,
+//         "error"
+//       );
+//     },
+//   });
+// }
+
+function ListarCombosEstado(elemento) {
   $.ajax({
     url: "../../controllers/GestionarMovimientoController.php?action=combos",
     type: "POST",
     dataType: "json",
     async: false,
-
     success: (res) => {
       if (res.status) {
-        $(`#${elemento}`).html(res.data.responsable).trigger("change");
-
+        $(`#${elemento}`).html(res.data.estado).trigger("change");
         $(`#${elemento}`).select2({
           theme: "bootstrap4",
-          //dropdownParent: $("#ModalFiltros .modal-body"),
           width: "100%",
         });
       } else {
         Swal.fire(
-          "Filtro de movimientos",
+          "Filtro de estados",
           "No se pudieron cargar los combos: " + res.message,
           "warning"
         );
@@ -374,7 +408,7 @@ function ListarCombosResponsable(elemento) {
     },
     error: (xhr, status, error) => {
       Swal.fire(
-        "Filtros de movimientos",
+        "Filtros de estados",
         "Error al cargar combos: " + error,
         "error"
       );
@@ -587,40 +621,3 @@ function listarActivosTable() {
     ],
   });
 }
-
-// function listarActivosModal() {
-//   $("#tbllistarActivos").DataTable({
-//     dom: "Bfrtip",
-//     responsive: false,
-//     destroy: true,
-//     ajax: {
-//       url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc",
-//       type: "POST",
-//       dataType: "json",
-//       dataSrc: function (json) {
-//         return json.data || [];
-//       },
-//     },
-//     columns: [
-//       { data: "IdArticulo" },
-//       { data: "Nombre" },
-//       { data: "Marca" },
-//       { data: "IdEmpresa" },
-//       { data: "IdUnidadNegocio" },
-//       { data: "NombreLocal" },
-//       {
-//         data: null,
-//         render: function (data, type, row) {
-//           return (
-//             '<button class="btn btn-success btn-sm btnSeleccionarActivo" data-id="' +
-//             row.IdActivo +
-//             '"><i class="fa fa-check"></i></button>'
-//           );
-//         },
-//       },
-//     ],
-//     language: {
-//       url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
-//     },
-//   });
-// }

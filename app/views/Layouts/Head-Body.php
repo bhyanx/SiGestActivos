@@ -118,7 +118,7 @@ if (!$tienePermiso) {
 
 
             <div class="dropdown-divider"></div>
-            <a href="../Logout/" class="dropdown-item dropdown-footer"><i class="fas fa-sign-out-alt"></i> Cerrar Sessión</a>
+            <a href="/app/views/Logout/" class="dropdown-item dropdown-footer"><i class="fas fa-sign-out-alt"></i> Cerrar Sessión</a>
         </div>
         </li>
     </ul>
