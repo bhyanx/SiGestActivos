@@ -143,116 +143,12 @@ session_start();
 
                         <div class="col-12" id="divregistroMovimiento">
                             <div class=" alert alert-info alert-dismissible">
-                                <span id="lbldatossucmovimiento"></span>
+                                <span id="lbldatossucmovimiento"> Guardar activos</span>
                                 <button type="button" class="close btn" id="btnchangedatasucmovimiento"><i class="fas fa-undo-alt"></i></button>
                             </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="card card-primary">
-                                        <div class="card-header">
-                                            <h3 class="card-title"><i class="fas fa-file-alt"></i> Datos de Origen:</h3>
-                                            <div class="card-tools">
-                                                <button type="button" class="btn btn-tool" data-card-widget="maximize">
-                                                    <i class="fas fa-expand"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                                    <i class="fas fa-minus"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="row">
-                                                        <div class="col-md-5">
-                                                            <div class="form-group">
-                                                                <label for="sucursal_origen">Sucursal origen:</label>
-                                                                <input class="form-control" name="sucursal_origen" id="sucursal_origen" readonly>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-7">
-                                                            <div class="form-group">
-                                                                <label for="usuario_origen">Usuario realizando el movimiento:</label>
-                                                                <input type="text" class="form-control" name="usuario_origen" id="usuario_origen" value="<?php echo $_SESSION['PrimerNombre'] . ' ' . $_SESSION['ApellidoPaterno'] . ' ' . $_SESSION['ApellidoMaterno']; ?>" readonly>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-md-6">
-                                                            <div class="form-group">
-                                                                <label for="fecha_salida">Fecha de salida:</label>
-                                                                <input type="date" class="form-control" name="fecha_salida" id="fecha_salida" value="<?php echo date('Y-m-d'); ?>" required readonly>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div class="form-group">
-                                                                <label for="hora_salida">Hora de salida:</label>
-                                                                <input type="time" class="form-control" name="hora_salida" id="hora_salida" value="<?php echo date('H:i'); ?>" required readonly>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="overlay dark" id="overlay" style="display: none;">
-                                            <i class="fas fa-2x fa-sync-alt"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card card-success">
-                                        <div class="card-header">
-                                            <h3 class="card-title"><i class="fas fa-file-alt"></i> Datos de Destino:</h3>
-                                            <div class="card-tools">
-                                                <button type="button" class="btn btn-tool" data-card-widget="maximize">
-                                                    <i class="fas fa-expand"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                                    <i class="fas fa-minus"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="row">
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="sucursal_destino">Sucursal destino:</label>
-                                                                <input class="form-control" name="sucursal_destino" id="sucursal_destino" readonly>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- <div class="form-group">
-                                                            <label for="usuario_destino">Usuario que recibe:</label>
-                                                            <select class="form-control" name="usuario_destino" id="usuario_destino" required></select>
-                                                        </div> -->
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-md-6">
-                                                            <div class="form-group">
-                                                                <label for="fecha_ingreso">Fecha de ingreso:</label>
-                                                                <input type="date" class="form-control" name="fecha_ingreso" id="fecha_ingreso" value="<?php echo date('Y-m-d'); ?>" required readonly>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div class="form-group">
-                                                                <label for="hora_ingreso">Hora de ingreso:</label>
-                                                                <input type="time" class="form-control" name="hora_ingreso" id="hora_ingreso" value="<?php echo date('H:i'); ?>" required readonly>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="overlay dark" id="overlay" style="display: none;">
-                                            <i class="fas fa-2x fa-sync-alt"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            
                             <div class="col-md-12">
-                                <div class="card card-warning">
+                                <div class="card card-success">
                                     <!-- /.card-header -->
                                     <div class="card-header">
                                         <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Detalle Movimiento de activos</h3>
@@ -270,22 +166,22 @@ session_start();
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <!-- ...existing code... -->
-<div class="row mb-2">
-    <div class="col-md-5 col-lg-4 col-xl-4">
-        <div class="form-group">
-            <label for="inputDocIngresoAlm">
-                Doc. Ingreso Almacén:&nbsp;
-            </label>
-            <div class="input-group">
-                <input type="text" id="inputDocIngresoAlm" placeholder="ID de Doc. Ingreso" class="form-control">
-                <div class="input-group-append">
-                    <button class="btn btn-primary" type="button" id="btnBuscarDocIngreso"><i class="fa fa-search"></i> Buscar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- ...la tabla aquí... -->
+                                                <div class="row mb-2">
+                                                    <div class="col-md-5 col-lg-4 col-xl-4">
+                                                        <div class="form-group">
+                                                            <label for="inputDocIngresoAlm">
+                                                                Doc. Ingreso Almacén:&nbsp;
+                                                            </label>
+                                                            <div class="input-group">
+                                                                <input type="text" id="inputDocIngresoAlm" placeholder="ID de Doc. Ingreso" class="form-control">
+                                                                <div class="input-group-append">
+                                                                    <button class="btn btn-primary" type="button" id="btnBuscarDocIngreso"><i class="fa fa-search"></i> Buscar</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- ...la tabla aquí... -->
                                             </div>
                                             <div class="col-md-12" id="divdetalle">
                                                 <hr>
@@ -367,13 +263,12 @@ session_start();
                                                         <table id="tbllistarActivos" class="table table-bordered table-striped display nowrap" style="width:100%">
                                                             <thead>
                                                                 <tr>
-
                                                                     <th>Id</th>
-                                                                    <!-- <th>Código</th> -->
                                                                     <th>Nombre</th>
                                                                     <th>Marca</th>
-                                                                    <th>Sucursal</th>
-                                                                    <th>Ambiente</th>
+                                                                    <th>Empresa</th>
+                                                                    <th>Id.Unidad Negocio</th>
+                                                                    <th>Nombre Local</th>
                                                                     <th><i class="fa fa-cogs"></i></th>
                                                                 </tr>
                                                             </thead>
@@ -383,11 +278,11 @@ session_start();
                                                             <tfoot>
                                                                 <tr>
                                                                     <th>Id</th>
-                                                                    <!-- <th>Código</th> -->
                                                                     <th>Nombre</th>
                                                                     <th>Marca</th>
-                                                                    <th>Sucursal</th>
-                                                                    <th>Ambiente</th>
+                                                                    <th>Empresa</th>
+                                                                    <th>Id.Unidad Negocio</th>
+                                                                    <th>Nombre Local</th>
                                                                     <th><i class="fa fa-cogs"></i></th>
                                                                 </tr>
                                                             </tfoot>
@@ -399,7 +294,6 @@ session_start();
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
             </section>

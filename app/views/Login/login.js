@@ -10,7 +10,7 @@ function init() {
   $("#CodEmpresas").on("change", function () {
     let codEmpresa = $(this).val();
     $.ajax({
-      url: "../../controllers/UsuarioController.php?action=unidadnegocio",
+      url: "/app/controllers/UsuarioController.php?action=unidadnegocio",
       type: "POST",
       data: { cod_empresa: codEmpresa },
       dataType: "json",
@@ -30,7 +30,7 @@ function init() {
 
 function ListarCombosEmpresa(elemento) {
   $.ajax({
-    url: "../../controllers/UsuarioController.php?action=combos",
+    url: "/app/controllers/UsuarioController.php?action=combos",
     type: "POST",
     dataType: "json",
     async: false,

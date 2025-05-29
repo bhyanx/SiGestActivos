@@ -15,20 +15,20 @@ function init() {
     }
   );
 
-  // ...existing code...
 
-  $(document).on("click", "#btnBuscarDocIngreso", function () {
+  $(document).on("click", "#btnBuscarDocIngreso", function () { 
     let docIngreso = $("#inputDocIngresoAlm").val().trim();
-    console.log("Data enviada a listarActivo:", docIngreso); // <-- aquí
+    console.log("Data enviada a listarActivo:", docIngreso);
+
     if (!docIngreso) {
-      mostrarNotificacionModalActivos(
-        "Ingrese el Doc. Ingreso Almacén",
-        "danger"
-      );
-      return;
+        mostrarNotificacionModalActivos("Ingrese el Doc. Ingreso Almacén", "danger");
+        return;
     }
+
+    $("#ModalArticulos").modal("show"); // 👈 Abre el modal aquí
     listarActivosModal(docIngreso);
-  });
+});
+
 
   // ...existing code...
 
@@ -222,6 +222,13 @@ function init() {
     });
   });
 
+  $("#ModalArticulos").on("shown.bs.modal", function () {
+    let docIngreso = $("#inputDocIngresoAlm").val().trim();
+    if (docIngreso) {
+      listarActivosModal(docIngreso);
+    }
+  });
+  
   // Botón para agregar otro activo (limpia el formulario de detalle)
   $("#btnAgregarOtroActivo").on("click", function () {
     $("#frmDetalleMovimiento")[0].reset();
@@ -269,7 +276,7 @@ function listarActivosModal(docIngresoAlm) {
       { data: "IdArticulo" },
       { data: "Nombre" },
       { data: "Marca" },
-      { data: "IdEmpresa" },
+      { data: "Empresa" },
       { data: "IdUnidadNegocio" },
       { data: "NombreLocal" },
       {

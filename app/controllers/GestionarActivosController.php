@@ -226,14 +226,15 @@ switch ($action) {
             $stmt = $db->prepare("
             SELECT 
         ing.idDocIngAlmacen AS IdDocIngresoAlm,
-        ing.idarticulo AS IdArticulo, -- <-- Cambia aquí el alias
+        ing.idarticulo AS IdArticulo, 
         a.Descripcion_articulo AS Nombre,
         a.DescripcionMarca AS Marca,
-        ing.Cod_Empresa AS IdEmpresa,
+		e.Razon_empresa AS Empresa,
         ing.cod_UnidadNeg AS IdUnidadNegocio,
         ing.Nombre_local AS NombreLocal
     FROM vListadoDeArticulosPorDocIngresoAlmacen ing
     INNER JOIN vArticulos a ON ing.IdArticulo = a.IdArticulo
+	LEFT JOIN vEmpresas e ON ing.Cod_Empresa = e.cod_empresa 
     WHERE ing.idDocIngAlmacen = ?
     ORDER BY a.Descripcion_articulo;
         ");
@@ -244,7 +245,7 @@ switch ($action) {
                     'IdArticulo' => $row['IdArticulo'],
                     'Nombre'     => $row['Nombre'],
                     'Marca'      => $row['Marca'] ?? '',
-                    'IdEmpresa'  => $row['IdEmpresa'] ?? '',
+                    'Empresa'  => $row['Empresa'] ?? '',
                     'IdUnidadNegocio' => $row['IdUnidadNegocio'],
                     'NombreLocal' => $row['NombreLocal'],
                 ];
