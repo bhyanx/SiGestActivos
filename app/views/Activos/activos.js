@@ -33,7 +33,7 @@ function init() {
 
   // ...existing code...
 
-  $("#btnchangedatasucmovimiento")
+  $("#btnvolverprincipal")
     .off("click")
     .on("click", function () {
       Swal.fire({
@@ -47,8 +47,8 @@ function init() {
         cancelButtonText: "No, continuar aquí",
       }).then((result) => {
         if (result.isConfirmed) {
-          $("#divregistroMovimiento").hide();
-          $("#divlistadomovimientos").show();
+          $("#divregistroActivo").hide();
+          $("#divlistadoactivos").show();
           $("#divtblactivos").show();
           $("#tblRegistros").show();
         }
@@ -57,16 +57,16 @@ function init() {
 
   // Ocultar secciones al cargar
   $("#divgenerarmov").hide();
-  $("#divregistroMovimiento").hide(); //uno
+  $("#divregistroActivo").hide(); //uno
 
   // Botón para abrir el panel de generación de movimiento
   $("#btnnuevo")
     .off("click")
     .on("click", function () {
-      $("#divregistroMovimiento").show(); //dos
+      $("#divregistroActivo").show(); //dos
       $("#tblRegistros").hide();
       $("#divtblactivos").hide();
-      $("#divlistadomovimientos").hide(); // Oculta el formulario de búsqueda
+      $("#divlistadoactivos").hide(); // Oculta el formulario de búsqueda
       $("#tituloModalMovimiento").html(
         '<i class="fa fa-plus-circle"></i> Registrar Movimiento'
       );
@@ -78,7 +78,7 @@ function init() {
   $("#btnprocesarempresa")
     .off("click")
     .on("click", function () {
-      $("#divregistroMovimiento").show(); //tres
+      $("#divregistroActivo").show(); //tres
       $("#divgenerarmov").hide();
       // Opcional: limpiar el formulario
       $("#frmMovimiento")[0].reset();
@@ -91,16 +91,16 @@ function init() {
     .on("click", function () {
       $("#divgenerarmov").hide();
       $("#divtblactivos").show();
-      $("#divlistadomovimientos").show(); // Muestra el formulario de búsqueda
+      $("#divlistadoactivos").show(); // Muestra el formulario de búsqueda
     });
 
   // Botón cancelar en registro de movimiento
   $("#btnCancelarMovimiento")
     .off("click")
     .on("click", function () {
-      $("#divregistroMovimiento").hide(); //cuatro
+      $("#divregistroActivo").hide(); //cuatro
       $("#divtblactivos").show();
-      $("#divlistadomovimientos").show();
+      $("#divlistadoactivos").show();
     });
 
   // Al buscar, mostrar la tabla y ocultar formularios
@@ -109,8 +109,8 @@ function init() {
 
     $("#divtblactivos").show(); // Asegura que el contenedor esté visible
     $("#divgenerarmov").hide();
-    $("#divregistroMovimiento").hide();
-    $("#divlistadomovimientos").show();
+    $("#divregistroActivo").hide();
+    $("#divlistadoactivos").show();
 
     if ($.fn.DataTable.isDataTable("#tblRegistros")) {
       $("#tblRegistros").DataTable().clear().destroy();
@@ -129,38 +129,6 @@ function init() {
   //   $("#frmMovimiento")[0].reset();
   //   $("#ModalMovimiento").modal("show");
   // });
-
-  // Guardar movimiento principal
-  $("#frmMovimiento").on("submit", function (e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-
-    $.ajax({
-      url: "../../controllers/GestionarMovimientoController.php?action=RegistrarMovimientoSolo",
-      type: "POST",
-      data: formData,
-      contentType: false,
-      processData: false,
-      dataType: "json",
-      success: function (res) {
-        if (res.status) {
-          // Guardar el ID del movimiento para el detalle
-          $("#IdMovimientoDetalle").val(res.idMovimiento);
-          // Autocompletar campos de destino en el modal de detalle
-          setSucursalOrigenDestino();
-          setDestinoDetalle();
-          $("#ModalMovimiento").modal("hide");
-          $("#frmDetalleMovimiento")[0].reset();
-          $("#ModalDetalleMovimiento").modal("show");
-        } else {
-          Swal.fire("Error", res.message, "error");
-        }
-      },
-      error: function () {
-        Swal.fire("Error", "No se pudo registrar el movimiento.", "error");
-      },
-    });
-  });
 
   // Al abrir el modal de detalle, autocompleta los campos de destino
   $("#ModalDetalleMovimiento").on("show.bs.modal", function () {
@@ -209,6 +177,7 @@ function init() {
       dataType: "json",
       success: function (res) {
         if (res.status) {
+          console.log("Server response:", res); // Add this line
           Swal.fire("Éxito", "Activo agregado al movimiento", "success");
           // Limpia solo el select de activo y los campos visuales
           $("#IdActivo").val("").trigger("change");
@@ -252,6 +221,45 @@ function init() {
 
   $(document).on("click", ".btnQuitarActivo", function () {
     $(this).closest("tr").remove();
+  });
+
+  // Guardar Activo
+  $("#btnGuardarActivo").on("click", function (e) {
+    e.preventDefault();
+    // Obtener los datos del formulario
+    var formData = new FormData($("#frmRegistroActivo")[0]);
+    formData.delete("Codigo"); // Remove Codigo from form data
+
+    // 🔍 Mostrar datos enviados
+    console.log("Datos enviados:");
+    for (var pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+    }
+
+    // Realizar la petición AJAX
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=Registrar",
+      type: "POST",
+      data: formData,
+      contentType: false,
+      processData: false,
+      dataType: "json",
+      success: function (res) {
+        if (res.status) {
+          Swal.fire("Éxito", res.message, "success");
+          $("#frmRegistroActivo")[0].reset();
+        } else {
+          Swal.fire("Error", res.message, "error");
+        }
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        Swal.fire(
+          "Error",
+          "Error al registrar el activo: " + errorThrown,
+          "error"
+        );
+      },
+    });
   });
 }
 
@@ -305,41 +313,39 @@ function setSucursalOrigenDestino() {
 }
 
 function agregarActivoAlDetalle(activo) {
-  if ($(`#tbldetalleactivomov tbody tr[data-id='${activo.id}']`).length > 0) {
+  if ($(`#tbldetalleactivoreg tbody tr[data-id='${activo.id}']`).length > 0) {
     NotificacionToast(
       "error",
       `El activo <b>${activo.nombre}</b> ya está en el detalle.`
     );
     return false;
   }
-  var numeroFilas = $("#tbldetalleactivomov").find("tbody tr").length;
+  var numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
 
   var selectAmbienteDestino = `<select class='form-control form-control-sm ambiente-destino' name='ambiente_destino[]' id="comboAmbiente${numeroFilas}"></select>`;
-  var selectEstadoActivo = `<select class='form-control form-control-sm estado-activo' name='estado_activo[]' id="comboEstado${numeroFilas}"></select>`;
+  var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
 
   var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
     <td>${activo.id}</td>
     <td>${activo.nombre}</td>
     <td>${activo.marca}</td>
-    <td><input type="text" class="form-control form-control-sm" name="codigo[]" placeholder="Codigo" disabled></td>
+    <td><input type="text" class="form-control form-control-sm" name="codigo[]" placeholder="Codigo"></td>
     <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie"></td>
-    <td>${selectEstadoActivo}</td>
+    <td>${inputEstadoActivo}</td>
     <td>${selectAmbienteDestino}</td>
     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea>
 </td>
     
     <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
   </tr>`;
-  $("#tbldetalleactivomov tbody").append(nuevaFila);
+  $("#tbldetalleactivoreg tbody").append(nuevaFila);
   console.log(`comboAmbiente${numeroFilas}`);
   ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
-  console.log(`comboEstado${numeroFilas}`);
-  ListarCombosEstado(`comboEstado${numeroFilas}`);
 
   // ListarCombosResponsable(`comboResponsable${numeroFilas}`);
 
   setTimeout(function () {
-    $("#tbldetalleactivomov tbody tr.agregado-temp").removeClass(
+    $("#tbldetalleactivoreg tbody tr.agregado-temp").removeClass(
       "table-success agregado-temp"
     );
   }, 1000);
@@ -387,7 +393,7 @@ function agregarActivoAlDetalle(activo) {
 
 function ListarCombosEstado(elemento) {
   $.ajax({
-    url: "../../controllers/GestionarMovimientoController.php?action=combos",
+    url: "../../controllers/GestionarActivosController.php?action=combos",
     type: "POST",
     dataType: "json",
     async: false,
@@ -418,7 +424,7 @@ function ListarCombosEstado(elemento) {
 
 function ListarCombosAmbiente(elemento) {
   $.ajax({
-    url: "../../controllers/GestionarMovimientoController.php?action=combos",
+    url: "../../controllers/GestionarActivosController.php?action=combos",
     type: "POST",
     dataType: "json",
     async: false,
@@ -512,7 +518,9 @@ function ListarCombosFiltros() {
         $("#filtroAmbiente").html(res.data.ambientes).trigger("change");
         // $("#filtroSucursalDestino").html(res.data.sucursales).trigger("change");
 
-        $("#filtroTipoMovimiento, #filtroSucursal, #filtroAmbiente").select2({
+        $(
+          "#filtroTipoMovimiento, #filtroSucursal, #filtroAmbiente , #filtroCategoria"
+        ).select2({
           theme: "bootstrap4",
           //dropdownParent: $("#ModalFiltros .modal-body"),
           width: "100%",

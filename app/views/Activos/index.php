@@ -36,7 +36,7 @@ session_start();
             <section class="content">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-10 offset-md-1 mb-4" id="divlistadomovimientos">
+                        <div class="col-md-10 offset-md-1 mb-4" id="divlistadoactivos">
                             <form action="#" method="post" id="frmbusqueda">
                                 <div class="row">
                                     <div class="col-md-12" id="divfiltros">
@@ -89,7 +89,7 @@ session_start();
                         <div class="col-12" id="divtblactivos" style="display: none;">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title"><i class="fa fa-list"></i> Lista de Movimientos Realizados</h3>
+                                    <h3 class="card-title"><i class="fa fa-list"></i> Lista de Activos Registrados</h3>
                                 </div>
                                 <div class="dataTables_wrapper dt-bootstrap4">
                                     <div class="card-body">
@@ -141,17 +141,17 @@ session_start();
                             </div>
                         </div>
 
-                        <div class="col-12" id="divregistroMovimiento">
+                        <div class="col-12" id="divregistroActivo">
                             <div class=" alert alert-info alert-dismissible">
-                                <span id="lbldatossucmovimiento"> Guardar activos</span>
-                                <button type="button" class="close btn" id="btnchangedatasucmovimiento"><i class="fas fa-undo-alt"></i></button>
+                                <span id="lbldatosactivo"> Guardar activos</span>
+                                <button type="button" class="close btn" id="btnvolverprincipal"><i class="fas fa-undo-alt"></i></button>
                             </div>
                             
                             <div class="col-md-12">
                                 <div class="card card-success">
                                     <!-- /.card-header -->
                                     <div class="card-header">
-                                        <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Detalle Movimiento de activos</h3>
+                                        <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Detalle Registro de activos</h3>
                                         <div class="card-tools">
                                             <button type="button" class="btn btn-tool" data-card-widget="maximize">
                                                 <i class="fas fa-expand"></i>
@@ -191,7 +191,7 @@ session_start();
                                                     </div>
                                                 </div>
                                                 <div class="table-responsive">
-                                                    <table id="tbldetalleactivomov" class="table table-hover table-bordered table-striped table-sm w-100">
+                                                    <table id="tbldetalleactivoreg" class="table table-hover table-bordered table-striped table-sm w-100">
                                                         <thead>
                                                             <tr>
                                                                 <th>Id. Articulo</th>
@@ -235,7 +235,7 @@ session_start();
                                                 </button>
                                             </div>
                                             <div class="col-12 col-md-6">
-                                                <button type="button" class="btn btn-primary btn-sm btn-block" id="btnGuardarOC">
+                                                <button type="button" class="btn btn-primary btn-sm btn-block" id="btnGuardarActivo">
                                                     <i class="fa fa-check"></i> Guardar
                                                 </button>
                                             </div>

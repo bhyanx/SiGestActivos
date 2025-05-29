@@ -66,7 +66,7 @@ switch ($action) {
                     'IdAmbiente_Nueva' => $_POST['IdAmbienteDestino'],
                     'IdTipo_Movimiento' => $_POST['IdTipoMovimiento'],
                     'IdAutorizador' => $_POST['IdAutorizador'],
-                    // Agrega aquí otros campos si los necesitas
+                    'estado_activo' => 'Operativa' // Agregamos el estado por defecto
                 ];
                 $movimientos->crearDetalleMovimiento($detalle);
                 echo json_encode(['status' => true]);

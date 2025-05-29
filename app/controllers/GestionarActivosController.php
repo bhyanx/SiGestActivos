@@ -41,7 +41,7 @@ switch ($action) {
                     'IdArticulo' => $_POST['IdArticulo'],
                     'Codigo' => $_POST['Codigo'],
                     'Serie' => $_POST['Serie'],
-                    'IdEstado' => $_POST['IdEstado'],
+                    'IdEstado' => 1, // Setting default value for IdEstado
                     'Garantia' => $_POST['Garantia'],
                     'FechaFinGarantia' => $_POST['FechaFinGarantia'],
                     'IdProveedor' => $_POST['IdProveedor'],
@@ -54,6 +54,25 @@ switch ($action) {
                     'FechaAdquisicion' => $_POST['FechaAdquisicion'],
                     'UserMod' => $_SESSION['CodEmpleado']
                 ];
+
+                // 1. Get the necessary data from the POST request
+                $IdCategoria = $_POST['IdCategoria'];
+                $IdSucursal = $_POST['IdSucursal'];
+                $CodEmpleado = $_SESSION['CodEmpleado'];
+
+                // 2. Generate the EMP, CCC, and UBI components
+                $EMP = 'LUB'; // Assuming default LUB for Lubriseng.  This should come from session or config
+                $CCC = $activos->getCategoriaCode($IdCategoria);
+
+                $UBI = $activos->getSucursalCode($IdSucursal);
+
+                // 3. Generate the NNNNN (sequential number)
+                $NNNNN = $activos->getNextSequentialNumber($EMP, $CCC);
+                // 4. Combine the components to create the Codigo
+                $Codigo = "$EMP-$CCC-$NNNNN-$UBI";
+
+                $data['Codigo'] = $Codigo;
+
                 $activos->registrarActivos($data);
                 echo json_encode(array('status' => true, 'message' => 'Activo registrado con Exito.'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
             } catch (Exception $e) {
@@ -145,45 +164,48 @@ switch ($action) {
                 $combos['docIngresoAlm'] .= "<option value='{$row['IdDocIngresoAlm']}'>{$row['IdDocIngresoAlm']}</option>";
             }
 
-            // Estados
-
-            //! CORRECCIÓN FALTANTE PARA QUE LISTE ESTADO DE ACTIVOS EN MI TABLA DE REGISTROS DE ACTIVOS CON EL MODAL
-            $estados = $combo->comboEstadoActivo();
-            $combos['estados'] = '<option value="">Seleccione</option>';
-            foreach ($estados as $row) {
-                $combos['estados'] .= "<option value='{$row['idEstadoActivo']}'>{$row['nombre']}</option>";
+            $tipoMovimiento = $combo->comboTipoMovimiento();
+            $combos['tipoMovimiento'] = '<option value="">Seleccione</option>';
+            foreach ($tipoMovimiento as $row) {
+                $combos['tipoMovimiento'] .= "<option value='{$row['idTipoMovimiento']}'>{$row['nombre']}</option>";
             }
 
-            // Proveedores
-            $proveedores = $combo->comboProveedor();
-            $combos['proveedores'] = '<option value="">Seleccione</option>';
-            foreach ($proveedores as $row) {
-                $combos['proveedores'] .= "<option value='{$row['Documento']}'>{$row['RazonSocial']}</option>";
-            }
-
-            // Sucursales
             $sucursales = $combo->comboSucursal();
             $combos['sucursales'] = '<option value="">Seleccione</option>';
             foreach ($sucursales as $row) {
-                $combos['sucursales'] .= "<option value='{$row['cod_UnidadNeg']}'>{$row['nombre']}</option>";
+                $combos['sucursales'] .= "<option value='{$row['idSucursal']}'>{$row['nombre']}</option>";
             }
 
-            // Ambientes
-            $ambientes = $combo->comboAmbiente();
-            $combos['ambientes'] = '<option value="">Seleccione</option>';
-            foreach ($ambientes as $row) {
-                $combos['ambientes'] .= "<option value='{$row['idAmbiente']}'>{$row['nombre']}</option>";
+            $autorizador = $combo->comboAutorizador();
+            $combos['autorizador'] = '<option value="">Seleccione</option>';
+            foreach ($autorizador as $row) {
+                $combos['autorizador'] .= "<option value='{$row['codTrabajador']}'>{$row['NombreTrabajador']}</option>";
             }
 
-            // Categorías
+            $responsable = $combo->comboResponsable();
+            $combos['responsable'] = '<option value="">Seleccione</option>';
+            foreach ($responsable as $row) {
+                $combos['responsable'] .= "<option value='{$row['codTrabajador']}'>{$row['NombreTrabajador']}</option>";
+            }
+
             $categorias = $combo->comboCategoria();
             $combos['categorias'] = '<option value="">Seleccione</option>';
             foreach ($categorias as $row) {
                 $combos['categorias'] .= "<option value='{$row['IdCategoria']}'>{$row['Nombre']}</option>";
             }
 
+            $ambientes = $combo->comboAmbiente();
+            $combos['ambientes'] = '<option value="">Seleccione</option>';
+            foreach ($ambientes as $row) {
+                $combos['ambientes'] .= "<option value='{$row['idAmbiente']}'>{$row['nombre']}</option>";
+            }
 
-            error_log("Combos generados: " . print_r($combos, true), 3, __DIR__ . '/../../logs/debug.log');
+            $estadoActivo = $combo->comboEstadoActivo();
+            $combos['estado'] = '<option value="">Seleccione</option>';
+            foreach ($estadoActivo as $row) {
+                $combos['estado'] .= "<option value='{$row['idEstadoActivo']}'>{$row['nombre']}</option>";
+            }
+
             echo json_encode(['status' => true, 'data' => $combos, 'message' => 'Combos cargados correctamente.']);
         } catch (Exception $e) {
             error_log("Error Combos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
