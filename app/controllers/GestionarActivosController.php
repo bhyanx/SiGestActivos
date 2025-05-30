@@ -35,47 +35,62 @@ switch ($action) {
     case 'Registrar':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
-                // Validar y convertir 'IdAmbiente' a NULL si está vacío
-                $idAmbiente = isset($_POST['IdAmbiente']) && $_POST['IdAmbiente'] !== '' ? $_POST['IdAmbiente'] : null;
+                // Obtener los datos del array de activos
+                $activosArray = json_decode($_POST['activos'], true);
+                if (!$activosArray) {
+                    throw new Exception("No se recibieron datos de activos válidos");
+                }
 
-                $data = [
-                    'IdActivo' => null,
-                    'IdDocIngresoAlm' => $_POST['IdDocIngresoAlm'],
-                    'IdArticulo' => $_POST['IdArticulo'],
-                    'Codigo' => $_POST['Codigo'],
-                    'Serie' => $_POST['Serie'],
-                    'IdEstado' => $_POST['IdEstado'],
-                    'Garantia' => $_POST['Garantia'],
-                    'FechaFinGarantia' => $_POST['FechaFinGarantia'],
-                    'IdProveedor' => $_POST['IdProveedor'],
-                    'Observaciones' => $_POST['Observaciones'],
-                    'IdSucursal' => $_POST['IdSucursal'],
-                    'IdAmbiente' => $idAmbiente,  // Aquí aplicamos el NULL si está vacío
-                    'IdCategoria' => $_POST['IdCategoria'],
-                    'VidaUtil' => $_POST['VidaUtil'],
-                    'ValorAdquisicion' => $_POST['ValorAdquisicion'],
-                    'FechaAdquisicion' => $_POST['FechaAdquisicion'],
-                    'UserMod' => $_SESSION['CodEmpleado']
-                ];
-                $activos->registrarActivos($data);
+                $resultados = [];
+                foreach ($activosArray as $activo) {
+                    // Formatear fechas
+                    $fechaFinGarantia = !empty($activo['FechaFinGarantia']) ? date('Y-m-d', strtotime($activo['FechaFinGarantia'])) : null;
+                    $fechaAdquisicion = !empty($activo['FechaAdquisicion']) ? date('Y-m-d', strtotime($activo['FechaAdquisicion'])) : date('Y-m-d');
+
+                    $data = [
+                        'IdActivo' => null,
+                        'IdDocIngresoAlm' => $activo['IdDocIngresoAlm'],
+                        'IdArticulo' => $activo['IdArticulo'],
+                        'Codigo' => null, // El SP generará el código automáticamente
+                        'Serie' => $activo['Serie'],
+                        'IdEstado' => $activo['IdEstado'],
+                        'Garantia' => $activo['Garantia'] ?? 0,
+                        'FechaFinGarantia' => $fechaFinGarantia,
+                        'IdProveedor' => $activo['IdProveedor'] ?? null,
+                        'Observaciones' => $activo['Observaciones'] ?? '',
+                        'IdSucursal' => $activo['IdSucursal'],
+                        'IdAmbiente' => $activo['IdAmbiente'],
+                        'IdCategoria' => $activo['IdCategoria'],
+                        'VidaUtil' => $activo['VidaUtil'] ?? 3,
+                        'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
+                        'FechaAdquisicion' => $fechaAdquisicion,
+                        'UserMod' => $_SESSION['CodEmpleado'],
+                        'Accion' => 1 // 1 = Insertar
+                    ];
+
+                    $activos->registrarActivos($data);
+                    $resultados[] = [
+                        'status' => true,
+                        'message' => 'Activo registrado correctamente'
+                    ];
+                }
+
                 echo json_encode([
                     'status' => true,
-                    'message' => 'Activo registrado con éxito.'
-                ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+                    'message' => 'Activos registrados con éxito.',
+                    'data' => $resultados
+                ]);
             } catch (Exception $e) {
                 error_log("Error Registrar: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
                 echo json_encode([
                     'status' => false,
-                    'message' => 'Error al registrar activo: ' . $e->getMessage()
+                    'message' => 'Error al registrar activos: ' . $e->getMessage()
                 ]);
             }
         }
         break;
 
-
-
     case 'Actualizar':
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 // Normaliza el idActivo para que siempre llegue como int y con el nombre correcto

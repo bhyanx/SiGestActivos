@@ -226,38 +226,78 @@ function init() {
   // Guardar Activo
   $("#btnGuardarActivo").on("click", function (e) {
     e.preventDefault();
-    // Obtener los datos del formulario
-    var formData = new FormData($("#frmRegistroActivo")[0]);
-
-    // 🔍 Mostrar datos enviados
-    console.log("Datos enviados:");
-    for (var pair of formData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
+    
+    // Validar que haya al menos un activo en la tabla
+    if ($("#tbldetalleactivoreg tbody tr").length === 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Debe agregar al menos un activo al detalle'
+        });
+        return;
     }
 
-    // Realizar la petición AJAX
+    // Recolectar datos de la tabla
+    let activos = [];
+    $("#tbldetalleactivoreg tbody tr").each(function() {
+        let row = $(this);
+        activos.push({
+            IdDocIngresoAlm: $("#inputDocIngresoAlm").val(),
+            IdArticulo: row.find("td:eq(0)").text(),
+            Serie: row.find("input[name='serie[]']").val(),
+            IdEstado: 1, // Estado por defecto
+            IdSucursal: 1, // Sucursal por defecto
+            IdAmbiente: row.find("select.ambiente-destino").val(),
+            IdCategoria: row.find("select.categoria").val(),
+            VidaUtil: 3, // Valor por defecto
+            ValorAdquisicion: 0, // Valor por defecto
+            FechaAdquisicion: new Date().toISOString().split('T')[0], // Fecha actual
+            Garantia: 0, // Valor por defecto
+            FechaFinGarantia: '1900-01-01', // Fecha por defecto
+            Observaciones: row.find("textarea[name='observaciones[]']").val() || ''
+        });
+    });
+
+    // Enviar datos al servidor
     $.ajax({
-      url: "../../controllers/GestionarActivosController.php?action=Registrar",
-      type: "POST",
-      data: formData,
-      contentType: false,
-      processData: false,
-      dataType: "json",
-      success: function (res) {
-        if (res.status) {
-          Swal.fire("Éxito", res.message, "success");
-          $("#frmRegistroActivo")[0].reset();
-        } else {
-          Swal.fire("Error", res.message, "error");
+        url: "../../controllers/GestionarActivosController.php?action=Registrar",
+        type: "POST",
+        data: {
+            action: "Registrar",
+            activos: JSON.stringify(activos)
+        },
+        dataType: "json",
+        success: function (res) {
+            if (res.status) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Éxito',
+                    text: res.message,
+                    timer: 1500
+                }).then(() => {
+                    // Limpiar tabla y volver a la vista principal
+                    $("#tbldetalleactivoreg tbody").empty();
+                    $("#divregistroActivo").hide();
+                    $("#divlistadoactivos").show();
+                    $("#divtblactivos").show();
+                    listarActivosTable();
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: res.message
+                });
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.error('Error en la petición:', jqXHR.responseText);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al registrar los activos: ' + errorThrown
+            });
         }
-      },
-      error: function (jqXHR, textStatus, errorThrown) {
-        Swal.fire(
-          "Error",
-          "Error al registrar el activo: " + errorThrown,
-          "error"
-        );
-      },
     });
   });
 }
@@ -662,4 +702,107 @@ function listarActivosTable() {
       },
     ],
   });
+}
+
+function guardarMantenimiento(e) {
+    e.preventDefault();
+    
+    // Validar campos requeridos
+    const requiredFields = [
+        'IdDocIngresoAlm', 'IdArticulo', 'Codigo', 'IdEstado', 
+        'EnUso', 'IdSucursal', 'IdCategoria', 'VidaUtil', 
+        'ValorAdquisicion', 'FechaAdquisicion'
+    ];
+    
+    let isValid = true;
+    requiredFields.forEach(field => {
+        const element = document.getElementById(field);
+        if (!element.value) {
+            element.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            element.classList.remove('is-invalid');
+        }
+    });
+    
+    if (!isValid) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Por favor complete todos los campos requeridos'
+        });
+        return;
+    }
+    
+    var formData = new FormData($("#frmmantenimiento")[0]);
+    formData.append("action", "Registrar");
+    
+    // Asegurarse de que los campos numéricos tengan valores válidos
+    const numericFields = ['VidaUtil', 'ValorAdquisicion', 'Garantia'];
+    numericFields.forEach(field => {
+        if (!formData.get(field)) {
+            formData.set(field, '0');
+        }
+    });
+    
+    // Asegurarse de que las fechas tengan valores válidos
+    const dateFields = ['FechaAdquisicion', 'FechaFinGarantia'];
+    dateFields.forEach(field => {
+        if (!formData.get(field)) {
+            formData.set(field, '1900-01-01');
+        }
+    });
+    
+    // Asegurarse de que los campos de ID tengan valores válidos
+    const idFields = ['IdDocIngresoAlm', 'IdArticulo', 'IdEstado', 'IdSucursal', 'IdAmbiente', 'IdCategoria', 'IdProveedor'];
+    idFields.forEach(field => {
+        if (!formData.get(field)) {
+            formData.set(field, 'NULL');
+        }
+    });
+
+    $.ajax({
+        url: "/app/controllers/GestionarActivosController.php",
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (datos) {
+            try {
+                var data = JSON.parse(datos);
+                if (data.status) {
+                    $("#ModalMantenimiento").modal("hide");
+                    ListarActivos();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Éxito',
+                        text: data.msg,
+                        timer: 1500
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.msg
+                    });
+                }
+            } catch (e) {
+                console.error('Error al procesar la respuesta:', e);
+                console.log('Respuesta del servidor:', datos);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al procesar la respuesta del servidor'
+                });
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la petición AJAX:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al comunicarse con el servidor'
+            });
+        }
+    });
 }
