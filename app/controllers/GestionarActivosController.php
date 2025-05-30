@@ -35,6 +35,9 @@ switch ($action) {
     case 'Registrar':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
+                // Validar y convertir 'IdAmbiente' a NULL si está vacío
+                $idAmbiente = isset($_POST['IdAmbiente']) && $_POST['IdAmbiente'] !== '' ? $_POST['IdAmbiente'] : null;
+
                 $data = [
                     'IdActivo' => null,
                     'IdDocIngresoAlm' => $_POST['IdDocIngresoAlm'],
@@ -47,7 +50,7 @@ switch ($action) {
                     'IdProveedor' => $_POST['IdProveedor'],
                     'Observaciones' => $_POST['Observaciones'],
                     'IdSucursal' => $_POST['IdSucursal'],
-                    'IdAmbiente' => $_POST['IdAmbiente'],
+                    'IdAmbiente' => $idAmbiente,  // Aquí aplicamos el NULL si está vacío
                     'IdCategoria' => $_POST['IdCategoria'],
                     'VidaUtil' => $_POST['VidaUtil'],
                     'ValorAdquisicion' => $_POST['ValorAdquisicion'],
@@ -55,13 +58,20 @@ switch ($action) {
                     'UserMod' => $_SESSION['CodEmpleado']
                 ];
                 $activos->registrarActivos($data);
-                echo json_encode(array('status' => true, 'message' => 'Activo registrado con Exito.'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Activo registrado con éxito.'
+                ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
             } catch (Exception $e) {
                 error_log("Error Registrar: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
-                echo json_encode(['status' => false, 'message' => 'Error al registrar activo: ' . $e->getMessage()]);
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al registrar activo: ' . $e->getMessage()
+                ]);
             }
         }
         break;
+
 
 
     case 'Actualizar':

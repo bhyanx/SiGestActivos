@@ -201,6 +201,7 @@ session_start();
                                                                 <th>Serie</th>
                                                                 <th>Estado</th>
                                                                 <th>Ambiente</th>
+                                                                <!-- <th>Categoria</th> -->
                                                                 <th>Observaciones</th>
                                                                 <th>Acción</th>
                                                             </tr>

@@ -322,6 +322,9 @@ function agregarActivoAlDetalle(activo) {
   var numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
 
   var selectAmbienteDestino = `<select class='form-control form-control-sm ambiente-destino' name='ambiente_destino[]' id="comboAmbiente${numeroFilas}"></select>`;
+
+  var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[] id="comboCategoria${numeroFilas}"></select>`;
+
   var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
 
   var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
@@ -340,6 +343,8 @@ function agregarActivoAlDetalle(activo) {
   $("#tbldetalleactivoreg tbody").append(nuevaFila);
   console.log(`comboAmbiente${numeroFilas}`);
   ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
+  // console.log(`comboCategoria${numeroFilas}`)
+  // ListarCombosCategoria(`comboCategoria${numeroFilas}`);
 
   // ListarCombosResponsable(`comboResponsable${numeroFilas}`);
 
@@ -389,6 +394,36 @@ function agregarActivoAlDetalle(activo) {
 //     },
 //   });
 // }
+function ListarCombosCategoria(elemento) {
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    async: false,
+    success: (res) => {
+      if (res.status) {
+        $(`#${elemento}`).html(res.data.categorias).trigger("change");
+        $(`#${elemento}`).select2({
+          theme: "bootstrap4",
+          width: "100%",
+        });
+      } else {
+        Swal.fire(
+          "Filtro de categorias",
+          "No se pudieron cargar los combos: " + res.message,
+          "warning"
+        );
+      }
+    },
+    error: (xhr, status, error) => {
+      Swal.fire(
+        "Filtro de categorias",
+        "No se pudieron cargar los combos: " + res.message,
+        "warning"
+      );
+    },
+  });
+}
 
 function ListarCombosEstado(elemento) {
   $.ajax({

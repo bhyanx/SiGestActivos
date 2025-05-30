@@ -45,24 +45,24 @@ class GestionarActivos
     {
         try {
             $stmt = $this->db->prepare('EXEC sp_GuardarActivo 
-                @pIdActivo = ?, 
-                @pIdDocIngresoAlm = ?, 
-                @pIdArticulo = ?, 
-                @pCodigo = ?, 
-                @pSerie = ?, 
-                @pIdEstado = 1, 
-                @pGarantia = ?, 
-                @pFechaFinGarantia = ?, 
-                @pIdProveedor = ?, 
-                @pObservaciones = ?, 
-                @pIdSucursal = 1, 
-                @pIdAmbiente = ?, 
-                @pIdCategoria = 1, 
-                @pVidaUtil = 2, 
-                @pValorAdquisicion = ?, 
-                @pFechaAdquisicion = ?, 
-                @pUserMod = ?, 
-                @pAccion = 1');
+            @pIdActivo = ?, 
+            @pIdDocIngresoAlm = ?, 
+            @pIdArticulo = ?, 
+            @pCodigo = ?, 
+            @pSerie = ?, 
+            @pIdEstado = 1, 
+            @pGarantia = ?, 
+            @pFechaFinGarantia = ?, 
+            @pIdProveedor = ?, 
+            @pObservaciones = ?, 
+            @pIdSucursal = 1, 
+            @pIdAmbiente = ?, 
+            @pIdCategoria = 1, 
+            @pVidaUtil = 3, 
+            @pValorAdquisicion = 30.0, 
+            @pFechaAdquisicion = ?, 
+            @pUserMod = ?, 
+            @pAccion = 1');
 
             $stmt->bindParam(1, $data['IdActivo'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
             $stmt->bindParam(2, $data['IdDocIngresoAlm'], \PDO::PARAM_INT);
@@ -75,12 +75,14 @@ class GestionarActivos
             $stmt->bindParam(9, $data['IdProveedor'], \PDO::PARAM_STR);
             $stmt->bindParam(10, $data['Observaciones'], \PDO::PARAM_STR);
             $stmt->bindParam(11, $data['IdSucursal'], \PDO::PARAM_INT);
-            $stmt->bindParam(12, $data['IdAmbiente'], \PDO::PARAM_INT);
+            // Ambiente puede ser NULL o un entero válido
+            $stmt->bindParam(12, $data['IdAmbiente'], $data['IdAmbiente'] === null ? \PDO::PARAM_NULL : \PDO::PARAM_INT);
             $stmt->bindParam(13, $data['IdCategoria'], \PDO::PARAM_INT);
             $stmt->bindParam(14, $data['VidaUtil'], \PDO::PARAM_INT);
             $stmt->bindParam(15, $data['ValorAdquisicion'], \PDO::PARAM_STR);
             $stmt->bindParam(16, $data['FechaAdquisicion'], \PDO::PARAM_STR);
             $stmt->bindParam(17, $data['UserMod'], \PDO::PARAM_STR);
+
             $stmt->execute();
             return true;
         } catch (\PDOException $e) {
@@ -88,6 +90,7 @@ class GestionarActivos
             throw $e;
         }
     }
+
 
     public function actualizarActivos($data)
     {
