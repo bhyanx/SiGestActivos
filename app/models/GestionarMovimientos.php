@@ -22,8 +22,12 @@ class GestionarMovimientos
             $stmt->bindParam(3, $data['idSucursalOrigen'], \PDO::PARAM_INT);
             $stmt->bindParam(4, $data['idSucursalDestino'], \PDO::PARAM_INT);
             $stmt->bindParam(5, $data['observaciones'], \PDO::PARAM_STR);
-            $stmt->execute();
-            return $this->db->lastInsertId(); // Devuelve el ID del último movimiento insertado
+            
+            if (!$stmt->execute()) {
+                throw new \PDOException("Error al ejecutar la consulta: " . implode(" ", $stmt->errorInfo()));
+            }
+            
+            return $this->db->lastInsertId();
         } catch (\PDOException $e) {
             error_log("Error in registrarMovimiento: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;

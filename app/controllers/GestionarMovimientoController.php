@@ -37,9 +37,9 @@ switch ($action) {
                 $data = [
                     'idTipoMovimiento' => $_POST['IdTipo'],
                     'idAutorizador' => $_POST['autorizador'],
-                    'idSucursalOrigen' => $_POST['sucursal_origen'],
+                    'idSucursalOrigen' => $_SESSION['cod_UnidadNeg'], // Cambiado a cod_UnidadNeg
                     'idSucursalDestino' => $_POST['sucursal_destino'],
-                    'observaciones' => $_POST['observacion']
+                    'observaciones' => $_POST['observacion'] ?? ''
                 ];
                 $idMovimiento = $movimientos->crearMovimiento($data);
                 echo json_encode([
@@ -85,11 +85,21 @@ switch ($action) {
                 $combos['tipoMovimiento'] .= "<option value='{$row['idTipoMovimiento']}'>{$row['nombre']}</option>";
             }
 
+            // Obtener sucursales incluyendo la unidad de negocio actual
             $sucursales = $combo->comboSucursal();
             $combos['sucursales'] = '<option value="">Seleccione</option>';
+            $unidadNegocioActual = $_SESSION['cod_UnidadNeg'];
+            
             foreach ($sucursales as $row) {
-                $combos['sucursales'] .= "<option value='{$row['idSucursal']}'>{$row['nombre']}</option>";
+                if ($row['idSucursal'] == $unidadNegocioActual) {
+                    $combos['sucursales'] .= "<option value='{$row['idSucursal']}' selected>{$row['nombre']}</option>";
+                } else {
+                    $combos['sucursales'] .= "<option value='{$row['idSucursal']}'>{$row['nombre']}</option>";
+                }
             }
+
+            // Agregar el ID de la unidad de negocio de la sesión
+            $combos['sucursalOrigen'] = $unidadNegocioActual;
 
             $autorizador = $combo->comboAutorizador();
             $combos['autorizador'] = '<option value="">Seleccione</option>';

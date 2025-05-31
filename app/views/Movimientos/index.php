@@ -183,9 +183,9 @@ session_start();
                                                 </div>
                                                 <div class="col-md-3">
                                                     <div class="form-group">
-                                                        <label for="IdSucursalOrigen">Sucursal salida:</label>
+                                                        <label for="IdSucursalOrigen">Sucursal Origen:</label>
                                                         <select name="IdSucursalOrigen" id="IdSucursalOrigen" class="form-control">
-                                                            <option value="<?php echo $_SESSION['idSucursal']; ?>" selected><?php echo $_SESSION['SucursalNombre']; ?></option>
+                                                            <option value="<?php echo $_SESSION['cod_UnidadNeg']; ?>" selected><?php echo $_SESSION['nombre_local']; ?></option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -444,7 +444,7 @@ session_start();
                                                 </button>
                                             </div>
                                             <div class="col-12 col-md-6">
-                                                <button type="button" class="btn btn-primary btn-sm btn-block" id="btnGuardarOC">
+                                                <button type="button" class="btn btn-primary btn-sm btn-block" id="btnGuardarMov">
                                                     <i class="fa fa-check"></i> Guardar
                                                 </button>
                                             </div>
