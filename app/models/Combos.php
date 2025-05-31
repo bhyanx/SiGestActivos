@@ -101,4 +101,11 @@ WHERE estado = 1";
         $stmt->execute([$codEmpresa]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function comboAccionesAuditoria(){
+        $sql = "SELECT DISTINCT accion FROM tLogAuditoria";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

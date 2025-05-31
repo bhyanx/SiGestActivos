@@ -44,6 +44,16 @@ class Auditorias {
             throw $e;
         }
     }
+
+    public function ListarLogs(){
+        try {
+            $stmt = $this->db->query('SELECT * FROM tLogAuditoria ORDER BY fecha DESC');
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error in Logs::listarTodo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
 }
 
 ?>

@@ -10,10 +10,12 @@ session_start();
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <?php require_once("../Layouts/Header.php"); ?>
     <title>Auditoria - Sistema Gestion de Activos</title>
 </head>
+
 <body class="sidebar-mini control-sidebar-slide-open sidebar-mini-xs sidebar-mini-md sidebar-collapse">
     <div class="wrapper">
         <?php require_once("../Layouts/Head-Body.php"); ?>
@@ -49,29 +51,66 @@ session_start();
                                     <h3 class="card-title"><i class="fa fa-list"></i>Lista de Logs</h3>
                                 </div>
                                 <div class="card-body">
-                                    <div class="row">   
+                                    <div class="row">
                                         <div class="col-md-12" id="divfiltros">
                                             <div class="row">
-                                                
-                                                    <div class="col-md-3 offset-md-9"><div class="form-group">
-                                                        <button class="btn btn-primary btn-block"id="btnnuevo"><i class="fa fa-plus"></i> Nuevo</button>
-                                                    </div></div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="filtroCodigo">Codigo:</label>
+                                                        <input class="form-control" name="filtroCodigo" id="filtroCodigo">
+                                                    </div>
                                                 </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="filtroAccion">Accion:</label>
+                                                        <select class="form-control" name="filtroAccion" id="filtroAccion"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="filtroTablas">Tablas:</label>
+                                                        <select class="form-control" name="filtroTablas" id="filtroTablas"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="filtroFecha">Fecha Registro:</label>
+                                                        <input type="date" class="form-control" name="filtroFecha" id="filtroFecha" value="<?php echo date('Y-m-d'); ?>">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2 offset-md-8">
+                                                    <div class="form-group mb-0">
+                                                        <label for="">&nbsp;</label>
+                                                        <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">
+                                                            <i class="fa fa-search"></i> Buscar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <!-- <div class="col-md-2">
+                                                    <div class="form-group mb-0">
+                                                        <label for="">&nbsp;</label>
+                                                        <button type="button" class="btn btn-success btn-sm btn-block" id="btnnuevo">
+                                                            <i class="fa fa-plus"></i> Nuevo
+                                                        </button>
+                                                    </div>
+                                                </div> -->
                                             </div>
                                         </div>
 
                                         <div class="col-md-12">
                                             <div class="table-responsive">
-                                                <table id="tblregistros" class="table table-bordered table-striped">
+                                                <table id="tblAuditorias" class="table table-bordered table-striped">
                                                     <thead>
                                                         <tr>
                                                             <th><i class="fa fa-cogs"></i></th>
-
-                                                            <th>Tabla de Auditoria</th>
-
-                                                            <th>Tabla de Auditoria</th>
-                                                            <th>Tabla de Auditoria</th>
-                                                            <th>Tabla de Auditoria</th>
+                                                            <th>Id. Log</th>
+                                                            <th>Cod Usuario</th>
+                                                            <th>Nombre</th>
+                                                            <th>Accion</th>
+                                                            <th>Tabla</th>
+                                                            <th>Id Registro</th>
+                                                            <th>Fecha</th>
+                                                            <th>Detalle</th>
                                                         </tr>
                                                     </thead>
                                                 </table>
@@ -90,4 +129,5 @@ session_start();
         <script src="auditoria.js"></script>
     </div>
 </body>
+
 </html>
