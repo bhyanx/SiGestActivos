@@ -39,14 +39,14 @@ if (!isset($_SESSION["IdRol"])) {
                         <div class="form-group">
                             <div class="input-container">
                                 <i class="fa-solid fa-building input-icon"></i>
-                                <select name="CodEmpresas" id="CodEmpresas" class="form-input" placeholder="Empresa" require></select>
+                                <select name="CodEmpresas" id="CodEmpresas" class="form-input" placeholder="Empresa" required></select>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <div class="input-container">
                                 <i class="fa-solid fa-city input-icon"></i>
-                                <select name="CodUnidadNegocio" id="CodUnidadNegocio" class="form-input" placeholder="Unidad de Negocio" require></select>
+                                <select name="CodUnidadNegocio" id="CodUnidadNegocio" class="form-input" placeholder="Unidad de Negocio" required></select>
                             </div>
                         </div>
 
