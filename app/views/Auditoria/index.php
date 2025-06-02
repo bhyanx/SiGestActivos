@@ -16,7 +16,7 @@ session_start();
     <title>Auditoria - Sistema Gestion de Activos</title>
 </head>
 
-<body class="sidebar-mini control-sidebar-slide-open sidebar-mini-xs sidebar-mini-md sidebar-collapse">
+<body class="sidebar-mini control-sidebar-slide-open layout-navbar-fixed layout-fixed sidebar-mini-xs sidebar-mini-md sidebar-collapse">
     <div class="wrapper">
         <?php require_once("../Layouts/Head-Body.php"); ?>
         <?php require_once("../Layouts/SideBar.php"); ?>
@@ -108,7 +108,7 @@ session_start();
                                                             <th>Nombre</th>
                                                             <th>Accion</th>
                                                             <th>Tabla</th>
-                                                            <th>Id Registro</th>
+                                                            <th>Id Ultimo Reg.</th>
                                                             <th>Fecha</th>
                                                             <th>Detalle</th>
                                                         </tr>
