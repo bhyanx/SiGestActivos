@@ -7,7 +7,7 @@ require_once '../models/Combos.php';
 $auditoria = new Auditorias();
 $combos = new Combos();
 
-$action = $_GET['action'] ?? ['action'] ?? 'Consultar';
+$action = $_GET['action'] ?? $_POST['action'] ?? 'Consultar';
 
 ini_set('display_errors', 0);
 
@@ -25,23 +25,50 @@ switch ($action) {
         }
         break;
 
-    case 'combos':
+    case 'obtenerHistorialAuditoria':
         try {
-            //code...
-            $accionesAuditoria = $combos->comboAccionesAuditoria();
-            $combos['accionesAuditoria'] = '<option value="">Seleccione</option>';
-            foreach ($estadoActivo as $row) {
-                $combos['accionesAuditoria'] .= "<option value='{$row['accion']}'>{$row['accion']}</option>";
+            $usuario = $_POST['usuario'];
+            $info = $auditoria->ListarHistorialLogs($usuario);
+            if ($info === false) {
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'No se encontró historial para el usuario especificado',
+                    'data' => []
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Historial obtenido correctamente',
+                    'data' => $info
+                ]);
             }
         } catch (Exception $e) {
-            //Exception $e;
+            error_log("Error en obtenerHistorialAuditoria: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al obtener el historial: ' . $e->getMessage(),
+                'data' => []
+            ]);
+        }
+        break;
+
+    case 'combos':
+        try {
+            $accionesAuditoria_data = $combos->comboAccionesAuditoria();
+            $html_accionesAuditoria = '<option value="">Seleccione</option>';
+            foreach ($accionesAuditoria_data as $row) {
+                if (isset($row['accion'])) {
+                    $html_accionesAuditoria .= "<option value='{$row['accion']}'>{$row['accion']}</option>";
+                }
+            }
+            echo json_encode(['status' => true, 'data' => ['accionesAuditoria' => $html_accionesAuditoria]]);
+        } catch (Exception $e) {
             error_log("Error Combos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/error.log');
             echo json_encode(['status' => false, 'message' => 'Error al cargar combos: ' . $e->getMessage()]);
         }
         break;
 
     default:
-        # code...
         echo json_encode(['status' => false, 'message' => 'Acción no encontrada']);
         break;
 }

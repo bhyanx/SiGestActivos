@@ -124,6 +124,25 @@ session_start();
                     </div>
                 </div>
             </section>
+
+            <div class="modal fade" id="ModalLogAuditoria" tabindex="-1" role="dialog" aria-labelledby="ModalLogAuditoriaLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header dragable_touch">
+                            <h5 class="modal-title" id="ModalLogAuditoriaLabel"><i class="fa fa-clock"></i> Historial Auditoria</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="timeline timeline-inverse" id="timedata">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <?php require_once("../Layouts/Footer.php"); ?>
         <script src="auditoria.js"></script>

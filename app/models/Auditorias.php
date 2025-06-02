@@ -57,4 +57,20 @@ class Auditorias
             throw $e;
         }
     }
+
+    public function ListarHistorialLogs($usuario)
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM vHistorialLogs WHERE usuario = ? ORDER BY fecha ASC");
+            $stmt->bindParam(1, $usuario, PDO::PARAM_STR);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error PDO in Auditorias::ListarHistorialLogs: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        } catch (Exception $e) {
+            error_log("Error general in Auditorias::ListarHistorialLogs: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
 }
