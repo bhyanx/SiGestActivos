@@ -13,7 +13,7 @@ class Roles{
     //* LISTAR ROLES DE USUARIOS
     public function listarTodo(){
         try{
-            $stmt = $this->db->query('SELECT * FROM tRoles ORDER BY NombreRol');
+            $stmt = $this->db->query('SELECT * FROM vRoles ORDER BY NombreRol');
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         }catch(\PDOException $e){
             error_log("Error in Roles::listarTodo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');

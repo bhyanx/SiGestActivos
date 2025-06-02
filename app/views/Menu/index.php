@@ -9,7 +9,7 @@ session_start();
 
 <head>
     <?php require_once("../Layouts/Header.php"); ?>
-    <title>Roles - Sistema Gestion de Activos</title>
+    <title>Menu - Sistema Gestion de Activos</title>
 </head>
 
 <body class="sidebar-mini control-sidebar-slide-open layout-navbar-fixed layout-fixed sidebar-mini-xs sidebar-mini-md sidebar-collapse">
@@ -22,7 +22,7 @@ session_start();
                 <div class="content-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1>Configuración de roles</h1>
+                            <h1>Menu</h1>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
@@ -30,7 +30,7 @@ session_start();
                                     <a href="#">Inicio</a>
                                 </li>
                                 <li class="breadcrumb-item active">
-                                    Roles
+                                    Menu
                                 </li>
                             </ol>
                         </div>
@@ -44,7 +44,7 @@ session_start();
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title"><i class="fa fa-list"></i>Lista de Roles</h3>
+                                    <h3 class="card-title"><i class="fa fa-list"></i>Listado de Menu en el sistema</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
@@ -59,12 +59,17 @@ session_start();
                                         </div>
                                         <div class="col-md-12">
                                             <div class="table-responsive">
-                                                <table id="tblRoles" class="table table-bordered table-striped">
+                                                <table id="tblMenu" class="table table-bordered table-striped">
                                                     <thead>
                                                         <tr>
                                                             <th><i class="fa fa-cogs"></i></th>
-                                                            <th>Id Rol</th>
-                                                            <th>Nombre Rol</th>
+                                                            <th>Cod. Menu</th>
+                                                            <th>Nombre Menu</th>
+                                                            <th>Menu Ruta</th>
+                                                            <th>Menu Identificador</th>
+                                                            <th>Menu Icono</th>
+                                                            <th>Menu Grupo</th>
+                                                            <th>Menu Grupo Icono</th>
                                                             <th>Estado</th>
                                                         </tr>
                                                     </thead>
@@ -78,12 +83,12 @@ session_start();
                     </div>
 
                     <!-- MODAL PARA REGISTRAR ROLES -->
-                    <div class="modal fade" id="ModalRoles" tabindex="-1" role="dialog" aria-labelledby="ModalRolesLabel" aria-hidden="true">
+                    <div class="modal fade" id="ModalMenu" tabindex="-1" role="dialog" aria-labelledby="ModalMenuLabel" aria-hidden="true">
                         <div class="modal-dialog modal-lg" role="document">
                             <div class="modal-content">
-                                <form id="frmRoles" name="frmRoles" method="POST">
+                                <form id="frmMenu" name="frmMenu" method="POST">
                                     <div class="modal-header bg-primary text-white">
-                                        <h5 class="modal-title" id="tituloModalRoles"><i class="fa fa-plus-circle"></i> Registrar nuevo rol</h5>
+                                        <h5 class="modal-title" id="tituloModalMenu"><i class="fa fa-plus-circle"></i> Registrar nuevo menu</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
@@ -94,14 +99,14 @@ session_start();
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <label for="idRol">Codigo de rol</label>
-                                                    <select class="form-control select2" id="idRol" name="idRol" required></select>
+                                                    <label for="idMenu">Codigo de menu</label>
+                                                    <select class="form-control select2" id="idMenu" name="idMenu" required></select>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <label for="rol">Nombre Rol:</label>
-                                                    <select class="form-control select2" id="rol" name="rol" required></select>
+                                                    <label for="menu">Nombre Menu:</label>
+                                                    <select class="form-control select2" id="menu" name="menu" required></select>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
@@ -124,7 +129,7 @@ session_start();
             </section>
         </div>
         <?php require_once("../Layouts/Footer.php"); ?>
-        <script src="roles.js"></script>
+        <script src="menu.js"></script>
     </div>
 </body>
 
