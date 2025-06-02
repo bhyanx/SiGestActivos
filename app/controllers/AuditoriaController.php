@@ -25,19 +25,6 @@ switch ($action) {
         }
         break;
 
-    // case 'detallesUsuarios':
-    //     try {
-    //         //code...
-    //         $usuario = $_GET['usuario'] ?? '';
-    //         $detalles = $auditoria->obtenerDetallesLog($usuario);
-    //         echo json_encode($detalles ?: []);
-    //     } catch (Exception $e) {
-    //         error_log("Error detallesUsuario: " . $e->getMessage(), 3, __DIR__ . '/../../logs/error.log');
-    //         echo json_encode(['status' => false, 'message' => 'Error al obtener los detalles: ' . $e->getMessage()]);
-    //     }
-    //     break;
-
-
     case 'combos':
         try {
             //code...
