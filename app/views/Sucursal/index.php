@@ -59,14 +59,15 @@ session_start();
                                         </div>
                                         <div class="col-md-12">
                                             <div class="table-responsive">
-                                                <table id="tblSucursales" class="table table-bordered table-striped">
+                                                <table id="tblSucursales" class="table table-bordered table-striped mt-4">
                                                     <thead>
                                                         <tr>
-                                                            <th><i class="fa fa-cogs"></i></th>
+                                                            <th>#</th>
                                                             <th>Cod. Sucursal</th>
                                                             <th>Nombre Sucursal</th>
                                                             <th>Dirección Sucursal</th>
                                                             <th>Estado</th>
+                                                            <th><i class="fa fa-cogs"></i></th>
                                                         </tr>
                                                     </thead>
                                                 </table>

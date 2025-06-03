@@ -48,79 +48,87 @@ session_start();
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title"><i class="fa fa-list"></i>Lista de Ambientes en <?php echo $_SESSION['NombreSucursal']; ?></h3>
+                                    <h3 class="card-title"><i class="fa fa-list"></i>Listado de Ambientes en el sistema</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-12" id="divfiltros">
                                             <div class="row">
-                                                <!-- <div class="col-md-3">
+                                                <div class="col-md-3 offset-md-9">
                                                     <div class="form-group">
-                                                        <label for="filtroCodigo">Codigo:</label>
-                                                        <input class="form-control" name="filtroCodigo" id="filtroCodigo">
+                                                        <button class="btn btn-primary btn-block" id="btnnuevo"><i class="fa fa-plus"></i>Nuevo</button>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-3">
-                                                    <div class="form-group">
-                                                        <label for="filtroAccion">Accion:</label>
-                                                        <select class="form-control" name="filtroAccion" id="filtroAccion"></select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <div class="form-group">
-                                                        <label for="filtroTablas">Tablas:</label>
-                                                        <select class="form-control" name="filtroTablas" id="filtroTablas"></select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <div class="form-group">
-                                                        <label for="filtroFecha">Fecha Registro:</label>
-                                                        <input type="date" class="form-control" name="filtroFecha" id="filtroFecha" value="<?php echo date('Y-m-d'); ?>">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-2 offset-md-8">
-                                                    <div class="form-group mb-0">
-                                                        <label for="">&nbsp;</label>
-                                                        <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">
-                                                            <i class="fa fa-search"></i> Buscar
-                                                        </button>
-                                                    </div>
-                                                </div> -->
-                                                <!-- <div class="col-md-2">
-                                                    <div class="form-group mb-0">
-                                                        <label for="">&nbsp;</label>
-                                                        <button type="button" class="btn btn-success btn-sm btn-block" id="btnnuevo">
-                                                            <i class="fa fa-plus"></i> Nuevo
-                                                        </button>
-                                                    </div>
-                                                </div> -->
                                             </div>
                                         </div>
-
                                         <div class="col-md-12">
                                             <div class="table-responsive">
-                                                <table id="tblAmbientes" class="table table-bordered table-striped">
+                                                <table id="tblAmbientes" class="table table-bordered table-striped mt-4">
                                                     <thead>
                                                         <tr>
-                                                            <th><i class="fa fa-cogs"></i></th>
-                                                            <th>Ambiente</th>
-                                                            <th>Descripción</th>
+                                                            <th>#</th>
+                                                            <th>IdAmbiente</th>
+                                                            <th>Nombre</th>
+                                                            <th>Descripcion</th>
                                                             <th>Sucursal</th>
                                                             <th>Estado</th>
+                                                            <th><i class="fa fa-cogs"></i></th>
                                                         </tr>
                                                     </thead>
                                                 </table>
                                             </div>
                                         </div>
-
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- MODAL PARA REGISTRAR AMBIENTES -->
+                    <div class="modal fade" id="ModalAmbiente" tabindex="-1" role="dialog" aria-labelledby="ModalAmbienteLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <form id="frmAmbiente" name="frmAmbiente" method="POST">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title" id="tituloModalAmbiente"><i class="fa fa-plus-circle"></i> Registrar nuevo ambiente</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="hidden" name="idAmbiente" id="idAmbiente" value="0">
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="nombre">Nombre</label>
+                                                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="descripcion">Descripcion:</label>
+                                                    <input type="text" class="form-control" id="descripcion" name="descripcion" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="estado">Estado:</label>
+                                                    <select class="form-control select2" id="estado" name="estado" required></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Guardar</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
-
             <div class="modal fade" id="ModalAmbiente" tabindex="-1" role="dialog" aria-labelledby="ModalLogAuditoriaLabel"
                 aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-xl" role="document">

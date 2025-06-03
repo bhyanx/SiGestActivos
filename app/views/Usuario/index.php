@@ -60,18 +60,21 @@ session_start();
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="col-md-12">
                                             <div class="table-responsive">
-                                                <table id="tblUsuarios" class="table table-bordered table-striped">
+                                                <table id="tblUsuarios" class="table table-bordered table-striped mt-4">
                                                     <thead>
                                                         <tr>
-                                                            <th><i class="fa fa-cogs"></i></th>
+                                                            <th>#</th>
                                                             <th>DNI</th>
                                                             <th>Nombres</th>
                                                             <th>Apellidos</th>
                                                             <th>Rol</th>
                                                             <th>Clave</th>
                                                             <th>Estado</th>
+                                                            <th><i class="fa fa-cogs"></i></th>
                                                         </tr>
                                                     </thead>
                                                 </table>

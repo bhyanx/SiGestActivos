@@ -110,89 +110,205 @@ function guardaryeditarUsuarios(e) {
   });
 }
 
+// function listarUsuarios() {
+//   $("#tblUsuarios").DataTable({
+//       dom: "Bfrtip",
+//       responsive: true,
+//       lengthChange: false,
+//       colReorder: true,
+//       autoWidth: false,
+//       buttons: [
+//         {
+//           extend: "excelHtml5",
+//           title: "Listado Usuarios",
+//           text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
+//           autoFilter: true,
+//           sheetName: "Data",
+//           exportOptions: {
+//             columns: [1, 2, 3],
+//           },
+//         },
+//         "pageLength",
+//       ],
+//       ajax: {
+//         url: "../../controllers/UsuarioController.php?action=LeerUsuarios",
+//         type: "POST",
+//         dataType: "json",
+//         data: {
+//           CodUsuario: "",
+//           IdRol: "",
+//           ClaveAcceso: ""
+//         },
+//         dataSrc: function (json) {
+//           console.log("Consultar response:", json); // Para depuración
+//           return json || [];
+//         },
+//         error: function (xhr, status, error) {
+//           console.log("Error en AJAX:", xhr.responseText, status, error);
+//           Swal.fire(
+//             "Gestionar Usuarios",
+//             "Error al cargar datos: " + error,
+//             "error"
+//           );
+//         },
+//       },
+//       bDestroy: true,
+//       responsive: true,
+//       bInfo: true,
+//       iDisplayLength: 10,
+//       autoWidth: false,
+//       language: {
+//         processing: "Procesando...",
+//         lengthMenu: "Mostrar _MENU_ registros",
+//         zeroRecords: "No se encontraron resultados",
+//         emptyTable: "Ningún dato disponible en esta tabla",
+//         infoEmpty: "Mostrando registros del 0 al 0 de un total de 0 registros",
+//         infoFiltered: "(filtrado de un total de _MAX_ registros)",
+//         search: "Buscar:",
+//         info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+//         paginate: {
+//           first: "Primero",
+//           last: "Último",
+//           next: "Siguiente",
+//           previous: "Anterior",
+//         },
+//       },
+//       columns: [
+//         {
+//           data: null,
+//           render: function (data, type, row, meta) {
+//             return meta.row + 1;
+//           },
+//         },
+//         { data: "CodUsuario" },
+//         { data: "Nombres" },
+//         { data: "Apellidos" },
+//         { data: "NombreRol" },
+//         { data: "ClaveAcceso" },
+//         {
+//           data: "Activo",
+//           render: function (data, type, row) {
+//             return data == 1
+//               ? '<span class="badge badge-success text-sm border border-success">Activo</span>'
+//               : '<span class="badge badge-danger text-sm border border-danger">Inactivo</span>';
+//           },
+//         },
+//         {
+//           data: null,
+//           render: function (data, type, row) {
+//             return (
+//               '<button class="btn btn-sm btn-primary" onclick="editar(event, ' +
+//               row.CodUsuario +
+//               ')"><i class="fa fa-cogs"></i></button>'
+//             );
+//           },
+//         },
+//       ],
+//     })
+// }
+
 function listarUsuarios() {
   $("#tblUsuarios").DataTable({
-      dom: "Bfrtip",
-      responsive: true,
-      lengthChange: false,
-      colReorder: true,
-      autoWidth: false,
-      buttons: [
-        {
-          extend: "excelHtml5",
-          title: "Listado Usuarios",
-          text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
-          autoFilter: true,
-          sheetName: "Data",
-          exportOptions: {
-            columns: [1, 2, 3],
+    aProcessing: true,
+    aServerSide: false,
+    layout: {
+      topStart: {
+        buttons: [
+          {
+            extend: "excelHtml5",
+            title: "Listado Usuarios",
+            text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
+            autoFilter: true,
+            sheetName: "Data",
+            exportOptions: {
+              columns: [1, 2, 3],
+            },
           },
+          "pageLength",
+          "colvis",
+        ],
+      },
+      bottom: "paging",
+      bottomStart: null,
+      bottomEnd: null,
+    },
+    responsive: true,
+    lengthChange: false,
+    colReorder: true,
+    autoWidth: false,
+    ajax: {
+      url: "../../controllers/UsuarioController.php?action=LeerUsuarios",
+      type: "POST",
+      dataType: "json",
+      data: {
+        CodUsuario: "",
+        IdRol: "",
+        ClaveAcceso: "",
+      },
+      dataSrc: function (json) {
+        console.log("Consultar response:", json);
+        return json || [];
+      },
+      error: function (xhr, status, error) {
+        console.log("Error en AJAX:", xhr.responseText, status, error);
+        Swal.fire(
+          "Gestionar Usuarios",
+          "Error al cargar datos: " + error,
+          "error"
+        );
+      },
+    },
+    bDestroy: true,
+    bInfo: true,
+    iDisplayLength: 10,
+    language: {
+      processing: "Procesando...",
+      lengthMenu: "Mostrar _MENU_ registros",
+      zeroRecords: "No se encontraron resultados",
+      emptyTable: "Ningún dato disponible en esta tabla",
+      infoEmpty: "Mostrando registros del 0 al 0 de un total de 0 registros",
+      infoFiltered: "(filtrado de un total de _MAX_ registros)",
+      search: "Buscar:",
+      info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+      paginate: {
+        first: "Primero",
+        last: "Último",
+        next: "Siguiente",
+        previous: "Anterior",
+      },
+    },
+    columns: [
+      {
+        data: null,
+        render: function (data, type, row, meta) {
+          return meta.row + 1;
         },
-        "pageLength",
-      ],
-      ajax: {
-        url: "../../controllers/UsuarioController.php?action=LeerUsuarios",
-        type: "POST",
-        dataType: "json",
-        data: {
-          CodUsuario: "",
-          IdRol: "",
-          ClaveAcceso: ""
+      },
+      { data: "CodUsuario" },
+      { data: "Nombres" },
+      { data: "Apellidos" },
+      { data: "NombreRol" },
+      { data: "ClaveAcceso" },
+      {
+        data: "Activo",
+        render: function (data, type, row) {
+          return data == 1
+            ? '<span class="badge badge-success text-sm border border-success">Activo</span>'
+            : '<span class="badge badge-danger text-sm border border-danger">Inactivo</span>';
         },
-        dataSrc: function (json) {
-          console.log("Consultar response:", json); // Para depuración
-          return json || [];
-        },
-        error: function (xhr, status, error) {
-          console.log("Error en AJAX:", xhr.responseText, status, error);
-          Swal.fire(
-            "Gestionar Usuarios",
-            "Error al cargar datos: " + error,
-            "error"
+      },
+      {
+        data: null,
+        render: function (data, type, row) {
+          return (
+            '<button class="btn btn-sm btn-primary" onclick="editar(event, ' +
+            row.CodUsuario +
+            ')"><i class="fa fa-cogs"></i></button>'
           );
         },
       },
-      bDestroy: true,
-      responsive: true,
-      bInfo: true,
-      iDisplayLength: 10,
-      autoWidth: false,
-      language: {
-        processing: "Procesando...",
-        lengthMenu: "Mostrar _MENU_ registros",
-        zeroRecords: "No se encontraron resultados",
-        emptyTable: "Ningún dato disponible en esta tabla",
-        infoEmpty: "Mostrando registros del 0 al 0 de un total de 0 registros",
-        infoFiltered: "(filtrado de un total de _MAX_ registros)",
-        search: "Buscar:",
-        info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-        paginate: {
-          first: "Primero",
-          last: "Último",
-          next: "Siguiente",
-          previous: "Anterior",
-        },
-      },
-      columnDefs: [
-        {
-          targets: 0,
-          data: null,
-          render: function (data, type, row) {
-            return (
-              '<button class="btn btn-sm btn-primary" onclick="editar(event, ' +
-              row.CodUsuario +
-              ')"><i class="fa fa-edit"></i></button>'
-            );
-          },
-        },
-        { targets: 1, data: "CodUsuario" },
-        { targets: 2, data: "Nombres" },
-        { targets: 3, data: "Apellidos" },
-        { targets: 4, data: "NombreRol" },
-        { targets: 5, data: "ClaveAcceso" },
-        { targets: 6, data: "Activo" },
-      ],
-    })
+    ],
+  });
 }
 
 function cargarUsuarios(idUsuario) {

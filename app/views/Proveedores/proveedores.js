@@ -8,24 +8,33 @@ $(document).ready(function () {
 
 function listarProveedores() {
   $("#tblProveedores").DataTable({
-    dom: "Bfrtip",
+    aProcessing: true,
+    aServerSide: false,
+    layout: {
+      topStart: {
+        buttons: [
+          {
+            extend: "excelHtml5",
+            title: "Listado Proveedores",
+            text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
+            autoFilter: true,
+            sheetName: "Data",
+            exportOptions: {
+              columns: [1, 2, 3],
+            },
+          },
+          "pageLength",
+          "colvis",
+        ],
+      },
+      bottom: "paging",
+      bottomStart: null,
+      bottomEnd: null,
+    },
     responsive: true,
     lengthChange: false,
     colReorder: true,
     autoWidth: false,
-    buttons: [
-      {
-        extend: "excelHtml5",
-        title: "Listado Proveedores",
-        text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
-        autoFilter: true,
-        sheetName: "Data",
-        exportOptions: {
-          columns: [1, 2, 3],
-        },
-      },
-      "pageLength",
-    ],
     ajax: {
       url: "../../controllers/ProveedorController.php?action=ListarProveedores",
       type: "POST",
@@ -69,21 +78,26 @@ function listarProveedores() {
         previous: "Anterior",
       },
     },
-    columnDefs: [
+    columns: [
       {
-        targets: 0,
+        data: null,
+        render: function (data, type, row, meta) {
+          return meta.row + 1;
+        },
+      },
+      { data: "Documento"},
+      { data: "RazonSocial"},
+      { data: "DescTipoEntExt"},
+      {
         data: null,
         render: function (data, type, row) {
           return (
             '<button class="btn btn-sm btn-primary" onclick="editar(event, ' +
             row.Documento +
-            ')"><i class="fa fa-edit"></i></button>'
+            ')"><i class="fa fa-cogs"></i></button>'
           );
         },
       },
-      { targets: 1, data: "Documento"},
-      { targets: 2, data: "RazonSocial"},
-      { targets: 3, data: "DescTipoEntExt"},
     ],
   });
 }

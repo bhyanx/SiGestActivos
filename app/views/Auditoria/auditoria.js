@@ -225,9 +225,33 @@ function ListarAcciones() {
 
 function listarLogsAuditoria() {
   $("#tblAuditorias").DataTable({
-    dom: "Bfrtip",
+    aProcessing: true,
+    aServerSide: false,
+    layout: {
+      topStart: {
+        buttons: [
+          {
+            extend: "excelHtml5",
+            title: "Listado de auditorias",
+            text: "<i class='fas fa-file-excel'></i> Exportar",
+            autoFilter: true,
+            sheetName: "Data",
+            exportOptions: {
+              columns: [1, 2, 3, 4, 5, 6, 7, 8],
+            },
+          },
+          "pageLength",
+          "colvis",
+        ],
+      },
+      bottom: "paging",
+      bottomStart: null,
+      bottomEnd: null,
+    },
     responsive: true,
-    destroy: true,
+    lengthChange: false,
+    colReorder: true,
+    autoWidth: false,
     ajax: {
       url: "../../controllers/AuditoriaController.php?action=Consultar",
       type: "POST",

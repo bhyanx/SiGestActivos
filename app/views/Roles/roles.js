@@ -8,24 +8,33 @@ $(document).ready(function () {
 
 function listarRoles() {
   $("#tblRoles").DataTable({
-    dom: "Bfrtip",
+    aProcessing: true,
+    aServerSide: false,
+    layout: {
+      topStart: {
+        buttons: [
+          {
+            extend: "excelHtml5",
+            title: "Listado Roles",
+            text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
+            autoFilter: true,
+            sheetName: "Data",
+            exportOptions: {
+              columns: [1, 2, 3],
+            },
+          },
+          "pageLength",
+          "colvis",
+        ],
+      },
+      bottom: "paging",
+      bottomStart: null,
+      bottomEnd: null,
+    },
     responsive: true,
     lengthChange: false,
     colReorder: true,
     autoWidth: false,
-    buttons: [
-      {
-        extend: "excelHtml5",
-        title: "Listado Roles",
-        text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
-        autoFilter: true,
-        sheetName: "Data",
-        exportOptions: {
-          columns: [1, 2, 3],
-        },
-      },
-      "pageLength",
-    ],
     ajax: {
       url: "../../controllers/RolController.php?action=ListarRoles",
       type: "POST",
@@ -65,29 +74,31 @@ function listarRoles() {
         previous: "Anterior",
       },
     },
-    columnDefs: [
+    columns: [
+      { data: null,
+        render: function (data, type, row, meta) {
+          return meta.row + 1;
+        }
+      },
+      { data: "IdRol", visible: false, searchable: false },
+      { data: "NombreRol" },
       {
-        targets: 0,
+        data: "Estado",
+        render: function (data, type, row) {
+          return data == 1  
+            ? '<span class="badge badge-success text-sm border border-success">Activo</span>'
+            : '<span class="badge badge-danger text-sm border border-danger">Inactivo</span>';
+        },
+      },
+      {
         data: null,
+        orderable: false,
         render: function (data, type, row) {
           return (
             '<button class="btn btn-sm btn-primary" onclick="editar(event, ' +
             row.IdRol +
-            ')"><i class="fa fa-edit"></i></button>'
+            ')"><i class="fa fa-cogs"></i></button>'
           );
-        },
-      },
-      { targets: 1, data: "IdRol", visible: false, searchable: false },
-      { targets: 2, data: "NombreRol" },
-      {
-        targets: 3,
-        data: "Estado",
-        render: function (data, type, row) {
-          if (data == 1 || data === 1) {
-            return '<span class="badge badge-success">Activo</span>';
-          } else {
-            return '<span class="badge badge-danger">Inactivo</span>';
-          }
         },
       },
     ],

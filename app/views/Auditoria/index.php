@@ -99,7 +99,7 @@ session_start();
 
                                         <div class="col-md-12">
                                             <div class="table-responsive">
-                                                <table id="tblAuditorias" class="table table-bordered table-striped">
+                                                <table id="tblAuditorias" class="table table-bordered table-striped mt-4">
                                                     <thead>
                                                         <tr>
                                                             <th><i class="fa fa-cogs"></i></th>

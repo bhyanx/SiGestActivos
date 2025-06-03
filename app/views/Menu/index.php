@@ -59,10 +59,10 @@ session_start();
                                         </div>
                                         <div class="col-md-12">
                                             <div class="table-responsive">
-                                                <table id="tblMenu" class="table table-bordered table-striped">
+                                                <table id="tblMenu" class="table table-bordered table-striped mt-4">
                                                     <thead>
                                                         <tr>
-                                                            <th><i class="fa fa-cogs"></i></th>
+                                                            <th>#</th>
                                                             <th>Cod. Menu</th>
                                                             <th>Nombre Menu</th>
                                                             <th>Menu Ruta</th>
@@ -71,6 +71,7 @@ session_start();
                                                             <th>Menu Grupo</th>
                                                             <th>Menu Grupo Icono</th>
                                                             <th>Estado</th>
+                                                            <th><i class="fa fa-cogs"></i></th>
                                                         </tr>
                                                     </thead>
                                                 </table>

@@ -73,21 +73,23 @@ session_start();
                                             <div class="table-responsive">
                                                 <table id="tblProveedores" class="table table-bordered table-striped w-100">
                                                     <thead>
-                                                        <tr>
-                                                            <th><i class="fa fa-cogs" title="Acciones"></i></th>
+                                                            <tr>
+                                                            <th>#</th>
                                                             <th>Nro. Documento</th>
                                                             <th>Razon Social</th>
                                                             <th>Tipo Entidad</th>
+                                                            <th><i class="fa fa-cogs" title="Acciones"></i></th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                     </tbody>
                                                     <tfoot>
                                                         <tr>
-                                                            <th><i class="fa fa-cogs" title="Acciones"></i></th>
+                                                            <th>#</th>
                                                             <th>Nro. Documento</th>
                                                             <th>Razon Social</th>
                                                             <th>Tipo Entidad</th>
+                                                            <th><i class="fa fa-cogs" title="Acciones"></i></th>
                                                         </tr>
                                                     </tfoot>
                                                 </table>

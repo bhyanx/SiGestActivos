@@ -98,7 +98,7 @@ session_start();
                                         </div>
                                         <div class="col-sm-12">
                                             <div class="table-responsive">
-                                                <table id="tblRegistros" class="table table-bordered table-striped">
+                                                <table id="tblRegistros" class="table table-bordered table-striped mt-4">
                                                     <thead>
                                                         <tr>
                                                             <!-- <th><i class="fa fa-cogs"></i></th> -->

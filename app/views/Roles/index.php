@@ -52,20 +52,21 @@ session_start();
                                             <div class="row">
                                                 <div class="col-md-3 offset-md-9">
                                                     <div class="form-group">
-                                                        <button class="btn btn-primary btn-block" id="btnnuevo"><i class="fa fa-plus"></i>Nuevo</button>
+                                                        <button class="btn btn-primary btn-block" id="btnnuevo"><i class="fa fa-plus"></i> Nuevo</button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="table-responsive">
-                                                <table id="tblRoles" class="table table-bordered table-striped">
+                                                <table id="tblRoles" class="table table-bordered table-striped mt-4">
                                                     <thead>
                                                         <tr>
-                                                            <th><i class="fa fa-cogs"></i></th>
+                                                            <th>#</th>
                                                             <th>Id Rol</th>
                                                             <th>Nombre Rol</th>
                                                             <th>Estado</th>
+                                                            <th><i class="fa fa-cogs"></i></th>
                                                         </tr>
                                                     </thead>
                                                 </table>
