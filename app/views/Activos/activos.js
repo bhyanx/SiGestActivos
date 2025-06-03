@@ -121,15 +121,6 @@ function init() {
     }, 100); // Espera breve para asegurar visibilidad
   });
 
-  // Botón para abrir modal de nuevo movimiento
-  // $("#btnnuevo").click(() => {
-  //   $("#tituloModalMovimiento").html(
-  //     '<i class="fa fa-plus-circle"></i> Registrar Movimiento'
-  //   );
-  //   $("#frmMovimiento")[0].reset();
-  //   $("#ModalMovimiento").modal("show");
-  // });
-
   // Al abrir el modal de detalle, autocompleta los campos de destino
   $("#ModalDetalleMovimiento").on("show.bs.modal", function () {
     setSucursalOrigenDestino();
@@ -245,25 +236,18 @@ function init() {
         IdDocIngresoAlm: $("#inputDocIngresoAlm").val(),
         IdArticulo: row.find("td:eq(0)").text(),
         Serie: row.find("input[name='serie[]']").val(),
-        IdEstado: 1, // Estado por defecto
-        IdSucursal: 1, // Sucursal por defecto
-        IdAmbiente: row.find("select.ambiente-destino").val(),
-        IdCategoria: row.find("select.categoria").val(),
-        VidaUtil: 3, // Valor por defecto
-        ValorAdquisicion: 0, // Valor por defecto
-        FechaAdquisicion: new Date().toISOString().split("T")[0], // Fecha actual
-        Garantia: 0, // Valor por defecto
-        FechaFinGarantia: "1900-01-01", // Fecha por defecto
+        IdAmbiente: row.find("select.ambiente-destino").val() || null,
+        IdCategoria: row.find("select.categoria").val() || null,
         Observaciones: row.find("textarea[name='observaciones[]']").val() || "",
       });
     });
 
     // Enviar datos al servidor
     $.ajax({
-      url: "../../controllers/GestionarActivosController.php?action=Registrar",
+      url: "../../controllers/GestionarActivosController.php?action=RegistrarPrueba",
       type: "POST",
       data: {
-        action: "Registrar",
+        action: "RegistrarPrueba",
         activos: JSON.stringify(activos),
       },
       dataType: "json",

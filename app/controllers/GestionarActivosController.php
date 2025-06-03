@@ -90,6 +90,64 @@ switch ($action) {
         }
         break;
 
+    case 'RegistrarPrueba':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                // Obtener los datos del array de activos
+                $activosArray = json_decode($_POST['activos'], true);
+                if (!$activosArray) {
+                    throw new Exception("No se recibieron datos de activos válidos");
+                }
+
+                $resultados = [];
+                foreach ($activosArray as $activo) {
+                    // Formatear fechas
+                    $fechaFinGarantia = !empty($activo['FechaFinGarantia']) ? date('Y-m-d', strtotime($activo['FechaFinGarantia'])) : null;
+                    $fechaAdquisicion = !empty($activo['FechaAdquisicion']) ? date('Y-m-d', strtotime($activo['FechaAdquisicion'])) : date('Y-m-d');
+
+                    $data = [
+                        'IdActivo' => null,
+                        'IdDocIngresoAlm' => $activo['IdDocIngresoAlm'],
+                        'IdArticulo' => $activo['IdArticulo'],
+                        'Codigo' => null, // El SP generará el código automáticamente
+                        'Serie' => $activo['Serie'],
+                        'IdEstado' => $activo['IdEstado'],
+                        'Garantia' => $activo['Garantia'] ?? 0,
+                        'FechaFinGarantia' => $fechaFinGarantia,
+                        'IdProveedor' => $activo['IdProveedor'] ?? null,
+                        'Observaciones' => $activo['Observaciones'] ?? '',
+                        'IdSucursal' => $activo['IdSucursal'],
+                        'IdAmbiente' => $activo['IdAmbiente'],
+                        'IdCategoria' => $activo['IdCategoria'],
+                        'VidaUtil' => $activo['VidaUtil'] ?? 3,
+                        'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
+                        'FechaAdquisicion' => $fechaAdquisicion,
+                        'UserMod' => $_SESSION['CodEmpleado'],
+                        'Accion' => 1 // 1 = Insertar
+                    ];
+
+                    $activos->registrarActivosPrueba($data);
+                    $resultados[] = [
+                        'status' => true,
+                        'message' => 'Activo registrado correctamente'
+                    ];
+                }
+
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Activos registrados con éxito.',
+                    'data' => $resultados
+                ]);
+            } catch (Exception $e) {
+                error_log("Error Registrar: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al registrar activos: ' . $e->getMessage()
+                ]);
+            }
+        }
+        break;
+
     case 'Actualizar':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
