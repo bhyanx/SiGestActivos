@@ -53,12 +53,6 @@ session_start();
                                                     <select class="form-control" name="filtroCategoria" id="filtroCategoria"></select>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label for="filtroAmbiente">Ambiente Destino:</label>
-                                                    <select class="form-control" name="filtroAmbiente"id="filtroAmbiente"></select>
-                                                </div>
-                                            </div> -->
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="filtroFecha">Fecha Registro:</label>
@@ -81,6 +75,16 @@ session_start();
                                                     </button>
                                                 </div>
                                             </div>
+
+                                            <!-- !!!COMENTADO POR DESUSO!!! -->
+                                            <!-- <div class="col-md-2">
+                                                <div class="form-group mb-0">
+                                                    <label for="">&nbsp;</label>
+                                                    <button type="button" class="btn btn-info btn-sm btn-block" id="btnCrearActivo">
+                                                        <i class="fa fa-plus"></i> Crear Activo
+                                                    </button>
+                                                </div>
+                                            </div> -->
                                         </div>
                                     </div>
                                 </div>
@@ -143,7 +147,7 @@ session_start();
                                 <span id="lbldatosactivo"> Guardar activos</span>
                                 <button type="button" class="close btn" id="btnvolverprincipal"><i class="fas fa-undo-alt"></i></button>
                             </div>
-                            
+
                             <div class="col-md-12">
                                 <div class="card card-success">
                                     <!-- /.card-header -->
@@ -198,7 +202,7 @@ session_start();
                                                                 <th>Serie</th>
                                                                 <th>Estado</th>
                                                                 <th>Ambiente</th>
-                                                                <th>Categoria</th> 
+                                                                <th>Categoria</th>
                                                                 <th>Observaciones</th>
                                                                 <th>Acción</th>
                                                             </tr>
@@ -293,6 +297,89 @@ session_start();
                                 </div>
                             </div>
                         </div>
+
+                        <!-- COMENTADO PORQUE YA NO SE USARÁ EL REGISTRO MANUAL -->
+                        <!-- <div class="modal fade" id="divModalRegistroManualActivo" tabindex="-1" role="dialog" aria-labelledby="ModalRegistroManualLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary">
+                                        <h5 class="modal-title" id="tituloModalRegistroManual"><i class="fa fa-plus-circle"></i> Crear Activo</h5>
+                                    </div>
+                                    <form id="frmmantenimiento">
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <input type="hidden" name="idActivo" id="dActivo" value="0">
+                                                <input type="hidden" name="IdActivo" id="idActivo" value="0">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="nombre">Nombre</label>
+                                                        <input type="text" name="nombre" id="nombre" class="form-control" placeholder="Ej. Mouse Logitech" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="serie">Serie</label>
+                                                        <input type="text" name="serie" id="serie" class="form-control" placeholder="Ej. ML-123" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="descripcion">Descripción</label>
+                                                        <textarea name="Descripcion" id="Descripcion" class="form-control" placeholder="Ej. Mouse Logitech color negro"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="empresa">Empresa</label>
+                                                        <input type="text" class="form-control" id="empresa" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="unidadNegocio">Unidad de Negocio</label>
+                                                        <input type="text" class="form-control" id="unidadNegocio" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="estado">Estado</label>
+                                                        <select name="Estado" id="Estado" class="form-control select-2" required></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="categoria">Categoria</label>
+                                                        <select name="Categoria" id="Categoria" class="form-control select-2" required></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="ambiente">Ambiente:</label>
+                                                        <select name="Ambiente" id="Ambiente" class="form-control select-2"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="Cantidad">Cantidad: </label>
+                                                        <input type="text" name="Cantidad" id="Cantidad" class="form-control" placeholder="Ej. 1" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="fechaAdquisicion">Fecha Adquisición: </label>
+                                                        <input type="date" name="fechaAdquisicion" id="fechaAdquisicion" class="form-control" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times"></i> Cerrar</button>
+                                            <button type="submit" class="btn btn-primary" id="btnguardar"><i class="fa fa-save"></i> Guardar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div> -->
                     </div>
             </section>
         </div>

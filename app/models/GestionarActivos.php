@@ -149,6 +149,63 @@ class GestionarActivos
         }
     }
 
+    // !COMENTADO POR DESUSO EN EL REGISTRO MANUAL DE ACTIVOS.
+    // public function registrarActivosManual($data)
+    // {
+    //     try {
+    
+    //         $sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
+    //         if ($sucursal === null) {
+    //             throw new Exception("No se ha encontrado la sucursal");
+    //         }
+
+    //         $nombre = !empty($data['Nombre']) ? trim($data['Nombre']) : null;
+    //         $descripcion = !empty($data['Descripcion']) ? trim($data['Descripcion']) : null;
+    //         $serie = !empty($data['Serie']) ? trim($data['Serie']) : null;
+    //         $IdEstado = !empty($data['IdEstado']) ? (int)$data['IdEstado'] : null;
+    //         $IdCategoria = !empty($data['IdCategoria']) ? (int)$data['IdCategoria'] : null;
+    //         $idAmbiente = !empty($data['IdAmbiente']) ? (int)$data['IdAmbiente'] : null;
+    //         $cantidad = !empty($data['Cantidad']) ? (int)$data['Cantidad'] : null;
+    //         $fechaAdquisicion = !empty($data['FechaAdquisicion']) ? date('Y-m-d', strtotime($data['FechaAdquisicion'])) : null;
+    //         $userMod = !empty($data['UserMod']) ? trim($data['UserMod']) : null;
+    //         $accion = 1;
+
+    //         if (empty($nombre) || empty($descripcion) || empty($serie) || empty($idEstado) || empty($IdCategoria) || empty($idAmbiente) || empty($cantidad) || empty($userMod)) {
+    //             throw new Exception("Todos los campos son obligatorios.");
+    //         }
+
+
+    //         $stmt = $this->db->prepare('EXEC sp_GuardarActivoManual
+    //         @pNombre = ?,
+    //         @pDescripcion = ?,
+    //         @pSerie = ?,
+    //         @pIdEstado = 1,
+    //         @pIdCategoria = ?,
+    //         @pIdAmbiente = ?,
+    //         @pIdSucursal = ?,
+    //         @pCantidad = ?,
+    //         @pFechaAdquisicion = ?,
+    //         @pUserMod = ?,
+    //         @pAccion = 1');
+
+    //         $stmt->bindParam(1, $data['Nombre'], \PDO::PARAM_STR);
+    //         $stmt->bindParam(2, $data['Descripcion'], \PDO::PARAM_STR);
+    //         $stmt->bindParam(3, $data['Serie'], \PDO::PARAM_STR);
+    //         $stmt->bindParam(4, $data['IdEstado'], \PDO::PARAM_INT);
+    //         $stmt->bindParam(5, $data['IdCategoria'], \PDO::PARAM_INT);
+    //         $stmt->bindParam(6, $data['IdAmbiente'], \PDO::PARAM_INT);
+    //         $stmt->bindParam(7, $data['IdSucursal'], \PDO::PARAM_INT);
+    //         $stmt->bindParam(8, $data['Cantidad'], \PDO::PARAM_INT);
+    //         $stmt->bindParam(9, $data['FechaAdquisicion'], \PDO::PARAM_STR);
+    //         $stmt->bindParam(10, $data['UserMod'], \PDO::PARAM_STR);
+
+    //         $stmt->execute();
+    //         return true;
+    //     } catch (\Throwable $th) {
+    //         error_log("Error in registrarActivosManual: " . $th->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+    //         throw $th;
+    //     }
+    // }
 
     public function actualizarActivos($data)
     {
@@ -240,15 +297,16 @@ class GestionarActivos
         return str_pad($number, 5, '0', STR_PAD_LEFT);
     }
 
-    public function generarCodigoActivo($IdCategoria, $IdSucursal) {
+    public function generarCodigoActivo($IdCategoria, $IdSucursal)
+    {
         try {
             // Obtener códigos de categoría y sucursal
             $codigoCategoria = $this->getCategoriaCode($IdCategoria);
             $codigoSucursal = $this->getSucursalCode($IdSucursal);
-            
+
             // Generar número secuencial
             $numeroSecuencial = $this->getNextSequentialNumber($codigoCategoria, $codigoSucursal);
-            
+
             // Formatear código final: CAT-SUC-NUM
             return $codigoCategoria . '-' . $codigoSucursal . '-' . $numeroSecuencial;
         } catch (\PDOException $e) {
