@@ -101,8 +101,6 @@ session_start();
                                                 <table id="tblRegistros" class="table table-bordered table-striped mt-4">
                                                     <thead>
                                                         <tr>
-                                                            <!-- <th><i class="fa fa-cogs"></i></th> -->
-                                                            <!-- <th>#</th> -->
                                                             <th><i class="fa fa-cogs"></i></th>
                                                             <th>Id Activo</th>
                                                             <th>Código</th>
@@ -118,7 +116,6 @@ session_start();
                                                     <tbody></tbody>
                                                     <tfoot>
                                                         <tr>
-                                                            <!-- <th><i class="fa fa-cogs"></i></th> -->
                                                             <th><i class="fa fa-cogs"></i></th>
                                                             <th>Id Activo</th>
                                                             <th>Código</th>
@@ -201,7 +198,7 @@ session_start();
                                                                 <th>Serie</th>
                                                                 <th>Estado</th>
                                                                 <th>Ambiente</th>
-                                                                <!-- <th>Categoria</th> -->
+                                                                <th>Categoria</th> 
                                                                 <th>Observaciones</th>
                                                                 <th>Acción</th>
                                                             </tr>
@@ -210,10 +207,10 @@ session_start();
                                                         </tbody>
                                                         <tfoot>
                                                             <tr>
-                                                                <th colspan="9" style="text-align: right;" class="bg-<?= $_SESSION['TemaColor'] ?>">TOTAL DETALLE &nbsp;&nbsp;</th>
+                                                                <th colspan="9" style="text-align: right;" class="">TOTAL DETALLE &nbsp;&nbsp;</th>
                                                                 <!-- <th style="text-align: right;"></th> -->
-                                                                <th class="text-center bg-<?= $_SESSION['TemaColor'] ?>">
-                                                                    <span id="TotalSinIgV">0.00</span>
+                                                                <th class="text-center">
+                                                                    <span id="CantRegistros">0</span>
                                                                 </th>
 
                                                             </tr>
@@ -231,7 +228,7 @@ session_start();
                                     <div class="card-footer">
                                         <div class="row">
                                             <div class="col-12 col-md-6 mb-2 mb-md-0">
-                                                <button type="button" class="btn btn-danger btn-sm btn-block" id="btncancelarficha">
+                                                <button type="button" class="btn btn-danger btn-sm btn-block" id="btncancelarGuardarDetalles">
                                                     <i class="fa fa-times"></i> Cerrar
                                                 </button>
                                             </div>
@@ -304,7 +301,7 @@ session_start();
         <script>
             var userMod = "<?php echo isset($_SESSION['CodEmpleado']) ? $_SESSION['CodEmpleado'] : ''; ?>";
         </script>
-        <script src="activos.js"></script>
+        <script src="activosp.js"></script>
     </div>
 </body>
 

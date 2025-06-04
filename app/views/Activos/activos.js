@@ -264,6 +264,7 @@ function init() {
             $("#divregistroActivo").hide();
             $("#divlistadoactivos").show();
             $("#divtblactivos").show();
+            $("#tblRegistros").show();
             listarActivosTable();
           });
         } else {
@@ -345,7 +346,7 @@ function agregarActivoAlDetalle(activo) {
   }
   var numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
 
-  var selectAmbienteDestino = `<select class='form-control form-control-sm ambiente-destino' name='ambiente_destino[]' id="comboAmbiente${numeroFilas}"></select>`;
+  var selectAmbiente = `<select class='form-control form-control-sm ambiente-destino' name='ambiente_destino[]' id="comboAmbiente${numeroFilas}"></select>`;
 
   var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[] id="comboCategoria${numeroFilas}"></select>`;
 
@@ -358,19 +359,17 @@ function agregarActivoAlDetalle(activo) {
     <td><input type="text" class="form-control form-control-sm" name="codigo[]" placeholder="Codigo"></td>
     <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie"></td>
     <td>${inputEstadoActivo}</td>
-    <td>${selectAmbienteDestino}</td>
+    <td>${selectAmbiente}</td>
+    <td>${selectCategoria}</td>
     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea>
 </td>
-    
     <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
   </tr>`;
   $("#tbldetalleactivoreg tbody").append(nuevaFila);
   console.log(`comboAmbiente${numeroFilas}`);
   ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
-  // console.log(`comboCategoria${numeroFilas}`)
-  // ListarCombosCategoria(`comboCategoria${numeroFilas}`);
-
-  // ListarCombosResponsable(`comboResponsable${numeroFilas}`);
+  console.log(`comboCategoria${numeroFilas}`)
+  ListarCombosCategoria(`comboCategoria${numeroFilas}`);
 
   setTimeout(function () {
     $("#tbldetalleactivoreg tbody tr.agregado-temp").removeClass(
