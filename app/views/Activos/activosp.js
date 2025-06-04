@@ -83,6 +83,7 @@ $(document).ready(function () {
       $("#divregistroActivo").hide();
       $("#divlistadoactivos").show();
   
+      
       if ($.fn.DataTable.isDataTable("#tblRegistros")) {
         $("#tblRegistros").DataTable().clear().destroy();
       }
@@ -551,7 +552,7 @@ $(document).ready(function () {
           render: () =>
             '<button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>',
         },
-        { data: "idActivo" },
+        { data: "idActivo", visible: false , searchable: false },
         { data: "CodigoActivo" },
         { data: "NumeroSerie" },
         { data: "NombreArticulo" },

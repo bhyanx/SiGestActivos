@@ -102,7 +102,7 @@ session_start();
                                                     <thead>
                                                         <tr>
                                                             <th><i class="fa fa-cogs"></i></th>
-                                                            <th>Id Activo</th>
+                                                            <th style="display: none;">Id Activo</th>
                                                             <th>Código</th>
                                                             <th>Serie</th>
                                                             <th>Nombre Activo</th>
