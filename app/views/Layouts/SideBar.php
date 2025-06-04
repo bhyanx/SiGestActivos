@@ -13,7 +13,8 @@ $data = $usuario->leerMenuGrupo($_SESSION['IdRol']);
 $datapermisos = $usuario->leerMenuRol($_SESSION['IdRol']);
 
 // Función para validar la ruta actual
-function isCurrentRoute($menuRuta) {
+function isCurrentRoute($menuRuta)
+{
     $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     return $currentPath === $menuRuta;
 }
@@ -21,9 +22,9 @@ function isCurrentRoute($menuRuta) {
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar elevation-4 sidebar-dark-green">
     <!-- Brand Logo -->
-    <a href="/app/views/Home/" class="brand-link">
-        <img src="/public/img/Page-Lubriseng.png" alt="Logo Sistema EPPS" class="brand-image elevation-3" style="opacity: .8">
-        <span class="brand-text font-weight text-sm"></span>
+    <a href="http://192.168.1.37:8088/sis_soporte/" class="brand-link">
+        <b class="ml-3 mr-0">SIS</b>
+        <span class="brand-text font-weight-light">- GESTIÓN ACTIVOS</span>
     </a>
 
     <!-- Sidebar -->
@@ -35,7 +36,7 @@ function isCurrentRoute($menuRuta) {
             </div>
             <div class="info">
                 <span class="d-block text-light text-sm">
-                    <?php 
+                    <?php
                     /*if (isset($_SESSION["NombreTrabajador"]) && !empty($_SESSION["NombreTrabajador"])) {
                         echo $_SESSION["NombreTrabajador"];
                     } else if (isset($_SESSION["PrimerNombre"]) && isset($_SESSION["ApellidoPaterno"])) {
@@ -73,28 +74,28 @@ function isCurrentRoute($menuRuta) {
                                 }
                             }
                         }
-                        
-                        echo '<li class="nav-item'.($hasActiveChild ? ' menu-open' : '').'">
-                                <a href="#" class="nav-link'.($hasActiveChild ? ' active' : '').'" id="'.$menugrupo['MenuGrupo'].'">
-                                    <i class="nav-icon fas '.$menugrupo['MenuGrupoIcono'].'"></i>
-                                    <p> '.$menugrupo['MenuGrupo'].' <i class="right fas fa-angle-left"></i> </p>
+
+                        echo '<li class="nav-item' . ($hasActiveChild ? ' menu-open' : '') . '">
+                                <a href="#" class="nav-link' . ($hasActiveChild ? ' active' : '') . '" id="' . $menugrupo['MenuGrupo'] . '">
+                                    <i class="nav-icon fas ' . $menugrupo['MenuGrupoIcono'] . '"></i>
+                                    <p> ' . $menugrupo['MenuGrupo'] . ' <i class="right fas fa-angle-left"></i> </p>
                                 </a>
                                 <ul class="nav nav-treeview">';
                         if (is_array($datapermisos)) {
-                            foreach ($datapermisos as $permiso) {                            
+                            foreach ($datapermisos as $permiso) {
                                 if ($menugrupo['MenuGrupo'] == $permiso['MenuGrupo'] && $permiso['Permiso'] == 1) {
                                     $isActive = isCurrentRoute($permiso['MenuRuta']);
                                     echo '<li class="nav-item ml-1">
-                                            <a href="'.$permiso['MenuRuta'].'" class="nav-link'.($isActive ? ' active' : '').'" id="'.$permiso['MenuIdentificador'].'">
-                                                <i class="fas '.$permiso['MenuIcono'].' nav-icon"></i>
-                                                <p>'.$permiso['NombreMenu'].'</p>
+                                            <a href="' . $permiso['MenuRuta'] . '" class="nav-link' . ($isActive ? ' active' : '') . '" id="' . $permiso['MenuIdentificador'] . '">
+                                                <i class="fas ' . $permiso['MenuIcono'] . ' nav-icon"></i>
+                                                <p>' . $permiso['NombreMenu'] . '</p>
                                             </a>
                                         </li>';
                                 }
                             }
                         }
                         echo '</ul>
-                            </li>';                   
+                            </li>';
                     }
                 }
                 ?>

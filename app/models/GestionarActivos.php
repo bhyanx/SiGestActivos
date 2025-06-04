@@ -78,7 +78,7 @@ class GestionarActivos
             $stmt->bindParam(8, $fechaFinGarantia, \PDO::PARAM_STR | \PDO::PARAM_NULL);
             $stmt->bindParam(9, $data['IdProveedor'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
             $stmt->bindParam(10, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(11, $data['IdSucursal'], \PDO::PARAM_INT);
+            $stmt->bindParam(11, $sucursal, \PDO::PARAM_INT);
             $stmt->bindParam(12, $data['IdAmbiente'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
             $stmt->bindParam(13, $data['VidaUtil'], \PDO::PARAM_INT);
             $stmt->bindParam(14, $data['ValorAdquisicion'], \PDO::PARAM_STR);
@@ -100,6 +100,7 @@ class GestionarActivos
             // Formatear fechas al formato SQL Server
             $fechaFinGarantia = !empty($data['FechaFinGarantia']) ? date('Y-m-d', strtotime($data['FechaFinGarantia'])) : null;
             $fechaAdquisicion = !empty($data['FechaAdquisicion']) ? date('Y-m-d', strtotime($data['FechaAdquisicion'])) : null;
+            $sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
 
             $stmt = $this->db->prepare('EXEC sp_GuardarActivoPRUEBA
                 @pIdActivo = ?, 
@@ -114,7 +115,7 @@ class GestionarActivos
                 @pObservaciones = ?, 
                 @pIdSucursal = ?, 
                 @pIdAmbiente = ?, 
-                @pIdCategoria = 1, 
+                @pIdCategoria = ?, 
                 @pVidaUtil = ?, 
                 @pValorAdquisicion = ?, 
                 @pFechaAdquisicion = ?, 
@@ -131,13 +132,14 @@ class GestionarActivos
             $stmt->bindParam(8, $fechaFinGarantia, \PDO::PARAM_STR | \PDO::PARAM_NULL);
             $stmt->bindParam(9, $data['IdProveedor'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
             $stmt->bindParam(10, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(11, $data['IdSucursal'], \PDO::PARAM_INT);
+            $stmt->bindParam(11, $sucursal, \PDO::PARAM_INT);
             $stmt->bindParam(12, $data['IdAmbiente'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
-            $stmt->bindParam(13, $data['VidaUtil'], \PDO::PARAM_INT);
-            $stmt->bindParam(14, $data['ValorAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(15, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(16, $data['UserMod'], \PDO::PARAM_STR);
-            $stmt->bindParam(17, $data['Accion'], \PDO::PARAM_INT);
+            $stmt->bindParam(13, $data['IdCategoria'], \PDO::PARAM_INT);
+            $stmt->bindParam(14, $data['VidaUtil'], \PDO::PARAM_INT);
+            $stmt->bindParam(15, $data['ValorAdquisicion'], \PDO::PARAM_STR);
+            $stmt->bindParam(16, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(17, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(18, $data['Accion'], \PDO::PARAM_INT);
 
             $stmt->execute();
             return true;
