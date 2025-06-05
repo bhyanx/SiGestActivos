@@ -207,7 +207,7 @@ session_start();
                         </div>
                         <div class="table-responsive">
                             <table id="tbldetalleactivoreg" class="table table-hover table-bordered table-striped table-sm w-100">
-                                <thead class="table-success">
+                                <thead>
                                     <tr>
                                         <th>Id. Articulo</th>
                                         <th>Nombre</th>
@@ -277,7 +277,7 @@ session_start();
                             <div class="table-responsive">
 
                                 <table id="tbllistarActivos" class="table table-bordered table-striped display nowrap" style="width:100%">
-                                    <thead>
+                                    <thead class="table-success">
                                         <tr>
                                             <th>Id</th>
                                             <th>Nombre</th>
