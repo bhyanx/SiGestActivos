@@ -10,20 +10,6 @@ session_start();
     <?php require_once("../Layouts/Header.php"); ?>
     <title>Activos - Sistema Gestion de activos</title>
 </head>
-<!--
-<style>
-    /* Cambia el color de las filas impares (stripe) */
-    table.table-striped tbody tr:nth-of-type(odd) {
-        background-color: #6cf169 !important;
-    }
-
-    /* Hover personalizado */
-    table.dataTable tbody tr:hover {
-        background-color: #37fa33 !important;
-        /* verde un poco más fuerte para hover */
-    }
-</style>
-
 
 <body class="sidebar-mini control-sidebar-slide-open layout-navbar-fixed layout-fixed sidebar-mini-xs sidebar-mini-md sidebar-collapse">
     <div class="wrapper">
@@ -207,7 +193,7 @@ session_start();
                         </div>
                         <div class="table-responsive">
                             <table id="tbldetalleactivoreg" class="table table-hover table-bordered table-striped table-sm w-100">
-                                <thead>
+                                <thead class="table-success">
                                     <tr>
                                         <th>Id. Articulo</th>
                                         <th>Nombre</th>
@@ -277,7 +263,7 @@ session_start();
                             <div class="table-responsive">
 
                                 <table id="tbllistarActivos" class="table table-bordered table-striped display nowrap" style="width:100%">
-                                    <thead class="table-success">
+                                    <thead>
                                         <tr>
                                             <th>Id</th>
                                             <th>Nombre</th>
