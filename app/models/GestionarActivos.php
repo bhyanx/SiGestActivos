@@ -210,7 +210,7 @@ class GestionarActivos
     public function actualizarActivos($data)
     {
         try {
-            $stmt = $this->db->prepare('EXEC sp_GuardarActivo
+            $stmt = $this->db->prepare('EXEC sp_GuardarActivoPRUEBA
                 @pIdActivo = ?,
                 @pIdDocIngresoAlm = ?, 
                 @pIdArticulo = ?, 
@@ -228,7 +228,7 @@ class GestionarActivos
                 @pValorAdquisicion = ?, 
                 @pFechaAdquisicion = ?, 
                 @pUserMod = ?, 
-                @pAccion = 2');
+                @pAccion = ?');
 
             $stmt->bindParam(1, $data['IdActivo'], \PDO::PARAM_INT);
             $stmt->bindParam(2, $data['IdDocIngresoAlm'], \PDO::PARAM_INT);

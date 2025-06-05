@@ -203,7 +203,8 @@ switch ($action) {
                     'VidaUtil' => $_POST['VidaUtil'],
                     'ValorAdquisicion' => $_POST['ValorAdquisicion'],
                     'FechaAdquisicion' => $_POST['FechaAdquisicion'],
-                    'UserMod' => $_SESSION['CodEmpleado']
+                    'UserMod' => $_SESSION['CodEmpleado'],
+                    'Accion' => 2
                 ];
                 $activos->actualizarActivos($data);
                 echo json_encode(['status' => true, 'message' => 'Activo actualizado con éxito.']);

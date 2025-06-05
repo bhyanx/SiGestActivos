@@ -6,12 +6,13 @@ function init() {
   listarActivosTable();
   ListarCombosMov();
   ListarCombosFiltros();
+  // ListarCombosModalActualizarActivo();
 
   // ? INICIO: SE COMENTO EL CODIGO PARA INICIALIZAR EL MODAL DE REGISTRO MANUAL
-  // $("#divModalRegistroManualActivo").on("shown.bs.modal", function () {
-  //   $("#frmmantenimiento")[0].reset();
-  //   cargarCombosModalRegistroManual();
-  // });
+  $("#divModalActualizarActivo").on("shown.bs.modal", function () {
+    $("#frmEditarActivo")[0].reset();
+    cargarCombosModalActualizarActivo();
+  });
   // ? FIN: SE COMENTO EL CODIGO PARA INICIALIZAR EL MODAL DE REGISTRO MANUAL
 
   $(document).on(
@@ -253,6 +254,64 @@ function init() {
     });
   });
 
+  $(document).on("click", ".btnEditarActivo", function () {
+    const fila = $(this).closest("tr");
+    const datos = $("#tblRegistros").DataTable().row(fila).data();
+
+    console.log(datos);
+
+    if (!datos) {
+      Swal.fire(
+        "Error",
+        "No se pudo obtener la información del activo.",
+        "error"
+      );
+      return;
+    }
+
+    cargarCombosModalActualizarActivo(() => {
+
+      $("#idActivo").val(datos.idActivo || '').trigger("change");
+      $("#CodigoActivo").val(datos.codigoActivo || '');
+      $("#DocIngresoAlmacen").val(datos.DocIngresoAlmacen || '');
+
+      $("#divModalActualizarActivo").modal("show");
+    });
+  });
+
+  $("#frmEditarActivo").on("submit", function (e) {
+    e.preventDefault();
+
+    const datos = {
+      IdActivo: $("#IdActivo").val(),
+      Serie: $("#Serie").val(),
+      Estado: $("#Estado").val(),
+      Ambiente: $("#Ambiente").val(),
+      Categoria: $("#Categoria").val(),
+      Observaciones: $("#Observaciones").val(),
+      Garantia: $("#Garantia").prop("checked") ? 1 : 0,
+    };
+
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=Actualizar",
+      type: "POST",
+      data: datos,
+      dataType: "json",
+      success: function (res) {
+        if (res.status) {
+          Swal.fire("Éxito", res.message, "success");
+          $("#divModalActualizarActivo").modal("hide");
+          listarActivosTable();
+        } else {
+          Swal.fire("Error", res.message, "error");
+        }
+      },
+      error: function (xhr, status, error) {
+        Swal.fire("Error", "Error al actualizar el activo: " + error, "error");
+      },
+    });
+  });
+
   // ? SE COMENTO PORQUE YA NO SE HARÁ UN REGISTRO MANUAL
 
   //   $("#frmmantenimiento").on("submit", function (e) {
@@ -384,48 +443,42 @@ function init() {
     );
     return true;
   }
+}
 
-  // ? INICIO: SE COMENTO LA CARGA DE COMBOS EN EL MODAL YA QUE NO SE UTILIZARÁ
-  // function cargarCombosModalRegistroManual() {
-  //   $.ajax({
-  //     url: "../../controllers/GestionarActivosController.php?action=combos",
-  //     type: "POST",
-  //     dataType: "json",
-  //     // async: false,
-  //     success: (res) => {
-  //       if (res.status) {
-  //         $("#Estado").html(res.data.estado).trigger("change");
-  //         $("#Estado").select2({
-  //           theme: "bootstrap4",
-  //           width: "100%",
-  //         });
-  //         $("#Ambiente").html(res.data.ambientes).trigger("change");
-  //         $("#Ambiente").select2({
-  //           theme: "bootstrap4",
-  //           width: "100%",
-  //         });
-  //         $("#Categoria").html(res.data.categorias).trigger("change");
-  //         $("#Categoria").select2({
-  //           theme: "bootstrap4",
-  //           width: "100%",
-  //         });
-  //       } else {
-  //         Swal.fire(
-  //           "Filtro de categorias",
-  //           "No se pudieron cargar los combos: " + res.message,
-  //           "warning"
-  //         );
-  //       }
-  //     },
-  //     error: (xhr, status, error) => {
-  //       Swal.fire(
-  //         "Filtro de categorias",
-  //         "Error al cargar combos: " + error,
-  //         "error"
-  //       );
-  //     },
-  //   });
-  // ? FIN: SE COMENTO LA CARGA DE COMBOS EN EL MODAL YA QUE NO SE UTILIZARÁ
+// ? INICIO: SE COMENTO LA CARGA DE COMBOS EN EL MODAL YA QUE NO SE UTILIZARÁ
+function cargarCombosModalActualizarActivo(callback) {
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    success: (res) => {
+      if (res.status) {
+        $("#Estado").html(res.data.estado).trigger("change");
+        $("#Estado").select2({
+          theme: "bootstrap4",
+          width: "100%",
+        });
+        $("#Ambiente").html(res.data.ambientes).trigger("change");
+        $("#Ambiente").select2({
+          theme: "bootstrap4",
+          width: "100%",
+        });
+        $("#Categoria").html(res.data.categorias).trigger("change");
+
+        // Llamar al callback solo después de cargar los combos
+        if (typeof callback === "function") {
+          callback();
+        }
+      }
+    },
+    error: (xhr, status, error) => {
+      console.error("Error al cargar combos:", error);
+      // Aún así, llamar al callback para que el modal se abra
+      if (typeof callback === "function") {
+        callback();
+      }
+    },
+  });
 }
 
 function ListarCombosCategoria(elemento) {
@@ -641,8 +694,8 @@ function listarActivosTable() {
     columns: [
       {
         data: null,
-        render: () =>
-          '<button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>',
+        render: (data, type, row) =>
+          '<button class="btn btn-sm btn-info btnEditarActivo"><i class="fas fa-eye"></i></button>',
       },
       { data: "idActivo", visible: false, searchable: false },
       { data: "CodigoActivo" },

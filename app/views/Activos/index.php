@@ -298,6 +298,124 @@ session_start();
                             </div>
                         </div>
 
+                        <!-- MODAL PARA PODER ACTUALIZAR EL ACTIVO. -->
+                        <div class="modal fade" id="divModalActualizarActivo" tabindex="-1" role="dialog" aria-labelledby="ModalActualizarActivoLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary">
+                                        <h5 class="modal-title" id="tituloModalActualizarActivo"><i class="fa fa-plus-circle"></i> Actualizar activo</h5>
+                                    </div>
+                                    <form id="frmEditarActivo">
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <!-- <input type="hidden" name="idActivo" id="dActivo" value="0">
+                                                <input type="hidden" name="IdActivo" id="idActivo" value="0"> -->
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Id Activo</label>
+                                                        <input type="text" id="idActivo" name="idActivo" class="form-control" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Codigo Activo</label>
+                                                        <input type="text" id="CodigoActivo" name="CodigoActivo" class="form-control" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Serie Activo</label>
+                                                        <input type="text" id="SerieActivo" name="SerieActivo" class="form-control">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Doc. Ingreso Almacén</label>
+                                                        <input type="text" id="DocIngresoAlmacen" name="DocIngresoAlmacen" class="form-control" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group"><label for="IdArticulo">Id Articulo</label>
+                                                        <input type="text" id="IdArticulo" name="IdArticulo" class="form-control" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="nombreArticulo">Nombre</label>
+                                                        <input type="text" name="nombreArticulo" id="nombreArticulo" class="form-control" placeholder="Ej. Mouse Logitech" required>
+                                                    </div>
+                                                </div>
+                                                <!-- <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="nombre">Nombre</label>
+                                                        <input type="text" name="nombre" id="nombre" class="form-control" placeholder="Ej. Mouse Logitech" required>
+                                                    </div>
+                                                </div> -->
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="marca">Marca</label>
+                                                        <input type="text" name="marca" id="marca" class="form-control" placeholder="Ej. Mouse Logitech color negro">
+                                                    </div>
+                                                </div>
+                                                <!-- <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="empresa">Empresa</label>
+                                                        <input type="text" class="form-control" id="empresa" disabled>
+                                                    </div>
+                                                </div> -->
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="estado">Estado</label>
+                                                        <select name="Estado" id="Estado" class="form-control select-2" required></select>
+                                                    </div>
+                                                </div>
+                                                <!-- <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="unidadNegocio">Unidad de Negocio</label>
+                                                        <input type="text" class="form-control" id="unidadNegocio" disabled>
+                                                    </div>
+                                                </div> -->
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="ambiente">Ambiente:</label>
+                                                        <select name="Ambiente" id="Ambiente" class="form-control select-2"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="categoria">Categoria</label>
+                                                        <select name="Categoria" id="Categoria" class="form-control select-2" required></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="Cantidad">Cantidad: </label>
+                                                        <input type="text" name="Cantidad" id="Cantidad" class="form-control" placeholder="Ej. 1" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="fechaAdquisicion">Fecha Adquisición: </label>
+                                                        <input type="date" name="fechaAdquisicion" id="fechaAdquisicion" class="form-control" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="Garantia">¿Tiene Garantía? </label>
+                                                        <input type="checkbox" name="Garantia" id="Garantia" class="form-control" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times"></i> Cerrar</button>
+                                            <button type="submit" class="btn btn-primary" id="btnguardar"><i class="fa fa-save"></i> Guardar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- COMENTADO PORQUE YA NO SE USARÁ EL REGISTRO MANUAL -->
                         <!-- <div class="modal fade" id="divModalRegistroManualActivo" tabindex="-1" role="dialog" aria-labelledby="ModalRegistroManualLabel" aria-hidden="true">
                             <div class="modal-dialog modal-lg" role="document">
