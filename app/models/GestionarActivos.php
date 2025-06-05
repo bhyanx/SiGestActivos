@@ -259,9 +259,20 @@ class GestionarActivos
             $stmt = $this->db->prepare("EXEC sp_GuardarActivoPRUEBA
             @pIdActivo = ?,
             @pIdResponsable = ?,
-            @pUserMod = ?,");
-        } catch (\Throwable $th) {
+            @pUserMod = ?,
+            @pAccion = ?");
+
+            $stmt->bindParam(1, $data['IdActivo'], PDO::PARAM_INT);
+            $stmt->bindParam(2, $data['IdResponsable'], PDO::PARAM_STR);
+            $stmt->bindParam(3, $data['UserMod'], PDO::PARAM_STR);
+            $stmt->bindParam(4, $data['Accion'], PDO::PARAM_INT);
+
+            $stmt->execute();
+            return true;
+        } catch (Exception $e) {
             //throw $th;
+            error_log("Error en asignarResponsables: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
         }
     }
 

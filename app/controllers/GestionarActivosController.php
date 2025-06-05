@@ -218,6 +218,25 @@ switch ($action) {
         }
         break;
 
+    case 'asignarResponsable':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $data = [
+                    'IdActivo' => $_POST['IdActivo'],
+                    'IdResponsable' => $_POST['IdResponsable'],
+                    'UserMod' => $_SESSION['CodEmpleado'],
+                    'Accion' => 4
+                ];
+
+                $activos->asignarResponsables($data);
+                echo json_encode(['status' => true, 'message' => 'Responsable asignado con éxito.']);
+            } catch (Exception $e) {
+                error_log("Error AsignarResponsable: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+                echo json_encode(['status' => false, 'message' => 'Error al asignar responsable: ' . $e->getMessage()]);
+            }
+        }
+        break;
+    
     case 'obtenerInfoActivo':
         try {
             $idActivo = $_POST['idActivo'];
