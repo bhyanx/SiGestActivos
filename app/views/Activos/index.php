@@ -342,7 +342,7 @@ session_start();
                                                 <div class="col-md-8">
                                                     <div class="form-group">
                                                         <label for="nombreArticulo">Nombre</label>
-                                                        <input type="text" name="nombreArticulo" id="nombreArticulo" class="form-control" placeholder="Ej. Mouse Logitech" required>
+                                                        <input type="text" name="nombreArticulo" id="nombreArticulo" class="form-control" placeholder="Ej. Mouse Logitech" disabled>
                                                     </div>
                                                 </div>
                                                 <!-- <div class="col-md-4">
@@ -366,7 +366,7 @@ session_start();
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="estado">Estado</label>
-                                                        <select name="Estado" id="Estado" class="form-control select-2" required></select>
+                                                        <select name="Estado" id="Estado" class="form-control select-2"></select>
                                                     </div>
                                                 </div>
                                                 <!-- <div class="col-md-6">
@@ -384,25 +384,25 @@ session_start();
                                                 <div class="col-md-8">
                                                     <div class="form-group">
                                                         <label for="categoria">Categoria</label>
-                                                        <select name="Categoria" id="Categoria" class="form-control select-2" required></select>
+                                                        <select name="Categoria" id="Categoria" class="form-control select-2"></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="Cantidad">Cantidad: </label>
-                                                        <input type="text" name="Cantidad" id="Cantidad" class="form-control" placeholder="Ej. 1" required>
+                                                        <input type="text" name="Cantidad" id="Cantidad" class="form-control" placeholder="Ej. 1">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="fechaAdquisicion">Fecha Adquisición: </label>
-                                                        <input type="date" name="fechaAdquisicion" id="fechaAdquisicion" class="form-control" required>
+                                                        <input type="date" name="fechaAdquisicion" id="fechaAdquisicion" class="form-control">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="Garantia">¿Tiene Garantía? </label>
-                                                        <input type="checkbox" name="Garantia" id="Garantia" class="form-control" required>
+                                                        <input type="checkbox" name="Garantia" id="Garantia" class="form-control">
                                                     </div>
                                                 </div>
                                             </div>
