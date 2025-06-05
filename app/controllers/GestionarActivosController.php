@@ -184,28 +184,31 @@ switch ($action) {
     case 'Actualizar':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
-                // Normaliza el idActivo para que siempre llegue como int y con el nombre correcto
-                $data['IdActivo'] = isset($_POST['IdActivo']) ? (int)$_POST['idActivo'] : null;
                 $data = [
-                    'IdActivo' => $_POST['IdActivo'],
-                    'IdDocIngresoAlm' => $_POST['IdDocIngresoAlm'],
-                    'IdArticulo' => $_POST['IdArticulo'],
-                    'Codigo' => $_POST['Codigo'],
-                    'Serie' => $_POST['Serie'],
-                    'IdEstado' => $_POST['IdEstado'],
-                    'Garantia' => $_POST['Garantia'],
-                    'FechaFinGarantia' => $_POST['FechaFinGarantia'],
-                    'IdProveedor' => $_POST['IdProveedor'],
-                    'Observaciones' => $_POST['Observaciones'],
-                    'IdSucursal' => $_POST['IdSucursal'],
-                    'IdAmbiente' => $_POST['IdAmbiente'],
-                    'IdCategoria' => $_POST['IdCategoria'],
-                    'VidaUtil' => $_POST['VidaUtil'],
-                    'ValorAdquisicion' => $_POST['ValorAdquisicion'],
-                    'FechaAdquisicion' => $_POST['FechaAdquisicion'],
-                    'UserMod' => $_SESSION['CodEmpleado'],
+                    'IdActivo' => isset($_POST['IdActivo']) ? (int)$_POST['IdActivo'] : null,
+                    'Serie' => $_POST['Serie'] ?? null,
+                    'IdEstado' => isset($_POST['IdEstado']) ? (int)$_POST['IdEstado'] : null,
+                    'IdAmbiente' => isset($_POST['IdAmbiente']) ? (int)$_POST['IdAmbiente'] : null,
+                    'IdCategoria' => isset($_POST['IdCategoria']) ? (int)$_POST['IdCategoria'] : null,
+                    'Observaciones' => $_POST['Observaciones'] ?? null,
+                    'UserMod' => $_SESSION['CodEmpleado'] ?? null,
                     'Accion' => 2
                 ];
+
+                // Validar campos requeridos
+                if (!$data['IdActivo']) {
+                    throw new Exception("El ID del activo es requerido");
+                }
+                if (!$data['IdEstado']) {
+                    throw new Exception("El estado es requerido");
+                }
+                if (!$data['IdAmbiente']) {
+                    throw new Exception("El ambiente es requerido");
+                }
+                if (!$data['IdCategoria']) {
+                    throw new Exception("La categoría es requerida");
+                }
+
                 $activos->actualizarActivos($data);
                 echo json_encode(['status' => true, 'message' => 'Activo actualizado con éxito.']);
             } catch (Exception $e) {
@@ -219,6 +222,22 @@ switch ($action) {
         try {
             $idActivo = $_POST['idActivo'];
             $info = $activos->obtenerInfoActivo($idActivo); // Este método debe existir en tu modelo
+            echo json_encode([
+                'status' => true,
+                'data' => $info
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'obtenerActivoPorId':
+        try {
+            $idActivo = $_POST['idActivo'];
+            $info = $activos->obtenerActivoPorId($idActivo);
             echo json_encode([
                 'status' => true,
                 'data' => $info

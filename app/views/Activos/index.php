@@ -308,8 +308,6 @@ session_start();
                                     <form id="frmEditarActivo">
                                         <div class="modal-body">
                                             <div class="row">
-                                                <!-- <input type="hidden" name="idActivo" id="dActivo" value="0">
-                                                <input type="hidden" name="IdActivo" id="idActivo" value="0"> -->
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="">Id Activo</label>
@@ -334,47 +332,30 @@ session_start();
                                                         <input type="text" id="DocIngresoAlmacen" name="DocIngresoAlmacen" class="form-control" disabled>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group"><label for="IdArticulo">Id Articulo</label>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="IdArticulo">Id Articulo</label>
                                                         <input type="text" id="IdArticulo" name="IdArticulo" class="form-control" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-8">
                                                     <div class="form-group">
                                                         <label for="nombreArticulo">Nombre</label>
-                                                        <input type="text" name="nombreArticulo" id="nombreArticulo" class="form-control" placeholder="Ej. Mouse Logitech" disabled>
+                                                        <input type="text" name="nombreArticulo" id="nombreArticulo" class="form-control" disabled>
                                                     </div>
                                                 </div>
-                                                <!-- <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label for="nombre">Nombre</label>
-                                                        <input type="text" name="nombre" id="nombre" class="form-control" placeholder="Ej. Mouse Logitech" required>
-                                                    </div>
-                                                </div> -->
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="marca">Marca</label>
-                                                        <input type="text" name="marca" id="marca" class="form-control" placeholder="Ej. Mouse Logitech color negro">
+                                                        <input type="text" name="marca" id="marca" class="form-control" disabled>
                                                     </div>
                                                 </div>
-                                                <!-- <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="empresa">Empresa</label>
-                                                        <input type="text" class="form-control" id="empresa" disabled>
-                                                    </div>
-                                                </div> -->
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="estado">Estado</label>
                                                         <select name="Estado" id="Estado" class="form-control select-2"></select>
                                                     </div>
                                                 </div>
-                                                <!-- <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="unidadNegocio">Unidad de Negocio</label>
-                                                        <input type="text" class="form-control" id="unidadNegocio" disabled>
-                                                    </div>
-                                                </div> -->
                                                 <div class="col-md-8">
                                                     <div class="form-group">
                                                         <label for="ambiente">Ambiente:</label>
@@ -390,19 +371,19 @@ session_start();
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="Cantidad">Cantidad: </label>
-                                                        <input type="text" name="Cantidad" id="Cantidad" class="form-control" placeholder="Ej. 1">
+                                                        <input type="text" name="Cantidad" id="Cantidad" class="form-control" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="fechaAdquisicion">Fecha Adquisición: </label>
-                                                        <input type="date" name="fechaAdquisicion" id="fechaAdquisicion" class="form-control">
+                                                        <input type="date" name="fechaAdquisicion" id="fechaAdquisicion" class="form-control" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="Garantia">¿Tiene Garantía? </label>
-                                                        <input type="checkbox" name="Garantia" id="Garantia" class="form-control">
+                                                        <input type="checkbox" name="Garantia" id="Garantia" class="form-control" disabled>
                                                     </div>
                                                 </div>
                                             </div>

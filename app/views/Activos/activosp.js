@@ -174,11 +174,12 @@ function init() {
   $(document).on("click", ".btnSeleccionarActivo", function () {
     var fila = $(this).closest("tr");
     var activo = {
-      id: $(this).data("id"),
+      id: fila.find("td:eq(0)").text(),
       nombre: fila.find("td:eq(1)").text(),
       marca: fila.find("td:eq(2)").text(),
-      sucursal: fila.find("td:eq(3)").text(),
-      ambiente: fila.find("td:eq(4)").text(),
+      empresa: fila.find("td:eq(3)").text(),
+      unidadNegocio: fila.find("td:eq(4)").text(),
+      nombreLocal: fila.find("td:eq(5)").text()
     };
     agregarActivoAlDetalle(activo);
   });
@@ -191,74 +192,94 @@ function init() {
     e.preventDefault();
 
     if ($("#tbldetalleactivoreg tbody tr").length === 0) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Debe agregar al menos un activo al detalle",
-      });
-      return;
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Debe agregar al menos un activo al detalle",
+        });
+        return;
     }
 
     let activos = [];
     $("#tbldetalleactivoreg tbody tr").each(function () {
-      let row = $(this);
-      activos.push({
-        IdDocIngresoAlm: $("#inputDocIngresoAlm").val(),
-        IdArticulo: row.find("td:eq(0)").text(),
-        Serie: row.find("input[name='serie[]']").val(),
-        IdAmbiente: row.find("select.ambiente").val() || null,
-        IdCategoria: row.find("select.categoria").val() || null,
-        Observaciones: row.find("textarea[name='observaciones[]']").val() || "",
-      });
+        let row = $(this);
+        activos.push({
+            IdDocIngresoAlm: parseInt($("#inputDocIngresoAlm").val()) || null,
+            IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
+            Serie: row.find("input[name='serie[]']").val() || null,
+            IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
+            IdCategoria: parseInt(row.find("select.categoria").val()) || null,
+            Observaciones: row.find("textarea[name='observaciones[]']").val() || "",
+            IdEstado: 1, // Estado por defecto: Operativo
+            Garantia: 0, // Por defecto sin garantía
+            IdSucursal: null, // Se obtiene de la sesión en el backend
+            UserMod: userMod,
+            Accion: 1 // 1 = Insertar
+        });
     });
 
-    $.ajax({
-      url: "../../controllers/GestionarActivosController.php?action=RegistrarPrueba",
-      type: "POST",
-      data: {
-        action: "RegistrarPrueba",
-        activos: JSON.stringify(activos),
-      },
-      dataType: "json",
-      success: function (res) {
-        if (res.status) {
-          Swal.fire({
-            icon: "success",
-            title: "Éxito",
-            text: res.message,
-            timer: 1500,
-          }).then(() => {
-            $("#tbldetalleactivoreg tbody").empty();
-            $("#divregistroActivo").hide();
-            $("#divlistadoactivos").show();
-            $("#divtblactivos").show();
-            $("#tblRegistros").show();
-            listarActivosTable();
-          });
-        } else {
-          Swal.fire({
+    // Validar que todos los campos requeridos estén presentes
+    let activosValidos = activos.every(activo => {
+        return activo.IdDocIngresoAlm && 
+               activo.IdArticulo && 
+               activo.IdAmbiente && 
+               activo.IdCategoria;
+    });
+
+    if (!activosValidos) {
+        Swal.fire({
             icon: "error",
             title: "Error",
-            text: res.message,
-          });
-        }
-      },
-      error: function (jqXHR, textStatus, errorThrown) {
-        console.error("Error en la petición:", jqXHR.responseText);
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Error al registrar los activos: " + errorThrown,
+            text: "Todos los campos son requeridos para cada activo",
         });
-      },
+        return;
+    }
+
+    $.ajax({
+        url: "../../controllers/GestionarActivosController.php?action=RegistrarPrueba",
+        type: "POST",
+        data: {
+            action: "RegistrarPrueba",
+            activos: JSON.stringify(activos),
+        },
+        dataType: "json",
+        success: function (res) {
+            if (res.status) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Éxito",
+                    text: res.message,
+                    timer: 1500,
+                }).then(() => {
+                    $("#tbldetalleactivoreg tbody").empty();
+                    $("#divregistroActivo").hide();
+                    $("#divlistadoactivos").show();
+                    $("#divtblactivos").show();
+                    $("#tblRegistros").show();
+                    listarActivosTable();
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: res.message,
+                });
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.error("Error en la petición:", jqXHR.responseText);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Error al registrar los activos: " + errorThrown,
+            });
+        },
     });
   });
 
   $(document).on("click", ".btnEditarActivo", function () {
     const fila = $(this).closest("tr");
     const datos = $("#tblRegistros").DataTable().row(fila).data();
-
-    console.log(datos);
 
     if (!datos) {
       Swal.fire(
@@ -269,48 +290,193 @@ function init() {
       return;
     }
 
-    cargarCombosModalActualizarActivo(() => {
+    $("#tituloModalActualizarActivo").html(
+      '<i class="fa fa-edit"></i> Editar Activo'
+    );
 
-      $("#idActivo").val(datos.idActivo || '').trigger("change");
-      $("#CodigoActivo").val(datos.codigoActivo || '');
-      $("#DocIngresoAlmacen").val(datos.DocIngresoAlmacen || '');
+    // Carga los combos y luego los datos del activo
+    ListarCombosConCallback(() => {
+      $.ajax({
+        url: "../../controllers/GestionarActivosController.php?action=obtenerActivoPorId",
+        type: "POST",
+        data: { idActivo: datos.idActivo },
+        dataType: "json",
+        success: (res) => {
+          if (res.status) {
+            let data = res.data;
+            console.log("Datos del activo:", data);
 
-      $("#divModalActualizarActivo").modal("show");
+            // Cargar datos básicos
+            $("#idActivo").val(data.idActivo);
+            $("#CodigoActivo").val(data.CodigoActivo);
+            $("#SerieActivo").val(data.NumeroSerie);
+            $("#DocIngresoAlmacen").val(data.DocIngresoAlmacen);
+            $("#IdArticulo").val(data.idArticulo);
+            $("#nombreArticulo").val(data.NombreArticulo);
+            $("#marca").val(data.MarcaArticulo);
+            $("#fechaAdquisicion").val(data.fechaAdquisicion);
+            $("#Garantia").prop("checked", data.garantia == 1);
+            $("#Observaciones").val(data.observaciones);
+            $("#VidaUtil").val(data.vidaUtil);
+            $("#ValorAdquisicion").val(data.valorSoles);
+
+            // Asignar valores a los combos
+            $("#Estado").val(data.idEstado).trigger("change");
+            $("#Ambiente").val(data.idAmbiente).trigger("change");
+            $("#Categoria").val(data.idCategoria).trigger("change");
+
+            // Mostrar el modal
+            $("#divModalActualizarActivo").modal({
+              backdrop: "static",
+              keyboard: false,
+            });
+          } else {
+            Swal.fire(
+              "Editar Activo",
+              "No se pudo obtener el activo: " + res.message,
+              "warning"
+            );
+          }
+        },
+        error: (xhr, status, error) => {
+          Swal.fire(
+            "Editar Activo",
+            "Error al obtener activo: " + error,
+            "error"
+          );
+        },
+      });
     });
   });
 
+  function ListarCombosConCallback(callback) {
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=combos",
+      type: "POST",
+      dataType: "json",
+      success: (res) => {
+        if (res.status) {
+          // Limpiar y cargar los combos
+          $("#Estado").empty().html(res.data.estado);
+          $("#Ambiente").empty().html(res.data.ambientes);
+          $("#Categoria").empty().html(res.data.categorias);
+
+          // Inicializar select2 con configuración específica para el modal
+          $(
+            "#Estado, #Ambiente, #Categoria"
+          ).select2({
+            theme: "bootstrap4",
+            dropdownParent: $("#divModalActualizarActivo .modal-body"),
+            width: "100%",
+          });
+
+          if (typeof callback === "function") {
+            callback();
+          }
+        } else {
+          Swal.fire(
+            "Error",
+            "No se pudieron cargar los combos: " + res.message,
+            "warning"
+          );
+        }
+      },
+      error: (xhr, status, error) => {
+        console.error("Error al cargar combos:", error);
+        Swal.fire("Error", "Error al cargar los combos: " + error, "error");
+      },
+    });
+  }
+
+  function cargarArticulosPorDocIngreso(idDoc, callback) {
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc",
+      type: "POST",
+      data: { IdDocIngresoAlm: idDoc },
+      dataType: "json",
+      success: (res) => {
+        if (res.status) {
+          let options = '<option value="">Seleccione un artículo</option>';
+          res.data.forEach((item) => {
+            options += `<option value="${item.IdArticulo}">${item.Nombre}</option>`;
+          });
+          $("#IdArticulo").html(options);
+          if (typeof callback === "function") {
+            callback();
+          }
+        }
+      },
+    });
+  }
+
+  // Modificar el evento submit del formulario
   $("#frmEditarActivo").on("submit", function (e) {
     e.preventDefault();
 
+    // Solo enviamos los campos que realmente necesitamos actualizar
     const datos = {
-      IdActivo: $("#IdActivo").val(),
-      Serie: $("#Serie").val(),
-      Estado: $("#Estado").val(),
-      Ambiente: $("#Ambiente").val(),
-      Categoria: $("#Categoria").val(),
-      Observaciones: $("#Observaciones").val(),
-      Garantia: $("#Garantia").prop("checked") ? 1 : 0,
+        IdActivo: $("#idActivo").val() || null,
+        Serie: $("#SerieActivo").val() || null,
+        IdEstado: $("#Estado").val() || null,
+        IdAmbiente: $("#Ambiente").val() || null,
+        IdCategoria: $("#Categoria").val() || null,
+        Observaciones: $("#Observaciones").val() || null,
+        UserMod: userMod,
+        Accion: 2
     };
 
+    // Validar campos requeridos
+    if (!datos.IdActivo) {
+        Swal.fire("Error", "El ID del activo es requerido", "error");
+        return;
+    }
+
+    if (!datos.IdEstado) {
+        Swal.fire("Error", "El estado es requerido", "error");
+        return;
+    }
+
+    if (!datos.IdAmbiente) {
+        Swal.fire("Error", "El ambiente es requerido", "error");
+        return;
+    }
+
+    if (!datos.IdCategoria) {
+        Swal.fire("Error", "La categoría es requerida", "error");
+        return;
+    }
+
+    // Convertir valores numéricos
+    datos.IdActivo = parseInt(datos.IdActivo);
+    datos.IdEstado = parseInt(datos.IdEstado);
+    datos.IdAmbiente = parseInt(datos.IdAmbiente);
+    datos.IdCategoria = parseInt(datos.IdCategoria);
+
+    console.log("Datos a enviar:", datos);
+
     $.ajax({
-      url: "../../controllers/GestionarActivosController.php?action=Actualizar",
-      type: "POST",
-      data: datos,
-      dataType: "json",
-      success: function (res) {
-        if (res.status) {
-          Swal.fire("Éxito", res.message, "success");
-          $("#divModalActualizarActivo").modal("hide");
-          listarActivosTable();
-        } else {
-          Swal.fire("Error", res.message, "error");
-        }
-      },
-      error: function (xhr, status, error) {
-        Swal.fire("Error", "Error al actualizar el activo: " + error, "error");
-      },
+        url: "../../controllers/GestionarActivosController.php?action=Actualizar",
+        type: "POST",
+        data: datos,
+        dataType: "json",
+        success: function (res) {
+            if (res.status) {
+                Swal.fire("Éxito", res.message, "success");
+                $("#divModalActualizarActivo").modal("hide");
+                listarActivosTable();
+            } else {
+                Swal.fire("Error", res.message || "Error al actualizar el activo", "error");
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error en la petición:", xhr.responseText);
+            Swal.fire("Error", "Error al actualizar el activo: " + error, "error");
+        },
     });
   });
+
+  // Eliminar los eventos que podrían estar causando la limpieza de datos
+  $("#divModalActualizarActivo").off("shown.bs.modal hidden.bs.modal");
 
   // ? SE COMENTO PORQUE YA NO SE HARÁ UN REGISTRO MANUAL
 
@@ -378,7 +544,7 @@ function init() {
           render: function (data, type, row) {
             return (
               '<button class="btn btn-success btn-sm btnSeleccionarActivo" data-id="' +
-              row.IdArticulo +
+              row.idArticulo +
               '"><i class="fa fa-check"></i></button>'
             );
           },
@@ -399,11 +565,11 @@ function init() {
 
   function agregarActivoAlDetalle(activo) {
     if ($(`#tbldetalleactivoreg tbody tr[data-id='${activo.id}']`).length > 0) {
-      NotificacionToast(
-        "error",
-        `El activo <b>${activo.nombre}</b> ya está en el detalle.`
-      );
-      return false;
+        NotificacionToast(
+            "error",
+            `El activo <b>${activo.nombre}</b> ya está en el detalle.`
+        );
+        return false;
     }
     var numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
 
@@ -414,32 +580,31 @@ function init() {
     var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
 
     var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
-      <td>${activo.id}</td>
-      <td>${activo.nombre}</td>
-      <td>${activo.marca}</td>
-      <td><input type="text" class="form-control form-control-sm" name="codigo[]" placeholder="Codigo"></td>
-      <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie"></td>
-      <td>${inputEstadoActivo}</td>
-      <td>${selectAmbiente}</td>
-      <td>${selectCategoria}</td>
-      <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea></td>
-      <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
+        <td>${activo.id}</td>
+        <td>${activo.nombre}</td>
+        <td>${activo.marca}</td>
+        <td><input type="text" class="form-control form-control-sm" name="codigo[]" placeholder="Codigo"></td>
+        <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie"></td>
+        <td>${inputEstadoActivo}</td>
+        <td>${selectAmbiente}</td>
+        <td>${selectCategoria}</td>
+        <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea></td>
+        <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
     </tr>`;
     $("#tbldetalleactivoreg tbody").append(nuevaFila);
-    console.log(`comboAmbiente${numeroFilas}`);
+    
     ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
-    console.log(`comboCategoria${numeroFilas}`);
     ListarCombosCategoria(`comboCategoria${numeroFilas}`);
 
     setTimeout(function () {
-      $("#tbldetalleactivoreg tbody tr.agregado-temp").removeClass(
-        "table-success agregado-temp"
-      );
+        $("#tbldetalleactivoreg tbody tr.agregado-temp").removeClass(
+            "table-success agregado-temp"
+        );
     }, 1000);
 
     NotificacionToast(
-      "success",
-      `Activo <b>${activo.nombre}</b> agregado al detalle.`
+        "success",
+        `Activo <b>${activo.nombre}</b> agregado al detalle.`
     );
     return true;
   }
@@ -453,19 +618,18 @@ function cargarCombosModalActualizarActivo(callback) {
     dataType: "json",
     success: (res) => {
       if (res.status) {
-        $("#Estado").html(res.data.estado).trigger("change");
-        $("#Estado").select2({
-          theme: "bootstrap4",
-          width: "100%",
-        });
-        $("#Ambiente").html(res.data.ambientes).trigger("change");
-        $("#Ambiente").select2({
-          theme: "bootstrap4",
-          width: "100%",
-        });
-        $("#Categoria").html(res.data.categorias).trigger("change");
+        // Limpiar y cargar los combos
+        $("#Estado").empty().html(res.data.estado);
+        $("#Ambiente").empty().html(res.data.ambientes);
+        $("#Categoria").empty().html(res.data.categorias);
 
-        // Llamar al callback solo después de cargar los combos
+        // Inicializar select2
+        $("#Estado, #Ambiente, #Categoria").select2({
+          theme: "bootstrap4",
+          width: "100%",
+        });
+
+        // Llamar al callback después de cargar los combos
         if (typeof callback === "function") {
           callback();
         }
@@ -473,7 +637,6 @@ function cargarCombosModalActualizarActivo(callback) {
     },
     error: (xhr, status, error) => {
       console.error("Error al cargar combos:", error);
-      // Aún así, llamar al callback para que el modal se abra
       if (typeof callback === "function") {
         callback();
       }
@@ -706,6 +869,13 @@ function listarActivosTable() {
       { data: "Proveedor" },
       { data: "Estado" },
       { data: "valorSoles" },
+      { data: "idArticulo", visible: false },
+      { data: "idAmbiente", visible: false },
+      { data: "idCategoria", visible: false },
+      { data: "DocIngresoAlmacen", visible: false },
+      { data: "fechaAdquisicion", visible: false },
+      { data: "garantia", visible: false },
+      { data: "observaciones", visible: false },
     ],
     language: {
       url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
