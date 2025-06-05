@@ -251,7 +251,7 @@ class GestionarActivos
         }
     }
 
-    public function getCategoriaCode($IdCategoria)
+    /*public function getCategoriaCode($IdCategoria)
     {
         $stmt = $this->db->prepare("SELECT Codigo FROM tCategoriasActivo WHERE IdCategoria = ?");
         $stmt->bindParam(1, $IdCategoria, PDO::PARAM_INT);
@@ -309,5 +309,5 @@ class GestionarActivos
             error_log("Error in generarCodigoActivo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
-    }
+    }*/
 }

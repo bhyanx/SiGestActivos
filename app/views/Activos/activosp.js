@@ -323,7 +323,7 @@ function init() {
             // Asignar valores a los combos
             $("#Estado").val(data.idEstado).trigger("change");
             $("#Ambiente").val(data.idAmbiente).trigger("change");
-            $("#Categoria").val(data.idCategoria).trigger("change");
+            $("#Categoria").val(data.idCategoria).trigger("change").prop("disabled", true);
 
             // Mostrar el modal
             $("#divModalActualizarActivo").modal({
@@ -419,7 +419,7 @@ function init() {
         Serie: $("#SerieActivo").val() || null,
         IdEstado: $("#Estado").val() || null,
         IdAmbiente: $("#Ambiente").val() || null,
-        IdCategoria: $("#Categoria").val() || null,
+        IdCategoria: $("#Categoria").val() || null, // La categoría se mantiene pero no es editable
         Observaciones: $("#Observaciones").val() || null,
         UserMod: userMod,
         Accion: 2
@@ -438,11 +438,6 @@ function init() {
 
     if (!datos.IdAmbiente) {
         Swal.fire("Error", "El ambiente es requerido", "error");
-        return;
-    }
-
-    if (!datos.IdCategoria) {
-        Swal.fire("Error", "La categoría es requerida", "error");
         return;
     }
 
@@ -583,7 +578,7 @@ function init() {
         <td>${activo.id}</td>
         <td>${activo.nombre}</td>
         <td>${activo.marca}</td>
-        <td><input type="text" class="form-control form-control-sm" name="codigo[]" placeholder="Codigo"></td>
+        <td><input type="text" class="form-control form-control-sm" name="codigo[]" placeholder="Codigo" disabled></td>
         <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie"></td>
         <td>${inputEstadoActivo}</td>
         <td>${selectAmbiente}</td>
@@ -819,7 +814,8 @@ function ListarCombosMov() {
 function listarActivosTable() {
   $("#tblRegistros").DataTable({
     aProcessing: true,
-    aServerSide: false,
+    //responsive: true,
+    aServerSide: true,
     layout: {
       topStart: {
         buttons: [
@@ -841,7 +837,6 @@ function listarActivosTable() {
       bottomStart: null,
       bottomEnd: null,
     },
-    responsive: true,
     lengthChange: false,
     colReorder: true,
     autoWidth: false,
