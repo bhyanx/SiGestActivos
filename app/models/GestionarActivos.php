@@ -223,8 +223,8 @@ class GestionarActivos
     public function actualizarActivos($data)
     {
         try {
-            $db = (new Conectar())->ConexionBdPracticante();
-            $stmt = $db->prepare("EXEC sp_GuardarActivoPRUEBA 
+            //$db = (new Conectar())->ConexionBdPracticante();
+            $stmt = $this->db->prepare("EXEC sp_GuardarActivoPRUEBA 
                 @pIdActivo = ?, 
                 @pSerie = ?, 
                 @pIdEstado = ?, 
@@ -248,6 +248,20 @@ class GestionarActivos
         } catch (Exception $e) {
             error_log("Error en actualizarActivos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
+        }
+    }
+
+    // ASIGNAR RESPONSABLES A ACTIVOS
+    public function asignarResponsables($data)
+    {
+        try {
+            //code...
+            $stmt = $this->db->prepare("EXEC sp_GuardarActivoPRUEBA
+            @pIdActivo = ?,
+            @pIdResponsable = ?,
+            @pUserMod = ?,");
+        } catch (\Throwable $th) {
+            //throw $th;
         }
     }
 
