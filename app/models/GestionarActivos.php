@@ -255,7 +255,6 @@ class GestionarActivos
     public function actualizarActivos($data)
     {
         try {
-            //$db = (new Conectar())->ConexionBdPracticante();
             $stmt = $this->db->prepare("EXEC sp_GuardarActivoPRUEBA 
                 @pIdActivo = ?, 
                 @pSerie = ?, 
@@ -308,63 +307,4 @@ class GestionarActivos
         }
     }
 
-    /*public function getCategoriaCode($IdCategoria)
-    {
-        $stmt = $this->db->prepare("SELECT Codigo FROM tCategoriasActivo WHERE IdCategoria = ?");
-        $stmt->bindParam(1, $IdCategoria, PDO::PARAM_INT);
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result ? $result['Codigo'] : 'XXX'; // XXX if not found
-    }
-
-    public function getSucursalCode($IdSucursal)
-    {
-        $stmt = $this->db->prepare("SELECT Codigo FROM tSucursales WHERE cod_UnidadNeg = ?");
-        $stmt->bindParam(1, $IdSucursal, PDO::PARAM_INT);
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result ? $result['Codigo'] : 'YYY'; // YYY if not found
-    }
-
-    public function getNextSequentialNumber($EMP, $CCC)
-    {
-        // Get the last sequential number used for this EMP and CCC
-        $stmt = $this->db->prepare("SELECT MAX(Codigo) AS LastCode FROM tActivos WHERE Codigo LIKE ?");
-        $like = "$EMP-$CCC-%";
-        $stmt->bindParam(1, $like, PDO::PARAM_STR);
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        $lastCode = $result['LastCode'];
-
-        if ($lastCode) {
-            // Extract the number and increment it
-            $parts = explode('-', $lastCode);
-            $number = intval($parts[2]) + 1;
-        } else {
-            // Start from 1
-            $number = 1;
-        }
-
-        // Pad the number with leading zeros
-        return str_pad($number, 5, '0', STR_PAD_LEFT);
-    }
-
-    public function generarCodigoActivo($IdCategoria, $IdSucursal)
-    {
-        try {
-            // Obtener códigos de categoría y sucursal
-            $codigoCategoria = $this->getCategoriaCode($IdCategoria);
-            $codigoSucursal = $this->getSucursalCode($IdSucursal);
-
-            // Generar número secuencial
-            $numeroSecuencial = $this->getNextSequentialNumber($codigoCategoria, $codigoSucursal);
-
-            // Formatear código final: CAT-SUC-NUM
-            return $codigoCategoria . '-' . $codigoSucursal . '-' . $numeroSecuencial;
-        } catch (\PDOException $e) {
-            error_log("Error in generarCodigoActivo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
-            throw $e;
-        }
-    }*/
 }
