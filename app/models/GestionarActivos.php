@@ -14,17 +14,21 @@ class GestionarActivos
     public function consultarActivos($data)
     {
         try {
+            //$empresa = $_SESSION['cod_empresa'] ??  null; 
+            //$sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
             // Convertir cadenas vacías a null o enteros para parámetros numéricos
             $pCodigo = empty($data['pCodigo']) ? null : $data['pCodigo'];
+            $pIdEmpresa = empty($data['pIdEmpresa']) ? null : $data['pIdEmpresa'];
             $pIdSucursal = empty($data['pIdSucursal']) ? null : (int)$data['pIdSucursal'];
             $pIdCategoria = empty($data['pIdCategoria']) ? null : (int)$data['pIdCategoria'];
             $pIdEstado = empty($data['pIdEstado']) ? null : (int)$data['pIdEstado'];
 
-            $stmt = $this->db->prepare('EXEC sp_ConsultarActivos @pCodigo = ?, @pIdSucursal = ?, @pIdCategoria = ?, @pIdEstado = ?');
+            $stmt = $this->db->prepare('EXEC sp_ConsultarActivos @pCodigo = ?, @pIdEmpresa = ?, @pIdSucursal = ?, @pIdCategoria = ?, @pIdEstado = ?');
             $stmt->bindParam(1, $pCodigo, \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(2, $pIdSucursal, \PDO::PARAM_INT | \PDO::PARAM_NULL);
-            $stmt->bindParam(3, $pIdCategoria, \PDO::PARAM_INT | \PDO::PARAM_NULL);
-            $stmt->bindParam(4, $pIdEstado, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(2, $pIdEmpresa, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(3, $pIdSucursal, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(4, $pIdCategoria, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(5, $pIdEstado, \PDO::PARAM_INT | \PDO::PARAM_NULL);
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
@@ -52,6 +56,31 @@ class GestionarActivos
         $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerAmbientesPorEmpresaSucursal($idEmpresa, $idSucursal)
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT 
+                    a.idAmbiente,
+                    a.nombre,
+                    a.idEmpresa,
+                    a.idSucursal
+                FROM tAmbiente a
+                WHERE a.idEmpresa = ? 
+                AND a.idSucursal = ?
+                AND a.estado = 1
+                ORDER BY a.nombre
+            ");
+            $stmt->bindParam(1, $idEmpresa, PDO::PARAM_INT);
+            $stmt->bindParam(2, $idSucursal, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error in obtenerAmbientesPorEmpresaSucursal: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
     }
 
     public function registrarActivos($data)
@@ -113,6 +142,7 @@ class GestionarActivos
             // Formatear fechas al formato SQL Server
             $fechaFinGarantia = !empty($data['FechaFinGarantia']) ? date('Y-m-d', strtotime($data['FechaFinGarantia'])) : null;
             $fechaAdquisicion = !empty($data['FechaAdquisicion']) ? date('Y-m-d', strtotime($data['FechaAdquisicion'])) : null;
+            $empresa = $_SESSION['cod_empresa'] ??  null; 
             $sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
 
             $stmt = $this->db->prepare('EXEC sp_GuardarActivoPRUEBA
@@ -126,6 +156,7 @@ class GestionarActivos
                 @pFechaFinGarantia = ?, 
                 @pIdProveedor = ?, 
                 @pObservaciones = ?, 
+                @pIdEmpresa = ?,
                 @pIdSucursal = ?, 
                 @pIdAmbiente = ?, 
                 @pIdCategoria = ?, 
@@ -145,14 +176,15 @@ class GestionarActivos
             $stmt->bindParam(8, $fechaFinGarantia, \PDO::PARAM_STR | \PDO::PARAM_NULL);
             $stmt->bindParam(9, $data['IdProveedor'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
             $stmt->bindParam(10, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(11, $sucursal, \PDO::PARAM_INT);
-            $stmt->bindParam(12, $data['IdAmbiente'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
-            $stmt->bindParam(13, $data['IdCategoria'], \PDO::PARAM_INT);
-            $stmt->bindParam(14, $data['VidaUtil'], \PDO::PARAM_INT);
-            $stmt->bindParam(15, $data['ValorAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(16, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(17, $data['UserMod'], \PDO::PARAM_STR);
-            $stmt->bindParam(18, $data['Accion'], \PDO::PARAM_INT);
+            $stmt->bindParam(11, $empresa, \PDO::PARAM_INT);
+            $stmt->bindParam(12, $sucursal, \PDO::PARAM_INT);
+            $stmt->bindParam(13, $data['IdAmbiente'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(14, $data['IdCategoria'], \PDO::PARAM_INT);
+            $stmt->bindParam(15, $data['VidaUtil'], \PDO::PARAM_INT);
+            $stmt->bindParam(16, $data['ValorAdquisicion'], \PDO::PARAM_STR);
+            $stmt->bindParam(17, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(18, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(19, $data['Accion'], \PDO::PARAM_INT);
 
             $stmt->execute();
             return true;

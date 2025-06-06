@@ -19,7 +19,8 @@ switch ($action) {
         try {
             $filtros = [
                 'pCodigo' => $_POST['pCodigo'] ?? null,
-                'pIdSucursal' => $_POST['pIdSucursal'] ?? null,
+                'pIdEmpresa' => $_SESSION['cod_empresa'] ?? null,
+                'pIdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
                 'pIdCategoria' => $_POST['pIdCategoria'] ?? null,
                 'pIdEstado' => $_POST['pIdEstado'] ?? null
             ];
@@ -116,6 +117,7 @@ switch ($action) {
                         'FechaFinGarantia' => $fechaFinGarantia,
                         'IdProveedor' => $activo['IdProveedor'] ?? null,
                         'Observaciones' => $activo['Observaciones'] ?? '',
+                        'IdEmpresa' => $_SESSION['IdEmpresa'] ?? '',
                         'IdSucursal' => $_SESSION['IdSucursal'],
                         'IdAmbiente' => $activo['IdAmbiente'],
                         'IdCategoria' => $activo['IdCategoria'] ?? 2,
@@ -331,10 +333,18 @@ switch ($action) {
                 $combos['categorias'] .= "<option value='{$row['IdCategoria']}'>{$row['Nombre']}</option>";
             }
 
-            $ambientes = $combo->comboAmbiente();
-            $combos['ambientes'] = '<option value="">Seleccione</option>';
-            foreach ($ambientes as $row) {
-                $combos['ambientes'] .= "<option value='{$row['idAmbiente']}'>{$row['nombre']}</option>";
+            // Obtener ambientes filtrados por empresa y sucursal
+            $idEmpresa = $_SESSION['cod_empresa'] ?? null;
+            $idSucursal = $_SESSION['cod_UnidadNeg'] ?? null;
+            
+            if ($idEmpresa && $idSucursal) {
+                $ambientes = $activos->obtenerAmbientesPorEmpresaSucursal($idEmpresa, $idSucursal);
+                $combos['ambientes'] = '<option value="">Seleccione</option>';
+                foreach ($ambientes as $row) {
+                    $combos['ambientes'] .= "<option value='{$row['idAmbiente']}'>{$row['nombre']}</option>";
+                }
+            } else {
+                $combos['ambientes'] = '<option value="">No hay ambientes disponibles</option>';
             }
 
             $estadoActivo = $combo->comboEstadoActivo();
@@ -418,6 +428,31 @@ switch ($action) {
             echo json_encode(['data' => [], 'error' => $e->getMessage()]);
         }
         break;
+
+    case 'obtenerAmbientes':
+        try {
+            $idEmpresa = $_POST['idEmpresa'] ?? null;
+            $idSucursal = $_POST['idSucursal'] ?? null;
+
+            if (!$idEmpresa || !$idSucursal) {
+                throw new Exception("Se requiere empresa y sucursal");
+            }
+
+            $ambientes = $activos->obtenerAmbientesPorEmpresaSucursal($idEmpresa, $idSucursal);
+            echo json_encode([
+                'status' => true,
+                'data' => $ambientes,
+                'message' => 'Ambientes cargados correctamente'
+            ]);
+        } catch (Exception $e) {
+            error_log("Error obtenerAmbientes: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al obtener ambientes: ' . $e->getMessage()
+            ]);
+        }
+        break;
+
     default:
         echo json_encode(['status' => false, 'message' => 'Acción no válida.']);
         break;

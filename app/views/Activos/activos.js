@@ -285,6 +285,12 @@ function init() {
       },
     });
   });
+
+  // Agregar eventos para los cambios de empresa y sucursal
+  $("#empresa, #sucursal").on("change", function() {
+    console.log("Cambio detectado en:", this.id);
+    cargarAmbientes();
+  });
 }
 
 function listarActivosModal(docIngresoAlm) {
@@ -480,35 +486,45 @@ function ListarCombosEstado(elemento) {
 }
 
 function ListarCombosAmbiente(elemento) {
-  $.ajax({
-    url: "../../controllers/GestionarActivosController.php?action=combos",
-    type: "POST",
-    dataType: "json",
-    async: false,
-    success: (res) => {
-      if (res.status) {
-        $(`#${elemento}`).html(res.data.ambientes).trigger("change");
+  const idEmpresa = $("#empresa").val();
+  const idSucursal = $("#sucursal").val();
 
-        $(`#${elemento}`).select2({
-          theme: "bootstrap4",
-          //dropdownParent: $("#ModalFiltros .modal-body"),
-          width: "100%",
-        });
+  console.log("Listando combos de ambiente para:", { idEmpresa, idSucursal, elemento });
+
+  if (!idEmpresa || !idSucursal) {
+    $(`#${elemento}`).html('<option value="">Seleccione primero empresa y sucursal</option>');
+    $(`#${elemento}`).selectpicker("refresh");
+    return;
+  }
+
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=obtenerAmbientes",
+    type: "POST",
+    data: {
+      idEmpresa: idEmpresa,
+      idSucursal: idSucursal
+    },
+    success: function(r) {
+      console.log("Respuesta de combos de ambiente:", r);
+      if (r.status) {
+        let options = '<option value="">Seleccione</option>';
+        if (r.data && r.data.length > 0) {
+          r.data.forEach(function(ambiente) {
+            options += `<option value="${ambiente.idAmbiente}">${ambiente.nombre}</option>`;
+          });
+        } else {
+          options = '<option value="">No hay ambientes disponibles</option>';
+        }
+        $(`#${elemento}`).html(options);
+        $(`#${elemento}`).selectpicker("refresh");
       } else {
-        Swal.fire(
-          "Filtro de movimientos",
-          "No se pudieron cargar los combos: " + res.message,
-          "warning"
-        );
+        NotificacionToast("error", r.message || "Error al cargar los ambientes");
       }
     },
-    error: (xhr, status, error) => {
-      Swal.fire(
-        "Filtros de movimientos",
-        "Error al cargar combos: " + error,
-        "error"
-      );
-    },
+    error: function(xhr, status, error) {
+      console.error("Error al cargar combos de ambiente:", { xhr, status, error });
+      NotificacionToast("error", "Error al cargar los ambientes: " + error);
+    }
   });
 }
 
@@ -821,5 +837,68 @@ function guardarMantenimiento(e) {
         text: "Error al comunicarse con el servidor",
       });
     },
+  });
+}
+
+function ListarCombos() {
+  $.get("../../controllers/GestionarActivosController.php?action=combos", function (r) {
+    if (r.status) {
+      $("#docIngresoAlm").html(r.data.docIngresoAlm);
+      $("#tipo_movimiento").html(r.data.tipoMovimiento);
+      $("#sucursal").html(r.data.sucursales);
+      $("#autorizador").html(r.data.autorizador);
+      $("#responsable").html(r.data.responsable);
+      $("#categoria").html(r.data.categorias);
+      $("#ambiente").html(r.data.ambientes);
+      $("#estado").html(r.data.estado);
+
+      // Inicializar los selectpicker
+      $(".selectpicker").selectpicker("refresh");
+    } else {
+      NotificacionToast("error", r.message);
+    }
+  });
+}
+
+function cargarAmbientes() {
+  const idEmpresa = $("#empresa").val();
+  const idSucursal = $("#sucursal").val();
+
+  console.log("Cargando ambientes para:", { idEmpresa, idSucursal });
+
+  if (!idEmpresa || !idSucursal) {
+    $("#ambiente").html('<option value="">Seleccione primero empresa y sucursal</option>');
+    $("#ambiente").selectpicker("refresh");
+    return;
+  }
+
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=obtenerAmbientes",
+    type: "POST",
+    data: {
+      idEmpresa: idEmpresa,
+      idSucursal: idSucursal
+    },
+    success: function(r) {
+      console.log("Respuesta de ambientes:", r);
+      if (r.status) {
+        let options = '<option value="">Seleccione</option>';
+        if (r.data && r.data.length > 0) {
+          r.data.forEach(function(ambiente) {
+            options += `<option value="${ambiente.idAmbiente}">${ambiente.nombre}</option>`;
+          });
+        } else {
+          options = '<option value="">No hay ambientes disponibles</option>';
+        }
+        $("#ambiente").html(options);
+        $("#ambiente").selectpicker("refresh");
+      } else {
+        NotificacionToast("error", r.message || "Error al cargar los ambientes");
+      }
+    },
+    error: function(xhr, status, error) {
+      console.error("Error al cargar ambientes:", { xhr, status, error });
+      NotificacionToast("error", "Error al cargar los ambientes: " + error);
+    }
   });
 }

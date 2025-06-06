@@ -48,6 +48,7 @@ session_start();
 
             <section class="content">
                 <div class="container-fluid">
+                    <!-- Contenedor principal -->
                     <div class="row">
                         <div class="col-md-10 offset-md-1 mb-4" id="divlistadomovimientos">
                             <form action="#" method="post" id="frmbusqueda">
