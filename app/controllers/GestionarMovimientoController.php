@@ -66,7 +66,8 @@ switch ($action) {
                     'IdAmbiente_Nueva' => $_POST['IdAmbienteDestino'],
                     'IdTipo_Movimiento' => $_POST['IdTipoMovimiento'],
                     'IdAutorizador' => $_POST['IdAutorizador'],
-                    'estado_activo' => 'Operativa' // Agregamos el estado por defecto
+                    'IdResponsable_Nueva' => $_POST['IdResponsableDestino'],
+                    'IdActivoPadre_Nuevo' => null
                 ];
                 $movimientos->crearDetalleMovimiento($detalle);
                 echo json_encode(['status' => true]);
@@ -89,17 +90,20 @@ switch ($action) {
             $sucursales = $combo->comboSucursal();
             $combos['sucursales'] = '<option value="">Seleccione</option>';
             $unidadNegocioActual = $_SESSION['cod_UnidadNeg'];
+            $nombreSucursalActual = '';
             
             foreach ($sucursales as $row) {
-                if ($row['idSucursal'] == $unidadNegocioActual) {
-                    $combos['sucursales'] .= "<option value='{$row['idSucursal']}' selected>{$row['nombre']}</option>";
+                if ($row['cod_UnidadNeg'] == $unidadNegocioActual) {
+                    $combos['sucursales'] .= "<option value='{$row['cod_UnidadNeg']}' selected>{$row['nombre']}</option>";
+                    $nombreSucursalActual = $row['nombre'];
                 } else {
-                    $combos['sucursales'] .= "<option value='{$row['idSucursal']}'>{$row['nombre']}</option>";
+                    $combos['sucursales'] .= "<option value='{$row['cod_UnidadNeg']}'>{$row['nombre']}</option>";
                 }
             }
 
-            // Agregar el ID de la unidad de negocio de la sesión
-            $combos['sucursalOrigen'] = $unidadNegocioActual;
+            // Agregar el nombre y ID de la unidad de negocio de la sesión
+            $combos['sucursalOrigen'] = $nombreSucursalActual;
+            $combos['sucursalOrigenId'] = $unidadNegocioActual;
 
             $autorizador = $combo->comboAutorizador();
             $combos['autorizador'] = '<option value="">Seleccione</option>';

@@ -64,11 +64,11 @@ class GestionarMovimientos
                 $params[] = $filtros['tipo'];
             }
             if (!empty($filtros['sucursal_origen'])) {
-                $sql .= " AND SucursalAnterior = ?";
+                $sql .= " AND SucursalOrigen = ?";
                 $params[] = $filtros['sucursal_origen'];
             }
             if (!empty($filtros['sucursal_destino'])) {
-                $sql .= " AND SucursalNueva = ?";
+                $sql .= " AND SucursalDestino = ?";
                 $params[] = $filtros['sucursal_destino'];
             }
             if (!empty($filtros['fecha'])) {
@@ -76,7 +76,7 @@ class GestionarMovimientos
                 $params[] = $filtros['fecha'];
             }
             if (!empty($filtros['ambiente'])) {
-                $sql .= " AND (AmbienteAnterior = ? OR AmbienteNuevo = ?)";
+                $sql .= " AND (AmbienteOrigen = ? OR AmbienteDestino = ?)";
                 $params[] = $filtros['ambiente'];
                 $params[] = $filtros['ambiente'];
             }

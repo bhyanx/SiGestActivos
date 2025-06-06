@@ -3,9 +3,31 @@ $(document).ready(function () {
 });
 
 function init() {
-  listarMovimientos();
+  // Inicializar la tabla una sola vez
+  if (!$.fn.DataTable.isDataTable("#tblMovimientos")) {
+    listarMovimientos();
+  }
+
   ListarCombosMov();
   ListarCombosFiltros();
+
+  // Manejar el evento submit del formulario de búsqueda
+  $("#frmbusqueda")
+    .off("submit")
+    .on("submit", function (e) {
+      e.preventDefault();
+      $("#divtblmovimientos").show();
+      $("#divgenerarmov").hide();
+      $("#divregistroMovimiento").hide();
+      $("#divlistadomovimientos").show();
+      
+      // Recargar la tabla
+      if ($.fn.DataTable.isDataTable("#tblMovimientos")) {
+        $("#tblMovimientos").DataTable().ajax.reload(null, false);
+      } else {
+        listarMovimientos();
+      }
+    });
 
   $(document).on(
     "change",
@@ -95,16 +117,6 @@ function init() {
       $("#divlistadomovimientos").show();
     });
 
-  // Al buscar, mostrar la tabla y ocultar formularios
-  $("#frmbusqueda").on("submit", function (e) {
-    e.preventDefault();
-    $("#divtblmovimientos").show();
-    $("#divgenerarmov").hide();
-    $("#divregistroMovimiento").hide();
-    $("#divlistadomovimientos").show();
-    if (typeof listarMovimientos === "function") listarMovimientos();
-  });
-
   // Botón para abrir modal de nuevo movimiento
   // $("#btnnuevo").click(() => {
   //   $("#tituloModalMovimiento").html(
@@ -182,7 +194,54 @@ function init() {
   // Guardar detalle (agregar activo al movimiento)
   $("#frmDetalleMovimiento").on("submit", function (e) {
     e.preventDefault();
+    
+    // Validar que haya al menos un activo en la tabla
+    if ($("#tbldetalleactivomov tbody tr").length === 0) {
+      Swal.fire("Error", "Debe agregar al menos un activo al detalle", "error");
+      return false;
+    }
+
+    // Validar que todos los campos requeridos estén llenos
+    let camposFaltantes = [];
+    $("#tbldetalleactivomov tbody tr").each(function() {
+      const ambienteDestino = $(this).find(".ambiente-destino").val();
+      const responsableDestino = $(this).find(".responsable-destino").val();
+      const idActivo = $(this).data("id");
+      const nombreActivo = $(this).find("td:eq(1)").text();
+
+      if (!ambienteDestino) {
+        camposFaltantes.push(`Ambiente destino para el activo ${nombreActivo}`);
+      }
+      if (!responsableDestino) {
+        camposFaltantes.push(`Responsable destino para el activo ${nombreActivo}`);
+      }
+    });
+
+    if (camposFaltantes.length > 0) {
+      Swal.fire({
+        title: "Campos Faltantes",
+        html: "Por favor complete los siguientes campos:<br><br>" + 
+              camposFaltantes.join("<br>"),
+        icon: "warning"
+      });
+      return false;
+    }
+
     const formData = new FormData(this);
+
+    // Agregar el responsable seleccionado
+    const responsableDestino = $(this).find(".responsable-destino").val();
+    formData.append("IdResponsableDestino", responsableDestino);
+
+    // Mostrar loading
+    Swal.fire({
+      title: "Procesando",
+      text: "Guardando el detalle del movimiento...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
 
     $.ajax({
       url: "../../controllers/GestionarMovimientoController.php?action=AgregarDetalle",
@@ -193,19 +252,89 @@ function init() {
       dataType: "json",
       success: function (res) {
         if (res.status) {
-          Swal.fire("Éxito", "Activo agregado al movimiento", "success");
-          // Limpia solo el select de activo y los campos visuales
-          $("#IdActivo").val("").trigger("change");
-          $("#CodigoActivo, #SucursalActual, #AmbienteActual").val("");
+          Swal.fire({
+            title: "Éxito",
+            text: "Activo agregado al movimiento",
+            icon: "success"
+          }).then(() => {
+            // Limpia solo el select de activo y los campos visuales
+            $("#IdActivo").val("").trigger("change");
+            $("#CodigoActivo, #SucursalActual, #AmbienteActual").val("");
+            // Limpiar la tabla de detalle
+            $("#tbldetalleactivomov tbody").empty();
+          });
         } else {
-          Swal.fire("Error", res.message, "error");
+          Swal.fire("Error", res.message || "No se pudo agregar el activo", "error");
         }
       },
-      error: function () {
-        Swal.fire("Error", "No se pudo agregar el activo.", "error");
-      },
+      error: function (xhr, status, error) {
+        console.error("Error en la petición:", error);
+        Swal.fire("Error", "Ocurrió un error al procesar la solicitud", "error");
+      }
     });
   });
+
+  // Función para agregar activo al detalle
+  function agregarActivoAlDetalle(activo) {
+    if ($(`#tbldetalleactivomov tbody tr[data-id='${activo.id}']`).length > 0) {
+      NotificacionToast(
+        "error",
+        `El activo <b>${activo.nombre}</b> ya está en el detalle.`
+      );
+      return false;
+    }
+
+    // Validar que el activo tenga todos los datos necesarios
+    if (!activo.id || !activo.nombre || !activo.marca || !activo.sucursal || !activo.ambiente) {
+      Swal.fire("Error", "El activo no tiene todos los datos necesarios", "error");
+      return false;
+    }
+
+    var numeroFilas = $("#tbldetalleactivomov").find("tbody tr").length;
+
+    var selectAmbienteDestino = `<select class='form-control form-control-sm ambiente-destino' name='ambiente_destino[]' id="comboAmbiente${numeroFilas}" required></select>`;
+    var selectResponsableDestino = `<select class='form-control form-control-sm responsable-destino' name='responsable_destino[]' id="comboResponsable${numeroFilas}" required></select>`;
+
+    var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
+      <td>${activo.id}</td>
+      <td>${activo.nombre}</td>
+      <td>${activo.marca}</td>
+      <td>${activo.sucursal}</td>
+      <td>${activo.ambiente}</td>
+      <td>${selectAmbienteDestino}</td>
+      <td>${selectResponsableDestino}</td>
+      <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
+    </tr>`;
+    $("#tbldetalleactivomov tbody").append(nuevaFila);
+    
+    // Inicializar los combos
+    ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
+    ListarCombosResponsable(`comboResponsable${numeroFilas}`);
+
+    // Agregar validación al cambiar los combos
+    $(`#comboAmbiente${numeroFilas}, #comboResponsable${numeroFilas}`).on('change', function() {
+      const ambienteVal = $(`#comboAmbiente${numeroFilas}`).val();
+      const responsableVal = $(`#comboResponsable${numeroFilas}`).val();
+      
+      if (!ambienteVal || !responsableVal) {
+        $(this).addClass('is-invalid');
+      } else {
+        $(this).removeClass('is-invalid');
+      }
+    });
+
+    setTimeout(function () {
+      $("#tbldetalleactivomov tbody tr.agregado-temp").removeClass(
+        "table-success agregado-temp"
+      );
+    }, 1000);
+
+    NotificacionToast(
+      "success",
+      `Activo <b>${activo.nombre}</b> agregado al detalle.`
+    );
+    return true;
+  }
 
   // Botón para agregar otro activo (limpia el formulario de detalle)
   $("#btnAgregarOtroActivo").on("click", function () {
@@ -370,51 +499,6 @@ function setSucursalOrigenDestino() {
   var sucursalDestinoText = $("#IdSucursalDestino option:selected").text();
   $("#sucursal_origen").val(sucursalOrigenText);
   $("#sucursal_destino").val(sucursalDestinoText);
-}
-
-function agregarActivoAlDetalle(activo) {
-  if ($(`#tbldetalleactivomov tbody tr[data-id='${activo.id}']`).length > 0) {
-    NotificacionToast(
-      "error",
-      `El activo <b>${activo.nombre}</b> ya está en el detalle.`
-    );
-    return false;
-  }
-  var numeroFilas = $("#tbldetalleactivomov").find("tbody tr").length;
-
-  // Usa el combo correcto que ya está poblado en el DOM
-  var opcionesAmbiente = $("#ambiente_destino").html(); // o el id correcto
-  var opcionesResponsable = $("#usuario_destino").html(); // o el id correcto
-
-  var selectAmbienteDestino = `<select class='form-control form-control-sm ambiente-destino' name='ambiente_destino[]' id="comboAmbiente${numeroFilas}"></select>`;
-  var selectResponsableDestino = `<select class='form-control form-control-sm responsable-destino' name='responsable_destino[]' id="comboResponsable${numeroFilas}"></select>`;
-
-  var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
-    <td>${activo.id}</td>
-    <td>${activo.nombre}</td>
-    <td>${activo.marca}</td>
-    <td>${activo.sucursal}</td>
-    <td>${activo.ambiente}</td>
-    <td>${selectAmbienteDestino}</td>
-    <td>${selectResponsableDestino}</td>
-    <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
-  </tr>`;
-  $("#tbldetalleactivomov tbody").append(nuevaFila);
-  console.log(`comboAmbiente${numeroFilas}`);
-  ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
-  ListarCombosResponsable(`comboResponsable${numeroFilas}`);
-
-  setTimeout(function () {
-    $("#tbldetalleactivomov tbody tr.agregado-temp").removeClass(
-      "table-success agregado-temp"
-    );
-  }, 1000);
-
-  NotificacionToast(
-    "success",
-    `Activo <b>${activo.nombre}</b> agregado al detalle.`
-  );
-  return true;
 }
 
 function ListarCombosResponsable(elemento) {
@@ -586,31 +670,28 @@ function ListarCombosMov() {
         // Cargar autorizador
         $("#CodAutorizador").html(res.data.autorizador).trigger("change");
 
-        // Obtener el nombre de la sucursal origen
+        // Obtener el nombre de la sucursal origen desde la sesión
         let sucursalOrigenNombre = "";
         if (res.data.sucursalOrigen) {
-          sucursalOrigenNombre = $(
-            "#IdSucursalOrigen option[value='" + res.data.sucursalOrigen + "']"
-          ).text();
+          sucursalOrigenNombre = res.data.sucursalOrigen;
         }
 
-        // Reemplazar el select por un input de solo lectura
-        $("#IdSucursalOrigen").replaceWith(`
-          <input type="text" class="form-control" id="IdSucursalOrigen" 
-                 value="${sucursalOrigenNombre}" readonly>
-          <input type="hidden" id="IdSucursalOrigenValor" value="${res.data.sucursalOrigen}">
-        `);
+        // Actualizar el campo de sucursal origen
+        $("#IdSucursalOrigen").val(sucursalOrigenNombre);
+        $("#IdSucursalOrigenValor").val(res.data.sucursalOrigenId || "");
 
         // Cargar sucursales solo para el destino
         $("#IdSucursalDestino").html(res.data.sucursales);
 
-        // Inicializar select2 para los combos restantes
-        $(
-          "#IdTipoMovimientoMov, #CodAutorizador, #IdSucursalDestino, #ambiente_destino, #usuario_destino"
-        ).select2({
-          theme: "bootstrap4",
-          width: "100%",
-        });
+        // Inicializar select2 una sola vez para los combos
+        if (!$("#IdTipoMovimientoMov").hasClass("select2-hidden-accessible")) {
+          $(
+            "#IdTipoMovimientoMov, #CodAutorizador, #IdSucursalDestino"
+          ).select2({
+            theme: "bootstrap4",
+            width: "100%",
+          });
+        }
 
         // Actualizar el texto de la sucursal origen
         setSucursalOrigenDestino();
@@ -636,6 +717,11 @@ function ListarCombosMov() {
 
 // Listar movimientos en una tabla DataTable
 function listarMovimientos() {
+  // Destruir la instancia existente si existe
+  if ($.fn.DataTable.isDataTable("#tblMovimientos")) {
+    $("#tblMovimientos").DataTable().destroy();
+  }
+
   $("#tblMovimientos").DataTable({
     aProcessing: true,
     aServerSide: false,
@@ -649,7 +735,7 @@ function listarMovimientos() {
             autoFilter: true,
             sheetName: "Data",
             exportOptions: {
-              columns: [1, 2, 3],
+              columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
             },
           },
           "pageLength",
@@ -660,7 +746,7 @@ function listarMovimientos() {
       bottomStart: null,
       bottomEnd: null,
     },
-    responsive: true,
+    //responsive: true,
     lengthChange: false,
     colReorder: true,
     autoWidth: false,
@@ -668,8 +754,18 @@ function listarMovimientos() {
       url: "../../controllers/GestionarMovimientoController.php?action=Consultar",
       type: "POST",
       dataType: "json",
+      data: function (d) {
+        // Agregar los filtros del formulario
+        d.filtroTipoMovimiento = $("#filtroTipoMovimiento").val();
+        d.filtroSucursal = $("#filtroSucursal").val();
+        d.filtroFecha = $("#filtroFecha").val();
+      },
       dataSrc: function (json) {
-        return json || [];
+        console.log("Datos recibidos:", json);
+        if (json && json.data) {
+          return json.data;
+        }
+        return [];
       },
     },
     columns: [
@@ -678,21 +774,26 @@ function listarMovimientos() {
         render: () =>
           '<button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>',
       },
-      { data: "IdDetalleMovimiento" },
+      { data: "IdDetalleMovimiento", visible: false, searchable: false },
       { data: "IdActivo" },
-      { data: "NombreActivo" },
+      { data: "NombreArticulo" },
       { data: "TipoMovimiento" },
-      { data: "SucursalAnterior" },
-      { data: "SucursalNueva" },
-      { data: "AmbienteAnterior" },
-      { data: "AmbienteNuevo" },
+      { data: "SucursalOrigen" },
+      { data: "SucursalDestino" },
+      { data: "AmbienteOrigen" },
+      { data: "AmbienteDestino" },
       { data: "Autorizador" },
-      { data: "ResponsableAnterior" },
-      { data: "ResponsableNuevo" },
-      { data: "FechaMovimiento" },
       { data: "ResponsableOrigen" },
       { data: "ResponsableDestino" },
-      { data: "Estado" },
+      {
+        data: "FechaMovimiento",
+        render: function (data) {
+          if (data) {
+            return moment(data).format("DD/MM/YYYY HH:mm");
+          }
+          return "";
+        },
+      },
     ],
     language: {
       url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
@@ -707,10 +808,14 @@ function listarMovimientos() {
 }
 
 function listarActivosModal() {
+  // Destruir la instancia existente si existe
+  if ($.fn.DataTable.isDataTable("#tbllistarActivos")) {
+    $("#tbllistarActivos").DataTable().destroy();
+  }
+
   $("#tbllistarActivos").DataTable({
     dom: "Bfrtip",
     responsive: false,
-    destroy: true,
     ajax: {
       url: "../../controllers/GestionarActivosController.php?action=ListarParaMovimiento",
       type: "POST",
