@@ -805,7 +805,22 @@ function listarMovimientos() {
       {
         data: null,
         render: () =>
-          '<button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>',
+          `<div class="btn-group">
+            <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-cog"></i>
+            </button>
+            <div class="dropdown-menu">
+              <button class="dropdown-item btnVerDetalle" type="button">
+                <i class="fas fa-eye text-info"></i> Ver Detalle
+              </button>
+              <button class="dropdown-item btnAnularMovimiento" type="button">
+                <i class="fas fa-ban text-danger"></i> Anular Movimiento
+              </button>
+              <button class="dropdown-item btnVerHistorial" type="button">
+                <i class="fas fa-history text-primary"></i> Ver Historial
+              </button>
+            </div>
+          </div>`,
       },
       { data: "IdDetalleMovimiento", visible: false, searchable: false },
       { data: "IdActivo" },
@@ -888,3 +903,130 @@ function listarActivosModal() {
     lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]]
   });
 }
+
+// Agregar los manejadores de eventos para los nuevos botones
+$(document).on("click", ".btnVerDetalle", function () {
+  const fila = $(this).closest("tr");
+  const datos = $("#tblMovimientos").DataTable().row(fila).data();
+  
+  if (!datos) {
+    Swal.fire("Error", "No se pudo obtener la información del movimiento.", "error");
+    return;
+  }
+
+  // Aquí puedes implementar la lógica para ver el detalle
+  Swal.fire({
+    title: "Detalle del Movimiento",
+    html: `
+      <div class="text-left">
+        <p><strong>ID Activo:</strong> ${datos.IdActivo}</p>
+        <p><strong>Nombre:</strong> ${datos.NombreArticulo}</p>
+        <p><strong>Tipo Movimiento:</strong> ${datos.TipoMovimiento}</p>
+        <p><strong>Sucursal Origen:</strong> ${datos.SucursalOrigen}</p>
+        <p><strong>Sucursal Destino:</strong> ${datos.SucursalDestino}</p>
+        <p><strong>Ambiente Origen:</strong> ${datos.AmbienteOrigen}</p>
+        <p><strong>Ambiente Destino:</strong> ${datos.AmbienteDestino}</p>
+        <p><strong>Autorizador:</strong> ${datos.Autorizador}</p>
+        <p><strong>Responsable Origen:</strong> ${datos.ResponsableOrigen}</p>
+        <p><strong>Responsable Destino:</strong> ${datos.ResponsableDestino}</p>
+        <p><strong>Fecha:</strong> ${datos.FechaMovimiento}</p>
+      </div>
+    `,
+    width: '600px'
+  });
+});
+
+$(document).on("click", ".btnAnularMovimiento", function () {
+  const fila = $(this).closest("tr");
+  const datos = $("#tblMovimientos").DataTable().row(fila).data();
+  
+  if (!datos) {
+    Swal.fire("Error", "No se pudo obtener la información del movimiento.", "error");
+    return;
+  }
+
+  Swal.fire({
+    title: "¿Estás seguro?",
+    text: "¿Deseas anular este movimiento?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Sí, anular",
+    cancelButtonText: "Cancelar"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      $.ajax({
+        url: "../../controllers/GestionarMovimientoController.php?action=anularMovimiento",
+        type: "POST",
+        data: { idMovimiento: datos.IdDetalleMovimiento },
+        dataType: "json",
+        success: function(res) {
+          if (res.status) {
+            Swal.fire({
+              title: "Éxito",
+              text: res.message,
+              icon: "success"
+            }).then(() => {
+              // Recargar la tabla
+              $("#tblMovimientos").DataTable().ajax.reload();
+            });
+          } else {
+            Swal.fire("Error", res.message, "error");
+          }
+        },
+        error: function(xhr, status, error) {
+          Swal.fire("Error", "Error al procesar la solicitud: " + error, "error");
+        }
+      });
+    }
+  });
+});
+
+$(document).on("click", ".btnVerHistorial", function () {
+  const fila = $(this).closest("tr");
+  const datos = $("#tblMovimientos").DataTable().row(fila).data();
+  
+  if (!datos) {
+    Swal.fire("Error", "No se pudo obtener la información del movimiento.", "error");
+    return;
+  }
+
+  $.ajax({
+    url: "../../controllers/GestionarMovimientoController.php?action=obtenerHistorialMovimiento",
+    type: "POST",
+    data: { idMovimiento: datos.IdDetalleMovimiento },
+    dataType: "json",
+    success: function(res) {
+      if (res.status) {
+        let historialHtml = '<div class="table-responsive"><table class="table table-bordered">';
+        historialHtml += '<thead><tr><th>Fecha</th><th>Estado</th><th>Tipo</th><th>Activo</th><th>Origen</th><th>Destino</th></tr></thead>';
+        historialHtml += '<tbody>';
+        
+        res.data.forEach(item => {
+          historialHtml += `<tr>
+            <td>${moment(item.FechaMovimiento).format('DD/MM/YYYY HH:mm')}</td>
+            <td>${item.estado === 'A' ? '<span class="badge badge-danger">Anulado</span>' : '<span class="badge badge-success">Activo</span>'}</td>
+            <td>${item.tipoMovimiento}</td>
+            <td>${item.CodigoActivo} - ${item.NombreArticulo}</td>
+            <td>${item.sucursalOrigen} - ${item.ambienteOrigen}</td>
+            <td>${item.sucursalDestino} - ${item.ambienteDestino}</td>
+          </tr>`;
+        });
+        
+        historialHtml += '</tbody></table></div>';
+
+        Swal.fire({
+          title: "Historial del Movimiento",
+          html: historialHtml,
+          width: '800px'
+        });
+      } else {
+        Swal.fire("Error", res.message, "error");
+      }
+    },
+    error: function(xhr, status, error) {
+      Swal.fire("Error", "Error al obtener el historial: " + error, "error");
+    }
+  });
+});

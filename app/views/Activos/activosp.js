@@ -349,6 +349,42 @@ function init() {
     });
   });
 
+  // Manejador para el botón de Asignar Responsable
+  $(document).on("click", ".btnAsignarResponsable", function () {
+    const fila = $(this).closest("tr");
+    const datos = $("#tblRegistros").DataTable().row(fila).data();
+    
+    if (!datos) {
+      Swal.fire("Error", "No se pudo obtener la información del activo.", "error");
+      return;
+    }
+
+    Swal.fire({
+      title: "Asignación de Responsable",
+      text: "Funcionalidad en desarrollo",
+      icon: "info"
+    });
+    // Aquí puedes cargar los datos necesarios para el modal de asignación
+  });
+
+  // Manejador para el botón de Ver Historial
+  $(document).on("click", ".btnVerHistorial", function () {
+    const fila = $(this).closest("tr");
+    const datos = $("#tblRegistros").DataTable().row(fila).data();
+    
+    if (!datos) {
+      Swal.fire("Error", "No se pudo obtener la información del activo.", "error");
+      return;
+    }
+
+    // Aquí puedes implementar la lógica para mostrar el historial
+    Swal.fire({
+      title: "Historial del Activo",
+      text: "Funcionalidad en desarrollo",
+      icon: "info"
+    });
+  });
+
   function ListarCombosConCallback(callback) {
     $.ajax({
       url: "../../controllers/GestionarActivosController.php?action=combos",
@@ -887,7 +923,22 @@ function listarActivosTable() {
       {
         data: null,
         render: (data, type, row) =>
-          '<button class="btn btn-sm btn-info btnEditarActivo"><i class="fas fa-eye"></i></button>',
+          `<div class="btn-group">
+            <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-cog"></i>
+            </button>
+            <div class="dropdown-menu">
+              <button class="dropdown-item btnEditarActivo" type="button">
+                <i class="fas fa-edit text-warning"></i> Editar
+              </button>
+              <button class="dropdown-item btnAsignarResponsable" type="button">
+                <i class="fas fa-user-plus text-info"></i> Asignar Responsable
+              </button>
+              <button class="dropdown-item btnVerHistorial" type="button">
+                <i class="fas fa-history text-primary"></i> Ver Historial
+              </button>
+            </div>
+          </div>`,
       },
       { data: "idActivo", visible: false, searchable: false },
       { data: "CodigoActivo" },

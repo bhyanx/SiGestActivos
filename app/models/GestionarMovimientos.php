@@ -161,4 +161,91 @@ class GestionarMovimientos
         }
     }
 
+    public function anularMovimiento($idMovimiento)
+    {
+        try {
+            // Primero verificamos si el movimiento existe y no está anulado
+            $sql = "SELECT estado FROM tMovimientos WHERE idMovimiento = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idMovimiento, PDO::PARAM_INT);
+            $stmt->execute();
+            $movimiento = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$movimiento) {
+                throw new Exception("El movimiento no existe");
+            }
+
+            if ($movimiento['estado'] === 'A') {
+                throw new Exception("El movimiento ya está anulado");
+            }
+
+            // Iniciamos la transacción
+            $this->db->beginTransaction();
+
+            // Actualizamos el estado del movimiento a anulado
+            $sql = "UPDATE tMovimientos SET estado = 'A', fechaAnulacion = GETDATE() WHERE idMovimiento = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idMovimiento, PDO::PARAM_INT);
+            $stmt->execute();
+
+            // Actualizamos el estado de los detalles del movimiento
+            $sql = "UPDATE tDetalleMovimiento SET estado = 'A' WHERE idMovimiento = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idMovimiento, PDO::PARAM_INT);
+            $stmt->execute();
+
+            // Confirmamos la transacción
+            $this->db->commit();
+            return true;
+        } catch (\PDOException $e) {
+            // Si hay error, revertimos la transacción
+            $this->db->rollBack();
+            error_log("Error in anularMovimiento: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
+    public function obtenerHistorialMovimiento($idMovimiento)
+    {
+        try {
+            $sql = "
+            SELECT 
+                m.idMovimiento,
+                m.FechaMovimiento,
+                m.estado,
+                m.fechaAnulacion,
+                tm.nombre as tipoMovimiento,
+                a.NombreArticulo,
+                a.CodigoActivo,
+                so.Nombre_local as sucursalOrigen,
+                sd.Nombre_local as sucursalDestino,
+                ao.nombre as ambienteOrigen,
+                ad.nombre as ambienteDestino,
+                CONCAT(tor.NombreTrabajador, ' ', tor.ApellidoPaterno) as responsableOrigen,
+                CONCAT(tdr.NombreTrabajador, ' ', tdr.ApellidoPaterno) as responsableDestino,
+                CONCAT(ta.NombreTrabajador, ' ', ta.ApellidoPaterno) as autorizador
+            FROM tMovimientos m
+            INNER JOIN tTipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento
+            INNER JOIN tDetalleMovimiento dm ON m.idMovimiento = dm.idMovimiento
+            INNER JOIN vActivos a ON dm.idActivo = a.IdActivo
+            INNER JOIN vUnidadesdeNegocio so ON m.idSucursalOrigen = so.cod_UnidadNeg
+            INNER JOIN vUnidadesdeNegocio sd ON m.idSucursalDestino = sd.cod_UnidadNeg
+            INNER JOIN tAmbiente ao ON dm.idAmbiente_Origen = ao.idAmbiente
+            INNER JOIN tAmbiente ad ON dm.idAmbiente_Nueva = ad.idAmbiente
+            INNER JOIN tTrabajador tor ON dm.idResponsable_Origen = tor.codTrabajador
+            INNER JOIN tTrabajador tdr ON dm.idResponsable_Nueva = tdr.codTrabajador
+            INNER JOIN tTrabajador ta ON m.idAutorizador = ta.codTrabajador
+            WHERE m.idMovimiento = ?
+            ORDER BY m.FechaMovimiento DESC";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idMovimiento, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error in obtenerHistorialMovimiento: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
 }

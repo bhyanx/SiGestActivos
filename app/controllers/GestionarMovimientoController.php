@@ -191,4 +191,48 @@ switch ($action) {
             echo json_encode(['status' => false, 'message' => 'Error al cargar combos: ' . $e->getMessage()]);
         }
         break;
+
+    // Nuevo caso para anular movimiento
+    case 'anularMovimiento':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $idMovimiento = $_POST['idMovimiento'] ?? null;
+                if (!$idMovimiento) {
+                    throw new Exception("ID de movimiento no proporcionado");
+                }
+                
+                $resultado = $movimientos->anularMovimiento($idMovimiento);
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Movimiento anulado correctamente'
+                ]);
+            } catch (Exception $e) {
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al anular el movimiento: ' . $e->getMessage()
+                ]);
+            }
+        }
+        break;
+
+    // Nuevo caso para obtener historial de movimiento
+    case 'obtenerHistorialMovimiento':
+        try {
+            $idMovimiento = $_POST['idMovimiento'] ?? null;
+            if (!$idMovimiento) {
+                throw new Exception("ID de movimiento no proporcionado");
+            }
+            
+            $historial = $movimientos->obtenerHistorialMovimiento($idMovimiento);
+            echo json_encode([
+                'status' => true,
+                'data' => $historial
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al obtener el historial: ' . $e->getMessage()
+            ]);
+        }
+        break;
 }
