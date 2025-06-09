@@ -307,4 +307,24 @@ class GestionarActivos
         }
     }
 
+    public function verificarArticuloExistente($idDocIngresoAlm, $idArticulo)
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT COUNT(*) as existe 
+                FROM tActivos 
+                WHERE IdDocIngresoAlm = ? 
+                AND IdArticulo = ?
+            ");
+            $stmt->bindParam(1, $idDocIngresoAlm, PDO::PARAM_INT);
+            $stmt->bindParam(2, $idArticulo, PDO::PARAM_INT);
+            $stmt->execute();
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $resultado['existe'] > 0;
+        } catch (\PDOException $e) {
+            error_log("Error in verificarArticuloExistente: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
 }

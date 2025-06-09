@@ -77,6 +77,60 @@ switch ($action) {
         }
         break;
 
+    // Listar activos para movimiento
+    case 'ListarParaMovimiento':
+        try {
+            $idEmpresa = $_SESSION['cod_empresa'] ?? null;
+            $idSucursal = $_SESSION['cod_UnidadNeg'] ?? null;
+
+            if (!$idEmpresa || !$idSucursal) {
+                throw new Exception("No se encontró la información de empresa o sucursal en la sesión");
+            }
+
+            $activos = $movimientos->listarActivosParaMovimiento($idEmpresa, $idSucursal);
+            echo json_encode([
+                'status' => true,
+                'data' => $activos,
+                'message' => 'Activos listados correctamente'
+            ]);
+        } catch (Exception $e) {
+            error_log("Error en ListarParaMovimiento: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al listar activos: ' . $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'obtenerAmbientesPorSucursal':
+        try {
+            $idEmpresa = $_SESSION['cod_empresa'] ?? null;
+            $idSucursal = $_POST['idSucursal'] ?? null;
+
+            if (!$idEmpresa || !$idSucursal) {
+                throw new Exception("Se requiere la empresa y la sucursal");
+            }
+
+            $ambientes = $movimientos->obtenerAmbientesPorSucursal($idEmpresa, $idSucursal);
+            $html = '<option value="">Seleccione</option>';
+            foreach ($ambientes as $ambiente) {
+                $html .= "<option value='{$ambiente['idAmbiente']}'>{$ambiente['nombre']}</option>";
+            }
+
+            echo json_encode([
+                'status' => true,
+                'data' => $html,
+                'message' => 'Ambientes cargados correctamente'
+            ]);
+        } catch (Exception $e) {
+            error_log("Error en obtenerAmbientesPorSucursal: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al cargar ambientes: ' . $e->getMessage()
+            ]);
+        }
+        break;
+
     // Cargar combos para selects
     case 'combos':
         try {
@@ -87,17 +141,17 @@ switch ($action) {
             }
 
             // Obtener sucursales incluyendo la unidad de negocio actual
-            $sucursales = $combo->comboSucursal();
+            $sucursales = $combo->comboUnidadNegocio($_SESSION['cod_empresa']);
             $combos['sucursales'] = '<option value="">Seleccione</option>';
             $unidadNegocioActual = $_SESSION['cod_UnidadNeg'];
             $nombreSucursalActual = '';
             
             foreach ($sucursales as $row) {
                 if ($row['cod_UnidadNeg'] == $unidadNegocioActual) {
-                    $combos['sucursales'] .= "<option value='{$row['cod_UnidadNeg']}' selected>{$row['nombre']}</option>";
-                    $nombreSucursalActual = $row['nombre'];
+                    $combos['sucursales'] .= "<option value='{$row['cod_UnidadNeg']}' selected>{$row['Nombre_local']}</option>";
+                    $nombreSucursalActual = $row['Nombre_local'];
                 } else {
-                    $combos['sucursales'] .= "<option value='{$row['cod_UnidadNeg']}'>{$row['nombre']}</option>";
+                    $combos['sucursales'] .= "<option value='{$row['cod_UnidadNeg']}'>{$row['Nombre_local']}</option>";
                 }
             }
 

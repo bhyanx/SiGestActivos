@@ -559,49 +559,83 @@ function init() {
   }
 
   function agregarActivoAlDetalle(activo) {
-    if ($(`#tbldetalleactivoreg tbody tr[data-id='${activo.id}']`).length > 0) {
-        NotificacionToast(
-            "error",
-            `El activo <b>${activo.nombre}</b> ya está en el detalle.`
-        );
-        return false;
-    }
-    var numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
+    // Primero verificar si el artículo ya existe
+    $.ajax({
+        url: "../../controllers/GestionarActivosController.php?action=verificarArticuloExistente",
+        type: "POST",
+        data: {
+            IdDocIngresoAlm: $("#inputDocIngresoAlm").val(),
+            IdArticulo: activo.id
+        },
+        dataType: "json",
+        success: function(res) {
+            if (res.status) {
+                if (res.existe) {
+                    NotificacionToast(
+                        "error",
+                        `El artículo <b>${activo.nombre}</b> ya ha sido registrado con este documento de ingreso.`
+                    );
+                    return false;
+                }
+                
+                // Si no existe, continuar con el proceso de agregar al detalle
+                if ($(`#tbldetalleactivoreg tbody tr[data-id='${activo.id}']`).length > 0) {
+                    NotificacionToast(
+                        "error",
+                        `El activo <b>${activo.nombre}</b> ya está en el detalle.`
+                    );
+                    return false;
+                }
 
-    var selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
+                var numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
+                var selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
+                var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
+                var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
 
-    var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
+                var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
+                    <td>${activo.id}</td>
+                    <td>${activo.nombre}</td>
+                    <td>${activo.marca}</td>
+                    <td><input type="text" class="form-control form-control-sm" name="codigo[]" placeholder="Codigo" disabled></td>
+                    <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie"></td>
+                    <td>${inputEstadoActivo}</td>
+                    <td>${selectAmbiente}</td>
+                    <td>${selectCategoria}</td>
+                    <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea></td>
+                    <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
+                </tr>`;
+                $("#tbldetalleactivoreg tbody").append(nuevaFila);
+                
+                ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
+                ListarCombosCategoria(`comboCategoria${numeroFilas}`);
 
-    var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
+                setTimeout(function () {
+                    $("#tbldetalleactivoreg tbody tr.agregado-temp").removeClass(
+                        "table-success agregado-temp"
+                    );
+                }, 1000);
 
-    var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
-        <td>${activo.id}</td>
-        <td>${activo.nombre}</td>
-        <td>${activo.marca}</td>
-        <td><input type="text" class="form-control form-control-sm" name="codigo[]" placeholder="Codigo" disabled></td>
-        <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie"></td>
-        <td>${inputEstadoActivo}</td>
-        <td>${selectAmbiente}</td>
-        <td>${selectCategoria}</td>
-        <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea></td>
-        <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
-    </tr>`;
-    $("#tbldetalleactivoreg tbody").append(nuevaFila);
-    
-    ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
-    ListarCombosCategoria(`comboCategoria${numeroFilas}`);
-
-    setTimeout(function () {
-        $("#tbldetalleactivoreg tbody tr.agregado-temp").removeClass(
-            "table-success agregado-temp"
-        );
-    }, 1000);
-
-    NotificacionToast(
-        "success",
-        `Activo <b>${activo.nombre}</b> agregado al detalle.`
-    );
-    return true;
+                NotificacionToast(
+                    "success",
+                    `Activo <b>${activo.nombre}</b> agregado al detalle.`
+                );
+                return true;
+            } else {
+                NotificacionToast(
+                    "error",
+                    res.message
+                );
+                return false;
+            }
+        },
+        error: function() {
+            NotificacionToast(
+                "error",
+                "Error al verificar el artículo"
+            );
+            return false;
+        }
+    });
   }
 }
 

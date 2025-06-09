@@ -404,11 +404,32 @@ switch ($action) {
             echo json_encode(['status' => false, 'message' => 'Error al cargar artículos: ' . $e->getMessage()]);
         }
         break;
-    // ...existing code...
 
+    case 'verificarArticuloExistente':
+        try {
+            $idDocIngresoAlm = $_POST['IdDocIngresoAlm'] ?? null;
+            $idArticulo = $_POST['IdArticulo'] ?? null;
+
+            if (!$idDocIngresoAlm || !$idArticulo) {
+                throw new Exception("Se requiere el documento de ingreso y el artículo");
+            }
+
+            $existe = $activos->verificarArticuloExistente($idDocIngresoAlm, $idArticulo);
+            echo json_encode([
+                'status' => true,
+                'existe' => $existe,
+                'message' => $existe ? 'El artículo ya ha sido registrado con este documento de ingreso' : 'El artículo no ha sido registrado'
+            ]);
+        } catch (Exception $e) {
+            error_log("Error verificarArticuloExistente: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al verificar artículo: ' . $e->getMessage()
+            ]);
+        }
+        break;
 
     // Listar activos para el modal de movimientos
-
     case 'ListarParaMovimiento':
         try {
             $resultados = $activos->consultarActivos([]);

@@ -90,5 +90,61 @@ class GestionarMovimientos
         }
     }
 
+    public function listarActivosParaMovimiento($idEmpresa, $idSucursal)
+    {
+        try {
+            $sql = "
+            SELECT 
+                a.IdActivo,
+                a.CodigoActivo,
+                a.NombreArticulo,
+                a.MarcaArticulo,
+                s.Nombre_local AS Sucursal,
+                amb.nombre AS Ambiente,
+                a.NumeroSerie
+            FROM vActivos a
+            INNER JOIN vUnidadesdeNegocio s ON a.IdSucursal = s.cod_UnidadNeg
+            INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
+            WHERE a.IdEmpresa = ? 
+            AND a.IdSucursal = ?
+            AND a.idEstado = 1
+            ORDER BY a.NombreArticulo";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idEmpresa, PDO::PARAM_INT);
+            $stmt->bindParam(2, $idSucursal, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error in listarActivosParaMovimiento: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
+    public function obtenerAmbientesPorSucursal($idEmpresa, $idSucursal)
+    {
+        try {
+            $sql = "
+            SELECT 
+                a.idAmbiente,
+                a.nombre,
+                a.idEmpresa,
+                a.idSucursal
+            FROM tAmbiente a
+            WHERE a.idEmpresa = ? 
+            AND a.idSucursal = ?
+            AND a.estado = 1
+            ORDER BY a.nombre";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idEmpresa, PDO::PARAM_INT);
+            $stmt->bindParam(2, $idSucursal, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error in obtenerAmbientesPorSucursal: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
 
 }

@@ -286,7 +286,7 @@ function init() {
 
     // Validar que el activo tenga todos los datos necesarios
     if (!activo.id || !activo.nombre || !activo.marca || !activo.sucursal || !activo.ambiente) {
-      Swal.fire("Error", "El activo no tiene todos los datos necesarios", "error");
+      NotificacionToast("error", "El activo no tiene todos los datos necesarios");
       return false;
     }
 
@@ -297,6 +297,7 @@ function init() {
 
     var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
       <td>${activo.id}</td>
+      <td>${activo.codigo}</td>
       <td>${activo.nombre}</td>
       <td>${activo.marca}</td>
       <td>${activo.sucursal}</td>
@@ -307,7 +308,7 @@ function init() {
     </tr>`;
     $("#tbldetalleactivomov tbody").append(nuevaFila);
     
-    // Inicializar los combos
+    // Inicializar los combos con la sucursal destino actual
     ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
     ListarCombosResponsable(`comboResponsable${numeroFilas}`);
 
@@ -346,12 +347,12 @@ function init() {
   $(document).on("click", ".btnSeleccionarActivo", function () {
     var fila = $(this).closest("tr");
     var activo = {
-      id: $(this).data("id"),
-      //codigo: fila.find("td:eq(0)").text(),
-      nombre: fila.find("td:eq(1)").text(),
-      marca: fila.find("td:eq(2)").text(),
-      sucursal: fila.find("td:eq(3)").text(),
-      ambiente: fila.find("td:eq(4)").text(),
+        id: $(this).data("id"),
+        codigo: fila.find("td:eq(1)").text(),
+        nombre: fila.find("td:eq(2)").text(),
+        marca: fila.find("td:eq(3)").text(),
+        sucursal: fila.find("td:eq(4)").text(),
+        ambiente: fila.find("td:eq(5)").text()
     };
     agregarActivoAlDetalle(activo);
   });
@@ -535,38 +536,43 @@ function ListarCombosResponsable(elemento) {
   });
 }
 
-function ListarCombosAmbiente(elemento) {
+function ListarCombosAmbiente(elemento, idSucursal = null) {
   $.ajax({
-    url: "../../controllers/GestionarMovimientoController.php?action=combos",
+    url: "../../controllers/GestionarMovimientoController.php?action=obtenerAmbientesPorSucursal",
     type: "POST",
+    data: { idSucursal: idSucursal || $("#IdSucursalDestino").val() },
     dataType: "json",
     async: false,
     success: (res) => {
       if (res.status) {
-        $(`#${elemento}`).html(res.data.ambientes).trigger("change");
+        $(`#${elemento}`).html(res.data).trigger("change");
 
         $(`#${elemento}`).select2({
           theme: "bootstrap4",
-          //dropdownParent: $("#ModalFiltros .modal-body"),
           width: "100%",
         });
       } else {
-        Swal.fire(
-          "Filtro de movimientos",
-          "No se pudieron cargar los combos: " + res.message,
-          "warning"
-        );
+        NotificacionToast("error", "No se pudieron cargar los ambientes: " + res.message);
       }
     },
     error: (xhr, status, error) => {
-      Swal.fire(
-        "Filtros de movimientos",
-        "Error al cargar combos: " + error,
-        "error"
-      );
-    },
+      NotificacionToast("error", "Error al cargar ambientes: " + error);
+    }
   });
 }
+
+// Agregar evento para actualizar ambientes cuando cambie la sucursal destino
+$(document).on("change", "#IdSucursalDestino", function() {
+  // Actualizar todos los combos de ambiente en la tabla
+  $("#tbldetalleactivomov tbody tr").each(function() {
+    const row = $(this);
+    const comboAmbiente = row.find(".ambiente-destino");
+    if (comboAmbiente.length > 0) {
+      const idCombo = comboAmbiente.attr("id");
+      ListarCombosAmbiente(idCombo);
+    }
+  });
+});
 
 function NotificacionToast(tipo, mensaje) {
   toastr.options = {
@@ -671,13 +677,13 @@ function ListarCombosMov() {
         $("#CodAutorizador").html(res.data.autorizador).trigger("change");
 
         // Obtener el nombre de la sucursal origen desde la sesión
-        let sucursalOrigenNombre = "";
-        if (res.data.sucursalOrigen) {
-          sucursalOrigenNombre = res.data.sucursalOrigen;
+        let nombreSucursalActual = "";
+        if (res.data.unidadNegocioActual) {
+          nombreSucursalActual = res.data.unidadNegocioActual;
         }
 
         // Actualizar el campo de sucursal origen
-        $("#IdSucursalOrigen").val(sucursalOrigenNombre);
+        $("#IdSucursalOrigen").val(nombreSucursalActual);
         $("#IdSucursalOrigenValor").val(res.data.sucursalOrigenId || "");
 
         // Cargar sucursales solo para el destino
@@ -817,33 +823,41 @@ function listarActivosModal() {
     dom: "Bfrtip",
     responsive: false,
     ajax: {
-      url: "../../controllers/GestionarActivosController.php?action=ListarParaMovimiento",
+      url: "../../controllers/GestionarMovimientoController.php?action=ListarParaMovimiento",
       type: "POST",
       dataType: "json",
       dataSrc: function (json) {
+        if (!json.status) {
+          NotificacionToast("error", json.message);
+          return [];
+        }
         return json.data || [];
       },
+      error: function(xhr, status, error) {
+        NotificacionToast("error", "Error al cargar los activos: " + error);
+        return [];
+      }
     },
     columns: [
       { data: "IdActivo" },
-      //{ data: "Codigo" },
-      { data: "Nombre" },
-      { data: "Marca" },
+      { data: "CodigoActivo" },
+      { data: "NombreArticulo" },
+      { data: "MarcaArticulo" },
       { data: "Sucursal" },
       { data: "Ambiente" },
       {
         data: null,
         render: function (data, type, row) {
-          return (
-            '<button class="btn btn-success btn-sm btnSeleccionarActivo" data-id="' +
-            row.IdActivo +
-            '"><i class="fa fa-check"></i></button>'
-          );
-        },
-      },
+          return '<button class="btn btn-success btn-sm btnSeleccionarActivo" data-id="' + 
+                 row.IdActivo + '"><i class="fa fa-check"></i></button>';
+        }
+      }
     ],
     language: {
-      url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
     },
+    order: [[2, 'asc']], // Ordenar por NombreArticulo
+    pageLength: 10,
+    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]]
   });
 }

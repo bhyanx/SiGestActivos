@@ -398,7 +398,7 @@ session_start();
                                                     <thead>
                                                         <tr>
                                                             <th>ID</th>
-                                                            <!-- <th>Código</th> -->
+                                                            <th>Código</th>
                                                             <th>Nombre</th>
                                                             <th>Marca</th>
                                                             <th>Sucursal</th>
@@ -468,7 +468,7 @@ session_start();
                                                             <tr>
 
                                                                 <th>Id</th>
-                                                                <!-- <th>Código</th> -->
+                                                                <th>Código</th>
                                                                 <th>Nombre</th>
                                                                 <th>Marca</th>
                                                                 <th>Sucursal</th>
