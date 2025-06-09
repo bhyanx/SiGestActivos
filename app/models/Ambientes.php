@@ -63,7 +63,7 @@ class Ambientes
 
     public function crear($data){
         try{
-            $stmt = $this->db->prepare('INSERT INTO tAmbiente (nombre, descripcion, idSucursal, estado, fechaRegistro, fechaMod,, userMod) VALUES (?,?,?,?, GETDATE(), GETDATE(), ?)');
+            $stmt = $this->db->prepare('INSERT INTO tAmbiente (nombre, descripcion, idSucursal, estado, fechaRegistro, fechaMod, userMod) VALUES (?,?,?,?, GETDATE(), GETDATE(), ?)');
             $stmt->execute([$data['nombre'], $data['descripcion'], $data['idSucursal'], $data['estado'], $data['userMod']]);
             return $this->db->lastInsertId();
         }catch(\PDOException $e){
