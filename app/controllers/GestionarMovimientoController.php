@@ -21,7 +21,9 @@ switch ($action) {
                 'sucursal_origen' => $_POST['filtroSucursalOrigen'] ?? null,
                 'sucursal_destino' => $_POST['filtroSucursalDestino'] ?? null,
                 'fecha' => $_POST['filtroFecha'] ?? null,
-                'ambiente' => $_POST['filtroAmbiente'] ?? null // si tienes este campo
+                'ambiente' => $_POST['filtroAmbiente'] ?? null,
+                'idEmpresa' => $_SESSION['cod_empresa'] ?? null,
+                'idSucursal' => $_SESSION['cod_UnidadNeg'] ?? null
             ];
             $resultados = $movimientos->listarDetalleMovimientos($filtros);
             echo json_encode(['data' => $resultados ?: []]);
@@ -158,6 +160,7 @@ switch ($action) {
             // Agregar el nombre y ID de la unidad de negocio de la sesión
             $combos['sucursalOrigen'] = $nombreSucursalActual;
             $combos['sucursalOrigenId'] = $unidadNegocioActual;
+            $combos['sucursalOrigenSelect'] = "<option value='{$unidadNegocioActual}' selected>{$nombreSucursalActual}</option>";
 
             $autorizador = $combo->comboAutorizador();
             $combos['autorizador'] = '<option value="">Seleccione</option>';

@@ -54,7 +54,9 @@ switch ($action) {
 
     case 'ListarAmbientes':
         try {
-            $data = $ambiente->listarTodo();
+            $cod_empresa = $_POST['cod_empresa'] ?? null;
+            $cod_UnidadNeg = $_POST['cod_UnidadNeg'] ?? null;
+            $data = $ambiente->listarTodo($cod_empresa, $cod_UnidadNeg);
             error_log("Listar Ambientes: " . json_encode($data), 3, __DIR__ . '/../../logs/acciones.log');
             echo json_encode($data ?: []);
         } catch (\Throwable $th) {

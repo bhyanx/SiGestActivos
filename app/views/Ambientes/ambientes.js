@@ -39,12 +39,15 @@ function ListarAmbientes() {
       url: "../../controllers/AmbienteController.php?action=ListarAmbientes",
       type: "POST",
       dataType: "json",
-      data: {
-        idAmbiente: "",
-        nombre: "",
-        descripcion: "",
-        NombreSucursal: "",
-        estado: "",
+      data: function(d) {
+        return {
+          cod_empresa: $("#cod_empresa").val() || null,
+          cod_UnidadNeg: $("#cod_UnidadNeg").val() || null,
+          idAmbiente: "",
+          nombre: "",
+          descripcion: "",
+          estado: ""
+        };
       },
       dataSrc: function (json) {
         console.log("Consultar response:", json);

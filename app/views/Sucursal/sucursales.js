@@ -38,11 +38,14 @@ function listarSucursales() {
       url: "../../controllers/SucursalesController.php?action=Listar",
       type: "POST",
       dataType: "json",
-      data: {
-        cod_UnidadNeg: "",
-        nombre: "",
-        direccion: "",
-        estado: "",
+      data: function(d) {
+        return {
+          cod_empresa: $("#cod_empresa").val() || null,
+          cod_UnidadNeg: "",
+          Nombre_local: "",
+          direccion: "",
+          estado: ""
+        };
       },
       dataSrc: function (json) {
         console.log("Consultar response:", json); // Para depuración
@@ -84,10 +87,10 @@ function listarSucursales() {
         },
       },
       { data: "cod_UnidadNeg", visible: false, searchable: false },
-      { data: "nombre" },
-      { data: "direccion" },
+      { data: "Nombre_local" },
+      { data: "Direccion_local" },
       {
-        data: "estado",
+        data: "estadoFuncionamiento",
         render: function (data, type, row) {
           return data == 1
             ? '<span class="badge badge-success text-sm border border-success">Activo</span>'

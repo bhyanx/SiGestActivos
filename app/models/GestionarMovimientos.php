@@ -59,6 +59,20 @@ class GestionarMovimientos
         try {
             $sql = "SELECT * FROM vDetalleMovimiento WHERE 1=1";
             $params = [];
+
+            // Filtro por empresa desde sesión
+            if (!empty($filtros['idEmpresa'])) {
+                $sql .= " AND idEmpresa = ?";
+                $params[] = $filtros['idEmpresa'];
+            }
+
+            // Filtro por sucursal desde sesión (origen o destino)
+            if (!empty($filtros['idSucursal'])) {
+                $sql .= " AND (SucursalOrigen = (SELECT Nombre_local FROM vUnidadesdeNegocio WHERE cod_UnidadNeg = ?) OR SucursalDestino = (SELECT Nombre_local FROM vUnidadesdeNegocio WHERE cod_UnidadNeg = ?))";
+                $params[] = $filtros['idSucursal'];
+                $params[] = $filtros['idSucursal'];
+            }
+
             if (!empty($filtros['tipo'])) {
                 $sql .= " AND TipoMovimiento = ?";
                 $params[] = $filtros['tipo'];

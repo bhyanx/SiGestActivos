@@ -56,6 +56,8 @@ session_start();
                                             <div class="row">
                                                 <div class="col-md-3 offset-md-9">
                                                     <div class="form-group">
+                                                        <input type="hidden" id="cod_empresa" value="<?php echo $_SESSION['cod_empresa'] ?? ''; ?>">
+                                                        <input type="hidden" id="cod_UnidadNeg" value="<?php echo $_SESSION['cod_UnidadNeg'] ?? ''; ?>">
                                                         <button class="btn btn-primary btn-block" id="btnnuevo"><i class="fa fa-plus"></i>Nuevo</button>
                                                     </div>
                                                 </div>

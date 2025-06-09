@@ -85,6 +85,39 @@ function init() {
   $("#btnprocesarempresa")
     .off("click")
     .on("click", function () {
+      // Validar campos obligatorios
+      const tipoMovimiento = $("#IdTipoMovimientoMov").val();
+      const autorizador = $("#CodAutorizador").val();
+      const sucursalDestino = $("#IdSucursalDestino").val();
+
+      if (!tipoMovimiento) {
+        Swal.fire({
+          title: "Campo Requerido",
+          text: "Debe seleccionar un tipo de movimiento",
+          icon: "warning"
+        });
+        return;
+      }
+
+      if (!autorizador) {
+        Swal.fire({
+          title: "Campo Requerido",
+          text: "Debe seleccionar un autorizador",
+          icon: "warning"
+        });
+        return;
+      }
+
+      if (!sucursalDestino) {
+        Swal.fire({
+          title: "Campo Requerido",
+          text: "Debe seleccionar una sucursal destino",
+          icon: "warning"
+        });
+        return;
+      }
+
+      // Si todo está correcto, proceder con el procesamiento
       $("#divregistroMovimiento").show();
       $("#divgenerarmov").hide();
 
@@ -676,17 +709,11 @@ function ListarCombosMov() {
         // Cargar autorizador
         $("#CodAutorizador").html(res.data.autorizador).trigger("change");
 
-        // Obtener el nombre de la sucursal origen desde la sesión
-        let nombreSucursalActual = "";
-        if (res.data.unidadNegocioActual) {
-          nombreSucursalActual = res.data.unidadNegocioActual;
-        }
-
         // Actualizar el campo de sucursal origen
-        $("#IdSucursalOrigen").val(nombreSucursalActual);
-        $("#IdSucursalOrigenValor").val(res.data.sucursalOrigenId || "");
+        $("#IdSucursalOrigen").val(res.data.sucursalOrigen);
+        $("#IdSucursalOrigenValor").val(res.data.sucursalOrigenId);
 
-        // Cargar sucursales solo para el destino
+        // Cargar sucursales para el destino
         $("#IdSucursalDestino").html(res.data.sucursales);
 
         // Inicializar select2 una sola vez para los combos

@@ -16,7 +16,8 @@ header('Content-Type: application/json');
 switch ($action) {
     case 'Listar':
         try {
-            $data = $sucursal->listarTodo();
+            $cod_empresa = $_POST['cod_empresa'] ?? null;
+            $data = $sucursal->listarTodo($cod_empresa);
             error_log("LeerUsuarios resultados: " . print_r($data, true), 3, __DIR__ . '/../../logs/debug.log');
             echo json_encode($data ?: []);
         } catch (Exception $e) {

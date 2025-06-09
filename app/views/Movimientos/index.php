@@ -170,11 +170,11 @@ session_start();
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label for="IdTipoMovimientoMov">Tipo de Movimiento:</label>
-                                                        <select name="IdTipoMovimientoMov" id="IdTipoMovimientoMov" class="form-control"></select>
+                                                        <select name="IdTipoMovimientoMov" id="IdTipoMovimientoMov" class="form-control" required></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <div class="form-group"><label for="CodAutorizador">Autorizador:</label><select name="CodAutorizador" id="CodAutorizador" class="form-control"></select></div>
+                                                    <div class="form-group"><label for="CodAutorizador">Autorizador:</label><select name="CodAutorizador" id="CodAutorizador" class="form-control" required></select></div>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <div class="form-group">
@@ -186,7 +186,7 @@ session_start();
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label for="IdSucursalDestino">Sucursal Destino:</label>
-                                                        <select name="IdSucursalDestino" id="IdSucursalDestino" class="form-control"></select>
+                                                        <select name="IdSucursalDestino" id="IdSucursalDestino" class="form-control" required></select>
                                                     </div>
                                                 </div>
 

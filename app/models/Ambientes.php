@@ -14,10 +14,29 @@ class Ambientes
     }
 
     //* LISTAR TODO 
-    public function listarTodo()
+    public function listarTodo($cod_empresa = null, $cod_UnidadNeg = null)
     {
         try {
-            $stmt = $this->db->query('SELECT * FROM vAmbientes ORDER BY nombre');
+            $sql = 'SELECT a.*, s.Nombre_local as NombreSucursal 
+                    FROM vAmbientes a 
+                    INNER JOIN vUnidadesdeNegocio s ON a.cod_UnidadNeg = s.cod_UnidadNeg 
+                    WHERE a.estado = 1';
+            $params = [];
+            
+            if ($cod_empresa !== null) {
+                $sql .= ' AND s.Cod_Empresa = ?';
+                $params[] = $cod_empresa;
+            }
+            
+            if ($cod_UnidadNeg !== null) {
+                $sql .= ' AND a.cod_UnidadNeg = ?';
+                $params[] = $cod_UnidadNeg;
+            }
+            
+            $sql .= ' ORDER BY a.nombre';
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             error_log("Error in Ambientes::listarTodo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
