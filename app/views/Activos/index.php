@@ -380,12 +380,6 @@ session_start();
                                                         <input type="date" name="fechaAdquisicion" id="fechaAdquisicion" class="form-control" disabled>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label for="Garantia">¿Tiene Garantía? </label>
-                                                        <input type="checkbox" name="Garantia" id="Garantia" class="form-control" disabled>
-                                                    </div>
-                                                </div>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
@@ -396,6 +390,7 @@ session_start();
                                 </div>
                             </div>
                         </div>
+                        <div id=""></div>
                         <div id="modalAsignarResponsable" class="modal fade" role="dialog">
                             <div class="modal-content">
                                 <form id="frmAsignarResponsable" name="frmAsignarResponsable" method="POST">
