@@ -474,6 +474,60 @@ switch ($action) {
         }
         break;
 
+    case 'darBaja':
+        try {
+            // Validar campos requeridos
+            if (!isset($_POST['idActivo']) || !isset($_POST['idResponsable']) || !isset($_POST['motivoBaja']) || !isset($_POST['userMod'])) {
+                throw new Exception("Faltan campos requeridos");
+            }
+            // Log para depuración
+            error_log("Datos recibidos en darBaja: " . print_r($_POST, true));
+
+            $data = [
+                'idActivo' => $_POST['idActivo'],
+                'idResponsable' => $_POST['idResponsable'],
+                'motivoBaja' => $_POST['motivoBaja'],
+                'userMod' => $_POST['userMod'],
+                'idEstado' => 3, // Estado de baja
+                'accion' => 3    // Acción de cambio de estado
+            ];
+
+            // Log para depuración
+            error_log("Datos preparados para SP: " . print_r($data, true));
+
+            $resultado = $activos->actualizarActivos($data);
+
+            if ($resultado) {
+                echo json_encode(['status' => true, 'message' => 'Activo dado de baja correctamente']);
+            } else {
+                throw new Exception("Error al dar de baja el activo");
+            }
+        } catch (Exception $e) {
+            error_log("Error en darBaja: " . $e->getMessage());
+            echo json_encode(['status' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'verificarResponsable':
+        try {
+            $idActivo = $_POST['idActivo'] ?? null;
+            if (!$idActivo) {
+                throw new Exception("ID del activo no proporcionado");
+            }
+            
+            $existe = $activos->verificarResponsableExistente($idActivo);
+            echo json_encode([
+                'status' => true,
+                'existe' => $existe
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+
     default:
         echo json_encode(['status' => false, 'message' => 'Acción no válida.']);
         break;

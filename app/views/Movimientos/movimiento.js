@@ -826,7 +826,7 @@ function listarMovimientos() {
       { data: "IdActivo" },
       { data: "NombreArticulo" },
       { data: "TipoMovimiento" },
-      { data: "SucursalOrigen" },
+      { data: "SucursalOrigen", visible: false, searchable: false },
       { data: "SucursalDestino" },
       { data: "AmbienteOrigen" },
       { data: "AmbienteDestino" },
@@ -844,7 +844,7 @@ function listarMovimientos() {
       },
     ],
     language: {
-      url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
     },
     buttons: [
       {
@@ -896,7 +896,7 @@ function listarActivosModal() {
       }
     ],
     language: {
-      url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
     },
     order: [[2, 'asc']], // Ordenar por NombreArticulo
     pageLength: 10,

@@ -359,12 +359,123 @@ function init() {
       return;
     }
 
-    Swal.fire({
-      title: "Asignación de Responsable",
-      text: "Funcionalidad en desarrollo",
-      icon: "info"
+    // Verificar si ya tiene un responsable
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=verificarResponsable",
+      type: "POST",
+      data: { idActivo: datos.idActivo },
+      dataType: "json",
+      success: function(res) {
+        if (res.status) {
+          if (res.existe) {
+            Swal.fire({
+              title: "Advertencia",
+              text: "Este activo ya tiene un responsable asignado. La asignación de un nuevo responsable solo debe realizarse a través de un movimiento.",
+              icon: "warning",
+              confirmButtonText: "Entendido"
+            });
+            return;
+          }
+          
+          // Si no tiene responsable, continuar con el proceso normal
+          $("#frmAsignarResponsable").data("idActivo", datos.idActivo);
+          
+          $.ajax({
+            url: "../../controllers/GestionarActivosController.php?action=combos",
+            type: "POST",
+            dataType: "json",
+            success: function(res) {
+              if (res.status) {
+                $("#Responsable").html(res.data.responsable).trigger("change");
+                $("#Responsable").select2({
+                  theme: "bootstrap4",
+                  dropdownParent: $("#modalAsignarResponsable .modal-body"),
+                  width: "100%"
+                });
+                // Mostrar el modal después de cargar el combo
+                $("#modalAsignarResponsable").modal("show");
+              } else {
+                Swal.fire("Error", res.message, "error");
+              }
+            },
+            error: function(xhr, status, error) {
+              Swal.fire("Error", "Error al cargar los combos: " + error, "error");
+            }
+          });
+        } else {
+          Swal.fire("Error", res.message || "Error al verificar el responsable", "error");
+        }
+      },
+      error: function(xhr, status, error) {
+        Swal.fire("Error", "Error al verificar el responsable: " + error, "error");
+      }
     });
-    // Aquí puedes cargar los datos necesarios para el modal de asignación
+  });
+
+  // Manejador para el formulario de asignación de responsable
+  $("#frmAsignarResponsable").on("submit", function (e) {
+    e.preventDefault();
+
+    const idActivo = $(this).data("idActivo");
+    const responsable = $("#Responsable").val();
+
+    if (!responsable) {
+      Swal.fire("Error", "Debe seleccionar un responsable", "error");
+      return;
+    }
+
+    // Mostrar loading
+    Swal.fire({
+      title: "Procesando",
+      text: "Asignando el responsable al activo...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    console.log("Datos a enviar:", {
+      idActivo: idActivo,
+      idResponsable: responsable,
+      userMod: userMod
+    });
+
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=asignarResponsable",
+      type: "POST",
+      data: {
+        IdActivo: idActivo,
+        IdResponsable: responsable,
+        UserMod: userMod
+      },
+      dataType: "json",
+      success: function (res) {
+        console.log("Respuesta del servidor:", res);
+        if (res.status) {
+          Swal.fire({
+            title: "Éxito",
+            text: res.message,
+            timer: 1500
+          }).then(() => {
+            $("#modalAsignarResponsable").modal("hide");
+            $("#frmAsignarResponsable")[0].reset();
+            listarActivosTable();
+          });
+        } else {
+          Swal.fire("Error", res.message || "Error al asignar el responsable", "error");
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("Error en la petición:", error);
+        Swal.fire("Error", "Error al procesar la solicitud: " + error, "error");
+      }
+    });
+  });
+  
+  $("#Responsable").select2({
+    theme: "bootstrap4",
+    dropdownParent: $("#modalAsignarResponsable .modal-body"),
+    width: "100%"
   });
 
   // Manejador para el botón de Ver Historial
@@ -383,6 +494,116 @@ function init() {
       text: "Funcionalidad en desarrollo",
       icon: "info"
     });
+  });
+
+  // Manejador para el botón de Dar de Baja
+  $(document).on("click", ".btnDarBaja", function () {
+    const fila = $(this).closest("tr");
+    const datos = $("#tblRegistros").DataTable().row(fila).data();
+    
+    if (!datos) {
+      Swal.fire("Error", "No se pudo obtener la información del activo.", "error");
+      return;
+    }
+
+    // Guardar el ID del activo en el formulario
+    $("#frmBajaActivo").data("idActivo", datos.idActivo);
+    
+    // Cargar el combo de autorizadores
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=combos",
+      type: "POST",
+      dataType: "json",
+      success: function(res) {
+        if (res.status) {
+          $("#Autorizador").html(res.data.autorizador).trigger("change");
+          $("#Autorizador").select2({
+            theme: "bootstrap4",
+            dropdownParent: $("#modalBajaActivo"),
+            width: "100%"
+          });
+          // Mostrar el modal después de cargar el combo
+          $("#modalBajaActivo").modal("show");
+        } else {
+          Swal.fire("Error", "No se pudieron cargar los autorizadores", "error");
+        }
+      },
+      error: function(xhr, status, error) {
+        Swal.fire("Error", "Error al cargar los autorizadores: " + error, "error");
+      }
+    });
+  });
+
+  // Manejador para el formulario de baja
+  $("#frmBajaActivo").on("submit", function (e) {
+    e.preventDefault();
+    
+    const idActivo = $(this).data("idActivo");
+    const autorizador = $("#Autorizador").val();
+    const motivoBaja = $("#motivoBaja").val();
+
+    if (!autorizador || !motivoBaja) {
+      Swal.fire("Error", "Todos los campos son obligatorios", "error");
+      return;
+    }
+
+    // Mostrar loading
+    Swal.fire({
+      title: "Procesando",
+      text: "Dando de baja el activo...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    // Log para depuración
+    console.log("Datos a enviar:", {
+      idActivo: idActivo,
+      idResponsable: autorizador,
+      motivoBaja: motivoBaja,
+      userMod: userMod
+    });
+
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=darBaja",
+      type: "POST",
+      data: {
+        idActivo: idActivo,
+        idResponsable: autorizador,
+        motivoBaja: motivoBaja,
+        userMod: userMod
+      },
+      dataType: "json",
+      success: function (res) {
+        console.log("Respuesta del servidor:", res);
+        if (res.status) {
+          Swal.fire({
+            icon: "success",
+            title: "Éxito",
+            text: res.message,
+            timer: 1500
+          }).then(() => {
+            $("#modalBajaActivo").modal("hide");
+            $("#frmBajaActivo")[0].reset();
+            listarActivosTable();
+          });
+        } else {
+          Swal.fire("Error", res.message, "error");
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("Error en la petición:", xhr.responseText);
+        Swal.fire("Error", "Error al procesar la baja del activo: " + error, "error");
+      }
+    });
+  });
+
+  // Inicializar select2 para el autorizador en el modal de baja
+  $("#Autorizador").select2({
+    theme: "bootstrap4",
+    dropdownParent: $("#modalBajaActivo"),
+    width: "100%"
   });
 
   function ListarCombosConCallback(callback) {
@@ -582,7 +803,7 @@ function init() {
         },
       ],
       language: {
-        url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+        url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
       },
     });
   }
@@ -937,6 +1158,9 @@ function listarActivosTable() {
               <button class="dropdown-item btnVerHistorial" type="button">
                 <i class="fas fa-history text-primary"></i> Ver Historial
               </button>
+              <button class="dropdown-item btnDarBaja" type="button">
+                <i class="fas fa-ban text-danger"></i> Dar de Baja
+              </button>
             </div>
           </div>`,
       },
@@ -958,7 +1182,7 @@ function listarActivosTable() {
       { data: "observaciones", visible: false },
     ],
     language: {
-      url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
     },
   });
 }

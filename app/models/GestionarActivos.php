@@ -142,7 +142,7 @@ class GestionarActivos
             // Formatear fechas al formato SQL Server
             $fechaFinGarantia = !empty($data['FechaFinGarantia']) ? date('Y-m-d', strtotime($data['FechaFinGarantia'])) : null;
             $fechaAdquisicion = !empty($data['FechaAdquisicion']) ? date('Y-m-d', strtotime($data['FechaAdquisicion'])) : null;
-            $empresa = $_SESSION['cod_empresa'] ??  null; 
+            $empresa = $_SESSION['cod_empresa'] ??  null;
             $sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
 
             $stmt = $this->db->prepare('EXEC sp_GuardarActivoPRUEBA
@@ -255,25 +255,25 @@ class GestionarActivos
     public function actualizarActivos($data)
     {
         try {
-            $stmt = $this->db->prepare("EXEC sp_GuardarActivoPRUEBA 
-                @pIdActivo = ?, 
-                @pSerie = ?, 
-                @pIdEstado = ?, 
-                @pIdAmbiente = ?, 
-                @pIdCategoria = ?, 
-                @pObservaciones = ?, 
-                @pUserMod = ?, 
-                @pAccion = ?");
-
-            $stmt->bindParam(1, $data['IdActivo'], PDO::PARAM_INT);
-            $stmt->bindParam(2, $data['Serie'], PDO::PARAM_STR);
-            $stmt->bindParam(3, $data['IdEstado'], PDO::PARAM_INT);
-            $stmt->bindParam(4, $data['IdAmbiente'], PDO::PARAM_INT);
-            $stmt->bindParam(5, $data['IdCategoria'], PDO::PARAM_INT);
-            $stmt->bindParam(6, $data['Observaciones'], PDO::PARAM_STR);
-            $stmt->bindParam(7, $data['UserMod'], PDO::PARAM_STR);
-            $stmt->bindParam(8, $data['Accion'], PDO::PARAM_INT);
-
+            if ($data['accion'] == 3) {
+                $stmt = $this->db->prepare("EXEC sp_GuardarActivoPRUEBA @pIdActivo = ?, @pIdEstado = ?, @pIdResponsable = ?, @pMotivoBaja = ?, @pUserMod = ?, @pAccion = ?");
+                $stmt->bindParam(1, $data['idActivo'], PDO::PARAM_INT);
+                $stmt->bindParam(2, $data['idEstado'], PDO::PARAM_INT);
+                $stmt->bindParam(3, $data['idResponsable'], PDO::PARAM_INT);
+                $stmt->bindParam(4, $data['motivoBaja'], PDO::PARAM_STR);
+                $stmt->bindParam(5, $data['userMod'], PDO::PARAM_STR);
+                $stmt->bindParam(6, $data['accion'], PDO::PARAM_INT);
+            } else {
+                $stmt = $this->db->prepare("EXEC sp_GuardarActivoPRUEBA @pIdActivo = ?, @pSerie = ?, @pIdEstado = ?, @pIdAmbiente = ?, @pIdCategoria = ?, @pObservaciones = ?, @pUserMod = ?, @pAccion = ?");
+                $stmt->bindParam(1, $data['IdActivo'], PDO::PARAM_INT);
+                $stmt->bindParam(2, $data['Serie'], PDO::PARAM_STR);
+                $stmt->bindParam(3, $data['IdEstado'], PDO::PARAM_INT);
+                $stmt->bindParam(4, $data['IdAmbiente'], PDO::PARAM_INT);
+                $stmt->bindParam(5, $data['IdCategoria'], PDO::PARAM_INT);
+                $stmt->bindParam(6, $data['Observaciones'], PDO::PARAM_STR);
+                $stmt->bindParam(7, $data['UserMod'], PDO::PARAM_STR);
+                $stmt->bindParam(8, $data['Accion'], PDO::PARAM_INT);
+            }
             $stmt->execute();
             return true;
         } catch (Exception $e) {
@@ -291,7 +291,7 @@ class GestionarActivos
             @pIdActivo = ?,
             @pIdResponsable = ?,
             @pUserMod = ?,
-            @pAccion = ?");
+            @pAccion = 4");
 
             $stmt->bindParam(1, $data['IdActivo'], PDO::PARAM_INT);
             $stmt->bindParam(2, $data['IdResponsable'], PDO::PARAM_STR);
@@ -327,4 +327,22 @@ class GestionarActivos
         }
     }
 
+    public function verificarResponsableExistente($idActivo)
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT COUNT(*) as existe 
+                FROM tActivos 
+                WHERE IdActivo = ? 
+                AND IdResponsable IS NOT NULL
+            ");
+            $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
+            $stmt->execute();
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $resultado['existe'] > 0;
+        } catch (\PDOException $e) {
+            error_log("Error in verificarResponsableExistente: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
 }

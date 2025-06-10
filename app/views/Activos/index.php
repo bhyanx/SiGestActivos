@@ -390,27 +390,68 @@ session_start();
                                 </div>
                             </div>
                         </div>
-                        <div id=""></div>
-                        <div id="modalAsignarResponsable" class="modal fade" role="dialog">
-                            <div class="modal-content">
-                                <form id="frmAsignarResponsable" name="frmAsignarResponsable" method="POST">
-                                    <div class="modal-header bg-info">
-                                        <h5 class="modal-title" id="tituloModalAsignarResponsable">Asignar Responsable</h5>
+
+                        <div id="modalBajaActivo" class="modal fade" role="dialog">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-danger">
+                                        <h5 class="modal-title" id="tituloModalBajaActivo"><i class="fa fa-minus-circle"></i> Dar de Baja Activo</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
-                                    <div class="modal-body">
-                                        <div class="form-group">
-                                            <label for="selectResponsable">Seleccione un responsable:</label>
-                                            <select name="selectResponsable" id="selectResponsable" class="form-control select-2"></select>
+                                    <form id="frmBajaActivo">
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="autorizador">Autorizador</label>
+                                                        <select name="Autorizador" id="Autorizador" class="form-control select-2"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="motivoBaja">Motivo de Baja:</label>
+                                                        <textarea name="motivoBaja" id="motivoBaja" class="form-control" rows="3" placeholder="Ingrese el motivo de la baja del activo..."></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times"></i> Cerrar</button>
+                                            <button type="submit" class="btn btn-primary" id="btnguardar"><i class="fa fa-save"></i> Guardar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="modalAsignarResponsable" class="modal fade" role="dialog">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-alert">
+                                        <h5 class="modal-title" id="tituloModalAsignarResponsable"><i class="fa fa-users"></i> Asignar Responsable</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
                                     </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i> Cerrar</button>
-                                        <button type="submit" class="btn btn-primary" id="btnasignarresponsable"><i class="fa fa-save"></i> Asignar</button>
-                                    </div>
-                                </form>
+                                    <form id="frmAsignarResponsable">
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="responsable">Responsable</label>
+                                                        <select name="Responsable" id="Responsable" class="form-control select-2"></select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times"></i> Cerrar</button>
+                                            <button type="submit" class="btn btn-primary" id="btnguardar"><i class="fa fa-save"></i> Guardar</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
