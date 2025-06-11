@@ -79,7 +79,7 @@ session_start();
                                                     <input type="date" class="form-control" name="filtroFecha" id="filtroFecha" value="<?php echo date('Y-m-d'); ?>">
                                                 </div>
                                             </div>
-                                            <div class="col-md-2 offset-md-8">
+                                            <div class="col-md-2 offset-md-6">
                                                 <div class="form-group mb-0">
                                                     <label for="">&nbsp;</label>
                                                     <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">
@@ -95,6 +95,14 @@ session_start();
                                                     </button>
                                                 </div>
                                             </div>
+                                            <!-- <div class="col-md-2">
+                                                <div class="form-group mb-0">
+                                                    <lable>&nbsp;</lable>
+                                                    <button class="btn btn-success btn-sm btn-block" id="btnCompuesto">
+                                                        <i class="fa fa-plus"></i> Nuevo Movimiento Compuesto
+                                                    </button>
+                                                </div>
+                                            </div> -->
                                         </div>
                                     </div>
                                 </div>

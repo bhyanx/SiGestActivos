@@ -1,0 +1,722 @@
+$(document).ready(function () {
+  init();
+});
+
+function init() {
+  // Inicializar la tabla una sola vez
+  if (!$.fn.DataTable.isDataTable("#tblMovimientos")) {
+    listarMovimientos();
+  }
+
+  ListarCombosMov();
+  ListarCombosFiltros();
+
+  // Manejar el evento submit del formulario de búsqueda
+  $("#frmbusqueda")
+    .off("submit")
+    .on("submit", function (e) {
+      e.preventDefault();
+      $("#divtblmovimientos").show();
+      $("#divgenerarmov").hide();
+      $("#divregistroMovimiento").hide();
+      $("#divlistadomovimientos").show();
+
+      // Recargar la tabla
+      if ($.fn.DataTable.isDataTable("#tblMovimientos")) {
+        $("#tblMovimientos").DataTable().ajax.reload(null, false);
+      } else {
+        listarMovimientos();
+      }
+    });
+
+  // Ocultar secciones al cargar
+  $("#divgenerarmov").hide();
+  $("#divregistroMovimiento").hide();
+
+  // Botón para abrir el panel de generación de movimiento
+  $("#btnnuevo")
+    .off("click")
+    .on("click", function () {
+      $("#divgenerarmov").show();
+      $("#divregistroMovimiento").hide();
+      $("#divtblmovimientos").hide();
+      $("#divlistadomovimientos").hide();
+    });
+
+  // Botón procesar en generarmov
+  $("#btnprocesarempresa")
+    .off("click")
+    .on("click", function () {
+      // Validar campos obligatorios
+      const autorizador = $("#CodAutorizador").val();
+      const sucursalDestino = $("#IdSucursalDestino").val();
+
+      if (!autorizador) {
+        Swal.fire({
+          title: "Campo Requerido",
+          text: "Debe seleccionar un autorizador",
+          icon: "warning",
+        });
+        return;
+      }
+
+      if (!sucursalDestino) {
+        Swal.fire({
+          title: "Campo Requerido",
+          text: "Debe seleccionar una sucursal destino",
+          icon: "warning",
+        });
+        return;
+      }
+
+      // Si todo está correcto, proceder con el procesamiento
+      $("#divregistroMovimiento").show();
+      $("#divgenerarmov").hide();
+
+      // Transferir valores de los combos
+      var autorizadorNombre = $("#CodAutorizador option:selected").text();
+      $("#IdAutorizador").val($("#CodAutorizador").val());
+      $("#lblautorizador").text("Autorizador: " + autorizadorNombre);
+
+      // Cargar activos padres disponibles
+      cargarActivosPadres();
+    });
+
+  // Botón cancelar en generarmov
+  $("#btncancelarempresa")
+    .off("click")
+    .on("click", function () {
+      $("#divgenerarmov").hide();
+      $("#divtblmovimientos").show();
+      $("#divlistadomovimientos").show();
+    });
+
+  // Botón cancelar en registro de movimiento
+  $("#btnCancelarMovimiento")
+    .off("click")
+    .on("click", function () {
+      $("#divregistroMovimiento").hide();
+      $("#divtblmovimientos").show();
+      $("#divlistadomovimientos").show();
+    });
+
+  // Al seleccionar un activo padre origen, cargar sus componentes
+  $("#IdActivoPadreOrigen").on("change", function () {
+    const idActivoPadre = $(this).val();
+    if (idActivoPadre) {
+      cargarComponentesActivo(idActivoPadre);
+    } else {
+      $("#tbldetallecomponentes tbody").empty();
+    }
+  });
+
+  // Botón para abrir el modal de búsqueda de componentes
+  $("#btnBuscarComponentes").on("click", function() {
+    const idActivoPadre = $("#IdActivoPadreOrigen").val();
+    if (!idActivoPadre) {
+      Swal.fire("Error", "Debe seleccionar un activo padre origen", "error");
+      return;
+    }
+    $("#modalBuscarComponentes").modal("show");
+    listarComponentesModal(idActivoPadre);
+  });
+
+  // Función para guardar el movimiento completo
+  $("#btnGuardarMov").on("click", function () {
+    // Verificar si hay componentes habilitados (los que se enviarán)
+    const componentesAEnviar = $("#tbldetallecomponentes tbody tr:not(.componente-deshabilitado)");
+    if (componentesAEnviar.length === 0) {
+      NotificacionToast("error", "Debe seleccionar al menos un componente para mover");
+      return;
+    }
+
+    // Verificar que se haya seleccionado un activo padre destino
+    if (!$("#IdActivoPadreDestino").val()) {
+      NotificacionToast("error", "Debe seleccionar un activo padre destino");
+      return;
+    }
+
+    // Mostrar loading
+    Swal.fire({
+      title: "Procesando",
+      text: "Guardando el movimiento...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    // Obtener los datos del formulario principal
+    const formData = new FormData();
+    formData.append("IdTipo", 8); // Tipo 8 = Movimiento entre activos
+    formData.append("autorizador", $("#IdAutorizador").val());
+    formData.append("sucursal_destino", $("#IdSucursalDestino").val());
+    formData.append("observacion", "");
+
+    // Primero guardar el movimiento principal
+    $.ajax({
+      url: "../../controllers/GestionarMovimientoController.php?action=RegistrarMovimientoSolo",
+      type: "POST",
+      data: formData,
+      contentType: false,
+      processData: false,
+      dataType: "json",
+      success: function (res) {
+        if (res.status) {
+          // Si se guardó el movimiento principal, proceder a guardar los detalles
+          guardarDetallesMovimiento(res.idMovimiento);
+        } else {
+          Swal.close();
+          NotificacionToast("error", res.message || "Error al registrar el movimiento");
+        }
+      },
+      error: function () {
+        Swal.close();
+        NotificacionToast("error", "Error al comunicarse con el servidor");
+      },
+    });
+  });
+}
+
+function cargarActivosPadres() {
+  $.ajax({
+    url: "../../controllers/GestionarMovimientosComponentesController.php?action=listarActivosPadres",
+    type: "POST",
+    dataType: "json",
+    success: function (res) {
+      if (res.status) {
+        // Limpiar y cargar los select de activos padres
+        $("#IdActivoPadreOrigen, #IdActivoPadreDestino").empty();
+
+        // Agregar opción por defecto
+        $("#IdActivoPadreOrigen, #IdActivoPadreDestino").append(
+          '<option value="">Seleccione un activo padre</option>'
+        );
+
+        // Agregar las opciones
+        res.data.forEach(function (activo) {
+          const option = `<option value="${activo.IdActivo}">${activo.CodigoActivo} - ${activo.NombreArticulo}</option>`;
+          $("#IdActivoPadreOrigen, #IdActivoPadreDestino").append(option);
+        });
+
+        // Inicializar select2
+        $("#IdActivoPadreOrigen, #IdActivoPadreDestino").select2({
+          theme: "bootstrap4",
+          width: "100%",
+        });
+      } else {
+        Swal.fire("Error", res.message, "error");
+      }
+    },
+    error: function () {
+      Swal.fire("Error", "Error al cargar los activos padres", "error");
+    },
+  });
+}
+
+function cargarComponentesActivo(idActivoPadre) {
+  $.ajax({
+    url: "../../controllers/GestionarMovimientosComponentesController.php?action=listarComponentesActivo",
+    type: "POST",
+    data: { idActivoPadre: idActivoPadre },
+    dataType: "json",
+    success: function (res) {
+      if (res.status) {
+        // Limpiar la tabla
+        $("#tbldetallecomponentes tbody").empty();
+
+        // Agregar los componentes (todos deshabilitados inicialmente)
+        res.data.forEach(function (componente) {
+          const fila = `
+            <tr data-id="${componente.IdActivo}" class="componente-deshabilitado" style="cursor: pointer; opacity: 0.6; background-color: #f8f9fa;">
+              <td>${componente.IdActivo}</td>
+              <td>${componente.CodigoActivo}</td>
+              <td>${componente.NombreArticulo}</td>
+              <td>${componente.MarcaArticulo}</td>
+              <td>${componente.NumeroSerie}</td>
+            </tr>
+          `;
+          $("#tbldetallecomponentes tbody").append(fila);
+        });
+      } else {
+        NotificacionToast("error", res.message);
+      }
+    },
+    error: function () {
+      NotificacionToast("error", "Error al cargar los componentes");
+    },
+  });
+}
+
+function guardarDetallesMovimiento(idMovimiento) {
+  let detallesGuardados = 0;
+  let totalDetalles = $("#tbldetallecomponentes tbody tr:not(.componente-deshabilitado)").length;
+  let errores = [];
+
+  if (totalDetalles === 0) {
+    Swal.close();
+    NotificacionToast("error", "No hay componentes seleccionados para mover");
+    return;
+  }
+
+  // Iterar solo sobre los componentes habilitados (los que se enviarán)
+  $("#tbldetallecomponentes tbody tr:not(.componente-deshabilitado)").each(function () {
+    const fila = $(this);
+    const detalleData = new FormData();
+
+    detalleData.append("IdMovimiento", idMovimiento);
+    detalleData.append("IdActivoComponente", fila.data("id"));
+    detalleData.append("IdActivoPadreNuevo", $("#IdActivoPadreDestino").val());
+    detalleData.append("IdTipo_Movimiento", 8); // Tipo 8 = Movimiento entre activos
+    detalleData.append("IdAutorizador", $("#IdAutorizador").val());
+    detalleData.append("Observaciones", "");
+
+    // Guardar cada detalle
+    $.ajax({
+      url: "../../controllers/GestionarMovimientosComponentesController.php?action=MoverComponenteEntreActivos",
+      type: "POST",
+      data: detalleData,
+      contentType: false,
+      processData: false,
+      dataType: "json",
+      success: function (res) {
+        detallesGuardados++;
+        if (!res.status) {
+          errores.push(
+            `Error en componente ${fila.find("td:eq(0)").text()}: ${
+              res.message
+            }`
+          );
+        }
+
+        // Cuando todos los detalles se hayan procesado
+        if (detallesGuardados === totalDetalles) {
+          Swal.close();
+          if (errores.length === 0) {
+            Swal.fire({
+              title: "Éxito",
+              text: "Movimiento registrado correctamente",
+              icon: "success"
+            }).then(() => {
+              // Limpiar y recargar
+              $("#divregistroMovimiento").hide();
+              $("#divtblmovimientos").show();
+              $("#divlistadomovimientos").show();
+              listarMovimientos();
+            });
+          } else {
+            NotificacionToast("warning", "El movimiento se registró pero hubo errores en algunos detalles");
+            // Limpiar y recargar
+            $("#divregistroMovimiento").hide();
+            $("#divtblmovimientos").show();
+            $("#divlistadomovimientos").show();
+            listarMovimientos();
+          }
+        }
+      },
+      error: function () {
+        detallesGuardados++;
+        errores.push(
+          `Error de comunicación con el servidor para el componente ${fila
+            .find("td:eq(0)")
+            .text()}`
+        );
+
+        if (detallesGuardados === totalDetalles) {
+          Swal.close();
+          NotificacionToast("error", "Hubo errores al guardar los detalles");
+        }
+      },
+    });
+  });
+}
+
+function ListarCombosMov() {
+  $.ajax({
+    url: "../../controllers/GestionarMovimientoController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    async: false,
+    success: (res) => {
+      if (res.status) {
+        // Cargar autorizador
+        $("#CodAutorizador").html(res.data.autorizador).trigger("change");
+
+        // Actualizar el campo de sucursal origen
+        $("#IdSucursalOrigen").val(res.data.sucursalOrigen);
+        $("#IdSucursalOrigenValor").val(res.data.sucursalOrigenId);
+
+        // Cargar sucursales para el destino
+        $("#IdSucursalDestino").html(res.data.sucursales);
+
+        // Inicializar select2
+        if (!$("#CodAutorizador").hasClass("select2-hidden-accessible")) {
+          $("#CodAutorizador, #IdSucursalDestino").select2({
+            theme: "bootstrap4",
+            width: "100%",
+          });
+        }
+      } else {
+        Swal.fire(
+          "Movimiento de activos",
+          "No se pudieron cargar los combos: " + res.message,
+          "warning"
+        );
+      }
+    },
+    error: (xhr, status, error) => {
+      Swal.fire(
+        "Movimiento de activos",
+        "Error al cargar combos: " + error,
+        "error"
+      );
+    },
+  });
+}
+
+function ListarCombosFiltros() {
+  $.ajax({
+    url: "../../controllers/GestionarMovimientoController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    success: (res) => {
+      if (res.status) {
+        $("#filtroSucursal").html(res.data.sucursales).trigger("change");
+
+        $("#filtroSucursal").select2({
+          theme: "bootstrap4",
+          width: "100%",
+        });
+      } else {
+        Swal.fire(
+          "Filtro de movimientos",
+          "No se pudieron cargar los combos: " + res.message,
+          "warning"
+        );
+      }
+    },
+    error: (xhr, status, error) => {
+      Swal.fire(
+        "Filtros de movimientos",
+        "Error al cargar combos: " + error,
+        "error"
+      );
+    },
+  });
+}
+
+function listarMovimientos() {
+  // Destruir la instancia existente si existe
+  if ($.fn.DataTable.isDataTable("#tblMovimientos")) {
+    $("#tblMovimientos").DataTable().destroy();
+  }
+
+  $("#tblMovimientos").DataTable({
+    aProcessing: true,
+    aServerSide: false,
+    layout: {
+      topStart: {
+        buttons: [
+          {
+            extend: "excelHtml5",
+            title: "Listado Movimientos entre Activos",
+            text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
+            autoFilter: true,
+            sheetName: "Data",
+            exportOptions: {
+              columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            },
+          },
+          "pageLength",
+          "colvis",
+        ],
+      },
+      bottom: "paging",
+      bottomStart: null,
+      bottomEnd: null,
+    },
+    lengthChange: false,
+    colReorder: true,
+    autoWidth: false,
+    ajax: {
+      url: "../../controllers/GestionarMovimientoController.php?action=ConsultarMovimientosEntreActivos",
+      type: "POST",
+      dataType: "json",
+      data: function (d) {
+        d.filtroSucursal = $("#filtroSucursal").val();
+        d.filtroFecha = $("#filtroFecha").val();
+      },
+      dataSrc: function (json) {
+        if (json && json.data) {
+          return json.data;
+        }
+        return [];
+      },
+    },
+    columns: [
+      {
+        data: null,
+        render: () =>
+          `<div class="btn-group">
+            <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-cog"></i>
+            </button>
+            <div class="dropdown-menu">
+              <button class="dropdown-item btnVerDetalle" type="button">
+                <i class="fas fa-eye text-info"></i> Ver Detalle
+              </button>
+              <button class="dropdown-item btnAnularMovimiento" type="button">
+                <i class="fas fa-ban text-danger"></i> Anular Movimiento
+              </button>
+            </div>
+          </div>`,
+      },
+      { data: "IdDetalleMovimiento", visible: false, searchable: false },
+      { data: "IdComponente" },
+      { data: "NombreComponente" },
+      { data: "ActivoPadreOrigen" },
+      { data: "ActivoPadreDestino" },
+      { data: "Sucursal" },
+      { data: "Ambiente" },
+      { data: "Autorizador" },
+      { data: "Responsable" },
+      {
+        data: "FechaMovimiento",
+        render: function (data) {
+          if (data) {
+            return moment(data).format("DD/MM/YYYY HH:mm");
+          }
+          return "";
+        },
+      },
+    ],
+    language: {
+      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+    },
+  });
+}
+
+// Agregar los manejadores de eventos para los botones de acción
+$(document).on("click", ".btnVerDetalle", function () {
+  const fila = $(this).closest("tr");
+  const datos = $("#tblMovimientos").DataTable().row(fila).data();
+
+  if (!datos) {
+    Swal.fire(
+      "Error",
+      "No se pudo obtener la información del movimiento.",
+      "error"
+    );
+    return;
+  }
+
+  Swal.fire({
+    title: "Detalle del Movimiento",
+    html: `
+      <div class="text-left">
+        <p><strong>ID Componente:</strong> ${datos.IdComponente}</p>
+        <p><strong>Nombre Componente:</strong> ${datos.NombreComponente}</p>
+        <p><strong>Activo Padre Origen:</strong> ${datos.ActivoPadreOrigen}</p>
+        <p><strong>Activo Padre Destino:</strong> ${datos.ActivoPadreDestino}</p>
+        <p><strong>Sucursal:</strong> ${datos.Sucursal}</p>
+        <p><strong>Ambiente:</strong> ${datos.Ambiente}</p>
+        <p><strong>Autorizador:</strong> ${datos.Autorizador}</p>
+        <p><strong>Responsable:</strong> ${datos.Responsable}</p>
+        <p><strong>Fecha:</strong> ${datos.FechaMovimiento}</p>
+      </div>
+    `,
+    width: "600px",
+  });
+});
+
+$(document).on("click", ".btnAnularMovimiento", function () {
+  const fila = $(this).closest("tr");
+  const datos = $("#tblMovimientos").DataTable().row(fila).data();
+
+  if (!datos) {
+    Swal.fire(
+      "Error",
+      "No se pudo obtener la información del movimiento.",
+      "error"
+    );
+    return;
+  }
+
+  Swal.fire({
+    title: "¿Estás seguro?",
+    text: "¿Deseas anular este movimiento?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Sí, anular",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      $.ajax({
+        url: "../../controllers/GestionarMovimientoController.php?action=anularMovimiento",
+        type: "POST",
+        data: { idMovimiento: datos.IdDetalleMovimiento },
+        dataType: "json",
+        success: function (res) {
+          if (res.status) {
+            Swal.fire({
+              title: "Éxito",
+              text: res.message,
+              icon: "success",
+            }).then(() => {
+              $("#tblMovimientos").DataTable().ajax.reload();
+            });
+          } else {
+            Swal.fire("Error", res.message, "error");
+          }
+        },
+        error: function (xhr, status, error) {
+          Swal.fire(
+            "Error",
+            "Error al procesar la solicitud: " + error,
+            "error"
+          );
+        },
+      });
+    }
+  });
+});
+
+function listarComponentesModal(idActivoPadre) {
+  if ($.fn.DataTable.isDataTable("#tblComponentes")) {
+    $("#tblComponentes").DataTable().destroy();
+  }
+
+  $("#tblComponentes").DataTable({
+    aProcessing: true,
+    aServerSide: false,
+    ajax: {
+      url: "../../controllers/GestionarMovimientosComponentesController.php?action=listarComponentesActivo",
+      type: "POST",
+      data: { idActivoPadre: idActivoPadre },
+      dataType: "json",
+      dataSrc: function (json) {
+        if (json && json.data) {
+          return json.data;
+        }
+        return [];
+      },
+    },
+    columns: [
+      { data: "IdActivo" },
+      { data: "CodigoActivo" },
+      { data: "NombreArticulo" },
+      { data: "MarcaArticulo" },
+      { data: "NumeroSerie" },
+      {
+        data: null,
+        render: function (data) {
+          return `<button type="button" class="btn btn-success btn-sm btnSeleccionarComponente" data-id="${data.IdActivo}">
+                    <i class="fa fa-check"></i>
+                  </button>`;
+        },
+      },
+    ],
+    language: {
+      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+    },
+  });
+}
+
+// Seleccionar componente en el detalle
+$(document).on("click", "#tbldetallecomponentes tbody tr", function() {
+  const fila = $(this);
+  
+  if (!fila.hasClass("componente-deshabilitado")) {
+    // Deshabilitar componente (excluir del envío)
+    fila.addClass("componente-deshabilitado").css({
+      "opacity": "0.6",
+      "background-color": "#f8f9fa"
+    });
+    
+    // Mostrar notificación
+    NotificacionToast("warning", `Componente <b>${fila.find("td:eq(2)").text()}</b> excluido del envío`);
+  } else {
+    // Habilitar componente (incluir en el envío)
+    fila.removeClass("componente-deshabilitado").css({
+      "opacity": "1",
+      "background-color": ""
+    });
+    
+    // Mostrar notificación
+    NotificacionToast("success", `Componente <b>${fila.find("td:eq(2)").text()}</b> incluido en el envío`);
+  }
+});
+
+// Agregar botón para agregar componentes seleccionados al detalle
+$("#modalBuscarComponentes .modal-footer").prepend(`
+  <button type="button" class="btn btn-primary" id="btnAgregarSeleccionados">
+    <i class="fa fa-plus"></i> Agregar Seleccionados
+  </button>
+`);
+
+// Agregar componentes seleccionados al detalle
+$(document).on("click", "#btnAgregarSeleccionados", function() {
+  const componentesSeleccionados = $("#tblComponentes tbody tr.selected");
+  
+  if (componentesSeleccionados.length === 0) {
+    Swal.fire("Advertencia", "Debe seleccionar al menos un componente", "warning");
+    return;
+  }
+
+  componentesSeleccionados.each(function() {
+    const data = $("#tblComponentes").DataTable().row($(this)).data();
+    
+    // Verificar si el componente ya está en el detalle
+    if ($(`#tbldetallecomponentes tbody tr[data-id="${data.IdActivo}"]`).length > 0) {
+      return; // Saltar este componente si ya está en el detalle
+    }
+
+    // Agregar al detalle
+    const nuevaFila = `
+      <tr data-id="${data.IdActivo}">
+        <td>${data.IdActivo}</td>
+        <td>${data.CodigoActivo}</td>
+        <td>${data.NombreArticulo}</td>
+        <td>${data.MarcaArticulo}</td>
+        <td>${data.NumeroSerie}</td>
+        <td>
+          <button type="button" class="btn btn-danger btn-sm btnEliminarComponente">
+            <i class="fa fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+    $("#tbldetallecomponentes tbody").append(nuevaFila);
+  });
+
+  // Cerrar el modal
+  $("#modalBuscarComponentes").modal("hide");
+});
+
+// Eliminar componente del detalle
+$(document).on("click", ".btnEliminarComponente", function() {
+  $(this).closest("tr").remove();
+});
+
+function NotificacionToast(tipo, mensaje) {
+  toastr.options = {
+    closeButton: false,
+    debug: false,
+    newestOnTop: true,
+    progressBar: true,
+    positionClass: "toast-bottom-left",
+    preventDuplicates: true,
+    onclick: null,
+    showDuration: "300",
+    hideDuration: "1000",
+    timeOut: "3000",
+    extendedTimeOut: "1000",
+    showEasing: "swing",
+    hideEasing: "linear",
+    showMethod: "fadeIn",
+    hideMethod: "fadeOut",
+  };
+  toastr[tipo](mensaje);
+}
