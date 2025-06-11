@@ -15,7 +15,26 @@ header('Content-Type: application/json');
 switch ($action) {
     case 'listarActivosPadres':
         try {
-            $activosPadres = $movimientosComponentes->listarActivosPadres();
+            $tipo = $_POST['tipo'] ?? '';
+            $sucursal = null;
+
+            if ($tipo === 'origen') {
+                // Para origen usamos la sucursal de la sesión
+                $sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
+                if (!$sucursal) {
+                    throw new Exception("No se encontró la sucursal de origen en la sesión");
+                }
+            } else if ($tipo === 'destino') {
+                // Para destino usamos la sucursal seleccionada
+                $sucursal = $_POST['sucursal'] ?? null;
+                if (!$sucursal) {
+                    throw new Exception("Debe seleccionar una sucursal destino");
+                }
+            } else {
+                throw new Exception("Tipo de consulta no válido");
+            }
+
+            $activosPadres = $movimientosComponentes->listarActivosPadres($sucursal);
             echo json_encode([
                 'status' => true,
                 'data' => $activosPadres,
@@ -60,11 +79,9 @@ switch ($action) {
                 'IdMovimiento' => $_POST['IdMovimiento'],
                 'IdActivoComponente' => $_POST['IdActivoComponente'],
                 'IdTipo_Movimiento' => $_POST['IdTipo_Movimiento'],
-                'IdSucursal_Nueva' => $_POST['IdSucursal_Nueva'],
-                'IdAmbiente_Nueva' => $_POST['IdAmbiente_Nueva'],
-                'IdResponsable_Nueva' => $_POST['IdResponsable_Nueva'],
                 'IdActivoPadreNuevo' => $_POST['IdActivoPadreNuevo'],
-                'IdAutorizador' => $_POST['IdAutorizador']
+                'IdAutorizador' => $_POST['IdAutorizador'],
+                'Observaciones' => $_POST['Observaciones'] ?? null
             ];
 
             $resultado = $movimientosComponentes->moverComponenteEntreActivos($data);

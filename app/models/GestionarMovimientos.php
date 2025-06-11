@@ -15,13 +15,14 @@ class GestionarMovimientos
     public function crearMovimiento($data)
     {
         try {
-            $stmt = $this->db->prepare('INSERT INTO tMovimientos (FechaMovimiento, idTipoMovimiento, idAutorizador, idSucursalOrigen, idSucursalDestino, observaciones) VALUES (GETDATE(), ?, ?, ?, ?, ?)');
+            $stmt = $this->db->prepare('INSERT INTO tMovimientos (FechaMovimiento, idTipoMovimiento, idAutorizador, idSucursalOrigen, idSucursalDestino, idEmpresa, observaciones) VALUES (GETDATE(), ?, ?, ?, ?, ?, ?)');
 
             $stmt->bindParam(1, $data['idTipoMovimiento'], \PDO::PARAM_INT);
             $stmt->bindParam(2, $data['idAutorizador'], \PDO::PARAM_INT);
             $stmt->bindParam(3, $data['idSucursalOrigen'], \PDO::PARAM_INT);
             $stmt->bindParam(4, $data['idSucursalDestino'], \PDO::PARAM_INT);
-            $stmt->bindParam(5, $data['observaciones'], \PDO::PARAM_STR);
+            $stmt->bindParam(5, $data['idEmpresa'], \PDO::PARAM_INT);
+            $stmt->bindParam(6, $data['observaciones'], \PDO::PARAM_STR);
             
             if (!$stmt->execute()) {
                 throw new \PDOException("Error al ejecutar la consulta: " . implode(" ", $stmt->errorInfo()));

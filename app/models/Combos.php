@@ -108,4 +108,17 @@ WHERE estado = 1";
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function comboEmpresas()
+    {
+        try {
+            $sql = "SELECT cod_empresa, nombre FROM tEmpresa WHERE estado = 1 ORDER BY nombre";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error in comboEmpresas: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
 }

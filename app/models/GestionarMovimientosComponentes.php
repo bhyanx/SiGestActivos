@@ -9,7 +9,7 @@ class GestionarMovimientosComponentes
         $this->db = (new Conectar())->ConexionBdPracticante();
     }
 
-    public function listarActivosPadres()
+    public function listarActivosPadres($sucursal = null)
     {
         try {
             $sql = "
@@ -26,10 +26,20 @@ class GestionarMovimientosComponentes
             INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
             WHERE a.IdEmpresa = 1 
             AND a.idEstado = 1
-            AND a.EsPadre = 1
-            ORDER BY a.NombreArticulo";
+            AND a.EsPadre = 1";
+            
+            if ($sucursal) {
+                $sql .= " AND a.IdSucursal = :sucursal";
+            }
+            
+            $sql .= " ORDER BY a.NombreArticulo";
             
             $stmt = $this->db->prepare($sql);
+            
+            if ($sucursal) {
+                $stmt->bindParam(':sucursal', $sucursal, PDO::PARAM_INT);
+            }
+            
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
@@ -72,24 +82,21 @@ class GestionarMovimientosComponentes
         try {
             $this->db->beginTransaction();
 
-            // Actualizar el activo padre del componente
-            $sql = "UPDATE vActivos SET IdActivoPadre = ? WHERE IdActivo = ?";
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(1, $data['IdActivoPadreNuevo'], PDO::PARAM_INT);
-            $stmt->bindParam(2, $data['IdActivoComponente'], PDO::PARAM_INT);
-            $stmt->execute();
+            $sql = "EXEC sp_MoverComponenteEntreActivos 
+                @IdMovimiento = ?, 
+                @IdActivoComponente = ?, 
+                @IdActivoPadreNuevo = ?, 
+                @IdTipo_Movimiento = ?, 
+                @IdAutorizador = ?,
+                @Observaciones = ?";
 
-            // Registrar el detalle del movimiento
-            $sql = "EXEC sp_RegistrarDetalleMovimiento @IdMovimiento = ?, @IdActivo = ?, @IdTipo_Movimiento = ?, @IdSucursal_Nueva = ?, @IdAmbiente_Nueva = ?, @IdResponsable_Nueva = ?, @IdActivoPadre_Nuevo = ?, @IdAutorizador = ?";
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $data['IdMovimiento'], PDO::PARAM_INT);
             $stmt->bindParam(2, $data['IdActivoComponente'], PDO::PARAM_INT);
-            $stmt->bindParam(3, $data['IdTipo_Movimiento'], PDO::PARAM_INT);
-            $stmt->bindParam(4, $data['IdSucursal_Nueva'], PDO::PARAM_INT);
-            $stmt->bindParam(5, $data['IdAmbiente_Nueva'], PDO::PARAM_INT);
-            $stmt->bindParam(6, $data['IdResponsable_Nueva'], PDO::PARAM_INT);
-            $stmt->bindParam(7, $data['IdActivoPadreNuevo'], PDO::PARAM_INT);
-            $stmt->bindParam(8, $data['IdAutorizador'], PDO::PARAM_INT);
+            $stmt->bindParam(3, $data['IdActivoPadreNuevo'], PDO::PARAM_INT);
+            $stmt->bindParam(4, $data['IdTipo_Movimiento'], PDO::PARAM_INT);
+            $stmt->bindParam(5, $data['IdAutorizador'], PDO::PARAM_INT);
+            $stmt->bindParam(6, $data['Observaciones'], PDO::PARAM_STR);
             $stmt->execute();
 
             $this->db->commit();
@@ -120,12 +127,12 @@ class GestionarMovimientosComponentes
             FROM tDetalleMovimiento dm
             INNER JOIN tMovimientos m ON dm.IdMovimiento = m.IdMovimiento
             INNER JOIN vActivos c ON dm.IdActivo = c.IdActivo
-            INNER JOIN vActivos ap_origen ON dm.IdActivoPadre_Origen = ap_origen.IdActivo
-            INNER JOIN vActivos ap_destino ON dm.IdActivoPadre_Nuevo = ap_destino.IdActivo
+            INNER JOIN vActivos ap_origen ON dm.IdActivoPadreOrigen = ap_origen.IdActivo
+            INNER JOIN vActivos ap_destino ON dm.IdActivoPadreNuevo = ap_destino.IdActivo
             INNER JOIN vUnidadesdeNegocio s ON m.IdSucursalDestino = s.cod_UnidadNeg
-            INNER JOIN tAmbiente amb ON dm.IdAmbiente_Nueva = amb.idAmbiente
+            INNER JOIN tAmbiente amb ON dm.IdAmbienteNueva = amb.idAmbiente
             INNER JOIN tTrabajador t ON m.IdAutorizador = t.codTrabajador
-            INNER JOIN tTrabajador r ON dm.IdResponsable_Nueva = r.codTrabajador
+            INNER JOIN tTrabajador r ON dm.IdResponsableNueva = r.codTrabajador
             WHERE m.IdTipoMovimiento = 8
             AND m.estado = 'A'";
 

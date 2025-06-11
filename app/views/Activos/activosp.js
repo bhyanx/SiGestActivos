@@ -1178,7 +1178,6 @@ function listarActivosTable() {
       { data: "idCategoria", visible: false },
       { data: "DocIngresoAlmacen", visible: false },
       { data: "fechaAdquisicion", visible: false },
-      { data: "garantia", visible: false },
       { data: "observaciones", visible: false },
     ],
     language: {

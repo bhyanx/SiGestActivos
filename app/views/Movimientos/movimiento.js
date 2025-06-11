@@ -746,7 +746,30 @@ function ListarCombosMov() {
   });
 }
 
-// Function lis
+// Agregar evento para actualizar sucursales cuando cambie la empresa
+$(document).on("change", "#IdEmpresa", function() {
+  const idEmpresa = $(this).val();
+  if (idEmpresa) {
+    $.ajax({
+      url: "../../controllers/GestionarMovimientoController.php?action=obtenerSucursalesPorEmpresa",
+      type: "POST",
+      data: { idEmpresa: idEmpresa },
+      dataType: "json",
+      success: function(res) {
+        if (res.status) {
+          $("#IdSucursalDestino").html(res.data).trigger("change");
+        } else {
+          NotificacionToast("error", "Error al cargar sucursales: " + res.message);
+        }
+      },
+      error: function(xhr, status, error) {
+        NotificacionToast("error", "Error al cargar sucursales: " + error);
+      }
+    });
+  } else {
+    $("#IdSucursalDestino").html('<option value="">Seleccione</option>').trigger("change");
+  }
+});
 
 // Listar movimientos en una tabla DataTable
 function listarMovimientos() {

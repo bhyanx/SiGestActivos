@@ -123,6 +123,20 @@ function init() {
 
   // Función para guardar el movimiento completo
   $("#btnGuardarMov").on("click", function () {
+    // Verificar si el activo padre destino es diferente al origen
+    const idActivoPadreOrigen = $("#IdActivoPadreOrigen").val();
+    const idActivoPadreDestino = $("#IdActivoPadreDestino").val();
+
+    if (idActivoPadreOrigen === idActivoPadreDestino) {
+      Swal.fire({
+        title: "Error",
+        text: "No se puede mover un componente al mismo activo padre",
+        icon: "error",
+        confirmButtonText: "Aceptar"
+      });
+      return;
+    }
+
     // Verificar si hay componentes habilitados (los que se enviarán)
     const componentesAEnviar = $("#tbldetallecomponentes tbody tr:not(.componente-deshabilitado)");
     if (componentesAEnviar.length === 0) {
@@ -176,31 +190,37 @@ function init() {
       },
     });
   });
+
+  // Agregar evento para actualizar activos padres cuando cambie la sucursal destino
+  $("#IdSucursalDestino").on("change", function() {
+    cargarActivosPadres();
+    // Limpiar los componentes cuando cambie la sucursal
+    $("#tbldetallecomponentes tbody").empty();
+    $("#IdActivoPadreOrigen").val("").trigger("change");
+    $("#IdActivoPadreDestino").val("").trigger("change");
+  });
 }
 
 function cargarActivosPadres() {
+  // Para origen usamos la sucursal de la sesión
   $.ajax({
     url: "../../controllers/GestionarMovimientosComponentesController.php?action=listarActivosPadres",
     type: "POST",
+    data: { tipo: 'origen' },
     dataType: "json",
     success: function (res) {
       if (res.status) {
-        // Limpiar y cargar los select de activos padres
-        $("#IdActivoPadreOrigen, #IdActivoPadreDestino").empty();
-
-        // Agregar opción por defecto
-        $("#IdActivoPadreOrigen, #IdActivoPadreDestino").append(
-          '<option value="">Seleccione un activo padre</option>'
-        );
-
-        // Agregar las opciones
+        // Limpiar y cargar el select de activos padres origen
+        $("#IdActivoPadreOrigen").empty();
+        $("#IdActivoPadreOrigen").append('<option value="">Seleccione un activo padre</option>');
+        
         res.data.forEach(function (activo) {
           const option = `<option value="${activo.IdActivo}">${activo.CodigoActivo} - ${activo.NombreArticulo}</option>`;
-          $("#IdActivoPadreOrigen, #IdActivoPadreDestino").append(option);
+          $("#IdActivoPadreOrigen").append(option);
         });
 
-        // Inicializar select2
-        $("#IdActivoPadreOrigen, #IdActivoPadreDestino").select2({
+        // Inicializar select2 para origen
+        $("#IdActivoPadreOrigen").select2({
           theme: "bootstrap4",
           width: "100%",
         });
@@ -208,10 +228,47 @@ function cargarActivosPadres() {
         Swal.fire("Error", res.message, "error");
       }
     },
-    error: function () {
-      Swal.fire("Error", "Error al cargar los activos padres", "error");
+    error: function (xhr, status, error) {
+      Swal.fire("Error", "Error al cargar los activos padres origen: " + error, "error");
     },
   });
+
+  // Para destino usamos la sucursal seleccionada
+  const sucursalDestino = $("#IdSucursalDestino").val();
+  if (sucursalDestino) {
+    $.ajax({
+      url: "../../controllers/GestionarMovimientosComponentesController.php?action=listarActivosPadres",
+      type: "POST",
+      data: { tipo: 'destino', sucursal: sucursalDestino },
+      dataType: "json",
+      success: function (res) {
+        if (res.status) {
+          // Limpiar y cargar el select de activos padres destino
+          $("#IdActivoPadreDestino").empty();
+          $("#IdActivoPadreDestino").append('<option value="">Seleccione un activo padre</option>');
+          
+          res.data.forEach(function (activo) {
+            const option = `<option value="${activo.IdActivo}">${activo.CodigoActivo} - ${activo.NombreArticulo}</option>`;
+            $("#IdActivoPadreDestino").append(option);
+          });
+
+          // Inicializar select2 para destino
+          $("#IdActivoPadreDestino").select2({
+            theme: "bootstrap4",
+            width: "100%",
+          });
+        } else {
+          Swal.fire("Error", res.message, "error");
+        }
+      },
+      error: function (xhr, status, error) {
+        Swal.fire("Error", "Error al cargar los activos padres destino: " + error, "error");
+      },
+    });
+  } else {
+    // Si no hay sucursal destino seleccionada, limpiar el selector
+    $("#IdActivoPadreDestino").empty().append('<option value="">Seleccione un activo padre</option>').trigger('change');
+  }
 }
 
 function cargarComponentesActivo(idActivoPadre) {
@@ -220,30 +277,55 @@ function cargarComponentesActivo(idActivoPadre) {
     type: "POST",
     data: { idActivoPadre: idActivoPadre },
     dataType: "json",
-    success: function (res) {
-      if (res.status) {
-        // Limpiar la tabla
+    success: function (response) {
+      if (response.status) {
         $("#tbldetallecomponentes tbody").empty();
-
-        // Agregar los componentes (todos deshabilitados inicialmente)
-        res.data.forEach(function (componente) {
-          const fila = `
-            <tr data-id="${componente.IdActivo}" class="componente-deshabilitado" style="cursor: pointer; opacity: 0.6; background-color: #f8f9fa;">
-              <td>${componente.IdActivo}</td>
+        response.data.forEach(function (componente) {
+          $("#tbldetallecomponentes tbody").append(`
+            <tr data-id="${componente.IdActivo}" class="componente-deshabilitado" style="opacity: 0.6; background-color: #f8f9fa;">
               <td>${componente.CodigoActivo}</td>
               <td>${componente.NombreArticulo}</td>
               <td>${componente.MarcaArticulo}</td>
               <td>${componente.NumeroSerie}</td>
+              <td>
+                <input type="text" class="form-control componente-observacion" placeholder="Ingrese observaciones para este componente">
+              </td>
+              <td>
+                <button type="button" class="btn btn-primary btn-sm btn-seleccionar">
+                  <i class="fas fa-check"></i> Seleccionar
+                </button>
+              </td>
             </tr>
-          `;
-          $("#tbldetallecomponentes tbody").append(fila);
+          `);
+        });
+
+        // Agregar el evento click solo al botón de selección
+        $(".btn-seleccionar").on("click", function() {
+          const fila = $(this).closest("tr");
+          const nombreComponente = fila.find("td:eq(1)").text(); // Obtener el nombre del componente
+          
+          if (fila.hasClass("componente-deshabilitado")) {
+            fila.removeClass("componente-deshabilitado").css({
+              opacity: 1,
+              backgroundColor: ""
+            });
+            $(this).html('<i class="fas fa-times"></i> Deseleccionar');
+            NotificacionToast("success", `Componente <b>${nombreComponente}</b> incluido en el envío`);
+          } else {
+            fila.addClass("componente-deshabilitado").css({
+              opacity: 0.6,
+              backgroundColor: "#f8f9fa"
+            });
+            $(this).html('<i class="fas fa-check"></i> Seleccionar');
+            NotificacionToast("warning", `Componente <b>${nombreComponente}</b> excluido del envío`);
+          }
         });
       } else {
-        NotificacionToast("error", res.message);
+        NotificacionToast("error", "Error al cargar componentes: " + response.message);
       }
     },
-    error: function () {
-      NotificacionToast("error", "Error al cargar los componentes");
+    error: function (xhr, status, error) {
+      NotificacionToast("error", "Error al cargar componentes: " + error);
     },
   });
 }
@@ -269,7 +351,7 @@ function guardarDetallesMovimiento(idMovimiento) {
     detalleData.append("IdActivoPadreNuevo", $("#IdActivoPadreDestino").val());
     detalleData.append("IdTipo_Movimiento", 8); // Tipo 8 = Movimiento entre activos
     detalleData.append("IdAutorizador", $("#IdAutorizador").val());
-    detalleData.append("Observaciones", "");
+    detalleData.append("Observaciones", fila.find('.componente-observacion').val() || $("#txtObservaciones").val());
 
     // Guardar cada detalle
     $.ajax({
@@ -419,12 +501,12 @@ function listarMovimientos() {
         buttons: [
           {
             extend: "excelHtml5",
-            title: "Listado Movimientos entre Activos",
+            title: "Listado Movimientos",
             text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
             autoFilter: true,
             sheetName: "Data",
             exportOptions: {
-              columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+              columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
             },
           },
           "pageLength",
@@ -439,19 +521,26 @@ function listarMovimientos() {
     colReorder: true,
     autoWidth: false,
     ajax: {
-      url: "../../controllers/GestionarMovimientoController.php?action=ConsultarMovimientosEntreActivos",
+      url: "../../controllers/GestionarMovimientosComponentesController.php?action=ConsultarMovimientosEntreActivos",
       type: "POST",
       dataType: "json",
       data: function (d) {
+        // Agregar los filtros del formulario
+        d.filtroTipoMovimiento = $("#filtroTipoMovimiento").val();
         d.filtroSucursal = $("#filtroSucursal").val();
         d.filtroFecha = $("#filtroFecha").val();
       },
       dataSrc: function (json) {
-        if (json && json.data) {
-          return json.data;
+        if (!json.status) {
+          NotificacionToast("error", json.message || "Error al cargar los movimientos");
+          return [];
         }
-        return [];
+        return json.data || [];
       },
+      error: function(xhr, status, error) {
+        NotificacionToast("error", "Error al cargar los movimientos: " + error);
+        return [];
+      }
     },
     columns: [
       {
@@ -468,18 +557,23 @@ function listarMovimientos() {
               <button class="dropdown-item btnAnularMovimiento" type="button">
                 <i class="fas fa-ban text-danger"></i> Anular Movimiento
               </button>
+              <button class="dropdown-item btnVerHistorial" type="button">
+                <i class="fas fa-history text-primary"></i> Ver Historial
+              </button>
             </div>
           </div>`,
       },
       { data: "IdDetalleMovimiento", visible: false, searchable: false },
-      { data: "IdComponente" },
-      { data: "NombreComponente" },
-      { data: "ActivoPadreOrigen" },
-      { data: "ActivoPadreDestino" },
-      { data: "Sucursal" },
-      { data: "Ambiente" },
+      { data: "IdActivo" },
+      { data: "NombreArticulo" },
+      { data: "TipoMovimiento" },
+      { data: "SucursalOrigen", visible: false, searchable: false },
+      { data: "SucursalDestino" },
+      { data: "AmbienteOrigen" },
+      { data: "AmbienteDestino" },
       { data: "Autorizador" },
-      { data: "Responsable" },
+      { data: "ResponsableOrigen" },
+      { data: "ResponsableDestino" },
       {
         data: "FechaMovimiento",
         render: function (data) {
@@ -493,6 +587,12 @@ function listarMovimientos() {
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
     },
+    buttons: [
+      {
+        extend: "excelHtml5",
+        text: '<i class="fas fa-file-excel"></i> Exportar',
+      },
+    ],
   });
 }
 
@@ -623,31 +723,6 @@ function listarComponentesModal(idActivoPadre) {
     },
   });
 }
-
-// Seleccionar componente en el detalle
-$(document).on("click", "#tbldetallecomponentes tbody tr", function() {
-  const fila = $(this);
-  
-  if (!fila.hasClass("componente-deshabilitado")) {
-    // Deshabilitar componente (excluir del envío)
-    fila.addClass("componente-deshabilitado").css({
-      "opacity": "0.6",
-      "background-color": "#f8f9fa"
-    });
-    
-    // Mostrar notificación
-    NotificacionToast("warning", `Componente <b>${fila.find("td:eq(2)").text()}</b> excluido del envío`);
-  } else {
-    // Habilitar componente (incluir en el envío)
-    fila.removeClass("componente-deshabilitado").css({
-      "opacity": "1",
-      "background-color": ""
-    });
-    
-    // Mostrar notificación
-    NotificacionToast("success", `Componente <b>${fila.find("td:eq(2)").text()}</b> incluido en el envío`);
-  }
-});
 
 // Agregar botón para agregar componentes seleccionados al detalle
 $("#modalBuscarComponentes .modal-footer").prepend(`

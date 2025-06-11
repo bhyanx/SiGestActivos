@@ -11,6 +11,7 @@ session_start();
         .swal2-container {
             z-index: 9999 !important;
         }
+
         .dropdown-menu .show {
             position: fixed !important;
         }
@@ -263,11 +264,11 @@ session_start();
                                                 <table id="tbldetallecomponentes" class="table table-hover table-bordered table-striped table-sm w-100">
                                                     <thead>
                                                         <tr>
-                                                            <th>ID</th>
                                                             <th>Código</th>
                                                             <th>Nombre</th>
                                                             <th>Marca</th>
                                                             <th>Serie</th>
+                                                            <th>Observaciones</th>
                                                             <th>Acción</th>
                                                         </tr>
                                                     </thead>
@@ -345,4 +346,5 @@ session_start();
         </div>
     </div>
 </body>
+
 </html>

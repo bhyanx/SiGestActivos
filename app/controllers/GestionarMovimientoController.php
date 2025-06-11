@@ -39,8 +39,9 @@ switch ($action) {
                 $data = [
                     'idTipoMovimiento' => $_POST['IdTipo'],
                     'idAutorizador' => $_POST['autorizador'],
-                    'idSucursalOrigen' => $_SESSION['cod_UnidadNeg'], // Cambiado a cod_UnidadNeg
+                    'idSucursalOrigen' => $_SESSION['cod_UnidadNeg'],
                     'idSucursalDestino' => $_POST['sucursal_destino'],
+                    'idEmpresa' => $_POST['idEmpresa'] ?? $_SESSION['cod_empresa'],
                     'observaciones' => $_POST['observacion'] ?? ''
                 ];
                 $idMovimiento = $movimientos->crearMovimiento($data);
@@ -232,6 +233,32 @@ switch ($action) {
             echo json_encode([
                 'status' => false,
                 'message' => 'Error al obtener el historial: ' . $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'obtenerSucursalesPorEmpresa':
+        try {
+            $idEmpresa = $_POST['idEmpresa'] ?? null;
+            if (!$idEmpresa) {
+                throw new Exception("Se requiere el ID de la empresa");
+            }
+
+            $sucursales = $combo->comboUnidadNegocio($idEmpresa);
+            $html = '<option value="">Seleccione</option>';
+            foreach ($sucursales as $row) {
+                $html .= "<option value='{$row['cod_UnidadNeg']}'>{$row['Nombre_local']}</option>";
+            }
+
+            echo json_encode([
+                'status' => true,
+                'data' => $html,
+                'message' => 'Sucursales cargadas correctamente'
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al cargar sucursales: ' . $e->getMessage()
             ]);
         }
         break;
