@@ -15,19 +15,33 @@ class GestionarMovimientos
     public function crearMovimiento($data)
     {
         try {
-            $stmt = $this->db->prepare('INSERT INTO tMovimientos (FechaMovimiento, idTipoMovimiento, idAutorizador, idSucursalOrigen, idSucursalDestino, idEmpresa, observaciones) VALUES (GETDATE(), ?, ?, ?, ?, ?, ?)');
+            $sql = "INSERT INTO tMovimientos (
+                FechaMovimiento, 
+                idTipoMovimiento, 
+                idAutorizador, 
+                idSucursalOrigen, 
+                idSucursalDestino,
+                idEmpresaDestino,
+                observaciones
+            ) VALUES (
+                GETDATE(), 
+                :idTipoMovimiento, 
+                :idAutorizador, 
+                :idSucursalOrigen, 
+                :idSucursalDestino,
+                :idEmpresaDestino,
+                :observaciones
+            )";
 
-            $stmt->bindParam(1, $data['idTipoMovimiento'], \PDO::PARAM_INT);
-            $stmt->bindParam(2, $data['idAutorizador'], \PDO::PARAM_INT);
-            $stmt->bindParam(3, $data['idSucursalOrigen'], \PDO::PARAM_INT);
-            $stmt->bindParam(4, $data['idSucursalDestino'], \PDO::PARAM_INT);
-            $stmt->bindParam(5, $data['idEmpresa'], \PDO::PARAM_INT);
-            $stmt->bindParam(6, $data['observaciones'], \PDO::PARAM_STR);
-            
-            if (!$stmt->execute()) {
-                throw new \PDOException("Error al ejecutar la consulta: " . implode(" ", $stmt->errorInfo()));
-            }
-            
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':idTipoMovimiento', $data['idTipoMovimiento']);
+            $stmt->bindParam(':idAutorizador', $data['idAutorizador']);
+            $stmt->bindParam(':idSucursalOrigen', $data['idSucursalOrigen']);
+            $stmt->bindParam(':idSucursalDestino', $data['idSucursalDestino']);
+            $stmt->bindParam(':idEmpresaDestino', $data['idEmpresaDestino']);
+            $stmt->bindParam(':observaciones', $data['observaciones']);
+
+            $stmt->execute();
             return $this->db->lastInsertId();
         } catch (\PDOException $e) {
             error_log("Error in registrarMovimiento: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
@@ -38,20 +52,47 @@ class GestionarMovimientos
     public function crearDetalleMovimiento($data)
     {
         try {
-            $stmt = $this->db->prepare('EXEC sp_RegistrarDetalleMovimiento @IdMovimiento = ?, @IdActivo = ?, @IdTipo_Movimiento = ?, @IdSucursal_Nueva = ?, @IdAmbiente_Nueva = ?, @IdResponsable_Nueva = ?, @IdActivoPadre_Nuevo = ?, @IdAutorizador = ?');
+            $sql = "EXEC sp_RegistrarDetalleMovimiento 
+                @IdMovimiento = :idMovimiento,
+                @IdActivo = :idActivo,
+                @IdTipo_Movimiento = :idTipoMovimiento,
+                @IdEmpresaDestino = :idEmpresaDestino,
+                @IdSucursal_Nueva = :idSucursalNueva,
+                @IdAmbiente_Nueva = :idAmbienteNueva,
+                @IdResponsable_Nueva = :idResponsableNueva,
+                @IdActivoPadre_Nuevo = :idActivoPadreNuevo,
+                @IdAutorizador = :idAutorizador";
 
-            $stmt->bindParam(1, $data['IdMovimiento'], \PDO::PARAM_INT);
-            $stmt->bindParam(2, $data['IdActivo'], \PDO::PARAM_INT);
-            $stmt->bindParam(3, $data['IdTipo_Movimiento'], \PDO::PARAM_INT);
-            $stmt->bindParam(4, $data['IdSucursal_Nueva'], \PDO::PARAM_INT);
-            $stmt->bindParam(5, $data['IdAmbiente_Nueva'], \PDO::PARAM_INT);
-            $stmt->bindParam(6, $data['IdResponsable_Nueva'], \PDO::PARAM_INT);
-            $stmt->bindParam(7, $data['IdActivoPadre_Nuevo'], \PDO::PARAM_INT);
-            $stmt->bindParam(8, $data['IdAutorizador'], \PDO::PARAM_INT);
-            $stmt->execute();
-        } catch (\PDOException $e) {
-            error_log("Error in crearDetalleMovimiento: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
-            throw $e;
+            $stmt = $this->db->prepare($sql);
+            
+            // Asegurar que los valores sean del tipo correcto
+            $idMovimiento = (int)$data['IdMovimiento'];
+            $idActivo = (int)$data['IdActivo'];
+            $idTipoMovimiento = (int)$data['IdTipo_Movimiento'];
+            $idEmpresaDestino = (int)$data['IdEmpresaDestino'];
+            $idSucursalNueva = (int)$data['IdSucursal_Nueva'];
+            $idAmbienteNueva = (int)$data['IdAmbiente_Nueva'];
+            $idResponsableNueva = (string)$data['IdResponsable_Nueva'];
+            $idActivoPadreNuevo = $data['IdActivoPadre_Nuevo'] ? (int)$data['IdActivoPadre_Nuevo'] : null;
+            $idAutorizador = (int)$data['IdAutorizador'];
+
+            $stmt->bindParam(':idMovimiento', $idMovimiento, PDO::PARAM_INT);
+            $stmt->bindParam(':idActivo', $idActivo, PDO::PARAM_INT);
+            $stmt->bindParam(':idTipoMovimiento', $idTipoMovimiento, PDO::PARAM_INT);
+            $stmt->bindParam(':idEmpresaDestino', $idEmpresaDestino, PDO::PARAM_INT);
+            $stmt->bindParam(':idSucursalNueva', $idSucursalNueva, PDO::PARAM_INT);
+            $stmt->bindParam(':idAmbienteNueva', $idAmbienteNueva, PDO::PARAM_INT);
+            $stmt->bindParam(':idResponsableNueva', $idResponsableNueva, PDO::PARAM_STR);
+            $stmt->bindParam(':idActivoPadreNuevo', $idActivoPadreNuevo, PDO::PARAM_INT);
+            $stmt->bindParam(':idAutorizador', $idAutorizador, PDO::PARAM_INT);
+
+            if (!$stmt->execute()) {
+                throw new PDOException("Error al ejecutar la consulta: " . implode(" ", $stmt->errorInfo()));
+            }
+
+            return true;
+        } catch (PDOException $e) {
+            throw new Exception("Error al crear el detalle del movimiento: " . $e->getMessage());
         }
     }
 
@@ -124,7 +165,7 @@ class GestionarMovimientos
             AND a.IdSucursal = ?
             AND a.idEstado = 1
             ORDER BY a.NombreArticulo";
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idEmpresa, PDO::PARAM_INT);
             $stmt->bindParam(2, $idSucursal, PDO::PARAM_INT);
@@ -139,26 +180,21 @@ class GestionarMovimientos
     public function obtenerAmbientesPorSucursal($idEmpresa, $idSucursal)
     {
         try {
-            $sql = "
-            SELECT 
-                a.idAmbiente,
-                a.nombre,
-                a.idEmpresa,
-                a.idSucursal
-            FROM tAmbiente a
-            WHERE a.idEmpresa = ? 
-            AND a.idSucursal = ?
-            AND a.estado = 1
-            ORDER BY a.nombre";
-            
+            $sql = "SELECT DISTINCT a.idAmbiente, a.nombre 
+                    FROM tAmbiente a 
+                    INNER JOIN tActivos ac ON a.idAmbiente = ac.idAmbiente 
+                    WHERE ac.idEmpresa = :idEmpresa 
+                    AND ac.idSucursal = :idSucursal 
+                    ORDER BY a.nombre";
+
             $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(1, $idEmpresa, PDO::PARAM_INT);
-            $stmt->bindParam(2, $idSucursal, PDO::PARAM_INT);
+            $stmt->bindParam(':idEmpresa', $idEmpresa, PDO::PARAM_INT);
+            $stmt->bindParam(':idSucursal', $idSucursal, PDO::PARAM_INT);
             $stmt->execute();
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            error_log("Error in obtenerAmbientesPorSucursal: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
-            throw $e;
+        } catch (PDOException $e) {
+            throw new Exception("Error al obtener ambientes: " . $e->getMessage());
         }
     }
 
@@ -238,7 +274,7 @@ class GestionarMovimientos
             INNER JOIN tTrabajador ta ON m.idAutorizador = ta.codTrabajador
             WHERE m.idMovimiento = ?
             ORDER BY m.FechaMovimiento DESC";
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idMovimiento, PDO::PARAM_INT);
             $stmt->execute();
@@ -248,5 +284,4 @@ class GestionarMovimientos
             throw $e;
         }
     }
-
 }

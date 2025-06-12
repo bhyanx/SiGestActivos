@@ -89,6 +89,7 @@ function init() {
       const tipoMovimiento = $("#IdTipoMovimientoMov").val();
       const autorizador = $("#CodAutorizador").val();
       const sucursalDestino = $("#IdSucursalDestino").val();
+      const empresaDestino = $("#IdEmpresaDestino").val();
 
       if (!tipoMovimiento) {
         Swal.fire({
@@ -103,6 +104,15 @@ function init() {
         Swal.fire({
           title: "Campo Requerido",
           text: "Debe seleccionar un autorizador",
+          icon: "warning"
+        });
+        return;
+      }
+
+      if (!empresaDestino) {
+        Swal.fire({
+          title: "Campo Requerido",
+          text: "Debe seleccionar una empresa destino",
           icon: "warning"
         });
         return;
@@ -398,8 +408,8 @@ function init() {
   $("#btnGuardarMov").on("click", function () {
     // Verificar si hay detalles en la tabla
     if ($("#tbldetalleactivomov tbody tr").length === 0) {
-      Swal.fire("Error", "Debe agregar al menos un activo al detalle", "error");
-      return;
+        Swal.fire("Error", "Debe agregar al menos un activo al detalle", "error");
+        return;
     }
 
     // Obtener los datos del formulario principal
@@ -407,31 +417,42 @@ function init() {
     formData.append("IdTipo", $("#IdTipoMovimiento").val());
     formData.append("autorizador", $("#IdAutorizador").val());
     formData.append("sucursal_destino", $("#IdSucursalDestino").val());
+    formData.append("cod_empresa", $("#IdEmpresaDestino").val()); // Agregar el campo de empresa
     formData.append("observacion", ""); // Si tienes campo de observaciones, agrégalo aquí
+
+    // Mostrar loading
+    Swal.fire({
+        title: "Procesando",
+        text: "Guardando el movimiento...",
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
 
     // Primero guardar el movimiento principal
     $.ajax({
-      url: "../../controllers/GestionarMovimientoController.php?action=RegistrarMovimientoSolo",
-      type: "POST",
-      data: formData,
-      contentType: false,
-      processData: false,
-      dataType: "json",
-      success: function (res) {
-        if (res.status) {
-          // Si se guardó el movimiento principal, proceder a guardar los detalles
-          guardarDetallesMovimiento(res.idMovimiento);
-        } else {
-          Swal.fire(
-            "Error",
-            res.message || "Error al registrar el movimiento",
-            "error"
-          );
-        }
-      },
-      error: function () {
-        Swal.fire("Error", "Error al comunicarse con el servidor", "error");
-      },
+        url: "../../controllers/GestionarMovimientoController.php?action=RegistrarMovimientoSolo",
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        dataType: "json",
+        success: function (res) {
+            if (res.status) {
+                // Si se guardó el movimiento principal, proceder a guardar los detalles
+                guardarDetallesMovimiento(res.idMovimiento);
+            } else {
+                Swal.fire(
+                    "Error",
+                    res.message || "Error al registrar el movimiento",
+                    "error"
+                );
+            }
+        },
+        error: function () {
+            Swal.fire("Error", "Error al comunicarse con el servidor", "error");
+        },
     });
   });
 
@@ -442,88 +463,90 @@ function init() {
 
     // Iterar sobre cada fila de la tabla de detalles
     $("#tbldetalleactivomov tbody tr").each(function () {
-      const fila = $(this);
-      const detalleData = new FormData();
+        const fila = $(this);
+        const detalleData = new FormData();
 
-      detalleData.append("IdMovimiento", idMovimiento);
-      detalleData.append("IdActivo", fila.find("td:eq(0)").text());
-      detalleData.append("IdTipoMovimiento", $("#IdTipoMovimiento").val());
-      detalleData.append("IdSucursalDestino", $("#IdSucursalDestino").val());
-      detalleData.append(
-        "IdAmbienteDestino",
-        fila.find(".ambiente-destino").val()
-      );
-      detalleData.append(
-        "IdResponsableDestino",
-        fila.find(".responsable-destino").val()
-      );
-      detalleData.append("IdAutorizador", $("#IdAutorizador").val());
+        detalleData.append("IdMovimiento", idMovimiento);
+        detalleData.append("IdActivo", fila.find("td:eq(0)").text());
+        detalleData.append("IdTipo_Movimiento", $("#IdTipoMovimiento").val());
+        detalleData.append("IdSucursal_Nueva", $("#IdSucursalDestino").val());
+        detalleData.append("IdEmpresaDestino", $("#IdEmpresaDestino").val());
+        detalleData.append(
+            "IdAmbiente_Nueva",
+            fila.find(".ambiente-destino").val()
+        );
+        detalleData.append(
+            "IdResponsable_Nueva",
+            fila.find(".responsable-destino").val()
+        );
+        detalleData.append("IdAutorizador", $("#IdAutorizador").val());
+        detalleData.append("IdActivoPadre_Nuevo", null);
 
-      // Guardar cada detalle
-      $.ajax({
-        url: "../../controllers/GestionarMovimientoController.php?action=AgregarDetalle",
-        type: "POST",
-        data: detalleData,
-        contentType: false,
-        processData: false,
-        dataType: "json",
-        success: function (res) {
-          detallesGuardados++;
-          if (!res.status) {
-            errores.push(
-              `Error en activo ${fila.find("td:eq(0)").text()}: ${res.message}`
-            );
-          }
+        // Guardar cada detalle
+        $.ajax({
+            url: "../../controllers/GestionarMovimientoController.php?action=AgregarDetalle",
+            type: "POST",
+            data: detalleData,
+            contentType: false,
+            processData: false,
+            dataType: "json",
+            success: function (res) {
+                detallesGuardados++;
+                if (!res.status) {
+                    errores.push(
+                        `Error en activo ${fila.find("td:eq(0)").text()}: ${res.message}`
+                    );
+                }
 
-          // Cuando todos los detalles se hayan procesado
-          if (detallesGuardados === totalDetalles) {
-            if (errores.length === 0) {
-              Swal.fire({
-                title: "Éxito",
-                text: "Movimiento registrado correctamente",
-                icon: "success",
-              }).then(() => {
-                // Limpiar y recargar
-                $("#divregistroMovimiento").hide();
-                $("#divtblmovimientos").show();
-                $("#divlistadomovimientos").show();
-                listarMovimientos();
-              });
-            } else {
-              Swal.fire({
-                title: "Advertencia",
-                html:
-                  "El movimiento se registró pero hubo errores en algunos detalles:<br>" +
-                  errores.join("<br>"),
-                icon: "warning",
-              }).then(() => {
-                $("#divregistroMovimiento").hide();
-                $("#divtblmovimientos").show();
-                $("#divlistadomovimientos").show();
-                listarMovimientos();
-              });
-            }
-          }
-        },
-        error: function () {
-          detallesGuardados++;
-          errores.push(
-            `Error de comunicación con el servidor para el activo ${fila
-              .find("td:eq(0)")
-              .text()}`
-          );
+                // Cuando todos los detalles se hayan procesado
+                if (detallesGuardados === totalDetalles) {
+                    if (errores.length === 0) {
+                        Swal.fire({
+                            title: "Éxito",
+                            text: "Movimiento registrado correctamente",
+                            icon: "success",
+                        }).then(() => {
+                            // Limpiar y recargar
+                            $("#divregistroMovimiento").hide();
+                            $("#divtblmovimientos").show();
+                            $("#divlistadomovimientos").show();
+                            listarMovimientos();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: "Advertencia",
+                            html:
+                                "El movimiento se registró pero hubo errores en algunos detalles:<br>" +
+                                errores.join("<br>"),
+                            icon: "warning",
+                        }).then(() => {
+                            $("#divregistroMovimiento").hide();
+                            $("#divtblmovimientos").show();
+                            $("#divlistadomovimientos").show();
+                            listarMovimientos();
+                        });
+                    }
+                }
+            },
+            error: function () {
+                detallesGuardados++;
+                errores.push(
+                    `Error de comunicación con el servidor para el activo ${fila
+                        .find("td:eq(0)")
+                        .text()}`
+                );
 
-          if (detallesGuardados === totalDetalles) {
-            Swal.fire({
-              title: "Error",
-              html:
-                "Hubo errores al guardar los detalles:<br>" +
-                errores.join("<br>"),
-              icon: "error",
-            });
-          }
-        },
-      });
+                if (detallesGuardados === totalDetalles) {
+                    Swal.fire({
+                        title: "Error",
+                        html:
+                            "Hubo errores al guardar los detalles:<br>" +
+                            errores.join("<br>"),
+                        icon: "error",
+                    });
+                }
+            },
+        });
     });
   }
 }
@@ -573,7 +596,10 @@ function ListarCombosAmbiente(elemento, idSucursal = null) {
   $.ajax({
     url: "../../controllers/GestionarMovimientoController.php?action=obtenerAmbientesPorSucursal",
     type: "POST",
-    data: { idSucursal: idSucursal || $("#IdSucursalDestino").val() },
+    data: { 
+      idSucursal: idSucursal || $("#IdSucursalDestino").val(),
+      idEmpresa: $("#IdEmpresaDestino").val()
+    },
     dataType: "json",
     async: false,
     success: (res) => {
@@ -594,8 +620,8 @@ function ListarCombosAmbiente(elemento, idSucursal = null) {
   });
 }
 
-// Agregar evento para actualizar ambientes cuando cambie la sucursal destino
-$(document).on("change", "#IdSucursalDestino", function() {
+// Agregar evento para actualizar ambientes cuando cambie la sucursal destino o la empresa
+$(document).on("change", "#IdSucursalDestino, #IdEmpresaDestino", function() {
   // Actualizar todos los combos de ambiente en la tabla
   $("#tbldetalleactivomov tbody tr").each(function() {
     const row = $(this);
@@ -709,6 +735,9 @@ function ListarCombosMov() {
         // Cargar autorizador
         $("#CodAutorizador").html(res.data.autorizador).trigger("change");
 
+        // Cargar empresas
+        $("#IdEmpresaDestino").html(res.data.empresas).trigger("change");
+
         // Actualizar el campo de sucursal origen
         $("#IdSucursalOrigen").val(res.data.sucursalOrigen);
         $("#IdSucursalOrigenValor").val(res.data.sucursalOrigenId);
@@ -718,9 +747,7 @@ function ListarCombosMov() {
 
         // Inicializar select2 una sola vez para los combos
         if (!$("#IdTipoMovimientoMov").hasClass("select2-hidden-accessible")) {
-          $(
-            "#IdTipoMovimientoMov, #CodAutorizador, #IdSucursalDestino"
-          ).select2({
+          $("#IdTipoMovimientoMov, #CodAutorizador, #IdSucursalDestino, #IdEmpresaDestino").select2({
             theme: "bootstrap4",
             width: "100%",
           });
@@ -747,7 +774,7 @@ function ListarCombosMov() {
 }
 
 // Agregar evento para actualizar sucursales cuando cambie la empresa
-$(document).on("change", "#IdEmpresa", function() {
+$(document).on("change", "#IdEmpresaDestino", function() {
   const idEmpresa = $(this).val();
   if (idEmpresa) {
     $.ajax({

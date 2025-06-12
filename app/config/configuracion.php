@@ -12,8 +12,8 @@ class Conectar
     public function ConexionBdPracticante()
     {
         try {
-            //$conexion = new PDO("sqlsrv:Server=192.168.1.35;Database=bdActivos", "practsistAlfa", "Calichin2025");
-            $conexion = new PDO("sqlsrv:Server=BHYANX;Database=bdActivos", "", "");
+            $conexion = new PDO("sqlsrv:Server=192.168.1.35;Database=bdActivos", "practsistAlfa", "Calichin2025");
+            //$conexion = new PDO("sqlsrv:Server=BHYANX;Database=bdActivos", "", "");
             $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $conexion;
         } catch (PDOException $e) {

@@ -168,14 +168,7 @@ session_start();
                                     <div class="row">
                                         <div class="col-md-12" id="divfiltros">
                                             <div class="row">
-                                                <!-- <div class="col-md-3">
-                                                    <div class="form-group">
-                                                        <label for="cod_empresa">Empresa:</label>
-                                                        <select name="cod_empresa" id="cod_empresa" class="form-control">
-                                                        </select>
-                                                    </div>
-                                                </div> -->
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
                                                     <div class="form-group">
                                                         <label for="IdTipoMovimientoMov">Tipo de Movimiento:</label>
                                                         <select name="IdTipoMovimientoMov" id="IdTipoMovimientoMov" class="form-control" required></select>
@@ -184,14 +177,20 @@ session_start();
                                                 <div class="col-md-3">
                                                     <div class="form-group"><label for="CodAutorizador">Autorizador:</label><select name="CodAutorizador" id="CodAutorizador" class="form-control" required></select></div>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
                                                     <div class="form-group">
                                                         <label for="IdSucursalOrigen">Sucursal Origen:</label>
                                                         <input type="text" class="form-control" name="IdSucursalOrigen" id="IdSucursalOrigen" readonly>
                                                         <input type="hidden" name="IdSucursalOrigenValor" id="IdSucursalOrigenValor">
                                                     </div>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="IdEmpresaDestino">Empresa Destino:</label>
+                                                        <select name="IdEmpresaDestino" id="IdEmpresaDestino" class="form-control" required></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
                                                     <div class="form-group">
                                                         <label for="IdSucursalDestino">Sucursal Destino:</label>
                                                         <select name="IdSucursalDestino" id="IdSucursalDestino" class="form-control" required></select>

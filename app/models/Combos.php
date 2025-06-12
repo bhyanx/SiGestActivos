@@ -39,7 +39,7 @@ class Combos
 
     public function comboResponsable()
     {
-        $sql = "SELECT codTrabajador, NombreTrabajador FROM vEmpleados";
+        $sql = "SELECT codTrabajador, NombreTrabajador FROM vEmpleados WHERE Estado = 1";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -111,7 +111,7 @@ class Combos
     public function comboEmpresas()
     {
         try {
-            $sql = "SELECT cod_empresa, nombre FROM tEmpresa WHERE estado = 1 ORDER BY nombre";
+            $sql = "SELECT cod_empresa, Razon_empresa FROM vEmpresas";
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

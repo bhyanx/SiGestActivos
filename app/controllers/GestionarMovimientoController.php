@@ -42,6 +42,7 @@ switch ($action) {
                     'idSucursalOrigen' => $_SESSION['cod_UnidadNeg'],
                     'idSucursalDestino' => $_POST['sucursal_destino'],
                     'idEmpresa' => $_POST['idEmpresa'] ?? $_SESSION['cod_empresa'],
+                    'idEmpresaDestino' => $_POST['cod_empresa'],
                     'observaciones' => $_POST['observacion'] ?? ''
                 ];
                 $idMovimiento = $movimientos->crearMovimiento($data);
@@ -65,12 +66,13 @@ switch ($action) {
                 $detalle = [
                     'IdMovimiento' => $_POST['IdMovimiento'],
                     'IdActivo' => $_POST['IdActivo'],
-                    'IdSucursal_Nueva' => $_POST['IdSucursalDestino'],
-                    'IdAmbiente_Nueva' => $_POST['IdAmbienteDestino'],
-                    'IdTipo_Movimiento' => $_POST['IdTipoMovimiento'],
+                    'IdSucursal_Nueva' => $_POST['IdSucursal_Nueva'],
+                    'IdAmbiente_Nueva' => $_POST['IdAmbiente_Nueva'],
+                    'IdTipo_Movimiento' => $_POST['IdTipo_Movimiento'],
                     'IdAutorizador' => $_POST['IdAutorizador'],
-                    'IdResponsable_Nueva' => $_POST['IdResponsableDestino'],
-                    'IdActivoPadre_Nuevo' => null
+                    'IdResponsable_Nueva' => $_POST['IdResponsable_Nueva'],
+                    'IdActivoPadre_Nuevo' => $_POST['IdActivoPadre_Nuevo'] ?? null,
+                    'IdEmpresaDestino' => $_POST['IdEmpresaDestino']
                 ];
                 $movimientos->crearDetalleMovimiento($detalle);
                 echo json_encode(['status' => true]);
@@ -107,7 +109,7 @@ switch ($action) {
 
     case 'obtenerAmbientesPorSucursal':
         try {
-            $idEmpresa = $_SESSION['cod_empresa'] ?? null;
+            $idEmpresa = $_POST['idEmpresa'] ?? null;
             $idSucursal = $_POST['idSucursal'] ?? null;
 
             if (!$idEmpresa || !$idSucursal) {
@@ -141,6 +143,13 @@ switch ($action) {
             $combos['tipoMovimiento'] = '<option value="">Seleccione</option>';
             foreach ($tipoMovimiento as $row) {
                 $combos['tipoMovimiento'] .= "<option value='{$row['idTipoMovimiento']}'>{$row['nombre']}</option>";
+            }
+
+            // Obtener empresas
+            $empresas = $combo->comboEmpresa();
+            $combos['empresas'] = '<option value="">Seleccione</option>';
+            foreach ($empresas as $row) {
+                $combos['empresas'] .= "<option value='{$row['cod_empresa']}'>{$row['Razon_empresa']}</option>";
             }
 
             // Obtener sucursales incluyendo la unidad de negocio actual
