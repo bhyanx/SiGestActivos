@@ -1,0 +1,5 @@
+app/config/configuracion.php
+
+app/controllers/GestionarActivosController.php
+app/models/Combos.php
+app/models/GestionarActivos.php

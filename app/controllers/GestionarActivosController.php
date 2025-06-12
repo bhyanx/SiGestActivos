@@ -297,7 +297,7 @@ switch ($action) {
             $db = (new Conectar())->ConexionBdPracticante(); // Usar bdActivos
 
             // Documentos de ingreso al almacén
-            $stmt = $db->query("SELECT idDocIngAlmacen AS IdDocIngresoAlm FROM vListadoDeArticulosPorDocIngresoAlmacen GROUP BY idDocIngAlmacen");
+            $stmt = $db->query("SELECT IdDocIngresoAlm AS IdDocIngresoAlm FROM vListadoDeArticulosPorDocIngresoAlmacen GROUP BY IdDocIngresoAlm");
             $combos['docIngresoAlm'] = '<option value="">Seleccione</option>';
             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
                 $combos['docIngresoAlm'] .= "<option value='{$row['IdDocIngresoAlm']}'>{$row['IdDocIngresoAlm']}</option>";

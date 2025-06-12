@@ -1,5 +1,5 @@
 <?php
-require_once '../config/configuracion.php';
+require_once(__DIR__ . '/../config/configuracion.php');
 
 class GestionarActivos
 {

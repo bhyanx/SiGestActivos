@@ -1158,6 +1158,9 @@ function listarActivosTable() {
               <button class="dropdown-item btnVerHistorial" type="button">
                 <i class="fas fa-history text-primary"></i> Ver Historial
               </button>
+              <button class="dropdown-item btnImprimirActivo" type="button">
+                <i class="fas fa-print text-secondary"></i> Imprimir Activo
+              </button>
               <button class="dropdown-item btnDarBaja" type="button">
                 <i class="fas fa-ban text-danger"></i> Dar de Baja
               </button>
@@ -1185,3 +1188,17 @@ function listarActivosTable() {
     },
   });
 }
+
+// Add the event handler for the print button
+$(document).on("click", ".btnImprimirActivo", function () {
+    const fila = $(this).closest("tr");
+    const datos = $("#tblRegistros").DataTable().row(fila).data();
+    
+    if (!datos) {
+        Swal.fire("Error", "No se pudo obtener la información del activo.", "error");
+        return;
+    }
+
+    // Abrir el reporte en una nueva ventana
+    window.open(`/app/views/Reportes/index.php?idActivo=${datos.idActivo}`, '_blank');
+});
