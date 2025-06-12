@@ -1200,5 +1200,5 @@ $(document).on("click", ".btnImprimirActivo", function () {
     }
 
     // Abrir el reporte en una nueva ventana
-    window.open(`/app/views/Reportes/index.php?idActivo=${datos.idActivo}`, '_blank');
+    window.open(`/app/views/Reportes/reporteActivo.php?idActivo=${datos.idActivo}`, '_blank');
 });

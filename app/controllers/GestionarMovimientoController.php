@@ -41,6 +41,7 @@ switch ($action) {
                     'idAutorizador' => $_POST['autorizador'],
                     'idSucursalOrigen' => $_SESSION['cod_UnidadNeg'],
                     'idSucursalDestino' => $_POST['sucursal_destino'],
+                    'idEmpresaOrigen' => $_SESSION['cod_empresa'],
                     'idEmpresaDestino' => $_POST['cod_empresa'],
                     'observaciones' => $_POST['observacion'] ?? ''
                 ];
@@ -278,8 +279,8 @@ switch ($action) {
                 'tipo' => $_POST['tipo'] ?? null,
                 'sucursal' => $_POST['sucursal'] ?? null,
                 'fecha' => $_POST['fecha'] ?? null,
-                'idEmpresa' => $_SESSION['idEmpresa'] ?? null,
-                'idSucursal' => $_SESSION['idSucursal'] ?? null
+                'idEmpresa' => $_SESSION['cod_empresa'] ?? null,
+                'idSucursal' => $_SESSION['cod_UnidadNeg'] ?? null
             ];
 
             $movimientos = $movimientos->listarMovimientos($filtros);

@@ -828,7 +828,16 @@ function ListarMovimientos() {
             },
             dataSrc: function(json) {
                 console.log("Datos recibidos:", json);
+                if (!json.status) {
+                    NotificacionToast("error", json.message || "Error al cargar los movimientos");
+                    return [];
+                }
                 return json.data || [];
+            },
+            error: function(xhr, status, error) {
+                console.error("Error en la petición:", error);
+                NotificacionToast("error", "Error al cargar los movimientos: " + error);
+                return [];
             }
         },
         columns: [
@@ -843,6 +852,9 @@ function ListarMovimientos() {
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="#" onclick="verDetallesMovimiento(${row.idMovimiento})">
                                     <i class="fas fa-list"></i> Ver Detalles
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="imprimirReporte(${row.idMovimiento})">
+                                    <i class="fas fa-print"></i> Imprimir Reporte
                                 </a>
                             </div>
                         </div>`;
@@ -1057,3 +1069,7 @@ $(document).on("click", ".btnVerHistorial", function () {
     }
   });
 });
+
+function imprimirReporte(idMovimiento) {
+    window.open(`../../views/Reportes/reporteMovimiento.php?id=${idMovimiento}`, '_blank');
+}
