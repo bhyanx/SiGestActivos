@@ -41,14 +41,14 @@ switch ($action) {
                     'idAutorizador' => $_POST['autorizador'],
                     'idSucursalOrigen' => $_SESSION['cod_UnidadNeg'],
                     'idSucursalDestino' => $_POST['sucursal_destino'],
-                    'idEmpresa' => $_POST['idEmpresa'] ?? $_SESSION['cod_empresa'],
                     'idEmpresaDestino' => $_POST['cod_empresa'],
                     'observaciones' => $_POST['observacion'] ?? ''
                 ];
-                $idMovimiento = $movimientos->crearMovimiento($data);
+                $resultado = $movimientos->crearMovimientoConCodigo($data);
                 echo json_encode([
                     'status' => true,
-                    'idMovimiento' => $idMovimiento
+                    'idMovimiento' => $resultado['idMovimiento'],
+                    'codMovimiento' => $resultado['codMovimiento']
                 ]);
             } catch (Exception $e) {
                 echo json_encode([
@@ -268,6 +268,49 @@ switch ($action) {
             echo json_encode([
                 'status' => false,
                 'message' => 'Error al cargar sucursales: ' . $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'listarMovimientos':
+        try {
+            $filtros = [
+                'tipo' => $_POST['tipo'] ?? null,
+                'sucursal' => $_POST['sucursal'] ?? null,
+                'fecha' => $_POST['fecha'] ?? null,
+                'idEmpresa' => $_SESSION['idEmpresa'] ?? null,
+                'idSucursal' => $_SESSION['idSucursal'] ?? null
+            ];
+
+            $movimientos = $movimientos->listarMovimientos($filtros);
+            echo json_encode([
+                'status' => true,
+                'data' => $movimientos
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'obtenerDetallesMovimiento':
+        try {
+            $idMovimiento = $_POST['idMovimiento'] ?? null;
+            if (!$idMovimiento) {
+                throw new Exception("ID de movimiento no proporcionado");
+            }
+
+            $detalles = $movimientos->obtenerDetallesMovimiento($idMovimiento);
+            echo json_encode([
+                'status' => true,
+                'data' => $detalles
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
             ]);
         }
         break;

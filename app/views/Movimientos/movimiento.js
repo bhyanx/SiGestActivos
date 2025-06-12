@@ -5,7 +5,7 @@ $(document).ready(function () {
 function init() {
   // Inicializar la tabla una sola vez
   if (!$.fn.DataTable.isDataTable("#tblMovimientos")) {
-    listarMovimientos();
+    ListarMovimientos();
   }
 
   ListarCombosMov();
@@ -25,7 +25,7 @@ function init() {
       if ($.fn.DataTable.isDataTable("#tblMovimientos")) {
         $("#tblMovimientos").DataTable().ajax.reload(null, false);
       } else {
-        listarMovimientos();
+        ListarMovimientos();
       }
     });
 
@@ -183,20 +183,24 @@ function init() {
       dataType: "json",
       success: function (res) {
         if (res.status) {
-          // Guardar el ID del movimiento para el detalle
-          $("#IdMovimientoDetalle").val(res.idMovimiento);
-          // Autocompletar campos de destino en el modal de detalle
-          setSucursalOrigenDestino();
-          setDestinoDetalle();
-          $("#ModalMovimiento").modal("hide");
-          $("#frmDetalleMovimiento")[0].reset();
-          $("#ModalDetalleMovimiento").modal("show");
+          // Si se guardó el movimiento principal, proceder a guardar los detalles
+          Swal.fire({
+            title: "Movimiento Creado",
+            text: `Se ha creado el movimiento con código: ${res.codMovimiento}`,
+            icon: "success"
+          }).then(() => {
+            guardarDetallesMovimiento(res.idMovimiento);
+          });
         } else {
-          Swal.fire("Error", res.message, "error");
+          Swal.fire(
+            "Error",
+            res.message || "Error al registrar el movimiento",
+            "error"
+          );
         }
       },
       error: function () {
-        Swal.fire("Error", "No se pudo registrar el movimiento.", "error");
+        Swal.fire("Error", "Error al comunicarse con el servidor", "error");
       },
     });
   });
@@ -510,7 +514,7 @@ function init() {
                             $("#divregistroMovimiento").hide();
                             $("#divtblmovimientos").show();
                             $("#divlistadomovimientos").show();
-                            listarMovimientos();
+                            ListarMovimientos();
                         });
                     } else {
                         Swal.fire({
@@ -523,7 +527,7 @@ function init() {
                             $("#divregistroMovimiento").hide();
                             $("#divtblmovimientos").show();
                             $("#divlistadomovimientos").show();
-                            listarMovimientos();
+                            ListarMovimientos();
                         });
                     }
                 }
@@ -799,109 +803,113 @@ $(document).on("change", "#IdEmpresaDestino", function() {
 });
 
 // Listar movimientos en una tabla DataTable
-function listarMovimientos() {
-  // Destruir la instancia existente si existe
-  if ($.fn.DataTable.isDataTable("#tblMovimientos")) {
-    $("#tblMovimientos").DataTable().destroy();
-  }
+function ListarMovimientos() {
+    if ($.fn.DataTable.isDataTable("#tblMovimientos")) {
+        $("#tblMovimientos").DataTable().destroy();
+    }
 
-  $("#tblMovimientos").DataTable({
-    aProcessing: true,
-    aServerSide: false,
-    layout: {
-      topStart: {
-        buttons: [
-          {
-            extend: "excelHtml5",
-            title: "Listado Movimientos",
-            text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
-            autoFilter: true,
-            sheetName: "Data",
-            exportOptions: {
-              columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    $("#tblMovimientos").DataTable({
+        aProcessing: true,
+        aServerSide: false,
+        destroy: true,
+        responsive: true,
+        bInfo: true,
+        iDisplayLength: 10,
+        order: [[7, "desc"]], // Ordenar por fecha descendente
+        ajax: {
+            url: "../../controllers/GestionarMovimientoController.php?action=listarMovimientos",
+            type: "POST",
+            data: function(d) {
+                return {
+                    tipo: $("#filtroTipoMovimiento").val(),
+                    sucursal: $("#filtroSucursal").val(),
+                    fecha: $("#filtroFecha").val()
+                };
             },
-          },
-          "pageLength",
-          "colvis",
-        ],
-      },
-      bottom: "paging",
-      bottomStart: null,
-      bottomEnd: null,
-    },
-    //responsive: true,
-    lengthChange: false,
-    colReorder: true,
-    autoWidth: false,
-    ajax: {
-      url: "../../controllers/GestionarMovimientoController.php?action=Consultar",
-      type: "POST",
-      dataType: "json",
-      data: function (d) {
-        // Agregar los filtros del formulario
-        d.filtroTipoMovimiento = $("#filtroTipoMovimiento").val();
-        d.filtroSucursal = $("#filtroSucursal").val();
-        d.filtroFecha = $("#filtroFecha").val();
-      },
-      dataSrc: function (json) {
-        console.log("Datos recibidos:", json);
-        if (json && json.data) {
-          return json.data;
-        }
-        return [];
-      },
-    },
-    columns: [
-      {
-        data: null,
-        render: () =>
-          `<div class="btn-group">
-            <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <i class="fas fa-cog"></i>
-            </button>
-            <div class="dropdown-menu">
-              <button class="dropdown-item btnVerDetalle" type="button">
-                <i class="fas fa-eye text-info"></i> Ver Detalle
-              </button>
-              <button class="dropdown-item btnAnularMovimiento" type="button">
-                <i class="fas fa-ban text-danger"></i> Anular Movimiento
-              </button>
-              <button class="dropdown-item btnVerHistorial" type="button">
-                <i class="fas fa-history text-primary"></i> Ver Historial
-              </button>
-            </div>
-          </div>`,
-      },
-      { data: "IdDetalleMovimiento", visible: false, searchable: false },
-      { data: "IdActivo" },
-      { data: "NombreArticulo" },
-      { data: "TipoMovimiento" },
-      { data: "SucursalOrigen", visible: false, searchable: false },
-      { data: "SucursalDestino" },
-      { data: "AmbienteOrigen" },
-      { data: "AmbienteDestino" },
-      { data: "Autorizador" },
-      { data: "ResponsableOrigen" },
-      { data: "ResponsableDestino" },
-      {
-        data: "FechaMovimiento",
-        render: function (data) {
-          if (data) {
-            return moment(data).format("DD/MM/YYYY HH:mm");
-          }
-          return "";
+            dataSrc: function(json) {
+                console.log("Datos recibidos:", json);
+                return json.data || [];
+            }
         },
-      },
-    ],
-    language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+        columns: [
+            {
+                data: null,
+                render: function(data, type, row) {
+                    return `
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-cogs"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#" onclick="verDetallesMovimiento(${row.idMovimiento})">
+                                    <i class="fas fa-list"></i> Ver Detalles
+                                </a>
+                            </div>
+                        </div>`;
+                }
+            },
+            { data: "CodMovimiento" },
+            { data: "tipoMovimiento" },
+            { data: "sucursalOrigen" },
+            { data: "sucursalDestino" },
+            { data: "empresaDestino" },
+            { data: "autorizador" },
+            { 
+                data: "fechaMovimiento",
+                render: function(data) {
+                    return moment(data).format("DD/MM/YYYY HH:mm");
+                }
+            }
+        ],
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+        }
+    });
+}
+
+function verDetallesMovimiento(idMovimiento) {
+  $.ajax({
+    url: "../../controllers/GestionarMovimientoController.php?action=obtenerDetallesMovimiento",
+    type: "POST",
+    data: { idMovimiento: idMovimiento },
+    dataType: "json",
+    success: function(res) {
+      if (res.status) {
+        let detallesHtml = '<div class="table-responsive"><table class="table table-bordered table-striped">';
+        detallesHtml += '<thead><tr>';
+        detallesHtml += '<th>Activo</th>';
+        detallesHtml += '<th>Ambiente Anterior</th>';
+        detallesHtml += '<th>Ambiente Nuevo</th>';
+        detallesHtml += '<th>Responsable Anterior</th>';
+        detallesHtml += '<th>Responsable Nuevo</th>';
+        detallesHtml += '</tr></thead><tbody>';
+        
+        res.data.forEach(function(detalle) {
+          detallesHtml += '<tr>';
+          detallesHtml += `<td>${detalle.nombreActivo}</td>`;
+          detallesHtml += `<td>${detalle.ambienteOrigen}</td>`;
+          detallesHtml += `<td>${detalle.ambienteDestino}</td>`;
+          detallesHtml += `<td>${detalle.responsableOrigen}</td>`;
+          detallesHtml += `<td>${detalle.responsableDestino}</td>`;
+          detallesHtml += '</tr>';
+        });
+        
+        detallesHtml += '</tbody></table></div>';
+        
+        Swal.fire({
+          title: 'Detalles del Movimiento',
+          html: detallesHtml,
+          width: '80%',
+          showCloseButton: true,
+          showConfirmButton: false
+        });
+      } else {
+        NotificacionToast("error", res.message || "Error al cargar los detalles");
+      }
     },
-    buttons: [
-      {
-        extend: "excelHtml5",
-        text: '<i class="fas fa-file-excel"></i> Exportar',
-      },
-    ],
+    error: function() {
+      NotificacionToast("error", "Error al comunicarse con el servidor");
+    }
   });
 }
 
@@ -955,37 +963,6 @@ function listarActivosModal() {
 }
 
 // Agregar los manejadores de eventos para los nuevos botones
-$(document).on("click", ".btnVerDetalle", function () {
-  const fila = $(this).closest("tr");
-  const datos = $("#tblMovimientos").DataTable().row(fila).data();
-  
-  if (!datos) {
-    Swal.fire("Error", "No se pudo obtener la información del movimiento.", "error");
-    return;
-  }
-
-  // Aquí puedes implementar la lógica para ver el detalle
-  Swal.fire({
-    title: "Detalle del Movimiento",
-    html: `
-      <div class="text-left">
-        <p><strong>ID Activo:</strong> ${datos.IdActivo}</p>
-        <p><strong>Nombre:</strong> ${datos.NombreArticulo}</p>
-        <p><strong>Tipo Movimiento:</strong> ${datos.TipoMovimiento}</p>
-        <p><strong>Sucursal Origen:</strong> ${datos.SucursalOrigen}</p>
-        <p><strong>Sucursal Destino:</strong> ${datos.SucursalDestino}</p>
-        <p><strong>Ambiente Origen:</strong> ${datos.AmbienteOrigen}</p>
-        <p><strong>Ambiente Destino:</strong> ${datos.AmbienteDestino}</p>
-        <p><strong>Autorizador:</strong> ${datos.Autorizador}</p>
-        <p><strong>Responsable Origen:</strong> ${datos.ResponsableOrigen}</p>
-        <p><strong>Responsable Destino:</strong> ${datos.ResponsableDestino}</p>
-        <p><strong>Fecha:</strong> ${datos.FechaMovimiento}</p>
-      </div>
-    `,
-    width: '600px'
-  });
-});
-
 $(document).on("click", ".btnAnularMovimiento", function () {
   const fila = $(this).closest("tr");
   const datos = $("#tblMovimientos").DataTable().row(fila).data();

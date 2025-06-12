@@ -120,17 +120,12 @@ session_start();
                                                 <thead>
                                                     <tr>
                                                         <th><i class="fa fa-cogs" title="Acciones"></i></th>
-                                                        <th>Id DetalleMovimiento</th>
-                                                        <th>Id Activo</th>
-                                                        <th>Nombre Activo</th>
+                                                        <th>Código</th>
                                                         <th>Tipo Movimiento</th>
-                                                        <th>Sucursal Anterior</th>
-                                                        <th>Sucursal Nueva</th>
-                                                        <th>Ambiente Anterior</th>
-                                                        <th>Ambiente Nueva</th>
+                                                        <th>Sucursal Origen</th>
+                                                        <th>Sucursal Destino</th>
+                                                        <th>Empresa Destino</th>
                                                         <th>Autorizador</th>
-                                                        <th>Responsable Anterior</th>
-                                                        <th>Responsable Nueva</th>
                                                         <th>Fecha Movimiento</th>
                                                     </tr>
                                                 </thead>
@@ -138,17 +133,12 @@ session_start();
                                                 <tfoot>
                                                     <tr>
                                                         <th><i class="fa fa-cogs" title="Acciones"></i></th>
-                                                        <th>Id DetalleMovimiento</th>
-                                                        <th>Id Activo</th>
-                                                        <th>Nombre Activo</th>
+                                                        <th>Código</th>
                                                         <th>Tipo Movimiento</th>
-                                                        <th>Sucursal Anterior</th>
-                                                        <th>Sucursal Nueva</th>
-                                                        <th>Ambiente Anterior</th>
-                                                        <th>Ambiente Nueva</th>
+                                                        <th>Sucursal Origen</th>
+                                                        <th>Sucursal Destino</th>
+                                                        <th>Empresa Destino</th>
                                                         <th>Autorizador</th>
-                                                        <th>Responsable Origen</th>
-                                                        <th>Responsable Nueva</th>
                                                         <th>Fecha Movimiento</th>
                                                     </tr>
                                                 </tfoot>
