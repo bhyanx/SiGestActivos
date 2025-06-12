@@ -15,7 +15,7 @@ class Combos
 
     public function comboSucursal()
     {
-        $sql = "SELECT cod_UnidadNeg, nombre FROM tSucursales WHERE estado = 1";
+        $sql = "SELECT cod_UnidadNeg, Nombre_local FROM vUnidadesdeNegocio WHERE estadoFuncionamiento = 1";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -39,7 +39,7 @@ class Combos
 
     public function comboResponsable()
     {
-        $sql = "SELECT codTrabajador, NombreTrabajador FROM vEmpleados WHERE Estado = 1";
+        $sql = "SELECT codTrabajador, NombreTrabajador FROM vEmpleados";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -71,8 +71,7 @@ class Combos
 
     public function comboAutorizador()
     {
-        $sql = "SELECT codTrabajador, NombreTrabajador FROM vEmpleados 
-WHERE estado = 1";
+        $sql = "SELECT codTrabajador, NombreTrabajador FROM vEmpleados";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
