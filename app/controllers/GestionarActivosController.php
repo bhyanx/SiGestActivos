@@ -91,6 +91,84 @@ switch ($action) {
         }
         break;
 
+    case 'RegistrarPruebaVenta':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                // Log del POST recibido
+                error_log("POST recibido en RegistrarPruebaVenta: " . print_r($_POST, true), 3, __DIR__ . '/../../logs/debug.log');
+                
+                // Obtener los datos del array de activos
+                $activosArray = json_decode($_POST['activos'], true);
+                
+                // Log del array decodificado
+                error_log("Array de activos decodificado: " . print_r($activosArray, true), 3, __DIR__ . '/../../logs/debug.log');
+                
+                if (!$activosArray) {
+                    error_log("Error en json_decode: " . json_last_error_msg(), 3, __DIR__ . '/../../logs/errors.log');
+                    throw new Exception("No se recibieron datos de activos válidos");
+                }
+
+                $resultados = [];
+                foreach ($activosArray as $activo) {
+                    // Log de cada activo antes de procesarlo
+                    error_log("Procesando activo: " . print_r($activo, true), 3, __DIR__ . '/../../logs/debug.log');
+                    
+                    // Formatear fechas
+                    $fechaFinGarantia = !empty($activo['FechaFinGarantia']) ? date('Y-m-d', strtotime($activo['FechaFinGarantia'])) : null;
+                    $fechaAdquisicion = !empty($activo['FechaAdquisicion']) ? date('Y-m-d', strtotime($activo['FechaAdquisicion'])) : date('Y-m-d');
+
+                    $data = [
+                        'IdActivo' => null,
+                        'IdDocVenta' => $activo['IdDocVenta'],
+                        'IdArticulo' => $activo['IdArticulo'],
+                        'Codigo' => null,
+                        'Serie' => $activo['Serie'],
+                        'IdEstado' => $activo['IdEstado'],
+                        'Garantia' => $activo['Garantia'] ?? 0,
+                        'FechaFinGarantia' => $fechaFinGarantia,
+                        'IdProveedor' => $activo['IdProveedor'] ?? null,
+                        'Observaciones' => $activo['Observaciones'] ?? '',
+                        'IdEmpresa' => $_SESSION['IdEmpresa'] ?? '',
+                        'IdSucursal' => $_SESSION['IdSucursal'],
+                        'IdAmbiente' => $activo['IdAmbiente'],
+                        'IdCategoria' => $activo['IdCategoria'] ?? 2,
+                        'VidaUtil' => $activo['VidaUtil'] ?? 3,
+                        'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
+                        'FechaAdquisicion' => $fechaAdquisicion,
+                        'UserMod' => $_SESSION['CodEmpleado'],
+                        'Accion' => 1
+                    ];
+
+                    // Log de los datos preparados para el SP
+                    error_log("Datos preparados para SP: " . print_r($data, true), 3, __DIR__ . '/../../logs/debug.log');
+
+                    $activos->registrarActivosVentaPrueba($data);
+                    $resultados[] = [
+                        'status' => true,
+                        'message' => 'Activo registrado correctamente'
+                    ];
+                }
+
+                $response = [
+                    'status' => true,
+                    'message' => 'Activos registrados con éxito.',
+                    'data' => $resultados
+                ];
+
+                // Log de la respuesta antes de enviarla
+                error_log("Respuesta a enviar: " . print_r($response, true), 3, __DIR__ . '/../../logs/debug.log');
+                
+                echo json_encode($response);
+            } catch (Exception $e) {
+                error_log("Error RegistrarPruebaVenta: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al registrar activos: ' . $e->getMessage()
+                ]);
+            }
+        }
+        break;
+
     case 'RegistrarPrueba':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
@@ -238,7 +316,7 @@ switch ($action) {
             }
         }
         break;
-    
+
     case 'obtenerInfoActivo':
         try {
             $idActivo = $_POST['idActivo'];
@@ -303,6 +381,20 @@ switch ($action) {
                 $combos['docIngresoAlm'] .= "<option value='{$row['IdDocIngresoAlm']}'>{$row['IdDocIngresoAlm']}</option>";
             }
 
+            // Documentos de venta
+            $stmt = $db->query("SELECT idDocumentoVta AS IdDocVenta FROM vListadoDeArticulosPorDocumentoDeVenta GROUP BY idDocumentoVta");
+            $combos['docVenta'] = '<option value="">Seleccione</option>';
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $combos['docVenta'] .= "<option value='{$row['IdDocVenta']}'>{$row['IdDocVenta']}</option>";
+            }
+
+            // Proveedores
+            $stmt = $db->query("SELECT Documento, RazonSocial FROM vEntidadExternaGeneralProveedor ORDER BY RazonSocial");
+            $combos['proveedores'] = '<option value="">Seleccione</option>';
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $combos['proveedores'] .= "<option value='{$row['Documento']}'>{$row['RazonSocial']}</option>";
+            }
+
             $tipoMovimiento = $combo->comboTipoMovimiento();
             $combos['tipoMovimiento'] = '<option value="">Seleccione</option>';
             foreach ($tipoMovimiento as $row) {
@@ -336,7 +428,7 @@ switch ($action) {
             // Obtener ambientes filtrados por empresa y sucursal
             $idEmpresa = $_SESSION['cod_empresa'] ?? null;
             $idSucursal = $_SESSION['cod_UnidadNeg'] ?? null;
-            
+
             if ($idEmpresa && $idSucursal) {
                 $ambientes = $activos->obtenerAmbientesPorEmpresaSucursal($idEmpresa, $idSucursal);
                 $combos['ambientes'] = '<option value="">Seleccione</option>';
@@ -357,6 +449,46 @@ switch ($action) {
         } catch (Exception $e) {
             error_log("Error Combos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             echo json_encode(['status' => false, 'message' => 'Error al cargar combos: ' . $e->getMessage()]);
+        }
+        break;
+
+    case 'articulos_por_doc_venta':
+        try {
+            $db = (new Conectar())->ConexionBdPracticante();
+
+            $IdDocVenta = $_POST['IdDocVenta'] ?? null;
+            if (!$IdDocVenta) {
+                throw new Exception("IdDocVenta no proporcionado.");
+            }
+
+            $stmt = $db->prepare("
+            SELECT ing.idDocumentoVta AS IdDocVenta, ing.idArtServDetDocVta AS IdArticulo, a.Descripcion_articulo AS Nombre,
+	   a.DescripcionMarca AS Marca, e.Razon_empresa AS Empresa, ing.cod_UnidadNeg AS IdUnidadNegocio,
+	   ing.Nombre_local AS NombreLocal
+FROM vListadoDeArticulosPorDocumentoDeVenta ing
+INNER JOIN vArticulos a ON ing.idArtServDetDocVta = a.IdArticulo
+LEFT JOIN vEmpresas e ON ing.Cod_Empresa = e.cod_empresa 
+WHERE  ing.IdTipoComp = 9 AND ing.idDocumentoVta = ? 
+ORDER BY a.Descripcion_articulo;
+");
+            $stmt->execute([$IdDocVenta]);
+            $articulos = [];
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $articulos[] = [
+                    'IdArticulo' => $row['IdArticulo'],
+                    'Nombre'     => $row['Nombre'],
+                    'Marca'      => $row['Marca'] ?? '',
+                    'Empresa'  => $row['Empresa'] ?? '',
+                    'IdUnidadNegocio' => $row['IdUnidadNegocio'],
+                    'NombreLocal' => $row['NombreLocal'],
+                ];
+            }
+
+            error_log("Artículos por doc: IdDocVenta=$IdDocVenta, Resultados=" . json_encode($articulos), 3, __DIR__ . '/../../logs/debug.log');
+            echo json_encode(['status' => true, 'data' => $articulos, 'message' => 'Artículos cargados correctamente.']);
+        } catch (Exception $e) {
+            error_log("Error articulos_por_doc_venta: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode(['status' => false, 'message' => 'Error al cargar artículos: ' . $e->getMessage()]);
         }
         break;
 
@@ -407,7 +539,7 @@ switch ($action) {
 
     case 'verificarArticuloExistente':
         try {
-            $idDocIngresoAlm = $_POST['IdDocIngresoAlm'] ?? null;
+            $idDocIngresoAlm = $_POST['IdDocVenta'] ?? null;
             $idArticulo = $_POST['IdArticulo'] ?? null;
 
             if (!$idDocIngresoAlm || !$idArticulo) {
@@ -514,7 +646,7 @@ switch ($action) {
             if (!$idActivo) {
                 throw new Exception("ID del activo no proporcionado");
             }
-            
+
             $existe = $activos->verificarResponsableExistente($idActivo);
             echo json_encode([
                 'status' => true,

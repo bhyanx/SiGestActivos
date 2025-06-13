@@ -204,11 +204,12 @@ function init() {
     $("#tbldetalleactivoreg tbody tr").each(function () {
         let row = $(this);
         activos.push({
-            IdDocIngresoAlm: parseInt($("#inputDocIngresoAlm").val()) || null,
+            IdDocVenta: parseInt($("#inputDocIngresoAlm").val()) || null,
             IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
             Serie: row.find("input[name='serie[]']").val() || null,
             IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
             IdCategoria: parseInt(row.find("select.categoria").val()) || null,
+            IdProveedor: row.find("select.proveedor").val() || null,
             Observaciones: row.find("textarea[name='observaciones[]']").val() || "",
             IdEstado: 1, // Estado por defecto: Operativo
             Garantia: 0, // Por defecto sin garantía
@@ -220,10 +221,11 @@ function init() {
 
     // Validar que todos los campos requeridos estén presentes
     let activosValidos = activos.every(activo => {
-        return activo.IdDocIngresoAlm && 
+        return activo.IdDocVenta && 
                activo.IdArticulo && 
                activo.IdAmbiente && 
-               activo.IdCategoria;
+               activo.IdCategoria &&
+               activo.IdProveedor;
     });
 
     if (!activosValidos) {
@@ -236,10 +238,10 @@ function init() {
     }
 
     $.ajax({
-        url: "../../controllers/GestionarActivosController.php?action=RegistrarPrueba",
+        url: "../../controllers/GestionarActivosController.php?action=RegistrarPruebaVenta",
         type: "POST",
         data: {
-            action: "RegistrarPrueba",
+            action: "RegistrarPruebaVenta",
             activos: JSON.stringify(activos),
         },
         dataType: "json",
@@ -647,9 +649,9 @@ function init() {
 
   function cargarArticulosPorDocIngreso(idDoc, callback) {
     $.ajax({
-      url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc",
+      url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc_venta",
       type: "POST",
-      data: { IdDocIngresoAlm: idDoc },
+      data: { IdDocVenta: idDoc },
       dataType: "json",
       success: (res) => {
         if (res.status) {
@@ -775,10 +777,10 @@ function init() {
       responsive: false,
       destroy: true,
       ajax: {
-        url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc",
+        url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc_venta",
         type: "POST",
         dataType: "json",
-        data: { IdDocIngresoAlm: docIngresoAlm },
+        data: { IdDocVenta: docIngresoAlm },
         dataSrc: function (json) {
           console.log("Respuesta del backend: ", json);
           return json.data || [];
@@ -821,7 +823,7 @@ function init() {
         url: "../../controllers/GestionarActivosController.php?action=verificarArticuloExistente",
         type: "POST",
         data: {
-            IdDocIngresoAlm: $("#inputDocIngresoAlm").val(),
+            IdDocVenta: $("#inputDocIngresoAlm").val(),
             IdArticulo: activo.id
         },
         dataType: "json",
@@ -847,6 +849,7 @@ function init() {
                 var numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
                 var selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
                 var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
+                var selectProveedor = `<select class='form-control form-control-sm proveedor' name='proveedor[]' id="comboProveedor${numeroFilas}"></select>`;
                 var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
 
                 var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
@@ -858,6 +861,7 @@ function init() {
                     <td>${inputEstadoActivo}</td>
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
+                    <td>${selectProveedor}</td>
                     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea></td>
                     <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
                 </tr>`;
@@ -865,6 +869,7 @@ function init() {
                 
                 ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
                 ListarCombosCategoria(`comboCategoria${numeroFilas}`);
+                ListarCombosProveedor(`comboProveedor${numeroFilas}`);
 
                 setTimeout(function () {
                     $("#tbldetalleactivoreg tbody tr.agregado-temp").removeClass(
@@ -892,6 +897,38 @@ function init() {
             );
             return false;
         }
+    });
+  }
+
+  // Agregar función para cargar el combo de proveedores
+  function ListarCombosProveedor(elemento) {
+    $.ajax({
+        url: "../../controllers/GestionarActivosController.php?action=combos",
+        type: "POST",
+        dataType: "json",
+        async: false,
+        success: (res) => {
+            if (res.status) {
+                $(`#${elemento}`).html(res.data.proveedores).trigger("change");
+                $(`#${elemento}`).select2({
+                    theme: "bootstrap4",
+                    width: "100%",
+                });
+            } else {
+                Swal.fire(
+                    "Filtro de proveedores",
+                    "No se pudieron cargar los combos: " + res.message,
+                    "warning"
+                );
+            }
+        },
+        error: (xhr, status, error) => {
+            Swal.fire(
+                "Filtro de proveedores",
+                "Error al cargar combos: " + error,
+                "error"
+            );
+        },
     });
   }
 }

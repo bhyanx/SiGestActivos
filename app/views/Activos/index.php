@@ -193,18 +193,19 @@ session_start();
                                                 </div>
                                                 <div class="table-responsive">
                                                     <table id="tbldetalleactivoreg" class="table table-hover table-bordered table-striped table-sm w-100">
-                                                        <thead>
+                                                        <thead class="table-success">
                                                             <tr>
-                                                                <th>Id. Articulo</th>
+                                                                <th>Id</th>
                                                                 <th>Nombre</th>
                                                                 <th>Marca</th>
                                                                 <th>Código</th>
                                                                 <th>Serie</th>
                                                                 <th>Estado</th>
                                                                 <th>Ambiente</th>
-                                                                <th>Categoria</th>
+                                                                <th>Categoría</th>
+                                                                <th>Proveedor</th>
                                                                 <th>Observaciones</th>
-                                                                <th>Acción</th>
+                                                                <th>Acciones</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>

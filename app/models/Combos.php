@@ -120,4 +120,16 @@ class Combos
             throw $e;
         }
     }
+
+    public function comboProveedores(){
+        try {
+            $sql = "SELECT TOP (50) Documento, RazonSocial FROM vEntidadExternaGeneralProveedor ORDER BY RazonSocial";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error in comboProveedores: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
 }

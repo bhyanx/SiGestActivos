@@ -136,6 +136,66 @@ class GestionarActivos
         }
     }
 
+    // INGRESAR ACTIVOS POR DOCUMENTO DE VENTA
+
+    public function registrarActivosVentaPrueba($data){
+        try {
+            $fechaFinGarantia = !empty($data['FechaFinGarantia']) ? date('Y-m-d', strtotime($data['FechaFinGarantia'])) : null;
+            $fechaAdquisicion = !empty($data['FechaAdquisicion']) ? date('Y-m-d', strtotime($data['FechaAdquisicion'])) : null;
+            $empresa = $_SESSION['cod_empresa'] ??  null;
+            $sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
+            
+            $stmt = $this->db->prepare('EXEC sp_GuardarActivoPruebaV
+                @pIdActivo = ?, 
+                @pIdDocVenta = ?, 
+                @pIdArticulo = ?, 
+                @pCodigo = ?, 
+                @pSerie = ?, 
+                @pIdEstado = ?, 
+                @pGarantia = ?, 
+                @pFechaFinGarantia = ?, 
+                @pIdProveedor = ?, 
+                @pObservaciones = ?, 
+                @pIdEmpresa = ?,
+                @pIdSucursal = ?, 
+                @pIdAmbiente = ?, 
+                @pIdCategoria = ?, 
+                @pVidaUtil = ?, 
+                @pValorAdquisicion = ?, 
+                @pFechaAdquisicion = ?, 
+                @pUserMod = ?, 
+                @pAccion = ?');
+
+            $stmt->bindParam(1, $data['IdActivo'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(2, $data['IdDocVenta'], \PDO::PARAM_INT);
+            $stmt->bindParam(3, $data['IdArticulo'], \PDO::PARAM_INT);
+            $stmt->bindParam(4, $data['Codigo'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(5, $data['Serie'], \PDO::PARAM_STR);
+            $stmt->bindParam(6, $data['IdEstado'], \PDO::PARAM_INT);
+            $stmt->bindParam(7, $data['Garantia'], \PDO::PARAM_INT);
+            $stmt->bindParam(8, $fechaFinGarantia, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(9, $data['IdProveedor'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(10, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(11, $empresa, \PDO::PARAM_INT);
+            $stmt->bindParam(12, $sucursal, \PDO::PARAM_INT);
+            $stmt->bindParam(13, $data['IdAmbiente'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(14, $data['IdCategoria'], \PDO::PARAM_INT);
+            $stmt->bindParam(15, $data['VidaUtil'], \PDO::PARAM_INT);
+            $stmt->bindParam(16, $data['ValorAdquisicion'], \PDO::PARAM_STR);
+            $stmt->bindParam(17, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(18, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(19, $data['Accion'], \PDO::PARAM_INT);
+
+            $stmt->execute();
+            return true;
+
+        } catch (\PDOException $e) {
+            error_log("Error in registrarActivosVentaPrueba: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+    
+
     public function registrarActivosPrueba($data)
     {
         try {
