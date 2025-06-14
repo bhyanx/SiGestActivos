@@ -96,13 +96,13 @@ switch ($action) {
             try {
                 // Log del POST recibido
                 error_log("POST recibido en RegistrarPruebaVenta: " . print_r($_POST, true), 3, __DIR__ . '/../../logs/debug.log');
-                
+
                 // Obtener los datos del array de activos
                 $activosArray = json_decode($_POST['activos'], true);
-                
+
                 // Log del array decodificado
                 error_log("Array de activos decodificado: " . print_r($activosArray, true), 3, __DIR__ . '/../../logs/debug.log');
-                
+
                 if (!$activosArray) {
                     error_log("Error en json_decode: " . json_last_error_msg(), 3, __DIR__ . '/../../logs/errors.log');
                     throw new Exception("No se recibieron datos de activos válidos");
@@ -112,7 +112,7 @@ switch ($action) {
                 foreach ($activosArray as $activo) {
                     // Log de cada activo antes de procesarlo
                     error_log("Procesando activo: " . print_r($activo, true), 3, __DIR__ . '/../../logs/debug.log');
-                    
+
                     // Formatear fechas
                     $fechaFinGarantia = !empty($activo['FechaFinGarantia']) ? date('Y-m-d', strtotime($activo['FechaFinGarantia'])) : null;
                     $fechaAdquisicion = !empty($activo['FechaAdquisicion']) ? date('Y-m-d', strtotime($activo['FechaAdquisicion'])) : date('Y-m-d');
@@ -157,7 +157,7 @@ switch ($action) {
 
                 // Log de la respuesta antes de enviarla
                 error_log("Respuesta a enviar: " . print_r($response, true), 3, __DIR__ . '/../../logs/debug.log');
-                
+
                 echo json_encode($response);
             } catch (Exception $e) {
                 error_log("Error RegistrarPruebaVenta: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
@@ -464,7 +464,8 @@ switch ($action) {
             $stmt = $db->prepare("
             SELECT ing.idDocumentoVta AS IdDocVenta, ing.idArtServDetDocVta AS IdArticulo, a.Descripcion_articulo AS Nombre,
 	   a.DescripcionMarca AS Marca, e.Razon_empresa AS Empresa, ing.cod_UnidadNeg AS IdUnidadNegocio,
-	   ing.Nombre_local AS NombreLocal
+	   ing.Nombre_local AS NombreLocal,
+	   ing.Cantidad AS Cantidad
 FROM vListadoDeArticulosPorDocumentoDeVenta ing
 INNER JOIN vArticulos a ON ing.idArtServDetDocVta = a.IdArticulo
 LEFT JOIN vEmpresas e ON ing.Cod_Empresa = e.cod_empresa 

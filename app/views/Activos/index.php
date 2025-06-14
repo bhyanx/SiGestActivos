@@ -204,6 +204,7 @@ session_start();
                                                                 <th>Ambiente</th>
                                                                 <th>Categoría</th>
                                                                 <th>Proveedor</th>
+                                                                <th>Cantidad</th>
                                                                 <th>Observaciones</th>
                                                                 <th>Acciones</th>
                                                             </tr>

@@ -203,20 +203,26 @@ function init() {
     let activos = [];
     $("#tbldetalleactivoreg tbody tr").each(function () {
         let row = $(this);
-        activos.push({
-            IdDocVenta: parseInt($("#inputDocIngresoAlm").val()) || null,
-            IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
-            Serie: row.find("input[name='serie[]']").val() || null,
-            IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
-            IdCategoria: parseInt(row.find("select.categoria").val()) || null,
-            IdProveedor: row.find("select.proveedor").val() || null,
-            Observaciones: row.find("textarea[name='observaciones[]']").val() || "",
-            IdEstado: 1, // Estado por defecto: Operativo
-            Garantia: 0, // Por defecto sin garantía
-            IdSucursal: null, // Se obtiene de la sesión en el backend
-            UserMod: userMod,
-            Accion: 1 // 1 = Insertar
-        });
+        let cantidad = parseInt(row.find("input.cantidad").val()) || 1;
+        
+        // Crear un registro por cada cantidad
+        for(let i = 0; i < cantidad; i++) {
+            activos.push({
+                IdDocVenta: parseInt($("#inputDocIngresoAlm").val()) || null,
+                IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
+                Serie: row.find("input[name='serie[]']").val() || null,
+                IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
+                IdCategoria: parseInt(row.find("select.categoria").val()) || null,
+                IdProveedor: row.find("select.proveedor").val() || null,
+                Observaciones: row.find("textarea[name='observaciones[]']").val() || "",
+                IdEstado: 1, // Estado por defecto: Operativo
+                Garantia: 0, // Por defecto sin garantía
+                IdSucursal: null, // Se obtiene de la sesión en el backend
+                UserMod: userMod,
+                Accion: 1, // 1 = Insertar
+                Cantidad: 1 // Cada registro individual tiene cantidad 1
+            });
+        }
     });
 
     // Validar que todos los campos requeridos estén presentes
@@ -236,6 +242,16 @@ function init() {
         });
         return;
     }
+
+    // Mostrar loading
+    Swal.fire({
+        title: "Procesando",
+        text: "Registrando los activos...",
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
 
     $.ajax({
         url: "../../controllers/GestionarActivosController.php?action=RegistrarPruebaVenta",
@@ -851,6 +867,7 @@ function init() {
                 var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
                 var selectProveedor = `<select class='form-control form-control-sm proveedor' name='proveedor[]' id="comboProveedor${numeroFilas}"></select>`;
                 var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
+                var inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" max="100">`;
 
                 var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
                     <td>${activo.id}</td>
@@ -862,14 +879,31 @@ function init() {
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
                     <td>${selectProveedor}</td>
+                    <td>${inputCantidad}</td>
                     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea></td>
                     <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
                 </tr>`;
                 $("#tbldetalleactivoreg tbody").append(nuevaFila);
                 
-                ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
-                ListarCombosCategoria(`comboCategoria${numeroFilas}`);
-                ListarCombosProveedor(`comboProveedor${numeroFilas}`);
+                // Cargar todos los combos en una sola llamada AJAX
+                $.ajax({
+                    url: "../../controllers/GestionarActivosController.php?action=combos",
+                    type: "POST",
+                    dataType: "json",
+                    success: function(res) {
+                        if (res.status) {
+                            $(`#comboAmbiente${numeroFilas}`).html(res.data.ambientes).trigger("change");
+                            $(`#comboCategoria${numeroFilas}`).html(res.data.categorias).trigger("change");
+                            $(`#comboProveedor${numeroFilas}`).html(res.data.proveedores).trigger("change");
+                            
+                            // Inicializar select2 para todos los combos
+                            $(`#comboAmbiente${numeroFilas}, #comboCategoria${numeroFilas}, #comboProveedor${numeroFilas}`).select2({
+                                theme: "bootstrap4",
+                                width: "100%"
+                            });
+                        }
+                    }
+                });
 
                 setTimeout(function () {
                     $("#tbldetalleactivoreg tbody tr.agregado-temp").removeClass(

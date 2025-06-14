@@ -140,10 +140,14 @@ class GestionarActivos
 
     public function registrarActivosVentaPrueba($data){
         try {
+            // Iniciar transacción para mejor rendimiento
+            $this->db->beginTransaction();
+
             $fechaFinGarantia = !empty($data['FechaFinGarantia']) ? date('Y-m-d', strtotime($data['FechaFinGarantia'])) : null;
             $fechaAdquisicion = !empty($data['FechaAdquisicion']) ? date('Y-m-d', strtotime($data['FechaAdquisicion'])) : null;
             $empresa = $_SESSION['cod_empresa'] ??  null;
             $sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
+            $cantidad = !empty($data['Cantidad']) ? (int)$data['Cantidad'] : 1;
             
             $stmt = $this->db->prepare('EXEC sp_GuardarActivoPruebaV
                 @pIdActivo = ?, 
@@ -164,6 +168,7 @@ class GestionarActivos
                 @pValorAdquisicion = ?, 
                 @pFechaAdquisicion = ?, 
                 @pUserMod = ?, 
+                @pCantidad = ?,
                 @pAccion = ?');
 
             $stmt->bindParam(1, $data['IdActivo'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
@@ -184,12 +189,18 @@ class GestionarActivos
             $stmt->bindParam(16, $data['ValorAdquisicion'], \PDO::PARAM_STR);
             $stmt->bindParam(17, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
             $stmt->bindParam(18, $data['UserMod'], \PDO::PARAM_STR);
-            $stmt->bindParam(19, $data['Accion'], \PDO::PARAM_INT);
+            $stmt->bindParam(19, $cantidad, \PDO::PARAM_INT);
+            $stmt->bindParam(20, $data['Accion'], \PDO::PARAM_INT);
 
             $stmt->execute();
+            
+            // Confirmar transacción
+            $this->db->commit();
             return true;
 
         } catch (\PDOException $e) {
+            // Revertir transacción en caso de error
+            $this->db->rollBack();
             error_log("Error in registrarActivosVentaPrueba: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
@@ -370,17 +381,20 @@ class GestionarActivos
     public function verificarArticuloExistente($idDocIngresoAlm, $idArticulo)
     {
         try {
+            // Optimizar la consulta usando EXISTS en lugar de COUNT
             $stmt = $this->db->prepare("
-                SELECT COUNT(*) as existe 
-                FROM tActivos 
-                WHERE IdDocIngresoAlm = ? 
-                AND IdArticulo = ?
+                SELECT CAST(CASE WHEN EXISTS (
+                    SELECT 1 
+                    FROM tActivos 
+                    WHERE IdDocIngresoAlm = ? 
+                    AND IdArticulo = ?
+                ) THEN 1 ELSE 0 END AS BIT) as existe
             ");
             $stmt->bindParam(1, $idDocIngresoAlm, PDO::PARAM_INT);
             $stmt->bindParam(2, $idArticulo, PDO::PARAM_INT);
             $stmt->execute();
             $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $resultado['existe'] > 0;
+            return $resultado['existe'] == 1;
         } catch (\PDOException $e) {
             error_log("Error in verificarArticuloExistente: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
