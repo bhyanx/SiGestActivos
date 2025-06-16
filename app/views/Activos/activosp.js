@@ -226,7 +226,8 @@ function init() {
           Serie: row.find("input[name='serie[]']").val() || null,
           IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
           IdCategoria: parseInt(row.find("select.categoria").val()) || null,
-          ValorAdquisicion: parseFloat(row.find("input[name='valor[]']").val()) || 0,
+          ValorAdquisicion:
+            parseFloat(row.find("input[name='valor[]']").val()) || 0,
           Observaciones:
             row.find("textarea[name='observaciones[]']").val() || "",
           IdEstado: 1, // Estado por defecto: Operativo
@@ -1224,27 +1225,16 @@ function listarActivosTable() {
         data: null,
         render: (data, type, row) =>
           `<div class="btn-group">
-            <button type="button" class="btn btn-info btn-sm dropdown-toggle align-self-center" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button type="button" class="btn btn-info btn-sm dropdown-toggle align-content-center" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <i class="fas fa-cog"></i>
             </button>
             <div class="dropdown-menu">
               <button class="dropdown-item btnEditarActivo" type="button">
-                <i class="fas fa-edit text-warning"></i> Editar
-              </button>
-              <button class="dropdown-item btnAsignarResponsable" type="button">
-                <i class="fas fa-user-plus text-info"></i> Asignar Responsable
-              </button>
-              <button class="dropdown-item btnVerHistorial" type="button">
-                <i class="fas fa-history text-primary"></i> Ver Historial
+                <i class="fas fa-bars text-success"></i> Detalle
               </button>
               <button class="dropdown-item btnImprimirActivo" type="button">
                 <i class="fas fa-print text-warning"></i> Imprimir Ingreso
               </button>
-              <button class="dropdown-item btnDarBaja" type="button">
-                <i class="fas fa-ban text-danger"></i> Dar de Baja
-              </button>
-              <button class="dropdown-item btnDetalleIngreso" type="button">
-                <i class="fas fa-file-lines text-success"></i> Detalle Ingreso
             </div>
           </div>`,
       },
@@ -1253,7 +1243,7 @@ function listarActivosTable() {
       { data: "IdEmpresa" },
       { data: "Locacion" },
       { data: "Cantidad" },
-      { data: "ValorTotal"},
+      { data: "ValorTotal" },
     ],
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
