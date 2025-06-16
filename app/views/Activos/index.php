@@ -471,6 +471,59 @@ session_start();
                                 </div>
                             </div>
                         </div>
+
+                        <!-- MODAL PARA LISTAR TODOS LOS ACTIVOS -->
+                        <div class="modal fade" id="modalListarTodosActivos" tabindex="-1" role="dialog" aria-labelledby="modalListarTodosActivosLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-xl" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-info">
+                                        <h5 class="modal-title" id="modalListarTodosActivosLabel"><i class="fa fa-list"></i> Lista de Todos los Activos</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="table-responsive">
+                                            <table id="tblTodosActivos" class="table table-bordered table-striped display nowrap" style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Id</th>
+                                                        <th>Código</th>
+                                                        <th>Nombre</th>
+                                                        <th>Marca</th>
+                                                        <th>Empresa</th>
+                                                        <th>Locación</th>
+                                                        <th>Categoría</th>
+                                                        <th>Estado</th>
+                                                        <th>Valor</th>
+                                                        <th>Responsable</th>
+                                                        <th><i class="fa fa-cogs"></i></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Aquí se llenarán los datos dinámicamente -->
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th>Id</th>
+                                                        <th>Código</th>
+                                                        <th>Nombre</th>
+                                                        <th>Marca</th>
+                                                        <th>Empresa</th>
+                                                        <th>Locación</th>
+                                                        <th>Categoría</th>
+                                                        <th>Estado</th>
+                                                        <th>Valor</th>
+                                                        <th>Responsable</th>
+                                                        <th><i class="fa fa-cogs"></i></th>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
             </section>
         </div>

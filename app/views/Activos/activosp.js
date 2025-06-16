@@ -1229,7 +1229,7 @@ function listarActivosTable() {
               <i class="fas fa-cog"></i>
             </button>
             <div class="dropdown-menu">
-              <button class="dropdown-item btnEditarActivo" type="button">
+              <button class="dropdown-item btnVerDetalle" type="button">
                 <i class="fas fa-bars text-success"></i> Detalle
               </button>
               <button class="dropdown-item btnImprimirActivo" type="button">
@@ -1250,6 +1250,99 @@ function listarActivosTable() {
     },
   });
 }
+
+function listarActivosTableModal() {
+  $("#tblTodosActivos").DataTable({
+    aProcessing: true,
+    aServerSide: true,
+    layout: {
+      topStart: {
+        buttons: [
+          {
+            extend: "excelHtml5",
+            title: "Listado Activos",
+            text: "<i class='fas fa-file-excel'></i> Exportar",
+            autoFilter: true,
+            sheetName: "Data",
+            exportOptions: {
+              columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+            },
+          },
+          "pageLength",
+          "colvis",
+        ],
+      },
+      bottom: "paging",
+      bottomStart: null,
+      bottomEnd: null,
+    },
+    lengthChange: false,
+    colReorder: true,
+    autoWidth: false,
+    destroy: true,
+    ajax: {
+      url: "../../controllers/GestionarActivosController.php?action=Consultar",
+      type: "POST",
+      dataType: "json",
+      dataSrc: function (json) {
+        return json || [];
+      },
+    },
+    columns: [
+      {
+        data: null,
+        render: (data, type, row) =>
+          `<div class="btn-group">
+            <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-cog"></i>
+            </button>
+            <div class="dropdown-menu">More actions
+              <button class="dropdown-item btnEditarActivo" type="button">
+                <i class="fas fa-edit text-warning"></i> Editar
+              </button>
+              <button class="dropdown-item btnAsignarResponsable" type="button">
+                <i class="fas fa-user-plus text-info"></i> Asignar Responsable
+              </button>
+              <button class="dropdown-item btnVerHistorial" type="button">
+                <i class="fas fa-history text-primary"></i> Ver Historial
+              </button>
+              <button class="dropdown-item btnImprimirActivo" type="button">
+                <i class="fas fa-print text-secondary"></i> Imprimir Activo
+              </button>
+              <button class="dropdown-item btnDarBaja" type="button">
+                <i class="fas fa-ban text-danger"></i> Dar de Baja
+              </button>More actions
+            </div>
+        </div>`,
+      },
+      { data: "idActivo", visible: false, searchable: false },
+      { data: "CodigoActivo" },
+      { data: "NumeroSerie" },
+      { data: "NombreArticulo" },
+      { data: "MarcaArticulo" },
+      { data: "Sucursal" },
+      { data: "Proveedor" },
+      { data: "Estado" },
+      { data: "valorSoles", visible: false, searchable: false },
+      { data: "idArticulo", visible: false },
+      { data: "idAmbiente", visible: false },
+      { data: "idCategoria", visible: false },
+      { data: "DocIngresoAlmacen", visible: false },
+      { data: "fechaAdquisicion", visible: false },
+      { data: "observaciones", visible: false },
+    ],
+    language: {
+      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+    },
+  });
+}
+
+$(document).on("click", ".btnVerDetalle", function () {
+  // Abrir el modal
+  $("#modalListarTodosActivos").modal("show");
+  // Listar los activos en el modal
+  listarActivosTableModal();
+});
 
 // Add the event handler for the print button
 $(document).on("click", ".btnImprimirActivo", function () {
