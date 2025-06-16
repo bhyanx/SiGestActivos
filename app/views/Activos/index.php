@@ -106,6 +106,13 @@ session_start();
                                                     <thead class="table-success">
                                                         <tr>
                                                             <th>Accion</th>
+                                                            <th>Codigo</th>
+                                                            <th>Nombre Activo</th>
+                                                            <th>IdEmpresa</th>
+                                                            <th>Locacion</th>
+                                                            <th>Cantidad</th>
+                                                            <th>Valor Total</th>
+                                                            <!-- <th>Accion</th>
                                                             <th>Id Activo</th>
                                                             <th>Código</th>
                                                             <th>Serie</th>
@@ -114,13 +121,20 @@ session_start();
                                                             <th>Sucursal</th>
                                                             <th>Proveedor</th>
                                                             <th>Estado</th>
-                                                            <th>Valor</th>
+                                                            <th>Valor</th> -->
                                                         </tr>
                                                     </thead>
                                                     <tbody></tbody>
                                                     <tfoot>
                                                         <tr>
                                                             <th>Accion</th>
+                                                            <th>Codigo</th>
+                                                            <th>Nombre Activo</th>
+                                                            <th>IdEmpresa</th>
+                                                            <th>Locacion</th>
+                                                            <th>Cantidad</th>
+                                                            <th>Valor Total</th>
+                                                            <!-- <th>Accion</th>
                                                             <th>Id Activo</th>
                                                             <th>Código</th>
                                                             <th>Serie</th>
@@ -129,7 +143,7 @@ session_start();
                                                             <th>Sucursal</th>
                                                             <th>Proveedor</th>
                                                             <th>Estado</th>
-                                                            <th>Valor</th>
+                                                            <th>Valor</th> -->
                                                         </tr>
                                                     </tfoot>
                                                 </table>
@@ -198,12 +212,13 @@ session_start();
                                                                 <th>Id</th>
                                                                 <th>Nombre</th>
                                                                 <th>Marca</th>
-                                                                <th>Código</th>
+                                                                <!--<th>Código</th>-->
                                                                 <th>Serie</th>
                                                                 <th>Estado</th>
                                                                 <th>Ambiente</th>
                                                                 <th>Categoría</th>
-                                                                <th>Proveedor</th>
+                                                                <th>Valor Unitario</th>
+                                                                <!--<th>Proveedor</th>-->
                                                                 <th>Cantidad</th>
                                                                 <th>Observaciones</th>
                                                                 <th>Acciones</th>
@@ -213,7 +228,7 @@ session_start();
                                                         </tbody>
                                                         <tfoot>
                                                             <tr>
-                                                                <th colspan="9" style="text-align: right;" class="">TOTAL DETALLE &nbsp;&nbsp;</th>
+                                                                <th colspan="10" style="text-align: right;" class="">TOTAL DETALLE &nbsp;&nbsp;</th>
                                                                 <!-- <th style="text-align: right;"></th> -->
                                                                 <th class="text-center">
                                                                     <span id="CantRegistros">0</span>

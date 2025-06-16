@@ -37,6 +37,32 @@ class GestionarActivos
         }
     }
 
+    public function consultarPrueba($data)
+    {
+        try {
+            //$empresa = $_SESSION['cod_empresa'] ??  null; 
+            //$sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
+            // Convertir cadenas vacías a null o enteros para parámetros numéricos
+            //$pCodigo = empty($data['pCodigo']) ? null : $data['pCodigo'];
+            $pIdEmpresa = empty($data['pIdEmpresa']) ? null : $data['pIdEmpresa'];
+            $pIdSucursal = empty($data['pIdSucursal']) ? null : (int)$data['pIdSucursal'];
+            //$pIdCategoria = empty($data['pIdCategoria']) ? null : (int)$data['pIdCategoria'];
+            //$pIdEstado = empty($data['pIdEstado']) ? null : (int)$data['pIdEstado'];
+
+            $stmt = $this->db->prepare('EXEC sp_ConsultarActivos @pCodigo = ?, @pIdEmpresa = ?, @pIdSucursal = ?, @pIdCategoria = ?, @pIdEstado = ?');
+            $stmt->bindParam(1, $pCodigo, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(2, $pIdEmpresa, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(3, $pIdSucursal, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(4, $pIdCategoria, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(5, $pIdEstado, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error in consultarActivos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
     public function obtenerActivoPorId($idActivo)
     {
         try {
@@ -385,10 +411,14 @@ class GestionarActivos
                     FROM tActivos 
                     WHERE IdDocIngresoAlm = ? 
                     AND IdArticulo = ?
+                    AND idEmpresa = ?
+                    AND idSucursal = ?
                 ) THEN 1 ELSE 0 END AS BIT) as existe
             ");
             $stmt->bindParam(1, $idDocIngresoAlm, PDO::PARAM_INT);
             $stmt->bindParam(2, $idArticulo, PDO::PARAM_INT);
+            $stmt->bindParam(3, $_SESSION['cod_empresa'], PDO::PARAM_INT);
+            $stmt->bindParam(4, $_SESSION['cod_UnidadNeg'], PDO::PARAM_INT);
             $stmt->execute();
             $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
             return $resultado['existe'] == 1;

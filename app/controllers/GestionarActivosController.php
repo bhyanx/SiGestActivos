@@ -19,13 +19,13 @@ switch ($action) {
     case 'Consultar':
         try {
             $filtros = [
-                'pCodigo' => $_POST['pCodigo'] ?? null,
+                //'pCodigo' => $_POST['pCodigo'] ?? null,
                 'pIdEmpresa' => $_SESSION['cod_empresa'] ?? null,
                 'pIdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
-                'pIdCategoria' => $_POST['pIdCategoria'] ?? null,
-                'pIdEstado' => $_POST['pIdEstado'] ?? null
+                //'pIdCategoria' => $_POST['pIdCategoria'] ?? null,
+                //'pIdEstado' => $_POST['pIdEstado'] ?? null
             ];
-            $resultados = $activos->consultarActivos($filtros);
+            $resultados = $activos->consultarPrueba($filtros);
             error_log("Consultar resultados: " . print_r($resultados, true), 3, __DIR__ . '/../../logs/debug.log');
             echo json_encode($resultados ?: []);
         } catch (Exception $e) {
@@ -557,12 +557,14 @@ ORDER BY a.Descripcion_articulo;
         try {
             $idDocIngresoAlm = $_POST['IdDocIngresoAlm'] ?? null;
             $idArticulo = $_POST['IdArticulo'] ?? null;
+            $idEmpresa = $_SESSION['cod_empresa'] ?? null;
+            $idSucursal = $_SESSION['cod_UnidadNeg'] ?? null;
 
             if (!$idDocIngresoAlm || !$idArticulo) {
                 throw new Exception("Se requiere el documento de ingreso y el artículo");
             }
 
-            $existe = $activos->verificarArticuloExistente($idDocIngresoAlm, $idArticulo);
+            $existe = $activos->verificarArticuloExistente($idDocIngresoAlm, $idArticulo, $idEmpresa, $idSucursal);
             echo json_encode([
                 'status' => true,
                 'existe' => $existe,

@@ -203,7 +203,7 @@ function init() {
     let activos = [];
     $("#tbldetalleactivoreg tbody tr").each(function () {
       let row = $(this);
-      activos.push({
+      /*activos.push({
         IdDocIngresoAlm: parseInt($("#inputDocIngresoAlm").val()) || null,
         IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
         Serie: row.find("input[name='serie[]']").val() || null,
@@ -215,7 +215,28 @@ function init() {
         IdSucursal: null, // Se obtiene de la sesión en el backend
         UserMod: userMod,
         Accion: 1, // 1 = Insertar
-      });
+      });*/
+
+      let cantidad = parseInt(row.find("input.cantidad").val()) || 1;
+
+      for (let i = 0; i < cantidad; i++) {
+        activos.push({
+          IdDocIngresoAlm: parseInt($("#inputDocIngresoAlm").val()) || null,
+          IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
+          Serie: row.find("input[name='serie[]']").val() || null,
+          IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
+          IdCategoria: parseInt(row.find("select.categoria").val()) || null,
+          ValorAdquisicion: parseFloat(row.find("input[name='valor[]']").val()) || 0,
+          Observaciones:
+            row.find("textarea[name='observaciones[]']").val() || "",
+          IdEstado: 1, // Estado por defecto: Operativo
+          Garantia: 0, // Por defecto sin garantía
+          IdSucursal: null, // Se obtiene de la sesión en el backend
+          UserMod: userMod,
+          Accion: 1, // 1 = Insertar
+          Cantidad: 1, // Agregar la cantidad al objeto
+        });
+      }
     });
 
     // Validar que todos los campos requeridos estén presentes
@@ -236,6 +257,15 @@ function init() {
       });
       return;
     }
+
+    Swal.fire({
+      title: "Procesando",
+      text: "Registrando activos...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
 
     $.ajax({
       url: "../../controllers/GestionarActivosController.php?action=RegistrarPrueba",
@@ -320,7 +350,7 @@ function init() {
             $("#Garantia").prop("checked", data.garantia == 1);
             $("#Observaciones").val(data.observaciones);
             $("#VidaUtil").val(data.vidaUtil);
-            $("#ValorAdquisicion").val(data.valorSoles);
+            $("#ValorAdquisicion").val(data.valorAdquisicion);
 
             // Asignar valores a los combos
             $("#Estado").val(data.idEstado).trigger("change");
@@ -870,6 +900,8 @@ function init() {
       data: {
         IdDocIngresoAlm: $("#inputDocIngresoAlm").val(),
         IdArticulo: activo.id,
+        IdEmpresa: activo.empresa,
+        IdSucursal: activo.sucursal,
       },
       dataType: "json",
       success: function (res) {
@@ -898,16 +930,19 @@ function init() {
           var selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
           var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
           var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
+          var inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1">`;
 
           var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
                     <td>${activo.id}</td>
                     <td>${activo.nombre}</td>
                     <td>${activo.marca}</td>
-                    <td><input type="text" class="form-control form-control-sm" name="codigo[]" placeholder="Codigo" disabled></td>
+                    
                     <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie"></td>
                     <td>${inputEstadoActivo}</td>
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
+                    <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor"></td>
+                    <td>${inputCantidad}</td>
                     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea></td>
                     <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
                 </tr>`;
@@ -1211,21 +1246,12 @@ function listarActivosTable() {
             </div>
           </div>`,
       },
-      { data: "idActivo", visible: false, searchable: false },
-      { data: "CodigoActivo" },
-      { data: "NumeroSerie" },
-      { data: "NombreArticulo" },
-      { data: "MarcaArticulo" },
-      { data: "Sucursal" },
-      { data: "Proveedor" },
-      { data: "Estado" },
-      { data: "valorSoles", visible: false, searchable: false },
-      { data: "idArticulo", visible: false },
-      { data: "idAmbiente", visible: false },
-      { data: "idCategoria", visible: false },
-      { data: "DocIngresoAlmacen", visible: false },
-      { data: "fechaAdquisicion", visible: false },
-      { data: "observaciones", visible: false },
+      { data: "Codigo" },
+      { data: "NombreActivo" },
+      { data: "IdEmpresa" },
+      { data: "Locacion" },
+      { data: "Cantidad" },
+      { data: "ValorTotal"},
     ],
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
