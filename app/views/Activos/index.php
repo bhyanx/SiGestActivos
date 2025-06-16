@@ -105,31 +105,31 @@ session_start();
                                                 <table id="tblRegistros" class="table table-bordered table-striped mt-4 table-hover">
                                                     <thead class="table-success">
                                                         <tr>
-                                                            <th><i class="fa fa-cogs"></i></th>
-                                                            <th style="display: none;">Id Activo</th>
+                                                            <th>Accion</th>
+                                                            <th>Id Activo</th>
                                                             <th>Código</th>
                                                             <th>Serie</th>
-                                                            <th>Nombre Activo</th>
+                                                            <th>Descripción</th>
                                                             <th>Marca</th>
                                                             <th>Sucursal</th>
                                                             <th>Proveedor</th>
                                                             <th>Estado</th>
-                                                            <th>Valor Adquisición</th>
+                                                            <th>Valor</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody></tbody>
                                                     <tfoot>
                                                         <tr>
-                                                            <th><i class="fa fa-cogs"></i></th>
+                                                            <th>Accion</th>
                                                             <th>Id Activo</th>
                                                             <th>Código</th>
                                                             <th>Serie</th>
-                                                            <th>Nombre Activo</th>
+                                                            <th>Descripción</th>
                                                             <th>Marca</th>
                                                             <th>Sucursal</th>
                                                             <th>Proveedor</th>
                                                             <th>Estado</th>
-                                                            <th>Valor Adquisición</th>
+                                                            <th>Valor</th>
                                                         </tr>
                                                     </tfoot>
                                                 </table>

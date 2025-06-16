@@ -812,7 +812,7 @@ function ListarMovimientos() {
         aProcessing: true,
         aServerSide: false,
         destroy: true,
-        responsive: true,
+        //responsive: true,
         bInfo: true,
         iDisplayLength: 10,
         order: [[7, "desc"]], // Ordenar por fecha descendente

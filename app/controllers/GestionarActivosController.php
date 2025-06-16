@@ -15,6 +15,7 @@ ini_set('display_errors', 0);
 header('Content-Type: application/json');
 
 switch ($action) {
+
     case 'Consultar':
         try {
             $filtros = [
@@ -32,6 +33,21 @@ switch ($action) {
             echo json_encode(['status' => false, 'message' => 'Error al consultar activos: ' . $e->getMessage()]);
         }
         break;
+
+    // case 'Consultar':
+    //     try {
+    //         $filtros = [
+    //             'pCodigo' => $_POST['pCodigo'] ?? null,
+    //             'pIdEmpresa' => $_SESSION['cod_empresa'] ?? null,
+    //             'pIdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null
+    //         ];
+    //         $resultados = $activos->consultarActivosCabecera($filtros);
+    //         error_log("Consultar resultados: " . print_r($resultados, true), 3, __DIR__ . '/../../logs/debug.log');
+    //         echo json_encode($resultados ?: []);
+    //     } catch (Exception $e) {
+    //         error_log("Error Consultar: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+    //         echo json_encode(['status' => false, 'message' => 'Error al consultar activos: ' . $e->getMessage()]);
+    //     }
 
     case 'Registrar':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -91,16 +107,15 @@ switch ($action) {
         }
         break;
 
-    case 'RegistrarPruebaVenta':
+    /*case 'RegistrarPruebaVenta':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
-                // Log del POST recibido
+
                 error_log("POST recibido en RegistrarPruebaVenta: " . print_r($_POST, true), 3, __DIR__ . '/../../logs/debug.log');
 
-                // Obtener los datos del array de activos
+
                 $activosArray = json_decode($_POST['activos'], true);
 
-                // Log del array decodificado
                 error_log("Array de activos decodificado: " . print_r($activosArray, true), 3, __DIR__ . '/../../logs/debug.log');
 
                 if (!$activosArray) {
@@ -110,7 +125,7 @@ switch ($action) {
 
                 $resultados = [];
                 foreach ($activosArray as $activo) {
-                    // Log de cada activo antes de procesarlo
+                    
                     error_log("Procesando activo: " . print_r($activo, true), 3, __DIR__ . '/../../logs/debug.log');
 
                     // Formatear fechas
@@ -167,7 +182,7 @@ switch ($action) {
                 ]);
             }
         }
-        break;
+        break;*/
 
     case 'RegistrarPrueba':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -382,11 +397,11 @@ switch ($action) {
             }
 
             // Documentos de venta
-            $stmt = $db->query("SELECT idDocumentoVta AS IdDocVenta FROM vListadoDeArticulosPorDocumentoDeVenta GROUP BY idDocumentoVta");
-            $combos['docVenta'] = '<option value="">Seleccione</option>';
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $combos['docVenta'] .= "<option value='{$row['IdDocVenta']}'>{$row['IdDocVenta']}</option>";
-            }
+            // $stmt = $db->query("SELECT idDocumentoVta AS IdDocVenta FROM vListadoDeArticulosPorDocumentoDeVenta GROUP BY idDocumentoVta");
+            // $combos['docVenta'] = '<option value="">Seleccione</option>';
+            // foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            //     $combos['docVenta'] .= "<option value='{$row['IdDocVenta']}'>{$row['IdDocVenta']}</option>";
+            // }
 
             // Proveedores
             $stmt = $db->query("SELECT Documento, RazonSocial FROM vEntidadExternaGeneralProveedor ORDER BY RazonSocial");
@@ -452,7 +467,7 @@ switch ($action) {
         }
         break;
 
-    case 'articulos_por_doc_venta':
+    /*case 'articulos_por_doc_venta':
         try {
             $db = (new Conectar())->ConexionBdPracticante();
 
@@ -491,7 +506,7 @@ ORDER BY a.Descripcion_articulo;
             error_log("Error articulos_por_doc_venta: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             echo json_encode(['status' => false, 'message' => 'Error al cargar artículos: ' . $e->getMessage()]);
         }
-        break;
+        break;*/
 
     //Case para el modal y agregar 
     case 'articulos_por_doc':
@@ -540,7 +555,7 @@ ORDER BY a.Descripcion_articulo;
 
     case 'verificarArticuloExistente':
         try {
-            $idDocIngresoAlm = $_POST['IdDocVenta'] ?? null;
+            $idDocIngresoAlm = $_POST['IdDocIngresoAlm'] ?? null;
             $idArticulo = $_POST['IdArticulo'] ?? null;
 
             if (!$idDocIngresoAlm || !$idArticulo) {

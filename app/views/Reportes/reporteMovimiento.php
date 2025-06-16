@@ -453,7 +453,7 @@ try {
             </div>
             <div class="document-info">
                 <div class="ruc">R.U.C. <?php echo $cabecera['RucOrigen'] ?? ''; ?></div>
-                <div class="guide-title">GUÍA DE REMISIÓN<br>ELECTRÓNICA REMITENTE</div>
+                <div class="guide-title">GESTION DE ALMACEN<br>MOVIMIENTO DE ACTIVOS</div>
                 <div class="guide-number">N° <?php echo $cabecera['CodMovimiento'] ?? ''; ?></div>
             </div>
         </div>
