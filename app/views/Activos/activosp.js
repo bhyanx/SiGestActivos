@@ -1224,7 +1224,7 @@ function listarActivosTable() {
         data: null,
         render: (data, type, row) =>
           `<div class="btn-group">
-            <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button type="button" class="btn btn-info btn-sm dropdown-toggle align-self-center" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <i class="fas fa-cog"></i>
             </button>
             <div class="dropdown-menu">
@@ -1238,11 +1238,13 @@ function listarActivosTable() {
                 <i class="fas fa-history text-primary"></i> Ver Historial
               </button>
               <button class="dropdown-item btnImprimirActivo" type="button">
-                <i class="fas fa-print text-secondary"></i> Imprimir Activo
+                <i class="fas fa-print text-warning"></i> Imprimir Ingreso
               </button>
               <button class="dropdown-item btnDarBaja" type="button">
                 <i class="fas fa-ban text-danger"></i> Dar de Baja
               </button>
+              <button class="dropdown-item btnDetalleIngreso" type="button">
+                <i class="fas fa-file-lines text-success"></i> Detalle Ingreso
             </div>
           </div>`,
       },
