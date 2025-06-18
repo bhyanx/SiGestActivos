@@ -25,7 +25,44 @@ switch ($action) {
                 //'pIdCategoria' => $_POST['pIdCategoria'] ?? null,
                 //'pIdEstado' => $_POST['pIdEstado'] ?? null
             ];
-            $resultados = $activos->consultarPrueba($filtros);
+            $resultados = $activos->consultarActivos($filtros);
+            error_log("Consultar resultados: " . print_r($resultados, true), 3, __DIR__ . '/../../logs/debug.log');
+            echo json_encode($resultados ?: []);
+        } catch (Exception $e) {
+            error_log("Error Consultar: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode(['status' => false, 'message' => 'Error al consultar activos: ' . $e->getMessage()]);
+        }
+        break;
+
+    case 'ConsultarActivos':
+        try {
+            $filtros = [
+                'pCodigo' => $_POST['pCodigo'] ?? null,
+                'pIdEmpresa' => $_SESSION['cod_empresa'] ?? null,
+                'pIdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
+                'pIdCategoria' => $_POST['pIdCategoria'] ?? null,
+                'pIdEstado' => $_POST['pIdEstado'] ?? null
+            ];
+            $resultados = $activos->consultarActivosModal($filtros);
+            error_log("Consultar resultados: " . print_r($resultados, true), 3, __DIR__ . '/../../logs/debug.log');
+            echo json_encode($resultados ?: []);
+        } catch (Exception $e) {
+            error_log("Error Consultar: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode(['status' => false, 'message' => 'Error al consultar activos: ' . $e->getMessage()]);
+        }
+        break;
+
+    case 'ConsultarActivosRelacionados':
+        try {
+            $filtros = [
+                'pIdArticulo' => $_POST['IdArticulo'] ?? null,
+                'pCodigo' => $_POST['pCodigo'] ?? null,
+                'pIdEmpresa' => $_SESSION['cod_empresa'] ?? null,
+                'pIdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
+                'pIdCategoria' => $_POST['pIdCategoria'] ?? null,
+                'pIdEstado' => $_POST['pIdEstado'] ?? null
+            ];
+            $resultados = $activos->consultarActivosRelacionados($filtros);
             error_log("Consultar resultados: " . print_r($resultados, true), 3, __DIR__ . '/../../logs/debug.log');
             echo json_encode($resultados ?: []);
         } catch (Exception $e) {

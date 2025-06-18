@@ -312,7 +312,7 @@ function init() {
 
   $(document).on("click", ".btnEditarActivo", function () {
     const fila = $(this).closest("tr");
-    const datos = $("#tblRegistros").DataTable().row(fila).data();
+    const datos = $("#tblTodosActivos").DataTable().row(fila).data();
 
     if (!datos) {
       Swal.fire(
@@ -388,7 +388,7 @@ function init() {
   // Manejador para el botón de Asignar Responsable
   $(document).on("click", ".btnAsignarResponsable", function () {
     const fila = $(this).closest("tr");
-    const datos = $("#tblRegistros").DataTable().row(fila).data();
+    const datos = $("#tblTodosActivos").DataTable().row(fila).data();
 
     if (!datos) {
       Swal.fire(
@@ -537,7 +537,7 @@ function init() {
   // Manejador para el botón de Ver Historial
   $(document).on("click", ".btnVerHistorial", function () {
     const fila = $(this).closest("tr");
-    const datos = $("#tblRegistros").DataTable().row(fila).data();
+    const datos = $("#tblTodosActivos").DataTable().row(fila).data();
 
     if (!datos) {
       Swal.fire(
@@ -559,7 +559,7 @@ function init() {
   // Manejador para el botón de Dar de Baja
   $(document).on("click", ".btnDarBaja", function () {
     const fila = $(this).closest("tr");
-    const datos = $("#tblRegistros").DataTable().row(fila).data();
+    const datos = $("#tblTodosActivos").DataTable().row(fila).data();
 
     if (!datos) {
       Swal.fire(
@@ -1251,7 +1251,7 @@ function listarActivosTable() {
   });
 }
 
-function listarActivosTableModal() {
+function listarActivosTableModal(articulo) {
   $("#tblTodosActivos").DataTable({
     aProcessing: true,
     aServerSide: true,
@@ -1281,8 +1281,11 @@ function listarActivosTableModal() {
     autoWidth: false,
     destroy: true,
     ajax: {
-      url: "../../controllers/GestionarActivosController.php?action=Consultar",
+      url: "../../controllers/GestionarActivosController.php?action=ConsultarActivosRelacionados",
       type: "POST",
+      data: {
+        IdArticulo: articulo.IdArticulo,
+      },
       dataType: "json",
       dataSrc: function (json) {
         return json || [];
@@ -1296,7 +1299,7 @@ function listarActivosTableModal() {
             <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-cog"></i>
             </button>
-            <div class="dropdown-menu">More actions
+            <div class="dropdown-menu">
               <button class="dropdown-item btnEditarActivo" type="button">
                 <i class="fas fa-edit text-warning"></i> Editar
               </button>
@@ -1311,7 +1314,7 @@ function listarActivosTableModal() {
               </button>
               <button class="dropdown-item btnDarBaja" type="button">
                 <i class="fas fa-ban text-danger"></i> Dar de Baja
-              </button>More actions
+              </button>
             </div>
         </div>`,
       },
@@ -1323,7 +1326,8 @@ function listarActivosTableModal() {
       { data: "Sucursal" },
       { data: "Proveedor" },
       { data: "Estado" },
-      { data: "valorSoles", visible: false, searchable: false },
+      { data: "valorAdquisicion" },
+      { data: "idResponsable" },
       { data: "idArticulo", visible: false },
       { data: "idAmbiente", visible: false },
       { data: "idCategoria", visible: false },
@@ -1340,14 +1344,21 @@ function listarActivosTableModal() {
 $(document).on("click", ".btnVerDetalle", function () {
   // Abrir el modal
   $("#modalListarTodosActivos").modal("show");
-  // Listar los activos en el modal
-  listarActivosTableModal();
+  // Obtener el Codigo de la fila seleccionada (que es el IdArticulo)
+  const fila = $(this).closest("tr");
+  const datos = $("#tblRegistros").DataTable().row(fila).data();
+  if (!datos || !datos.Codigo) {
+    Swal.fire("Error", "No se pudo obtener el IdArticulo.", "error");
+    return;
+  }
+  // Listar los activos en el modal, enviando el IdArticulo
+  listarActivosTableModal({ IdArticulo: datos.Codigo });
 });
 
 // Add the event handler for the print button
 $(document).on("click", ".btnImprimirActivo", function () {
   const fila = $(this).closest("tr");
-  const datos = $("#tblRegistros").DataTable().row(fila).data();
+  const datos = $("#tblTodosActivos").DataTable().row(fila).data();
 
   if (!datos) {
     Swal.fire(

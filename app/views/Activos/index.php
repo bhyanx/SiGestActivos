@@ -316,7 +316,7 @@ session_start();
                         </div>
 
                         <!-- MODAL PARA PODER ACTUALIZAR EL ACTIVO. -->
-                        <div class="modal fade" id="divModalActualizarActivo" tabindex="-1" role="dialog" aria-labelledby="ModalActualizarActivoLabel" aria-hidden="true">
+                        <div class="modal fade" id="divModalActualizarActivo" style="z-index: 9999 !important;" role="dialog" aria-labelledby="ModalActualizarActivoLabel" aria-hidden="true">
                             <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header bg-primary">
@@ -408,7 +408,7 @@ session_start();
                             </div>
                         </div>
 
-                        <div id="modalBajaActivo" class="modal fade" role="dialog">
+                        <div id="modalBajaActivo" class="modal fade" style="z-index: 9999 !important;" role="dialog">
                             <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header bg-danger">
@@ -443,7 +443,7 @@ session_start();
                             </div>
                         </div>
 
-                        <div id="modalAsignarResponsable" class="modal fade" role="dialog">
+                        <div id="modalAsignarResponsable" class="modal fade" role="dialog" style="z-index: 9999 !important;">
                             <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header bg-alert">
@@ -487,6 +487,7 @@ session_start();
                                             <table id="tblTodosActivos" class="table table-bordered table-striped display nowrap" style="width:100%">
                                                 <thead>
                                                     <tr>
+                                                        <th><i class="fa fa-cogs"></i></th>
                                                         <th>Id</th>
                                                         <th>Código</th>
                                                         <th>Nombre</th>
@@ -497,7 +498,6 @@ session_start();
                                                         <th>Estado</th>
                                                         <th>Valor</th>
                                                         <th>Responsable</th>
-                                                        <th><i class="fa fa-cogs"></i></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
