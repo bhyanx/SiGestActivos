@@ -28,7 +28,7 @@ class Conectar
 
     public static function ruta()
     {
-        return 'http://192.168.1.35:8088/sigestActivos/';
+        return 'http://192.168.1.54:8088/SiGestActivos/';
     }
 
     public static function rutaServidor()

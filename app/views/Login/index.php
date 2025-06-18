@@ -11,9 +11,9 @@ if (!isset($_SESSION["IdRol"])) {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Login | Sistema Activos</title>
-        <link rel="stylesheet" href="/public/css/variables.css">
-        <link rel="stylesheet" href="/public/css/login.css">
-        <link rel="stylesheet" href="/public/css/animations.css">
+        <link rel="stylesheet" href="../../../public/css/variables.css">
+        <link rel="stylesheet" href="../../../public/css/login.css">
+        <link rel="stylesheet" href="../../../public/css/animations.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -26,7 +26,7 @@ if (!isset($_SESSION["IdRol"])) {
             <div class="login-card">
                 <div class="logo-container">
                     <div>
-                        <img src="/public/img/Logo-Lubriseng.png" alt="Lubriseng Logo" class="logo">
+                        <img src="../../../public/img/Logo-Lubriseng.png" alt="Lubriseng Logo" class="logo">
                     </div>
                 </div>
 
@@ -82,8 +82,8 @@ if (!isset($_SESSION["IdRol"])) {
             </div>
         </div>
 
-        <?php require_once '../Layouts/Footer.php'; ?>
-        <script src="/app/views/Login/login.js"></script>
+        <?php require_once '../../../Layouts/Footer.php'; ?>
+        <script src="login.js"></script>
     </body>
 
     </html>
