@@ -14,6 +14,10 @@ function init() {
     cargarCombosModalActualizarActivo();
   });
   // ? FIN: SE COMENTO EL CODIGO PARA INICIALIZAR EL MODAL DE REGISTRO MANUAL
+  $("#divModalRegistroManualActivo").on("shown.bs.modal", function () {
+    $("#frmmantenimiento")[0].reset();
+    cargarCombosModalRegistroManual();
+  });
 
   $(document).on(
     "change",
@@ -78,9 +82,9 @@ function init() {
     });
 
   // ? INICIO: SE COMENTO LA CARGA DE COMBOS EN EL MODAL YA QUE NO SE UTILIZARÁ
-  // $("#btnCrearActivo").click(() => {
-  //   $("#divModalRegistroManualActivo").modal("show");
-  // });
+  $("#btnCrearActivo").click(() => {
+    $("#divModalRegistroManualActivo").modal("show");
+  });
   // ? FIN: SE COMENTO LA CARGA DE COMBOS EN EL MODAL YA QUE NO SE UTILIZARÁ
 
   $("#btnCancelarMovimiento")
@@ -810,130 +814,169 @@ function init() {
 
   // ? SE COMENTO PORQUE YA NO SE HARÁ UN REGISTRO MANUAL
 
-  //   $("#frmmantenimiento").on("submit", function (e) {
-  //     e.preventDefault();
+  $("#frmmantenimiento").on("submit", function (e) {
+    e.preventDefault();
+    const formData = $(this).serialize();
 
-  //     const formData = $(this).serialize();
-
-  //     $.ajax({
-  //       url: "../../controllers/GestionarActivosController.php?action=RegistrarManual",
-  //       type: "POST",
-  //       data: formData,
-  //       dataType: "json",
-  //       success: function (res) {
-  //         if (res.status) {
-  //           Swal.fire("Exito", res.message, "success");
-  //           $("#divModalRegistroManualActivo").modal("hide");
-  //           $("#frmmantenimiento")[0].reset();
-  //           listarActivosTable?.();
-  //         } else {
-  //           Swal.fire("Error", res.message, "error");
-  //         }
-  //       },
-  //       error: function (xhr, status, error) {
-  //         console.error("Error en la petición:", xhr.responseText);
-  //         Swal.fire({
-  //           icon: "error",
-  //           title: "Error",
-  //           text: "Error al registrar el activo: " + error,
-  //         });
-  //       },
-  //     });
-  //   });
-  // }
-
-  // ? FIN CODIGO PARA GUARDAR MANUAL SIN UTILIZAR.
-
-  function listarActivosModal(docIngresoAlm) {
-    if ($.fn.DataTable.isDataTable("#tbllistarActivos")) {
-      $("#tbllistarActivos").DataTable().clear().destroy();
-    }
-    $("#tbllistarActivos").DataTable({
-      dom: "Bfrtip",
-      responsive: false,
-      destroy: true,
-      ajax: {
-        url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc",
-        type: "POST",
-        dataType: "json",
-        data: { IdDocIngresoAlm: docIngresoAlm },
-        dataSrc: function (json) {
-          console.log("Respuesta del backend: ", json);
-          return json.data || [];
-        },
-      },
-      columns: [
-        { data: "IdArticulo" },
-        { data: "Nombre" },
-        { data: "Marca" },
-        { data: "Empresa" },
-        { data: "IdUnidadNegocio" },
-        { data: "NombreLocal" },
-        {
-          data: null,
-          render: function (data, type, row) {
-            return (
-              '<button class="btn btn-success btn-sm btnSeleccionarActivo" data-id="' +
-              row.idArticulo +
-              '"><i class="fa fa-check"></i></button>'
-            );
-          },
-        },
-      ],
-      language: {
-        url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
-      },
-    });
-  }
-
-  function setSucursalOrigenDestino() {
-    var sucursalOrigenText = $("#IdSucursalOrigen option:selected").text();
-    var sucursalDestinoText = $("#IdSucursalDestino option:selected").text();
-    $("#sucursal_origen").val(sucursalOrigenText);
-    $("#sucursal_destino").val(sucursalDestinoText);
-  }
-
-  function agregarActivoAlDetalle(activo) {
-    // Primero verificar si el artículo ya existe
     $.ajax({
-      url: "../../controllers/GestionarActivosController.php?action=verificarArticuloExistente",
+      url: "../../controllers/GestionarActivosController.php?action=RegistrarManual",
       type: "POST",
-      data: {
-        IdDocIngresoAlm: $("#inputDocIngresoAlm").val(),
-        IdArticulo: activo.id,
-        IdEmpresa: activo.empresa,
-        IdSucursal: activo.sucursal,
-      },
+      data: formData,
       dataType: "json",
       success: function (res) {
         if (res.status) {
-          if (res.existe) {
-            NotificacionToast(
-              "error",
-              `El artículo <b>${activo.nombre}</b> ya ha sido registrado con este documento de ingreso.`
-            );
-            return false;
-          }
+          Swal.fire("Exito", res.message, "success");
+          $("#divModalRegistroManualActivo").modal("hide");
+          $("#frmmantenimiento")[0].reset();
+          listarActivosTable?.();
+        } else {
+          Swal.fire("Error", res.message, "error");
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("Error en la petición:", xhr.responseText);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error al registrar el activo: " + error,
+        });
+      },
+    });
+  });
 
-          // Si no existe, continuar con el proceso de agregar al detalle
-          if (
-            $(`#tbldetalleactivoreg tbody tr[data-id='${activo.id}']`).length >
-            0
-          ) {
-            NotificacionToast(
-              "error",
-              `El activo <b>${activo.nombre}</b> ya está en el detalle.`
-            );
-            return false;
-          }
+  function cargarCombosModalRegistroManual() {
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=combos",
+      type: "POST",
+      dataType: "json",
+      // async: false,
+      success: (res) => {
+        if (res.status) {
+          $("#Estado").html(res.data.estado).trigger("change");
+          $("#Estado").select2({
+            theme: "bootstrap4",
+            width: "100%",
+          });
+          $("#Ambiente").html(res.data.ambientes).trigger("change");
+          $("#Ambiente").select2({
+            theme: "bootstrap4",
+            width: "100%",
+          });
+          $("#Categoria").html(res.data.categorias).trigger("change");
+          $("#Categoria").select2({
+            theme: "bootstrap4",
+            width: "100%",
+          });
+        } else {
+          Swal.fire(
+            "Filtro de categorias",
+            "No se pudieron cargar los combos: " + res.message,
+            "warning"
+          );
+        }
+      },
+      error: (xhr, status, error) => {
+        Swal.fire(
+          "Filtro de categorias",
+          "Error al cargar combos: " + error,
+          "error"
+        );
+      },
+    });
+  }
+}
 
-          var numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
-          var selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
-          var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
-          var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
-          var inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1">`;
+// ? FIN CODIGO PARA GUARDAR MANUAL SIN UTILIZAR.
 
-          var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
+function listarActivosModal(docIngresoAlm) {
+  if ($.fn.DataTable.isDataTable("#tbllistarActivos")) {
+    $("#tbllistarActivos").DataTable().clear().destroy();
+  }
+  $("#tbllistarActivos").DataTable({
+    dom: "Bfrtip",
+    responsive: false,
+    destroy: true,
+    ajax: {
+      url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc",
+      type: "POST",
+      dataType: "json",
+      data: { IdDocIngresoAlm: docIngresoAlm },
+      dataSrc: function (json) {
+        console.log("Respuesta del backend: ", json);
+        return json.data || [];
+      },
+    },
+    columns: [
+      { data: "IdArticulo" },
+      { data: "Nombre" },
+      { data: "Marca" },
+      { data: "Empresa" },
+      { data: "IdUnidadNegocio" },
+      { data: "NombreLocal" },
+      {
+        data: null,
+        render: function (data, type, row) {
+          return (
+            '<button class="btn btn-success btn-sm btnSeleccionarActivo" data-id="' +
+            row.idArticulo +
+            '"><i class="fa fa-check"></i></button>'
+          );
+        },
+      },
+    ],
+    language: {
+      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+    },
+  });
+}
+
+function setSucursalOrigenDestino() {
+  var sucursalOrigenText = $("#IdSucursalOrigen option:selected").text();
+  var sucursalDestinoText = $("#IdSucursalDestino option:selected").text();
+  $("#sucursal_origen").val(sucursalOrigenText);
+  $("#sucursal_destino").val(sucursalDestinoText);
+}
+
+function agregarActivoAlDetalle(activo) {
+  // Primero verificar si el artículo ya existe
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=verificarArticuloExistente",
+    type: "POST",
+    data: {
+      IdDocIngresoAlm: $("#inputDocIngresoAlm").val(),
+      IdArticulo: activo.id,
+      IdEmpresa: activo.empresa,
+      IdSucursal: activo.sucursal,
+    },
+    dataType: "json",
+    success: function (res) {
+      if (res.status) {
+        if (res.existe) {
+          NotificacionToast(
+            "error",
+            `El artículo <b>${activo.nombre}</b> ya ha sido registrado con este documento de ingreso.`
+          );
+          return false;
+        }
+
+        // Si no existe, continuar con el proceso de agregar al detalle
+        if (
+          $(`#tbldetalleactivoreg tbody tr[data-id='${activo.id}']`).length > 0
+        ) {
+          NotificacionToast(
+            "error",
+            `El activo <b>${activo.nombre}</b> ya está en el detalle.`
+          );
+          return false;
+        }
+
+        var numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
+        var selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
+        var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
+        var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
+        var inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1">`;
+
+        var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
                     <td>${activo.id}</td>
                     <td>${activo.nombre}</td>
                     <td>${activo.marca}</td>
@@ -947,33 +990,32 @@ function init() {
                     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea></td>
                     <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
                 </tr>`;
-          $("#tbldetalleactivoreg tbody").append(nuevaFila);
+        $("#tbldetalleactivoreg tbody").append(nuevaFila);
 
-          ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
-          ListarCombosCategoria(`comboCategoria${numeroFilas}`);
+        ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
+        ListarCombosCategoria(`comboCategoria${numeroFilas}`);
 
-          setTimeout(function () {
-            $("#tbldetalleactivoreg tbody tr.agregado-temp").removeClass(
-              "table-success agregado-temp"
-            );
-          }, 1000);
-
-          NotificacionToast(
-            "success",
-            `Activo <b>${activo.nombre}</b> agregado al detalle.`
+        setTimeout(function () {
+          $("#tbldetalleactivoreg tbody tr.agregado-temp").removeClass(
+            "table-success agregado-temp"
           );
-          return true;
-        } else {
-          NotificacionToast("error", res.message);
-          return false;
-        }
-      },
-      error: function () {
-        NotificacionToast("error", "Error al verificar el artículo");
+        }, 1000);
+
+        NotificacionToast(
+          "success",
+          `Activo <b>${activo.nombre}</b> agregado al detalle.`
+        );
+        return true;
+      } else {
+        NotificacionToast("error", res.message);
         return false;
-      },
-    });
-  }
+      }
+    },
+    error: function () {
+      NotificacionToast("error", "Error al verificar el artículo");
+      return false;
+    },
+  });
 }
 
 // ? INICIO: SE COMENTO LA CARGA DE COMBOS EN EL MODAL YA QUE NO SE UTILIZARÁ

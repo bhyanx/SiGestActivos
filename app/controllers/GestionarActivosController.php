@@ -281,37 +281,37 @@ switch ($action) {
         break;
 
     // !COMENTADO POR DESUSO EN EL REGISTRO MANUAL DE ACTIVOS.
-    // case 'RegistrarManual':
-    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //         try {
-    //             $data = [
-    //                 'Nombre' => $_POST['nombre'],
-    //                 'Descripcion' => $_POST['descripcion'],
-    //                 'Serie' => $_POST['serie'],
-    //                 'IdEstado' => $_POST['idEstado'],
-    //                 'IdCategoria' => $_POST['idCategoria'],
-    //                 'IdAmbiente' => $_POST['idAmbiente'],
-    //                 'IdSucursal' => $_SESSION['cod_UnidadNeg'],
-    //                 'Cantidad' => $_POST['cantidad'],
-    //                 'AnioCompra' => $_POST['anioCompra'],
-    //                 'UserMod' => $_SESSION['CodEmpleado'],
-    //                 'Accion' => 1
-    //             ];
+    case 'RegistrarManual':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $data = [
+                    'Nombre' => $_POST['nombre'],
+                    'Descripcion' => $_POST['descripcion'],
+                    'Serie' => $_POST['serie'],
+                    'IdEstado' => $_POST['idEstado'],
+                    'IdCategoria' => $_POST['idCategoria'],
+                    'IdAmbiente' => $_POST['idAmbiente'],
+                    'IdSucursal' => $_SESSION['cod_UnidadNeg'],
+                    'Cantidad' => $_POST['cantidad'],
+                    'AnioCompra' => $_POST['anioCompra'],
+                    'UserMod' => $_SESSION['CodEmpleado'],
+                    'Accion' => 1
+                ];
 
-    //             $activos->registrarActivosManual($data);
-    //             echo json_encode([
-    //                 'status' => true,
-    //                 'message' => 'Activos registrados con éxito.'
-    //             ]);
-    //         } catch (Exception $e) {
-    //             error_log("Error RegistrarManual: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
-    //             echo json_encode([
-    //                 'status' => false,
-    //                 'message' => 'Error al registrar activos manualmente: ' . $e->getMessage()
-    //             ]);
-    //         }
-    //     }
-    //     break;
+                $activos->registrarActivosManual($data);
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Activos registrados con éxito.'
+                ]);
+            } catch (Exception $e) {
+                error_log("Error RegistrarManual: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al registrar activos manualmente: ' . $e->getMessage()
+                ]);
+            }
+        }
+        break;
 
     case 'Actualizar':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
