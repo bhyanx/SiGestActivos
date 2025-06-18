@@ -357,6 +357,12 @@ session_start();
                                                         <input type="text" class="form-control" id="unidadNegocio" disabled>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="">Responsable</label>
+                                                        <select name="Responsable" id="Responsable" class="form-control select-2" required></select>
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="estado">Estado</label>
@@ -375,16 +381,34 @@ session_start();
                                                         <select name="Ambiente" id="Ambiente" class="form-control select-2"></select>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="">Proveedor</label>
+                                                        <select name="Proveedor" id="Proveedor" class="form-control select-2"></select>
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="Cantidad"> Cantidad: </label>
                                                         <input type="text" name="Cantidad" id="Cantidad" class="form-control" placeholder="Ej. 1" required>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Valor Adquisición:</label>
+                                                        <input type="text" name="ValorAdquisicion" id="ValorAdquisicion" class="form-control" placeholder="Ej. 10.00" required>
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="fechaAdquisicion">Fecha Adquisición: </label>
                                                         <input type="date" name="fechaAdquisicion" id="fechaAdquisicion" class="form-control" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="">Observaciones: </label>
+                                                        <textarea name="Observaciones" id="Observaciones" class="form-control" rows="3" placeholder="Ingrese las observaciones según el activo..."></textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -411,7 +435,7 @@ session_start();
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="">Id Activo</label>
-                                                        <input type="text" id="idActivo" name="idActivo" class="form-control" disabled>
+                                                        <input type="text" id="IdActivo" name="IdActivo" class="form-control" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
@@ -453,19 +477,19 @@ session_start();
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="estado">Estado</label>
-                                                        <select name="Estado" id="Estado" class="form-control select-2"></select>
+                                                        <select name="IdEstado" id="IdEstado" class="form-control select-2"></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-8">
                                                     <div class="form-group">
                                                         <label for="ambiente">Ambiente:</label>
-                                                        <select name="Ambiente" id="Ambiente" class="form-control select-2"></select>
+                                                        <select name="IdAmbiente" id="IdAmbiente" class="form-control select-2"></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-8">
                                                     <div class="form-group">
                                                         <label for="categoria">Categoria</label>
-                                                        <select name="Categoria" id="Categoria" class="form-control select-2"></select>
+                                                        <select name="IdCategoria" id="IdCategoria" class="form-control select-2"></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">

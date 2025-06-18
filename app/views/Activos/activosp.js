@@ -13,6 +13,7 @@ function init() {
     $("#frmEditarActivo")[0].reset();
     cargarCombosModalActualizarActivo();
   });
+
   // ? FIN: SE COMENTO EL CODIGO PARA INICIALIZAR EL MODAL DE REGISTRO MANUAL
   $("#divModalRegistroManualActivo").on("shown.bs.modal", function () {
     $("#frmmantenimiento")[0].reset();
@@ -332,7 +333,7 @@ function init() {
     );
 
     // Carga los combos y luego los datos del activo
-    ListarCombosConCallback(() => {
+    cargarCombosModalActualizarActivo(() => {
       $.ajax({
         url: "../../controllers/GestionarActivosController.php?action=obtenerActivoPorId",
         type: "POST",
@@ -344,7 +345,7 @@ function init() {
             console.log("Datos del activo:", data);
 
             // Cargar datos básicos
-            $("#idActivo").val(data.idActivo);
+            $("#IdActivo").val(data.idActivo);
             $("#CodigoActivo").val(data.CodigoActivo);
             $("#SerieActivo").val(data.NumeroSerie);
             $("#DocIngresoAlmacen").val(data.DocIngresoAlmacen);
@@ -358,7 +359,7 @@ function init() {
             $("#ValorAdquisicion").val(data.valorAdquisicion);
 
             // Asignar valores a los combos
-            $("#Estado").val(data.idEstado).trigger("change");
+            $("#IdEstado").val(data.idEstado).trigger("change");
             $("#Ambiente").val(data.idAmbiente).trigger("change");
             $("#Categoria")
               .val(data.idCategoria)
@@ -1027,13 +1028,13 @@ function cargarCombosModalActualizarActivo(callback) {
     success: (res) => {
       if (res.status) {
         // Limpiar y cargar los combos
-        $("#Estado").empty().html(res.data.estado);
-        $("#Ambiente").empty().html(res.data.ambientes);
-        $("#Categoria").empty().html(res.data.categorias);
+        $("#IdEstado").html(res.data.estado).trigger("change");
+        $("#IdAmbiente").html(res.data.ambientes).trigger("change");
+        $("#IdCategoria").html(res.data.categorias).trigger("change");
 
-        // Inicializar select2
-        $("#Estado, #Ambiente, #Categoria").select2({
+        $("#IdEstado, #IdAmbiente, #IdCategoria").select2({
           theme: "bootstrap4",
+          dropdownParent: $("#divModalActualizarActivo .modal-body"),
           width: "100%",
         });
 
