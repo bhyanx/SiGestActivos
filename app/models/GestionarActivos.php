@@ -325,51 +325,52 @@ class GestionarActivos
     public function registrarActivosManual($data)
     {
         try {
-
-            $sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
-            if ($sucursal === null) {
-                throw new Exception("No se ha encontrado la sucursal");
-            }
-
-            $nombre = !empty($data['Nombre']) ? trim($data['Nombre']) : null;
-            $descripcion = !empty($data['Descripcion']) ? trim($data['Descripcion']) : null;
-            $serie = !empty($data['Serie']) ? trim($data['Serie']) : null;
-            $IdEstado = !empty($data['IdEstado']) ? (int)$data['IdEstado'] : null;
-            $IdCategoria = !empty($data['IdCategoria']) ? (int)$data['IdCategoria'] : null;
-            $idAmbiente = !empty($data['IdAmbiente']) ? (int)$data['IdAmbiente'] : null;
-            $cantidad = !empty($data['Cantidad']) ? (int)$data['Cantidad'] : null;
+            $fechaFinGarantia = !empty($data['FechaFinGarantia']) ? date('Y-m-d', strtotime($data['FechaFinGarantia'])) : null;
             $fechaAdquisicion = !empty($data['FechaAdquisicion']) ? date('Y-m-d', strtotime($data['FechaAdquisicion'])) : null;
-            $userMod = !empty($data['UserMod']) ? trim($data['UserMod']) : null;
-            $accion = 1;
-
-            if (empty($nombre) || empty($descripcion) || empty($serie) || empty($idEstado) || empty($IdCategoria) || empty($idAmbiente) || empty($cantidad) || empty($userMod)) {
-                throw new Exception("Todos los campos son obligatorios.");
-            }
-
+            $empresa = $_SESSION['cod_empresa'] ??  null;
+            $sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
+        
 
             $stmt = $this->db->prepare('EXEC sp_GuardarActivoManual
+            @pIdActivo = ?,
+            @pIdDocumentoVenta = ?,
+             @pIdOrdendeCompra = ?,
              @pNombre = ?,
              @pDescripcion = ?,
              @pSerie = ?,
              @pIdEstado = 1,
-             @pIdCategoria = ?,
-             @pIdAmbiente = ?,
+             @pIdResponsable = ?,
+             @pIdProveedor = ?,
+             @pObservaciones = ?,
+             @pIdEmpresa = ?,
              @pIdSucursal = ?,
-             @pCantidad = ?,
+             @pIdAmbiente = ?,
+             @pIdCategoria = ?,
+             @pValorAdquisicion = ?,
              @pFechaAdquisicion = ?,
              @pUserMod = ?,
+             @pCantidad = ?,
              @pAccion = 1');
 
-            $stmt->bindParam(1, $data['Nombre'], \PDO::PARAM_STR);
-            $stmt->bindParam(2, $data['Descripcion'], \PDO::PARAM_STR);
-            $stmt->bindParam(3, $data['Serie'], \PDO::PARAM_STR);
-            $stmt->bindParam(4, $data['IdEstado'], \PDO::PARAM_INT);
-            $stmt->bindParam(5, $data['IdCategoria'], \PDO::PARAM_INT);
-            $stmt->bindParam(6, $data['IdAmbiente'], \PDO::PARAM_INT);
-            $stmt->bindParam(7, $data['IdSucursal'], \PDO::PARAM_INT);
-            $stmt->bindParam(8, $data['Cantidad'], \PDO::PARAM_INT);
-            $stmt->bindParam(9, $data['FechaAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(10, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(1, $data['IdActivo'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(2, $data['IdDocumentoVenta'], \PDO::PARAM_INT);
+            $stmt->bindParam(3, $data['IdOrdendeCompra'], \PDO::PARAM_INT);
+            $stmt->bindParam(4, $data['Nombre'], \PDO::PARAM_STR);
+            $stmt->bindParam(5, $data['Descripcion'], \PDO::PARAM_STR);
+            $stmt->bindParam(6, $data['Serie'], \PDO::PARAM_STR);
+            $stmt->bindParam(7, $data['IdEstado'], \PDO::PARAM_INT);
+            $stmt->bindParam(8, $data['IdResponsable'], \PDO::PARAM_INT);
+            $stmt->bindParam(9, $data['IdProveedor'], \PDO::PARAM_INT);
+            $stmt->bindParam(10, $data['Observaciones'], \PDO::PARAM_STR);
+            $stmt->bindParam(11, $empresa, \PDO::PARAM_INT);
+            $stmt->bindParam(12, $sucursal, \PDO::PARAM_INT);
+            $stmt->bindParam(13, $data['IdAmbiente'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(14, $data['IdCategoria'], \PDO::PARAM_INT);
+            $stmt->bindParam(15, $data['VidaUtil'], \PDO::PARAM_INT);
+            $stmt->bindParam(16, $data['ValorAdquisicion'], \PDO::PARAM_STR);
+            $stmt->bindParam(17, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(18, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(19, $data['Accion'], \PDO::PARAM_INT);
 
             $stmt->execute();
             return true;

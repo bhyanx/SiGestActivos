@@ -325,8 +325,7 @@ session_start();
                                     <form id="frmmantenimiento">
                                         <div class="modal-body">
                                             <div class="row">
-                                                <input type="hidden" name="idActivo" id="dActivo" value="0">
-                                                <input type="hidden" name="IdActivo" id="idActivo" value="0">
+                                                <input type="hidden" name="IdActivo" id="IdActivo" value="0">
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="nombre">Nombre</label>
@@ -415,7 +414,7 @@ session_start();
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times"></i> Cerrar</button>
-                                            <button type="submit" class="btn btn-primary" id="btnguardar"><i class="fa fa-save"></i> Guardar</button>
+                                            <button type="submit" class="btn btn-primary" id="btnGuardarManual"><i class="fa fa-save"></i> Guardar</button>
                                         </div>
                                     </form>
                                 </div>

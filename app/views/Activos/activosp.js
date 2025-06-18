@@ -315,6 +315,41 @@ function init() {
     });
   });
 
+  $("#btnGuardarActivo").on("click", function (e) {
+    e.preventDefault();
+    // Recopilar datos del formulario
+    const data = {
+      //IdDocumentoVenta: $("#inputDocIngresoAlm").val(),
+      Nombre: $("#nombre").val(),
+      Descripcion: $("#Descripcion").val(),
+      Serie: $("#serie").val(),
+      IdEstado: $("#Estado").val(),
+      IdResponsable: $("#Responsable").val(),
+      IdProveedor: $("#Proveedor").val(),
+      Observaciones: $("#Observaciones").val(),
+      IdEmpresa: null, // Asegúrate de que esto sea correcto
+      IdSucursal: null, // Asegúrate de que esto sea correcto
+      IdAmbiente: $("#Ambiente").val(),
+      IdCategoria: $("#Categoria").val(),
+      ValorAdquisicion: $("#ValorAdquisicion").val(),
+      FechaAdquisicion: $("#fechaAdquisicion").val(),
+      Cantidad: $("#Cantidad").val(),
+    };
+
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=RegistrarManual",
+      type: "POST",
+      data: data,
+      dataType: "json",
+      success: function (res) {
+        // Manejo de la respuesta
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.error("Error en la petición:", jqXHR.responseText);
+      },
+    });
+  });
+
   $(document).on("click", ".btnEditarActivo", function () {
     const fila = $(this).closest("tr");
     const datos = $("#tblTodosActivos").DataTable().row(fila).data();
@@ -850,24 +885,21 @@ function init() {
       url: "../../controllers/GestionarActivosController.php?action=combos",
       type: "POST",
       dataType: "json",
-      // async: false,
+      async: true,
       success: (res) => {
         if (res.status) {
+          $("#Responsable").html(res.data.responsable).trigger("change");
           $("#Estado").html(res.data.estado).trigger("change");
-          $("#Estado").select2({
-            theme: "bootstrap4",
-            width: "100%",
-          });
           $("#Ambiente").html(res.data.ambientes).trigger("change");
-          $("#Ambiente").select2({
-            theme: "bootstrap4",
-            width: "100%",
-          });
           $("#Categoria").html(res.data.categorias).trigger("change");
-          $("#Categoria").select2({
-            theme: "bootstrap4",
-            width: "100%",
-          });
+          $("#Proveedor").html(res.data.proveedores).trigger("change");
+
+          $("#Responsable, #Estado, #Ambiente, #Categoria, #Proveedor").select2(
+            {
+              theme: "bootstrap4",
+              width: "100%",
+            }
+          );
         } else {
           Swal.fire(
             "Filtro de categorias",
@@ -1168,6 +1200,7 @@ function ListarCombosFiltros() {
         $("#filtroAmbiente").html(res.data.ambientes).trigger("change");
         $("#filtroCategoria, #filtroSucursal, #filtroAmbiente").select2({
           theme: "bootstrap4",
+          dropdownParent: $("#divtblactivos .modal-body"),
           width: "100%",
         });
       } else {

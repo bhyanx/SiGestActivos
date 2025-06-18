@@ -285,17 +285,26 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $data = [
-                    'Nombre' => $_POST['nombre'],
-                    'Descripcion' => $_POST['descripcion'],
-                    'Serie' => $_POST['serie'],
-                    'IdEstado' => $_POST['idEstado'],
-                    'IdCategoria' => $_POST['idCategoria'],
-                    'IdAmbiente' => $_POST['idAmbiente'],
-                    'IdSucursal' => $_SESSION['cod_UnidadNeg'],
-                    'Cantidad' => $_POST['cantidad'],
-                    'AnioCompra' => $_POST['anioCompra'],
+                    'IdActivo' => null,
+                    'IdDocumentoVenta' => $_POST['IdDocumentoVenta'],
+                    'IdOrdendeCompra' => $_POST['IdOrdendeCompra'],
+                    'Nombre' => $_POST['Nombre'],
+                    'Descripcion' => $_POST['Descripcion'],
+                    'Codigo' => null,
+                    'Serie' => $_POST['Serie'],
+                    'IdEstado' => $_POST['IdEstado'],
+                    'IdResponsable' => $_POST['IdResponsable'],
+                    'IdProveedor' => $_POST['IdProveedor'],
+                    'Observaciones' => $_POST['Observaciones'],
+                    'IdEmpresa' => $_SESSION['IdEmpresa'] ?? '',
+                    'IdSucursal' => $_SESSION['IdSucursal'],
+                    'IdAmbiente' => $_POST['IdAmbiente'],
+                    'IdCategoria' => $_POST['IdCategoria'],
+                    'VidaUtil' => $_POST['VidaUtil'],
+                    'ValorAdquisicion' => $_POST['ValorAdquisicion'],
+                    'FechaAdquisicion' => $_POST['FechaAdquisicion'],
                     'UserMod' => $_SESSION['CodEmpleado'],
-                    'Accion' => 1
+                    'Accion' => 1,
                 ];
 
                 $activos->registrarActivosManual($data);
