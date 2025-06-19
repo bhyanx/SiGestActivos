@@ -1,7 +1,9 @@
 <?php
-ob_start();
-session_start();
-// require_once("../../config/configuracion.php");
+require_once("../../config/configuracion.php");
+if (!isset($_SESSION["IdRol"])) {
+    header("Location:" .Conectar::ruta());
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -43,7 +45,7 @@ session_start();
                     <div class="col-md-6 col-lg-3 col-xl-2">
                         <div class="card shadow">
                             <div class="card-body">
-                                <img class='img-fluid w-100' src="/public/img/Logo-Lubriseng.png" alt="" />
+                                <img class='img-fluid w-100' src="<?php echo Conectar::ruta(); ?>public/img/Logo-Lubriseng.png" alt="" />
                             </div>
                         </div>
                     </div>
@@ -207,3 +209,5 @@ session_start();
 </body>
 
 </html>
+?>
+

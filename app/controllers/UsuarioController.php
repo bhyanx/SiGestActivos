@@ -1,8 +1,13 @@
 <?php
+
+// Al inicio de UsuarioController.php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 session_start();
-require_once '../config/configuracion.php';
-require_once '../models/Usuarios.php';
-require_once '../models/Combos.php';
+require_once __DIR__ . '/../config/configuracion.php';
+require_once __DIR__ . '/../models/Usuarios.php';
+require_once __DIR__ . '/../models/Combos.php';
 
 $usuario = new Usuarios();
 $combo = new Combos();
@@ -74,11 +79,16 @@ switch ($action) {
                 }
 
                 if ($tienePermisos) {
-                    if (empty($row["UrlUltimaSession"])) {
-                        $result = array('status' => true, 'msg' => '/app/views/Home/');
+                    $redirect_url = '';
+                    if (!empty($row["UrlUltimaSession"])) {
+                        // Limpiar la ruta de la BD y construir una URL absoluta
+                        $cleaned_url_ultima_session = ltrim($row["UrlUltimaSession"], './');
+                        $redirect_url = Conectar::ruta() . 'app/views/' . $cleaned_url_ultima_session;
                     } else {
-                        $result = array('status' => true, 'msg' => $row["UrlUltimaSession"]);
+                        // Redirigir a la ruta base de Home si no hay UrlUltimaSession
+                        $redirect_url = Conectar::ruta() . 'app/views/Home/';
                     }
+                    $result = array('status' => true, 'msg' => $redirect_url);
                 } else {
                     $result = array('status' => false, 'msg' => 'No tiene permisos para acceder al sistema');
                 }
@@ -130,7 +140,7 @@ switch ($action) {
 
             error_log("Combos generados: " . print_r($combos, true), 3, __DIR__ . '/../../logs/debug.log');
             echo json_encode(['status' => true, 'data' => $combos, 'message' => 'Combos cargados correctamente.']);
-        } catch (\PDOException) {
+        } catch (\PDOException $e) {
             error_log("Error Combos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             echo json_encode(['status' => false, 'message' => 'Error al cargar combos: ' . $e->getMessage()]);
         }

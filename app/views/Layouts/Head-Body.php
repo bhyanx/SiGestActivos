@@ -3,7 +3,7 @@ ob_start();
 // Validar menu y permisos de usuario
 if (!isset($_SESSION['Permisos'])) {
     ob_end_clean();
-    header('Location: /app/views/Logout/');
+    header('Location: ../views/Logout/');
     exit();
 }
 
@@ -36,12 +36,12 @@ if (!$tienePermiso) {
 <!-- Preloader -->
 
 <div class="preloader flex-column justify-content-center align-items-center">
-    <img class="rotate-loader" src="/public/img/Logo-Lubriseng.png" alt="AdminLTELogo" style="width: 50%">
+    <img class="rotate-loader" src="../../../public/img/Logo-Lubriseng.png" alt="AdminLTELogo" style="width: 50%">
     <i class="fas fa-5x fa-sync-alt"></i>
 </div>
 
 <div class="preloader flex-column justify-content-center align-items-center">
-    <img class="animation__shake" src="/public/img/Logo-Lubriseng.png" alt="AdminLTELogo" style="width: 50%">
+    <img class="animation__shake" src="../../../public/img/Logo-Lubriseng.png" alt="AdminLTELogo" style="width: 50%">
     <h3 id="textpreloader"></h3>
     <i class="fas fa-2x fa-sync-alt iconloader" id="iconloader"></i>
 </div>
@@ -118,7 +118,7 @@ if (!$tienePermiso) {
 
 
             <div class="dropdown-divider"></div>
-            <a href="/app/views/Logout/" class="dropdown-item dropdown-footer"><i class="fas fa-sign-out-alt"></i> Cerrar Sessión</a>
+            <a href="../../../app/views/Logout/" class="dropdown-item dropdown-footer"><i class="fas fa-sign-out-alt"></i> Cerrar Sessión</a>
         </div>
         </li>
     </ul>

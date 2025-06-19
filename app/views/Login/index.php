@@ -11,6 +11,7 @@ if (!isset($_SESSION["IdRol"])) {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Login | Sistema Activos</title>
+        <link rel="icon" type="image/x-icon" href="../../../public/img/Page-Lubriseng.svg" />
         <link rel="stylesheet" href="../../../public/css/variables.css">
         <link rel="stylesheet" href="../../../public/css/login.css">
         <link rel="stylesheet" href="../../../public/css/animations.css">
@@ -82,13 +83,13 @@ if (!isset($_SESSION["IdRol"])) {
             </div>
         </div>
 
-        <?php require_once '../../../Layouts/Footer.php'; ?>
+        <?php require_once '../Layouts/Footer.php'; ?>
         <script src="login.js"></script>
     </body>
 
     </html>
 <?php
 } else {
-    header("Location: ../views/Home/");
+    header("Location:" .Conectar::ruta());
     exit();
 }

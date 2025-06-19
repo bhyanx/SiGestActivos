@@ -10,7 +10,7 @@ function init() {
   $("#CodEmpresas").on("change", function () {
     let codEmpresa = $(this).val();
     $.ajax({
-      url: "/app/controllers/UsuarioController.php?action=unidadnegocio",
+      url: "../../controllers/UsuarioController.php?action=unidadnegocio",
       type: "POST",
       data: { cod_empresa: codEmpresa },
       dataType: "json",
@@ -30,7 +30,7 @@ function init() {
 
 function ListarCombosEmpresa(elemento) {
   $.ajax({
-    url: "/app/controllers/UsuarioController.php?action=combos",
+    url: "../../controllers/UsuarioController.php?action=combos",
     type: "POST",
     dataType: "json",
     async: false,
@@ -82,7 +82,7 @@ function Login(e) {
   });
 
   $.ajax({
-    url: "/app/controllers/UsuarioController.php?action=AccesoUsuario",
+    url: "../../controllers/UsuarioController.php?action=AccesoUsuario",
     type: "POST",
     data: {
       CodUsuario: usuario,
@@ -93,12 +93,7 @@ function Login(e) {
     dataType: "json",
     success: function (data) {
       if (data.status) {
-        // Asegurarse de que la URL sea absoluta
-        if (data.msg.startsWith("/")) {
-          window.location.href = data.msg;
-        } else {
-          window.location.href = "/" + data.msg;
-        }
+        window.location.href = data.msg;
       } else {
         Swal.fire({
           icon: "error",

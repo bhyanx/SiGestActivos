@@ -206,9 +206,11 @@ LEFT JOIN tRoles r ON u.IdRol = r.IdRol");
 
             // Procesar las rutas
             foreach ($menus as &$menu) {
-                if (strpos($menu['MenuRuta'], '../') === 0) {
-                    $menu['MenuRuta'] = '/app/views/' . substr($menu['MenuRuta'], 3);
-                }
+                // Eliminar el '../' inicial y cualquier './' o '/' duplicado del inicio de MenuRuta
+                $cleaned_ruta = ltrim($menu['MenuRuta'], './');
+                // Prepend the full public path including app/views/
+                // Esto asume que MenuRuta en la BD es relativa a 'app/views/'
+                $menu['MenuRuta'] = Conectar::ruta() . 'app/views/' . $cleaned_ruta;
             }
 
             return $menus;

@@ -22,7 +22,7 @@ function isCurrentRoute($menuRuta)
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar elevation-4 sidebar-dark-green">
     <!-- Brand Logo -->
-    <a href="http://192.168.1.37:8088/sis_soporte/" class="brand-link">
+    <a href="http://192.168.1.54:8088/SiGestActivos/" class="brand-link">
         <b class="ml-3 mr-0">SIS</b>
         <span class="brand-text font-weight-light">- GESTIÓN ACTIVOS</span>
     </a>

@@ -1,6 +1,12 @@
 <?php
 
 session_start();
+require_once("../../config/configuracion.php");
+
+if (!isset($_SESSION["IdRol"])) {
+    header("Location: " . Conectar::ruta());
+    exit();
+}
 
 ?>
 

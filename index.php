@@ -3,9 +3,11 @@
 require_once("app/config/configuracion.php");
 
 if (!empty($_SESSION['CodUsuario']) && !empty($_SESSION['ClaveAcceso'])){
-    header("Location: app/views/Home");
+    header("Location: " . Conectar::ruta() . "app/views/Home/");
+    exit();
 }else{
-    header("Location: app/views/Login");
+    header("Location: " . Conectar::ruta() . "app/views/Login/");
+    exit();
 } 
 ob_end_flush();
 ?>
