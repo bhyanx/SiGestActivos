@@ -319,21 +319,29 @@ function init() {
     e.preventDefault();
     // Recopilar datos del formulario
     const data = {
-      //IdDocumentoVenta: $("#inputDocIngresoAlm").val(),
+      IdDocumentoVenta: $("#IdDocumentoVenta").val(),
+      IdOrdendeCompra: $("#IdOrdendeCompra").val(),
       Nombre: $("#nombre").val(),
       Descripcion: $("#Descripcion").val(),
+      Codigo: $("#Codigo").val(),
       Serie: $("#serie").val(),
       IdEstado: $("#Estado").val(),
+      Garantia: $("#Garantia").is(":checked") ? 1 : 0,
       IdResponsable: $("#Responsable").val(),
+      FechaFinGarantia: $("#FechaFinGarantia").val(),
       IdProveedor: $("#Proveedor").val(),
       Observaciones: $("#Observaciones").val(),
-      IdEmpresa: null, // Asegúrate de que esto sea correcto
-      IdSucursal: null, // Asegúrate de que esto sea correcto
+      IdEmpresa: null, // Se establecerá en el backend
+      IdSucursal: null, // Se establecerá en el backend
       IdAmbiente: $("#Ambiente").val(),
       IdCategoria: $("#Categoria").val(),
+      VidaUtil: $("#VidaUtil").val(),
       ValorAdquisicion: $("#ValorAdquisicion").val(),
       FechaAdquisicion: $("#fechaAdquisicion").val(),
+      UserMod: null, // Se establecerá en el backend
+      MotivoBaja: $("#MotivoBaja").val(),
       Cantidad: $("#Cantidad").val(),
+      Accion: 1,
     };
 
     $.ajax({

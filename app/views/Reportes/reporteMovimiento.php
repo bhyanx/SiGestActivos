@@ -440,7 +440,7 @@ try {
         <div class="header">
             <div class="company-info">
                 <div class="logo-placeholder">
-                    <img src="/public/img/Logo-Lubriseng.png" alt="Logo de Lubriseng" style="width: 100px; height: auto;">
+                    <img src="../../../public/img/Logo-Lubriseng.png" alt="Logo de Lubriseng" style="width: 100px; height: auto;">
                 </div>
                 <div class="company-details">
                     <div class="company-name"><?php echo $cabecera['empresaOrigen'] ?? ''; ?></div>
@@ -535,7 +535,7 @@ try {
                             <td colspan="5" style="text-align: center;">No hay detalles de movimiento para mostrar.</td>
                         </tr>
                     <?php endif; ?>
-                    <?php for ($k = 0; $k < (4 - count($detalles)); $k++): // Asumiendo un mínimo de 4 filas de ejemplo 
+                    <?php for ($k = 0; $k < (1 - count($detalles)); $k++): // Asumiendo un mínimo de 4 filas de ejemplo 
                     ?>
                         <tr>
                             <td></td>

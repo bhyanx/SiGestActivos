@@ -332,7 +332,7 @@ function init() {
     }
 
     // Validar que el activo tenga todos los datos necesarios
-    if (!activo.id || !activo.nombre || !activo.marca || !activo.sucursal || !activo.ambiente) {
+    if (!activo.id || !activo.nombre || !activo.sucursal || !activo.ambiente) {
       NotificacionToast("error", "El activo no tiene todos los datos necesarios");
       return false;
     }

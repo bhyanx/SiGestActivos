@@ -285,27 +285,33 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $data = [
-                    'IdActivo' => null,
-                    'IdDocumentoVenta' => $_POST['IdDocumentoVenta'],
-                    'IdOrdendeCompra' => $_POST['IdOrdendeCompra'],
-                    'Nombre' => $_POST['Nombre'],
-                    'Descripcion' => $_POST['Descripcion'],
-                    'Codigo' => null,
-                    'Serie' => $_POST['Serie'],
-                    'IdEstado' => $_POST['IdEstado'],
-                    'IdResponsable' => $_POST['IdResponsable'],
-                    'IdProveedor' => $_POST['IdProveedor'],
-                    'Observaciones' => $_POST['Observaciones'],
-                    'IdEmpresa' => $_SESSION['IdEmpresa'] ?? '',
-                    'IdSucursal' => $_SESSION['IdSucursal'],
-                    'IdAmbiente' => $_POST['IdAmbiente'],
-                    'IdCategoria' => $_POST['IdCategoria'],
-                    'VidaUtil' => $_POST['VidaUtil'],
-                    'ValorAdquisicion' => $_POST['ValorAdquisicion'],
-                    'FechaAdquisicion' => $_POST['FechaAdquisicion'],
-                    'UserMod' => $_SESSION['CodEmpleado'],
+                    'IdActivo' => $_POST['IdActivo'] ?? null,
+                    'IdDocumentoVenta' => $_POST['IdDocumentoVenta'] ?? null,
+                    'IdOrdendeCompra' => $_POST['IdOrdendeCompra'] ?? null,
+                    'Nombre' => $_POST['nombre'] ?? null,
+                    'Descripcion' => $_POST['descripcion'] ?? null,
+                    'Codigo' => null, // El SP generará el código automáticamente
+                    'Serie' => $_POST['serie'] ?? null,
+                    'IdEstado' => empty($_POST['Estado']) ? null : (int)$_POST['Estado'],
+                    'Garantia' => $_POST['Garantia'] ?? 0,
+                    'IdResponsable' => $_POST['Responsable'] ?? null,
+                    'FechaFinGarantia' => $_POST['FechaFinGarantia'] ?? null,
+                    'IdProveedor' => $_POST['Proveedor'] ?? null,
+                    'Observaciones' => $_POST['Observaciones'] ?? '',
+                    'IdEmpresa' => $_SESSION['cod_empresa'] ?? null,
+                    'IdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
+                    'IdAmbiente' => empty($_POST['Ambiente']) ? null : (int)$_POST['Ambiente'],
+                    'IdCategoria' => empty($_POST['Categoria']) ? null : (int)$_POST['Categoria'],
+                    'VidaUtil' => empty($_POST['VidaUtil']) ? null : (int)$_POST['VidaUtil'],
+                    'ValorAdquisicion' => $_POST['ValorAdquisicion'] ?? null,
+                    'FechaAdquisicion' => $_POST['fechaAdquisicion'] ?? null,
+                    'UserMod' => $_SESSION['CodEmpleado'] ?? null,
+                    'MotivoBaja' => $_POST['MotivoBaja'] ?? null,
+                    'Cantidad' => empty($_POST['Cantidad']) ? null : (int)$_POST['Cantidad'],
                     'Accion' => 1,
                 ];
+
+                error_log("Data for registrarActivosManual: " . print_r($data, true), 3, __DIR__ . '/../../logs/debug.log');
 
                 $activos->registrarActivosManual($data);
                 echo json_encode([
