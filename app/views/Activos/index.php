@@ -75,8 +75,6 @@ if (isset($_SESSION["IdRol"])) {
                                                         </button>
                                                     </div>
                                                 </div>
-
-                                                <!-- !!!COMENTADO POR DESUSO!!! -->
                                                 <div class="col-md-2">
                                                     <div class="form-group mb-0">
                                                         <label for="">&nbsp;</label>
@@ -156,7 +154,7 @@ if (isset($_SESSION["IdRol"])) {
                                 </div>
                             </div>
 
-                            <div class="col-12" id="divregistroActivo">
+                            <div class="col-12" id="divregistroActivo" style="display: none;">
                                 <div class=" alert alert-info alert-dismissible">
                                     <span id="lbldatosactivo"> Guardar activos</span>
                                     <button type="button" class="close btn" id="btnvolverprincipal"><i class="fas fa-undo-alt"></i></button>
@@ -173,6 +171,9 @@ if (isset($_SESSION["IdRol"])) {
                                                 </button>
                                                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                                     <i class="fas fa-minus"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-tool btn-remove-activo" style="display:none;">
+                                                    <i class="fas fa-times"></i>
                                                 </button>
                                             </div>
                                         </div>
@@ -315,8 +316,144 @@ if (isset($_SESSION["IdRol"])) {
                                 </div>
                             </div>
 
+                            <!-- Nuevo div para registro manual de multiples activos -->
+                            <div class="col-12" id="divRegistroManualActivoMultiple" style="display: none;">
+                                <div class="alert alert-info alert-dismissible">
+                                    <span>Registro Manual de Activos</span>
+                                    <button type="button" class="close btn" id="btnvolverprincipalManual"><i class="fas fa-undo-alt"></i></button>
+                                </div>
+
+                                <div id="activosContainer">
+                                    <div class="card card-success activo-manual-form">
+                                        <div class="card-header">
+                                            <h3 class="card-title"><i class="fas fa-plus-circle"></i> Activo Nuevo <span class="activo-num">#1</span></h3>
+                                            <div class="card-tools">
+                                                <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                                                    <i class="fas fa-expand"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="nombre">Nombre</label>
+                                                        <input type="text" name="nombre[]" class="form-control" placeholder="Ej. Mouse Logitech" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="serie">Serie</label>
+                                                        <input type="text" name="serie[]" class="form-control" placeholder="Ej. ML-123" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="Estado">Estado</label>
+                                                        <select name="Estado[]" class="form-control select-2" required></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="descripcion">Descripción</label>
+                                                        <textarea name="Descripcion[]" class="form-control" placeholder="Ej. Mouse Logitech color negro"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="empresa">Empresa</label>
+                                                        <input type="text" class="form-control" name="empresa[]" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="unidadNegocio">Unidad de Negocio</label>
+                                                        <input type="text" class="form-control" name="unidadNegocio[]" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="Responsable">Responsable</label>
+                                                        <select name="Responsable[]" class="form-control select-2" required></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="Categoria">Categoria</label>
+                                                        <select name="Categoria[]" class="form-control select-2" required></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="Ambiente">Ambiente:</label>
+                                                        <select name="Ambiente[]" class="form-control select-2"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="Proveedor">Proveedor</label>
+                                                        <select name="Proveedor[]" class="form-control select-2"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="Cantidad"> Cantidad: </label>
+                                                        <input type="text" name="Cantidad[]" class="form-control" placeholder="Ej. 1" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="ValorAdquisicion">Valor Adquisición:</label>
+                                                        <input type="text" name="ValorAdquisicion[]" class="form-control" placeholder="Ej. 10.00" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="fechaAdquisicion">Fecha Adquisición: </label>
+                                                        <input type="date" name="fechaAdquisicion[]" class="form-control" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="Observaciones">Observaciones: </label>
+                                                        <textarea name="Observaciones[]" class="form-control" rows="3" placeholder="Ingrese las observaciones según el activo..."></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12 mt-3">
+                                    <div class="card">
+                                        <div class="card-footer">
+                                            <div class="row">
+                                                <div class="col-12 col-md-6 mb-2 mb-md-0">
+                                                    <button type="button" class="btn btn-danger btn-sm btn-block" id="btncancelarRegistroManual">
+                                                        <i class="fa fa-times"></i> Cerrar
+                                                    </button>
+                                                </div>
+                                                <div class="col-12 col-md-6">
+                                                    <button type="button" class="btn btn-success btn-sm btn-block" id="btnAgregarOtroActivo">
+                                                        <i class="fa fa-plus"></i> Agregar Otro Activo
+                                                    </button>
+                                                </div>
+                                                <div class="col-12 mt-2">
+                                                    <button type="button" class="btn btn-primary btn-sm btn-block" id="btnGuardarActivosManuales">
+                                                        <i class="fa fa-check"></i> Guardar Todos los Activos
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- COMENTADO PORQUE YA NO SE USARÁ EL REGISTRO MANUAL -->
-                            <div class="modal fade" id="divModalRegistroManualActivo" tabindex="-1" role="dialog" aria-labelledby="ModalRegistroManualLabel" aria-hidden="true">
+                            <!--<div class="modal fade" id="divModalRegistroManualActivo" tabindex="-1" role="dialog" aria-labelledby="ModalRegistroManualLabel" aria-hidden="true">
                                 <div class="modal-dialog modal-lg" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header bg-primary">
@@ -419,7 +556,7 @@ if (isset($_SESSION["IdRol"])) {
                                         </form>
                                     </div>
                                 </div>
-                            </div>
+                            </div>-->
 
                             <!-- MODAL PARA PODER ACTUALIZAR EL ACTIVO. -->
                             <div class="modal fade" id="divModalActualizarActivo" style="z-index: 9999 !important;" role="dialog" aria-labelledby="ModalActualizarActivoLabel" aria-hidden="true">
@@ -645,7 +782,7 @@ if (isset($_SESSION["IdRol"])) {
     </html>
 <?php
 } else {
-    header("Location: " .Conectar::ruta());
+    header("Location: " . Conectar::ruta());
     exit();
 }
 ?>

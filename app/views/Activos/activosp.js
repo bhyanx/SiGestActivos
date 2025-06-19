@@ -1,3 +1,5 @@
+let activoFormCount = 0;
+
 $(document).ready(function () {
   init();
 });
@@ -59,6 +61,7 @@ function init() {
       }).then((result) => {
         if (result.isConfirmed) {
           $("#divregistroActivo").hide();
+          $("#divRegistroManualActivoMultiple").hide();
           $("#divlistadoactivos").show();
           $("#divtblactivos").show();
           $("#tblRegistros").show();
@@ -75,6 +78,7 @@ function init() {
       $("#tblRegistros").hide();
       $("#divtblactivos").hide();
       $("#divlistadoactivos").hide();
+      $("#divRegistroManualActivoMultiple").hide();
       $("#tituloModalMovimiento").html(
         '<i class="fa fa-plus-circle"></i> Registrar Movimiento'
       );
@@ -82,11 +86,17 @@ function init() {
       $("#ModalArticulos").modal("show");
     });
 
-  // ? INICIO: SE COMENTO LA CARGA DE COMBOS EN EL MODAL YA QUE NO SE UTILIZARÁ
-  $("#btnCrearActivo").click(() => {
-    $("#divModalRegistroManualActivo").modal("show");
-  });
-  // ? FIN: SE COMENTO LA CARGA DE COMBOS EN EL MODAL YA QUE NO SE UTILIZARÁ
+  $("#btnCrearActivo")
+    .off("click")
+    .on("click", function () {
+      $("#divRegistroManualActivoMultiple").show();
+      $("#divlistadoactivos").hide();
+      $("#divtblactivos").hide();
+      $("#divregistroActivo").hide();
+      $("#activosContainer").empty();
+      activoFormCount = 0;
+      addActivoManualForm();
+    });
 
   $("#btnCancelarMovimiento")
     .off("click")
@@ -101,6 +111,7 @@ function init() {
     $("#divtblactivos").show();
     $("#divregistroActivo").hide();
     $("#divlistadoactivos").show();
+    $("#divRegistroManualActivoMultiple").hide();
 
     if ($.fn.DataTable.isDataTable("#tblRegistros")) {
       $("#tblRegistros").DataTable().clear().destroy();
@@ -172,8 +183,34 @@ function init() {
   });
 
   $("#btnAgregarOtroActivo").on("click", function () {
-    $("#frmDetalleMovimiento")[0].reset();
-    $("#CodigoActivo, #SucursalActual, #AmbienteActual").val("");
+    addActivoManualForm();
+  });
+
+  $(document).on("click", ".btn-remove-activo", function () {
+    const formToRemove = $(this).closest(".activo-manual-form");
+    if ($("#activosContainer .activo-manual-form").length > 1) {
+      Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Se eliminará este formulario de activo.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonColor: "#d33",
+        cancelButtonText: "Cancelar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          formToRemove.remove();
+          updateActivoFormNumbers();
+        }
+      });
+    } else {
+      Swal.fire({
+        icon: "warning",
+        title: "Advertencia",
+        text: "No puedes eliminar el último formulario de activo.",
+      });
+    }
   });
 
   $(document).on("click", ".btnSeleccionarActivo", function () {
@@ -315,47 +352,79 @@ function init() {
     });
   });
 
-  $("#btnGuardarActivo").on("click", function (e) {
+  $("#btnGuardarActivosManuales").on("click", function (e) {
     e.preventDefault();
-    // Recopilar datos del formulario
-    const data = {
-      IdDocumentoVenta: $("#IdDocumentoVenta").val(),
-      IdOrdendeCompra: $("#IdOrdendeCompra").val(),
-      Nombre: $("#nombre").val(),
-      Descripcion: $("#Descripcion").val(),
-      Codigo: $("#Codigo").val(),
-      Serie: $("#serie").val(),
-      IdEstado: $("#Estado").val(),
-      Garantia: $("#Garantia").is(":checked") ? 1 : 0,
-      IdResponsable: $("#Responsable").val(),
-      FechaFinGarantia: $("#FechaFinGarantia").val(),
-      IdProveedor: $("#Proveedor").val(),
-      Observaciones: $("#Observaciones").val(),
-      IdEmpresa: null, // Se establecerá en el backend
-      IdSucursal: null, // Se establecerá en el backend
-      IdAmbiente: $("#Ambiente").val(),
-      IdCategoria: $("#Categoria").val(),
-      VidaUtil: $("#VidaUtil").val(),
-      ValorAdquisicion: $("#ValorAdquisicion").val(),
-      FechaAdquisicion: $("#fechaAdquisicion").val(),
-      UserMod: null, // Se establecerá en el backend
-      MotivoBaja: $("#MotivoBaja").val(),
-      Cantidad: $("#Cantidad").val(),
-      Accion: 1,
-    };
 
-    $.ajax({
-      url: "../../controllers/GestionarActivosController.php?action=RegistrarManual",
-      type: "POST",
-      data: data,
-      dataType: "json",
-      success: function (res) {
-        // Manejo de la respuesta
-      },
-      error: function (jqXHR, textStatus, errorThrown) {
-        console.error("Error en la petición:", jqXHR.responseText);
-      },
+    const activos = [];
+    $("#activosContainer .activo-manual-form").each(function () {
+        const form = $(this);
+        const activo = {
+            IdActivo: null,
+            Nombre: form.find("input[name='nombre[]']").val(),
+            Descripcion: form.find("textarea[name='Descripcion[]']").val(),
+            Serie: form.find("input[name='serie[]']").val(),
+            IdEstado: form.find("select[name='Estado[]']").val(),
+            Garantia: 0,
+            IdEmpresa: null,
+            IdSucursal: null,
+            IdResponsable: form.find("select[name='Responsable[]']").val(),
+            IdProveedor: form.find("select[name='Proveedor[]']").val(),
+            Observaciones: form.find("textarea[name='Observaciones[]']").val(),
+            IdAmbiente: form.find("select[name='Ambiente[]']").val(),
+            IdCategoria: form.find("select[name='Categoria[]']").val(),
+            ValorAdquisicion: parseFloat(form.find("input[name='ValorAdquisicion[]']").val()),
+            FechaAdquisicion: form.find("input[name='fechaAdquisicion[]']").val(),
+            Cantidad: parseInt(form.find("input[name='Cantidad[]']").val()) || 1,
+            Accion: 1
+        };
+        activos.push(activo);
     });
+
+    if (activos.length > 0) {
+        Swal.fire({
+            title: "Procesando",
+            text: "Registrando activos...",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        $.ajax({
+            url: "../../controllers/GestionarActivosController.php?action=GuardarActivosManuales",
+            type: "POST",
+            data: JSON.stringify({ activos: activos }),
+            contentType: "application/json",
+            dataType: "json",
+            success: function (res) {
+                if (res.status) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Éxito",
+                        text: res.message,
+                        timer: 1500,
+                    }).then(() => {
+                        $("#activosContainer").empty();
+                        activoFormCount = 0;
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: res.message,
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.error("Error en la petición:", jqXHR.responseText);
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Error al registrar los activos: " + errorThrown,
+                });
+            },
+        });
+    }
   });
 
   $(document).on("click", ".btnEditarActivo", function () {
@@ -1463,3 +1532,273 @@ $(document).on("click", ".btnImprimirActivo", function () {
     "_blank"
   );
 });
+
+function addActivoManualForm() {
+  activoFormCount++;
+  const formHtml = `
+    <div class="card card-success activo-manual-form" data-form-number="${activoFormCount}">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-plus-circle"></i> Activo Nuevo <span class="activo-num">#${activoFormCount}</span></h3>
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-card-widget="maximize">
+            <i class="fas fa-expand"></i>
+          </button>
+          <button type="button" class="btn btn-tool" data-card-widget="collapse">
+            <i class="fas fa-minus"></i>
+          </button>
+          <button type="button" class="btn btn-tool btn-remove-activo">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      <form class="frmmantenimientoManual">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="nombre_${activoFormCount}">Nombre</label>
+                <input type="text" name="nombre[]" id="nombre_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech" required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="serie_${activoFormCount}">Serie</label>
+                <input type="text" name="serie[]" id="serie_${activoFormCount}" class="form-control" placeholder="Ej. ML-123" required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Estado_${activoFormCount}">Estado</label>
+                <select name="Estado[]" id="Estado_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="descripcion_${activoFormCount}">Descripción</label>
+                <textarea name="Descripcion[]" id="descripcion_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech color negro"></textarea>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="empresa_${activoFormCount}">Empresa</label>
+                <input type="text" class="form-control" name="empresa[]" id="empresa_${activoFormCount}" disabled>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="unidadNegocio_${activoFormCount}">Unidad de Negocio</label>
+                <input type="text" class="form-control" name="unidadNegocio[]" id="unidadNegocio_${activoFormCount}" disabled>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="Responsable_${activoFormCount}">Responsable</label>
+                <select name="Responsable[]" id="Responsable_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="Proveedor_${activoFormCount}">Proveedor</label>
+                <select name="Proveedor[]" id="Proveedor_${activoFormCount}" class="form-control select-2"></select>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <label for="Categoria_${activoFormCount}">Categoria</label>
+                <select name="Categoria[]" id="Categoria_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <label for="Ambiente_${activoFormCount}">Ambiente:</label>
+                <select name="Ambiente[]" id="Ambiente_${activoFormCount}" class="form-control select-2"></select>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Cantidad_${activoFormCount}"> Cantidad: </label>
+                <input type="number" name="Cantidad[]" id="Cantidad_${activoFormCount}" class="form-control" placeholder="Ej. 1" value="1" min="1" required readonly disabled>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="ValorAdquisicion_${activoFormCount}">Valor Adquisición:</label>
+                <input type="number" step="0.01" name="ValorAdquisicion[]" id="ValorAdquisicion_${activoFormCount}" class="form-control" placeholder="Ej. 10.00" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="fechaAdquisicion_${activoFormCount}">Fecha Adquisición: </label>
+                <input type="date" name="fechaAdquisicion[]" id="fechaAdquisicion_${activoFormCount}" class="form-control" value="${new Date()
+    .toISOString()
+    .slice(0, 10)}" required>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="Observaciones_${activoFormCount}">Observaciones: </label>
+                <textarea name="Observaciones[]" id="Observaciones_${activoFormCount}" class="form-control" rows="3" placeholder="Ingrese las observaciones según el activo..."></textarea>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      </form>
+    </div>
+  `;
+  $("#activosContainer").append(formHtml);
+  updateActivoFormNumbers();
+
+  const newForm = $(`[data-form-number="${activoFormCount}"]`);
+  newForm.find(".select-2").select2({
+    dropdownParent: newForm,
+  });
+
+  // Inicializar los widgets de tarjeta para el nuevo formulario
+  newForm
+    .find('[data-card-widget="collapse"], [data-card-widget="maximize"]')
+    .each(function () {
+      $(this).CardWidget();
+    });
+
+  ListarCombosResponsable(`Responsable_${activoFormCount}`);
+  ListarCombosEstado(`Estado_${activoFormCount}`);
+  ListarCombosCategoria(`Categoria_${activoFormCount}`);
+  ListarCombosAmbiente(`Ambiente_${activoFormCount}`);
+  ListarCombosProveedor(`Proveedor_${activoFormCount}`);
+
+  if ($("#activosContainer .activo-manual-form").length > 1) {
+    $(".btn-remove-activo").show();
+  } else {
+    $(".btn-remove-activo").hide();
+  }
+}
+
+function updateActivoFormNumbers() {
+  $("#activosContainer .activo-manual-form").each(function (index) {
+    $(this)
+      .find(".activo-num")
+      .text(`#${index + 1}`);
+    $(this).attr("data-form-number", index + 1);
+    $(this)
+      .find("label")
+      .each(function () {
+        const forAttr = $(this).attr("for");
+        if (forAttr) {
+          const newForAttr = forAttr.replace(/_(\d+)$/, `_${index + 1}`);
+          $(this).attr("for", newForAttr);
+        }
+      });
+    $(this)
+      .find("input, select, textarea")
+      .each(function () {
+        const idAttr = $(this).attr("id");
+        if (idAttr) {
+          const newIdAttr = idAttr.replace(/_(\d+)$/, `_${index + 1}`);
+          $(this).attr("id", newIdAttr);
+        }
+      });
+
+    if ($("#activosContainer .activo-manual-form").length > 1) {
+      $(this).find(".btn-remove-activo").show();
+    } else {
+      $(this).find(".btn-remove-activo").hide();
+    }
+  });
+  activoFormCount = $("#activosContainer .activo-manual-form").length;
+}
+
+// Funciones para cargar combos (asegurando su existencia o creándolas si es necesario)
+function ListarCombosResponsable(elemento) {
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    async: false,
+    success: (res) => {
+      if (res.status) {
+        $(`#${elemento}`).html(res.data.responsable).trigger("change");
+        $(`#${elemento}`).select2({
+          theme: "bootstrap4",
+          width: "100%",
+        });
+      } else {
+        Swal.fire(
+          "Filtro de movimientos",
+          "No se pudieron cargar los combos: " + res.message,
+          "warning"
+        );
+      }
+    },
+    error: (xhr, status, error) => {
+      Swal.fire(
+        "Filtros de movimientos",
+        "Error al cargar combos: " + error,
+        "error"
+      );
+    },
+  });
+}
+
+function ListarCombosEstado(elemento) {
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    async: false,
+    success: (res) => {
+      if (res.status) {
+        $(`#${elemento}`).html(res.data.estado).trigger("change");
+        $(`#${elemento}`).select2({
+          theme: "bootstrap4",
+          width: "100%",
+        });
+      } else {
+        Swal.fire(
+          "Filtro de movimientos",
+          "No se pudieron cargar los combos: " + res.message,
+          "warning"
+        );
+      }
+    },
+    error: (xhr, status, error) => {
+      Swal.fire(
+        "Filtros de movimientos",
+        "Error al cargar combos: " + error,
+        "error"
+      );
+    },
+  });
+}
+
+function ListarCombosProveedor(elemento) {
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    async: false,
+    success: (res) => {
+      if (res.status) {
+        $(`#${elemento}`).html(res.data.proveedores).trigger("change");
+        $(`#${elemento}`).select2({
+          theme: "bootstrap4",
+          width: "100%",
+        });
+      } else {
+        Swal.fire(
+          "Filtro de movimientos",
+          "No se pudieron cargar los combos: " + res.message,
+          "warning"
+        );
+      }
+    },
+    error: (xhr, status, error) => {
+      Swal.fire(
+        "Filtros de movimientos",
+        "Error al cargar combos: " + error,
+        "error"
+      );
+    },
+  });
+}
