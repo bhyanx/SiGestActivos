@@ -357,73 +357,77 @@ function init() {
 
     const activos = [];
     $("#activosContainer .activo-manual-form").each(function () {
-        const form = $(this);
-        const activo = {
-            IdActivo: null,
-            Nombre: form.find("input[name='nombre[]']").val(),
-            Descripcion: form.find("textarea[name='Descripcion[]']").val(),
-            Serie: form.find("input[name='serie[]']").val(),
-            IdEstado: form.find("select[name='Estado[]']").val(),
-            Garantia: 0,
-            IdEmpresa: null,
-            IdSucursal: null,
-            IdResponsable: form.find("select[name='Responsable[]']").val(),
-            IdProveedor: form.find("select[name='Proveedor[]']").val(),
-            Observaciones: form.find("textarea[name='Observaciones[]']").val(),
-            IdAmbiente: form.find("select[name='Ambiente[]']").val(),
-            IdCategoria: form.find("select[name='Categoria[]']").val(),
-            ValorAdquisicion: parseFloat(form.find("input[name='ValorAdquisicion[]']").val()),
-            FechaAdquisicion: form.find("input[name='fechaAdquisicion[]']").val(),
-            Cantidad: parseInt(form.find("input[name='Cantidad[]']").val()) || 1,
-            Accion: 1
-        };
-        activos.push(activo);
+      const form = $(this);
+      const activo = {
+        IdActivo: null,
+        IdDocumentoVenta: form.find("input[name='idDocumentoVenta[]']").val(),
+        IdOrdendeCompra: form.find("input[name='idOrdendeCompra[]']").val(),
+        Nombre: form.find("input[name='nombre[]']").val(),
+        Descripcion: form.find("textarea[name='Descripcion[]']").val(),
+        Serie: form.find("input[name='serie[]']").val(),
+        IdEstado: form.find("select[name='Estado[]']").val(),
+        Garantia: 0,
+        IdEmpresa: null,
+        IdSucursal: null,
+        IdResponsable: form.find("select[name='Responsable[]']").val(),
+        IdProveedor: form.find("select[name='Proveedor[]']").val(),
+        Observaciones: form.find("textarea[name='Observaciones[]']").val(),
+        IdAmbiente: form.find("select[name='Ambiente[]']").val(),
+        IdCategoria: form.find("select[name='Categoria[]']").val(),
+        ValorAdquisicion: parseFloat(
+          form.find("input[name='ValorAdquisicion[]']").val()
+        ),
+        FechaAdquisicion: form.find("input[name='fechaAdquisicion[]']").val(),
+        Cantidad: parseInt(form.find("input[name='Cantidad[]']").val()) || 1,
+        Accion: 1,
+      };
+      activos.push(activo);
     });
 
     if (activos.length > 0) {
-        Swal.fire({
-            title: "Procesando",
-            text: "Registrando activos...",
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            },
-        });
+      Swal.fire({
+        title: "Procesando",
+        text: "Registrando activos...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
 
-        $.ajax({
-            url: "../../controllers/GestionarActivosController.php?action=GuardarActivosManuales",
-            type: "POST",
-            data: JSON.stringify({ activos: activos }),
-            contentType: "application/json",
-            dataType: "json",
-            success: function (res) {
-                if (res.status) {
-                    Swal.fire({
-                        icon: "success",
-                        title: "Éxito",
-                        text: res.message,
-                        timer: 1500,
-                    }).then(() => {
-                        $("#activosContainer").empty();
-                        activoFormCount = 0;
-                    });
-                } else {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: res.message,
-                    });
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                console.error("Error en la petición:", jqXHR.responseText);
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: "Error al registrar los activos: " + errorThrown,
-                });
-            },
-        });
+      $.ajax({
+        url: "../../controllers/GestionarActivosController.php?action=GuardarActivosManuales",
+        type: "POST",
+        data: JSON.stringify({ activos: activos }),
+        contentType: "application/json",
+        dataType: "json",
+        success: function (res) {
+          if (res.status) {
+            Swal.fire({
+              icon: "success",
+              title: "Éxito",
+              text: res.message,
+              timer: 1500,
+            }).then(() => {
+              $("#activosContainer").empty();
+              activoFormCount = 0;
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: res.message,
+            });
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.error("Error en la petición:", jqXHR.responseText);
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Error al registrar los activos: " + errorThrown,
+          });
+        },
+      });
     }
   });
 
@@ -1556,6 +1560,18 @@ function addActivoManualForm() {
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
+                <label for="idDocumentoVenta_${activoFormCount}">Documento de Venta</label>
+                <input type="text" name="idDocumentoVenta[]" id="idDocumentoVenta_${activoFormCount}" class="form-control" placeholder="Doc. Venta"/>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="idOrdendeCompra_${activoFormCount}">Orden de Compra</label>
+                <input type="text" name="idOrdendeCompra[]" id="idOrdendeCompra_${activoFormCount}" class="form-control" placeholder="Orden Compra"/>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
                 <label for="nombre_${activoFormCount}">Nombre</label>
                 <input type="text" name="nombre[]" id="nombre_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech" required>
               </div>
@@ -1570,6 +1586,12 @@ function addActivoManualForm() {
               <div class="form-group">
                 <label for="Estado_${activoFormCount}">Estado</label>
                 <select name="Estado[]" id="Estado_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Categoria_${activoFormCount}">Categoria</label>
+                <select name="Categoria[]" id="Categoria_${activoFormCount}" class="form-control select-2" required></select>
               </div>
             </div>
             <div class="col-md-12">
@@ -1602,12 +1624,7 @@ function addActivoManualForm() {
                 <select name="Proveedor[]" id="Proveedor_${activoFormCount}" class="form-control select-2"></select>
               </div>
             </div>
-            <div class="col-md-8">
-              <div class="form-group">
-                <label for="Categoria_${activoFormCount}">Categoria</label>
-                <select name="Categoria[]" id="Categoria_${activoFormCount}" class="form-control select-2" required></select>
-              </div>
-            </div>
+            
             <div class="col-md-8">
               <div class="form-group">
                 <label for="Ambiente_${activoFormCount}">Ambiente:</label>
