@@ -403,9 +403,9 @@ class GestionarActivos
                 $stmt = $this->db->prepare("EXEC sp_GuardarActivoPRUEBA @pIdActivo = ?, @pSerie = ?, @pIdEstado = ?, @pIdAmbiente = ?, @pIdCategoria = ?, @pObservaciones = ?, @pUserMod = ?, @pAccion = ?");
                 $stmt->bindParam(1, $data['IdActivo'], PDO::PARAM_INT);
                 $stmt->bindParam(2, $data['Serie'], PDO::PARAM_STR);
-                $stmt->bindParam(3, $data['IdEstado'], PDO::PARAM_INT);
-                $stmt->bindParam(4, $data['IdAmbiente'], PDO::PARAM_INT);
-                $stmt->bindParam(5, $data['IdCategoria'], PDO::PARAM_INT);
+                $stmt->bindParam(3, $data['IdEstado'], PDO::PARAM_INT | PDO::PARAM_NULL);
+                $stmt->bindParam(4, $data['IdAmbiente'], PDO::PARAM_INT | PDO::PARAM_NULL);
+                $stmt->bindParam(5, $data['IdCategoria'], PDO::PARAM_INT | PDO::PARAM_NULL);
                 $stmt->bindParam(6, $data['Observaciones'], PDO::PARAM_STR);
                 $stmt->bindParam(7, $data['UserMod'], PDO::PARAM_STR);
                 $stmt->bindParam(8, $data['Accion'], PDO::PARAM_INT);

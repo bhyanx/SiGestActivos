@@ -1,4 +1,5 @@
 let activoFormCount = 0;
+let combosActivos = null;
 
 $(document).ready(function () {
   init();
@@ -69,6 +70,75 @@ function init() {
       });
     });
 
+    $("#btnvolverprincipalManual")
+    .off("click")
+    .on("click", function () {
+      Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Se perderán los cambios realizados",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar",
+        cancelButtonColor: "#d33",
+        cancelButtonText: "No, continuar aquí",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $("#divregistroActivo").hide();
+          $("#divRegistroManualActivoMultiple").hide();
+          $("#divlistadoactivos").show();
+          $("#divtblactivos").show();
+          $("#tblRegistros").show();
+        }
+      });
+    });
+
+    $("#btncancelarRegistroManual")
+    .off("click")
+    .on("click", function () {
+      Swal.fire({
+        title: "¿Estás seguro cerrar el formulario?",
+        text: "Se perderán los datos registrados",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar",
+        cancelButtonColor: "#d33",
+        cancelButtonText: "No, continuar aquí",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $("#divregistroActivo").hide();
+          $("#divRegistroManualActivoMultiple").hide();
+          $("#divlistadoactivos").show();
+          $("#divtblactivos").show();
+          $("#tblRegistros").show();
+        }
+      });
+    });
+
+    $("#btncancelarGuardarDetalles")
+    .off("click")
+    .on("click", function () {
+      Swal.fire({
+        title: "¿Estás seguro de cerrar los detalles?",
+        text: "Se perderán los cambios realizados y los articulos seleccionados",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar",
+        cancelButtonColor: "#d33",
+        cancelButtonText: "No, continuar aquí",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $("#divregistroActivo").hide();
+          $("#divRegistroManualActivoMultiple").hide();
+          $("#divlistadoactivos").show();
+          $("#divtblactivos").show();
+          $("#tblRegistros").show();
+        }
+      });
+    });
+
   $("#divregistroActivo").hide();
 
   $("#btnnuevo")
@@ -95,7 +165,14 @@ function init() {
       $("#divregistroActivo").hide();
       $("#activosContainer").empty();
       activoFormCount = 0;
-      addActivoManualForm();
+      if (!combosActivos) {
+        obtenerCombosActivos(function (data) {
+          combosActivos = data;
+          addActivoManualForm(combosActivos);
+        });
+      } else {
+        addActivoManualForm(combosActivos);
+      }
     });
 
   $("#btnCancelarMovimiento")
@@ -183,7 +260,9 @@ function init() {
   });
 
   $("#btnAgregarOtroActivo").on("click", function () {
-    addActivoManualForm();
+    if (combosActivos) {
+      addActivoManualForm(combosActivos);
+    }
   });
 
   $(document).on("click", ".btn-remove-activo", function () {
@@ -461,6 +540,7 @@ function init() {
             console.log("Datos del activo:", data);
 
             // Cargar datos básicos
+            $("#IdActivoEditar").val(data.idActivo);
             $("#IdActivo").val(data.idActivo);
             $("#CodigoActivo").val(data.CodigoActivo);
             $("#SerieActivo").val(data.NumeroSerie);
@@ -867,11 +947,11 @@ function init() {
 
     // Solo enviamos los campos que realmente necesitamos actualizar
     const datos = {
-      IdActivo: $("#idActivo").val() || null,
+      IdActivo: $("#IdActivoEditar").val() || null,
       Serie: $("#SerieActivo").val() || null,
-      IdEstado: $("#Estado").val() || null,
-      IdAmbiente: $("#Ambiente").val() || null,
-      IdCategoria: $("#Categoria").val() || null, // La categoría se mantiene pero no es editable
+      IdEstado: $("#IdEstado").val() === '' ? null : $("#IdEstado").val(),
+      IdAmbiente: $("#Ambiente").val() === '' ? null : $("#Ambiente").val(),
+      IdCategoria: $("#Categoria").val() === '' ? null : $("#Categoria").val(), // La categoría se mantiene pero no es editable
       Observaciones: $("#Observaciones").val() || null,
       UserMod: userMod,
       Accion: 2,
@@ -883,21 +963,17 @@ function init() {
       return;
     }
 
-    if (!datos.IdEstado) {
-      Swal.fire("Error", "El estado es requerido", "error");
-      return;
-    }
-
-    if (!datos.IdAmbiente) {
-      Swal.fire("Error", "El ambiente es requerido", "error");
-      return;
-    }
-
-    // Convertir valores numéricos
+    // Convertir valores numéricos solo si tienen un valor
     datos.IdActivo = parseInt(datos.IdActivo);
-    datos.IdEstado = parseInt(datos.IdEstado);
-    datos.IdAmbiente = parseInt(datos.IdAmbiente);
-    datos.IdCategoria = parseInt(datos.IdCategoria);
+    if (datos.IdEstado !== null) datos.IdEstado = parseInt(datos.IdEstado);
+    if (datos.IdAmbiente !== null) {
+        datos.IdAmbiente = parseInt(datos.IdAmbiente);
+        if (isNaN(datos.IdAmbiente)) datos.IdAmbiente = null;
+    }
+    if (datos.IdCategoria !== null) {
+        datos.IdCategoria = parseInt(datos.IdCategoria);
+        if (isNaN(datos.IdCategoria)) datos.IdCategoria = null;
+    }
 
     console.log("Datos a enviar:", datos);
 
@@ -1442,6 +1518,7 @@ function listarActivosTableModal(articulo) {
       type: "POST",
       data: {
         IdArticulo: articulo.IdArticulo,
+        IdActivo: articulo.IdActivo,
       },
       dataType: "json",
       dataSrc: function (json) {
@@ -1537,26 +1614,44 @@ $(document).on("click", ".btnImprimirActivo", function () {
   );
 });
 
-function addActivoManualForm() {
+function obtenerCombosActivos(callback) {
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    success: function(res) {
+      if (res.status) {
+        callback(res.data);
+      } else {
+        Swal.fire("Error", "No se pudieron cargar los combos: " + res.message, "error");
+      }
+    },
+    error: function(xhr, status, error) {
+      Swal.fire("Error", "Error al cargar combos: " + error, "error");
+    }
+  });
+}
+
+function addActivoManualForm(combos) {
   activoFormCount++;
   const formHtml = `
     <div class="card card-success activo-manual-form" data-form-number="${activoFormCount}">
       <div class="card-header">
         <h3 class="card-title"><i class="fas fa-plus-circle"></i> Activo Nuevo <span class="activo-num">#${activoFormCount}</span></h3>
         <div class="card-tools">
-          <button type="button" class="btn btn-tool" data-card-widget="maximize">
-            <i class="fas fa-expand"></i>
-          </button>
-          <button type="button" class="btn btn-tool" data-card-widget="collapse">
-            <i class="fas fa-minus"></i>
-          </button>
-          <button type="button" class="btn btn-tool btn-remove-activo">
-            <i class="fas fa-times"></i>
-          </button>
+            <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                <i class="fas fa-expand"></i>
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-tool btn-remove-activo" style="display:none;">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
       </div>
-      <form class="frmmantenimientoManual">
-        <div class="card-body">
+      <div class="card-body">
+        <form class="frmmantenimientoManual">
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
@@ -1612,27 +1707,25 @@ function addActivoManualForm() {
                 <input type="text" class="form-control" name="unidadNegocio[]" id="unidadNegocio_${activoFormCount}" disabled>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="form-group">
                 <label for="Responsable_${activoFormCount}">Responsable</label>
                 <select name="Responsable[]" id="Responsable_${activoFormCount}" class="form-control select-2" required></select>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="form-group">
                 <label for="Proveedor_${activoFormCount}">Proveedor</label>
-                <select name="Proveedor[]" id="Proveedor_${activoFormCount}" class="form-control select-2"></select>
+                <select name="Proveedor[]" id="Proveedor_${activoFormCount}" class="form-control select-2" required></select>
               </div>
             </div>
-            
-            <div class="col-md-8">
+            <div class="col-md-4">
               <div class="form-group">
                 <label for="Ambiente_${activoFormCount}">Ambiente:</label>
                 <select name="Ambiente[]" id="Ambiente_${activoFormCount}" class="form-control select-2"></select>
               </div>
             </div>
-            
-            <div class="col-md-4">
+            <div class="col-md-3">
               <div class="form-group">
                 <label for="Cantidad_${activoFormCount}"> Cantidad: </label>
                 <input type="number" name="Cantidad[]" id="Cantidad_${activoFormCount}" class="form-control" placeholder="Ej. 1" value="1" min="1" required readonly disabled>
@@ -1644,12 +1737,10 @@ function addActivoManualForm() {
                 <input type="number" step="0.01" name="ValorAdquisicion[]" id="ValorAdquisicion_${activoFormCount}" class="form-control" placeholder="Ej. 10.00" required>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="form-group">
                 <label for="fechaAdquisicion_${activoFormCount}">Fecha Adquisición: </label>
-                <input type="date" name="fechaAdquisicion[]" id="fechaAdquisicion_${activoFormCount}" class="form-control" value="${new Date()
-    .toISOString()
-    .slice(0, 10)}" required>
+                <input type="date" name="fechaAdquisicion[]" id="fechaAdquisicion_${activoFormCount}" class="form-control" value="${new Date().toISOString().slice(0, 10)}" required>
               </div>
             </div>
             <div class="col-md-12">
@@ -1658,33 +1749,74 @@ function addActivoManualForm() {
                 <textarea name="Observaciones[]" id="Observaciones_${activoFormCount}" class="form-control" rows="3" placeholder="Ingrese las observaciones según el activo..."></textarea>
               </div>
             </div>
-            
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   `;
   $("#activosContainer").append(formHtml);
-  updateActivoFormNumbers();
 
-  const newForm = $(`[data-form-number="${activoFormCount}"]`);
-  newForm.find(".select-2").select2({
+  // Solo actualiza el número y atributos del nuevo formulario
+  const newForm = $(`[data-form-number='${activoFormCount}']`);
+  newForm.find(".activo-num").text(`#${activoFormCount}`);
+  // No es necesario reasignar for/id salvo que cambie el orden
+
+  // Initialize Select2 for static combos after they are populated
+    newForm.find(`[name='Responsable[]']`).select2({ dropdownParent: newForm, theme: 'bootstrap4', width: '100%' });
+    newForm.find(`[name='Estado[]']`).select2({ dropdownParent: newForm, theme: 'bootstrap4', width: '100%' });
+    newForm.find(`[name='Categoria[]']`).select2({ dropdownParent: newForm, theme: 'bootstrap4', width: '100%' });
+    newForm.find(`[name='Ambiente[]']`).select2({ dropdownParent: newForm, theme: 'bootstrap4', width: '100%' });
+
+  // Proveedor: inicializar Select2 con AJAX para búsqueda dinámica
+  newForm.find('[name="Proveedor[]"]').select2({
     dropdownParent: newForm,
+    minimumInputLength: 2,
+    theme: 'bootstrap4',
+    language: {
+      inputTooShort: function (args) {
+        return "Ingresar mas de 2 caracteres.";
+      },
+      noResults: function () {
+        return "Datos no encontrados.";
+      },
+      searching: function () {
+        return "Buscando...";
+      }
+    },
+    ajax: {
+      url: "../../controllers/GestionarActivosController.php?action=comboProveedor",
+      type: "GET",
+      dataType: "json",
+      delay: 250,
+      data: function (params) {
+        return {
+          filtro: params.term // término de búsqueda
+        };
+      },
+      processResults: function (data) {
+        // data ya debe ser un array de objetos {id, text}
+        return {
+          results: data || []
+        };
+      },
+      cache: true
+    },
+    placeholder: "Ingresar/Seleccionar Proveedor",
+    allowClear: true
   });
 
-  // Inicializar los widgets de tarjeta para el nuevo formulario
-  newForm
-    .find('[data-card-widget="collapse"], [data-card-widget="maximize"]')
-    .each(function () {
-      $(this).CardWidget();
-    });
-
-  ListarCombosResponsable(`Responsable_${activoFormCount}`);
-  ListarCombosEstado(`Estado_${activoFormCount}`);
-  ListarCombosCategoria(`Categoria_${activoFormCount}`);
-  ListarCombosAmbiente(`Ambiente_${activoFormCount}`);
-  ListarCombosProveedor(`Proveedor_${activoFormCount}`);
-
+  // Cargar combos normales
+  if (combos) {
+    newForm.find(`[name='Responsable[]']`).html(combos.responsable).trigger('change');
+    newForm.find(`[name='Estado[]']`).html(combos.estado).trigger('change');
+    newForm.find(`[name='Categoria[]']`).html(combos.categorias).trigger('change');
+    newForm.find(`[name='Ambiente[]']`).html(combos.ambientes).trigger('change');
+    // No cargar combos.proveedores aquí
+  }
+  if (typeof $.fn.CardWidget === "function") {
+    newForm.CardWidget();
+  }
+  // Mostrar/ocultar botón de eliminar solo en el nuevo formulario
   if ($("#activosContainer .activo-manual-form").length > 1) {
     $(".btn-remove-activo").show();
   } else {
@@ -1693,129 +1825,50 @@ function addActivoManualForm() {
 }
 
 function updateActivoFormNumbers() {
+  // Solo actualiza el número de formularios y el atributo data-form-number
   $("#activosContainer .activo-manual-form").each(function (index) {
-    $(this)
-      .find(".activo-num")
-      .text(`#${index + 1}`);
+    $(this).find(".activo-num").text(`#${index + 1}`);
     $(this).attr("data-form-number", index + 1);
-    $(this)
-      .find("label")
-      .each(function () {
-        const forAttr = $(this).attr("for");
-        if (forAttr) {
-          const newForAttr = forAttr.replace(/_(\d+)$/, `_${index + 1}`);
-          $(this).attr("for", newForAttr);
-        }
-      });
-    $(this)
-      .find("input, select, textarea")
-      .each(function () {
-        const idAttr = $(this).attr("id");
-        if (idAttr) {
-          const newIdAttr = idAttr.replace(/_(\d+)$/, `_${index + 1}`);
-          $(this).attr("id", newIdAttr);
-        }
-      });
-
-    if ($("#activosContainer .activo-manual-form").length > 1) {
-      $(this).find(".btn-remove-activo").show();
-    } else {
-      $(this).find(".btn-remove-activo").hide();
-    }
+    // No reasignes for/id salvo que sea estrictamente necesario
   });
   activoFormCount = $("#activosContainer .activo-manual-form").length;
+  // Mostrar/ocultar botón de eliminar solo si hay más de uno
+  if (activoFormCount > 1) {
+    $(".btn-remove-activo").show();
+  } else {
+    $(".btn-remove-activo").hide();
+  }
 }
 
-// Funciones para cargar combos (asegurando su existencia o creándolas si es necesario)
-function ListarCombosResponsable(elemento) {
-  $.ajax({
-    url: "../../controllers/GestionarActivosController.php?action=combos",
-    type: "POST",
-    dataType: "json",
-    async: false,
-    success: (res) => {
-      if (res.status) {
-        $(`#${elemento}`).html(res.data.responsable).trigger("change");
-        $(`#${elemento}`).select2({
-          theme: "bootstrap4",
-          width: "100%",
-        });
-      } else {
-        Swal.fire(
-          "Filtro de movimientos",
-          "No se pudieron cargar los combos: " + res.message,
-          "warning"
-        );
+$(document).on("click", ".btn-remove-activo", function () {
+  const formToRemove = $(this).closest(".activo-manual-form");
+  if ($("#activosContainer .activo-manual-form").length > 1) {
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "Se eliminará este formulario de activo.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonColor: "#d33",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        formToRemove.remove();
+        updateActivoFormNumbers();
       }
-    },
-    error: (xhr, status, error) => {
-      Swal.fire(
-        "Filtros de movimientos",
-        "Error al cargar combos: " + error,
-        "error"
-      );
-    },
-  });
-}
+    });
+  } else {
+    Swal.fire({
+      icon: "warning",
+      title: "Advertencia",
+      text: "No puedes eliminar el último formulario de activo.",
+    });
+  }
+});
 
-function ListarCombosEstado(elemento) {
-  $.ajax({
-    url: "../../controllers/GestionarActivosController.php?action=combos",
-    type: "POST",
-    dataType: "json",
-    async: false,
-    success: (res) => {
-      if (res.status) {
-        $(`#${elemento}`).html(res.data.estado).trigger("change");
-        $(`#${elemento}`).select2({
-          theme: "bootstrap4",
-          width: "100%",
-        });
-      } else {
-        Swal.fire(
-          "Filtro de movimientos",
-          "No se pudieron cargar los combos: " + res.message,
-          "warning"
-        );
-      }
-    },
-    error: (xhr, status, error) => {
-      Swal.fire(
-        "Filtros de movimientos",
-        "Error al cargar combos: " + error,
-        "error"
-      );
-    },
-  });
-}
-
-function ListarCombosProveedor(elemento) {
-  $.ajax({
-    url: "../../controllers/GestionarActivosController.php?action=combos",
-    type: "POST",
-    dataType: "json",
-    async: false,
-    success: (res) => {
-      if (res.status) {
-        $(`#${elemento}`).html(res.data.proveedores).trigger("change");
-        $(`#${elemento}`).select2({
-          theme: "bootstrap4",
-          width: "100%",
-        });
-      } else {
-        Swal.fire(
-          "Filtro de movimientos",
-          "No se pudieron cargar los combos: " + res.message,
-          "warning"
-        );
-      }
-    },
-    error: (xhr, status, error) => {
-      Swal.fire(
-        "Filtros de movimientos",
-        "Error al cargar combos: " + error,
-        "error"
-      );
-    },
-  });
-}
+$("#activosContainer .card").each(function () {
+  if (typeof $(this).CardWidget === "function") {
+    $(this).CardWidget();
+  }
+});

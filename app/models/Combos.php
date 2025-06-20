@@ -132,4 +132,27 @@ class Combos
             throw $e;
         }
     }
+
+    // Nueva función get_Proveedor para búsqueda dinámica con filtro
+    public function get_Proveedor($filtro)
+    {
+        try {
+            // Asegurarse de que el filtro siempre sea una cadena
+            $filtro = (string) $filtro;
+
+            $sql = "SELECT TOP 20 p.Documento, p.RazonSocial 
+FROM vEntidadExternaGeneralProveedor  p
+WHERE p.EstReg = '1' AND P.CodTipoDocId = 2 
+AND (p.RazonSocial LIKE ? OR p.Documento LIKE ?) 
+ORDER BY p.RazonSocial ";
+
+            $stmt = $this->db->prepare($sql);
+            $filtroParam = "%" . $filtro . "%";
+            $stmt->execute([$filtroParam, $filtroParam]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error in get_Proveedor: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
 }

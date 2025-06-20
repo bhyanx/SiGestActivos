@@ -324,7 +324,7 @@ if (isset($_SESSION["IdRol"])) {
                                 </div>
 
                                 <div id="activosContainer">
-                                    <div class="card card-success activo-manual-form">
+                                    <div class="card card-success activo-manual-form" data-form-number="1">
                                         <div class="card-header">
                                             <h3 class="card-title"><i class="fas fa-plus-circle"></i> Activo Nuevo <span class="activo-num">#1</span></h3>
                                             <div class="card-tools">
@@ -566,6 +566,7 @@ if (isset($_SESSION["IdRol"])) {
                                             <h5 class="modal-title" id="tituloModalActualizarActivo"><i class="fa fa-plus-circle"></i> Actualizar activo</h5>
                                         </div>
                                         <form id="frmEditarActivo">
+                                            <input type="hidden" name="IdActivo" id="IdActivoEditar" value="0">
                                             <div class="modal-body">
                                                 <div class="row">
                                                     <div class="col-md-4">
@@ -733,6 +734,7 @@ if (isset($_SESSION["IdRol"])) {
                                                             <th><i class="fa fa-cogs"></i></th>
                                                             <th>Id</th>
                                                             <th>Código</th>
+                                                            <th>Serie</th>
                                                             <th>Nombre</th>
                                                             <th>Marca</th>
                                                             <th>Empresa</th>
@@ -748,8 +750,10 @@ if (isset($_SESSION["IdRol"])) {
                                                     </tbody>
                                                     <tfoot>
                                                         <tr>
+                                                            <th><i class="fa fa-cogs"></i></th>
                                                             <th>Id</th>
                                                             <th>Código</th>
+                                                            <th>Serie</th>
                                                             <th>Nombre</th>
                                                             <th>Marca</th>
                                                             <th>Empresa</th>

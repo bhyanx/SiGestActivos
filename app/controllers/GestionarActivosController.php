@@ -334,27 +334,13 @@ switch ($action) {
                 $data = [
                     'IdActivo' => isset($_POST['IdActivo']) ? (int)$_POST['IdActivo'] : null,
                     'Serie' => $_POST['Serie'] ?? null,
-                    'IdEstado' => isset($_POST['IdEstado']) ? (int)$_POST['IdEstado'] : null,
-                    'IdAmbiente' => isset($_POST['IdAmbiente']) ? (int)$_POST['IdAmbiente'] : null,
-                    'IdCategoria' => isset($_POST['IdCategoria']) ? (int)$_POST['IdCategoria'] : null,
+                    'IdEstado' => (isset($_POST['IdEstado']) && is_numeric($_POST['IdEstado']) && $_POST['IdEstado'] !== '') ? (int)$_POST['IdEstado'] : null,
+                    'IdAmbiente' => (isset($_POST['IdAmbiente']) && is_numeric($_POST['IdAmbiente']) && $_POST['IdAmbiente'] !== '') ? (int)$_POST['IdAmbiente'] : null,
+                    'IdCategoria' => (isset($_POST['IdCategoria']) && is_numeric($_POST['IdCategoria']) && $_POST['IdCategoria'] !== '') ? (int)$_POST['IdCategoria'] : null,
                     'Observaciones' => $_POST['Observaciones'] ?? null,
                     'UserMod' => $_SESSION['CodEmpleado'] ?? null,
                     'Accion' => 2
                 ];
-
-                // Validar campos requeridos
-                if (!$data['IdActivo']) {
-                    throw new Exception("El ID del activo es requerido");
-                }
-                if (!$data['IdEstado']) {
-                    throw new Exception("El estado es requerido");
-                }
-                if (!$data['IdAmbiente']) {
-                    throw new Exception("El ambiente es requerido");
-                }
-                if (!$data['IdCategoria']) {
-                    throw new Exception("La categoría es requerida");
-                }
 
                 $activos->actualizarActivos($data);
                 echo json_encode(['status' => true, 'message' => 'Activo actualizado con éxito.']);
@@ -786,6 +772,32 @@ ORDER BY a.Descripcion_articulo;
                     'message' => 'Error al registrar activos manualmente: ' . $e->getMessage()
                 ]);
             }
+        }
+        break;
+
+    case 'comboProveedor':
+        try {
+            // Asegúrate de que $combo esté instanciado (viene de Combos.php)
+            if (empty($combo) || !($combo instanceof Combos)) {
+                $combo = new Combos();
+            }
+
+            $filtro = $_GET['filtro'] ?? null;
+            $datos = $combo->get_Proveedor($filtro);
+            $arrayProv = [];
+
+            if (is_array($datos) && count($datos) > 0) {
+                foreach ($datos as $row) {
+                    $arrayProv[] = [
+                        'id' => $row['Documento'], // Asumiendo que Documento es el ID
+                        'text' => $row['RazonSocial'] . " - " . $row['Documento'] // O el formato que necesites
+                    ];
+                }
+            }
+            echo json_encode($arrayProv);
+        } catch (Exception $e) {
+            error_log("Error en comboProveedor: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode(['results' => [], 'error' => $e->getMessage()]);
         }
         break;
 
