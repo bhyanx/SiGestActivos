@@ -987,8 +987,8 @@ function listarActivosModal() {
     columns: [
       { data: "IdActivo" },
       { data: "CodigoActivo" },
-      { data: "NombreArticulo" },
-      { data: "MarcaArticulo" },
+      { data: "NombreActivoVisible" },
+      { data: "Marca" },
       { data: "Sucursal" },
       { data: "Ambiente" },
       {

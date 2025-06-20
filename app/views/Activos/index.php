@@ -103,45 +103,38 @@ if (isset($_SESSION["IdRol"])) {
                                                     <table id="tblRegistros" class="table table-bordered table-striped mt-4 table-hover">
                                                         <thead class="table-success">
                                                             <tr>
-                                                                <th>Accion</th>
-                                                                <th>Codigo</th>
-                                                                <th>Nombre Activo</th>
-                                                                <th>IdEmpresa</th>
-                                                                <th>Locacion</th>
-                                                                <th>Cantidad</th>
-                                                                <th>Valor Total</th>
-                                                                <!-- <th>Accion</th>
-                                                            <th>Id Activo</th>
-                                                            <th>Código</th>
-                                                            <th>Serie</th>
-                                                            <th>Descripción</th>
-                                                            <th>Marca</th>
-                                                            <th>Sucursal</th>
-                                                            <th>Proveedor</th>
-                                                            <th>Estado</th>
-                                                            <th>Valor</th> -->
+                                                                <th><i class="fas fa-cogs"></i></th>
+
+                                                                <th>Id Activo</th>
+                                                                <th>Código</th>
+                                                                <th>Serie</th>
+                                                                <th>Descripción</th>
+                                                                <th>Marca</th>
+                                                                <th>Sucursal</th>
+                                                                <th>Proveedor</th>
+                                                                <th>Estado</th>
+                                                                <th>Valor</th>
+                                                                <th>Responsable</th>
+                                                                <th>Art. Relacionados</th>
+                                                                <th>Act. Relacionados</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody></tbody>
                                                         <tfoot>
                                                             <tr>
-                                                                <th>Accion</th>
-                                                                <th>Codigo</th>
-                                                                <th>Nombre Activo</th>
-                                                                <th>IdEmpresa</th>
-                                                                <th>Locacion</th>
-                                                                <th>Cantidad</th>
-                                                                <th>Valor Total</th>
-                                                                <!-- <th>Accion</th>
-                                                            <th>Id Activo</th>
-                                                            <th>Código</th>
-                                                            <th>Serie</th>
-                                                            <th>Descripción</th>
-                                                            <th>Marca</th>
-                                                            <th>Sucursal</th>
-                                                            <th>Proveedor</th>
-                                                            <th>Estado</th>
-                                                            <th>Valor</th> -->
+                                                                <th><i class="fas fa-cogs"></i></th>
+                                                                <th>Id Activo</th>
+                                                                <th>Código</th>
+                                                                <th>Serie</th>
+                                                                <th>Descripción</th>
+                                                                <th>Marca</th>
+                                                                <th>Sucursal</th>
+                                                                <th>Proveedor</th>
+                                                                <th>Estado</th>
+                                                                <th>Valor</th>
+                                                                <th>Responsable</th>
+                                                                <th>Articulos Relacionados</th>
+                                                                <th>Activos Relacionados</th>
                                                             </tr>
                                                         </tfoot>
                                                     </table>
@@ -623,18 +616,18 @@ if (isset($_SESSION["IdRol"])) {
                                                             <select name="IdAmbiente" id="IdAmbiente" class="form-control select-2"></select>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-8">
+                                                    <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label for="categoria">Categoria</label>
                                                             <select name="IdCategoria" id="IdCategoria" class="form-control select-2"></select>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-4">
+                                                    <!-- <div class="col-md-4">
                                                         <div class="form-group">
                                                             <label for="Cantidad">Cantidad: </label>
                                                             <input type="text" name="Cantidad" id="Cantidad" class="form-control" disabled>
                                                         </div>
-                                                    </div>
+                                                    </div> -->
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label for="fechaAdquisicion">Fecha Adquisición: </label>
@@ -743,6 +736,8 @@ if (isset($_SESSION["IdRol"])) {
                                                             <th>Estado</th>
                                                             <th>Valor</th>
                                                             <th>Responsable</th>
+                                                            <!-- <th>Articulos Relacionados</th>
+                                                            <th>Activos Relacionados</th> -->
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -762,7 +757,9 @@ if (isset($_SESSION["IdRol"])) {
                                                             <th>Estado</th>
                                                             <th>Valor</th>
                                                             <th>Responsable</th>
-                                                            <th><i class="fa fa-cogs"></i></th>
+                                                            <!-- <th>Articulos Relacionados</th>
+                                                            <th>Activos Relacionados</th> -->
+                                                            <!-- <th><i class="fa fa-cogs"></i></th> -->
                                                         </tr>
                                                     </tfoot>
                                                 </table>

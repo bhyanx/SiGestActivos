@@ -96,12 +96,13 @@ session_start();
                                                         <th><i class="fa fa-cogs" title="Acciones"></i></th>
                                                         <th>Id DetalleMovimiento</th>
                                                         <th>Id Componente</th>
+                                                        <th>Codigo Componente</th>
                                                         <th>Nombre Componente</th>
+                                                        <th>Tipo de Mov.</th>
                                                         <th>Activo Padre Origen</th>
                                                         <th>Activo Padre Destino</th>
                                                         <th>Sucursal</th>
                                                         <th>Ambiente</th>
-                                                        <th>Autorizador</th>
                                                         <th>Responsable</th>
                                                         <th>Fecha Movimiento</th>
                                                     </tr>

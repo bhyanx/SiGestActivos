@@ -70,7 +70,7 @@ function init() {
       });
     });
 
-    $("#btnvolverprincipalManual")
+  $("#btnvolverprincipalManual")
     .off("click")
     .on("click", function () {
       Swal.fire({
@@ -93,7 +93,7 @@ function init() {
       });
     });
 
-    $("#btncancelarRegistroManual")
+  $("#btncancelarRegistroManual")
     .off("click")
     .on("click", function () {
       Swal.fire({
@@ -116,7 +116,7 @@ function init() {
       });
     });
 
-    $("#btncancelarGuardarDetalles")
+  $("#btncancelarGuardarDetalles")
     .off("click")
     .on("click", function () {
       Swal.fire({
@@ -512,7 +512,10 @@ function init() {
 
   $(document).on("click", ".btnEditarActivo", function () {
     const fila = $(this).closest("tr");
-    const datos = $("#tblTodosActivos").DataTable().row(fila).data();
+    const datos =
+      $(fila).closest("table").attr("id") === "tblRegistros"
+        ? $("#tblRegistros").DataTable().row(fila).data()
+        : $("#tblTodosActivos").DataTable().row(fila).data();
 
     if (!datos) {
       Swal.fire(
@@ -548,8 +551,8 @@ function init() {
             $("#SerieActivo").val(data.NumeroSerie);
             $("#DocIngresoAlmacen").val(data.DocIngresoAlmacen);
             $("#IdArticulo").val(data.idArticulo);
-            $("#nombreArticulo").val(data.NombreArticulo);
-            $("#marca").val(data.MarcaArticulo);
+            $("#nombreArticulo").val(data.NombreActivoVisible);
+            $("#marca").val(data.Marca);
             $("#fechaAdquisicion").val(data.fechaAdquisicion);
             $("#Garantia").prop("checked", data.garantia == 1);
             $("#Observaciones").val(data.observaciones);
@@ -558,12 +561,16 @@ function init() {
 
             // Asignar valores a los combos
             $("#IdEstado").val(data.idEstado).trigger("change");
-            $("#Ambiente").val(data.idAmbiente).trigger("change");
-            $("#Categoria")
+            $("#IdAmbiente").val(data.idAmbiente).trigger("change");
+            $("#IdCategoria")
               .val(data.idCategoria)
               .trigger("change")
               .prop("disabled", true);
 
+            // $("#Cantidad")
+            //   .val(data.cantidad)
+            //   .trigger("change")
+            //   .prop("disabled", true);
             // Mostrar el modal
             $("#divModalActualizarActivo").modal({
               backdrop: "static",
@@ -591,7 +598,10 @@ function init() {
   // Manejador para el botón de Asignar Responsable
   $(document).on("click", ".btnAsignarResponsable", function () {
     const fila = $(this).closest("tr");
-    const datos = $("#tblTodosActivos").DataTable().row(fila).data();
+    const datos =
+      $(fila).closest("table").attr("id") === "tblRegistros"
+        ? $("#tblRegistros").DataTable().row(fila).data()
+        : $("#tblTodosActivos").DataTable().row(fila).data();
 
     if (!datos) {
       Swal.fire(
@@ -740,7 +750,10 @@ function init() {
   // Manejador para el botón de Ver Historial
   $(document).on("click", ".btnVerHistorial", function () {
     const fila = $(this).closest("tr");
-    const datos = $("#tblTodosActivos").DataTable().row(fila).data();
+    const datos =
+      $(fila).closest("table").attr("id") === "tblRegistros"
+        ? $("#tblRegistros").DataTable().row(fila).data()
+        : $("#tblTodosActivos").DataTable().row(fila).data();
 
     if (!datos) {
       Swal.fire(
@@ -783,15 +796,15 @@ function init() {
                       </thead>
                       <tbody>`;
 
-          res.data.forEach(item => {
+          res.data.forEach((item) => {
             historialHtml += `
               <tr>
                 <td>${item.FechaModificacion}</td>
                 <td>${item.Accion}</td>
                 <td>${item.UserMod}</td>
                 <td>${item.CampoModificado}</td>
-                <td>${item.ValorAnterior || ''}</td>
-                <td>${item.ValorNuevo || ''}</td>
+                <td>${item.ValorAnterior || ""}</td>
+                <td>${item.ValorNuevo || ""}</td>
               </tr>`;
           });
 
@@ -812,28 +825,42 @@ function init() {
           $("body").append(historialHtml);
           // Inicializar datatable
           $("#tblHistorialActivo").DataTable({
-            language: { url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+            language: {
+              url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+            },
             responsive: true,
             destroy: true,
-            order: [[0, 'desc']]
+            order: [[0, "desc"]],
           });
           // Mostrar el modal
           $("#modalHistorialActivo").modal("show");
-
         } else {
-          Swal.fire("Historial del Activo", res.data.length === 0 ? "No se encontró historial para este activo." : "Error al obtener el historial: " + res.message, "info");
+          Swal.fire(
+            "Historial del Activo",
+            res.data.length === 0
+              ? "No se encontró historial para este activo."
+              : "Error al obtener el historial: " + res.message,
+            "info"
+          );
         }
       },
       error: function (xhr, status, error) {
-        Swal.fire("Error", "No se pudo obtener el historial del activo: " + error, "error");
-      }
+        Swal.fire(
+          "Error",
+          "No se pudo obtener el historial del activo: " + error,
+          "error"
+        );
+      },
     });
   });
 
   // Manejador para el botón de Dar de Baja
   $(document).on("click", ".btnDarBaja", function () {
     const fila = $(this).closest("tr");
-    const datos = $("#tblTodosActivos").DataTable().row(fila).data();
+    const datos =
+      $(fila).closest("table").attr("id") === "tblRegistros"
+        ? $("#tblRegistros").DataTable().row(fila).data()
+        : $("#tblTodosActivos").DataTable().row(fila).data();
 
     if (!datos) {
       Swal.fire(
@@ -1022,9 +1049,9 @@ function init() {
     const datos = {
       IdActivo: $("#IdActivoEditar").val() || null,
       Serie: $("#SerieActivo").val() || null,
-      IdEstado: $("#IdEstado").val() === '' ? null : $("#IdEstado").val(),
-      IdAmbiente: $("#Ambiente").val() === '' ? null : $("#Ambiente").val(),
-      IdCategoria: $("#Categoria").val() === '' ? null : $("#Categoria").val(), // La categoría se mantiene pero no es editable
+      IdEstado: $("#IdEstado").val() === "" ? null : $("#IdEstado").val(),
+      IdAmbiente: $("#Ambiente").val() === "" ? null : $("#Ambiente").val(),
+      IdCategoria: $("#Categoria").val() === "" ? null : $("#Categoria").val(), // La categoría se mantiene pero no es editable
       Observaciones: $("#Observaciones").val() || null,
       UserMod: userMod,
       Accion: 2,
@@ -1040,12 +1067,12 @@ function init() {
     datos.IdActivo = parseInt(datos.IdActivo);
     if (datos.IdEstado !== null) datos.IdEstado = parseInt(datos.IdEstado);
     if (datos.IdAmbiente !== null) {
-        datos.IdAmbiente = parseInt(datos.IdAmbiente);
-        if (isNaN(datos.IdAmbiente)) datos.IdAmbiente = null;
+      datos.IdAmbiente = parseInt(datos.IdAmbiente);
+      if (isNaN(datos.IdAmbiente)) datos.IdAmbiente = null;
     }
     if (datos.IdCategoria !== null) {
-        datos.IdCategoria = parseInt(datos.IdCategoria);
-        if (isNaN(datos.IdCategoria)) datos.IdCategoria = null;
+      datos.IdCategoria = parseInt(datos.IdCategoria);
+      if (isNaN(datos.IdCategoria)) datos.IdCategoria = null;
     }
 
     console.log("Datos a enviar:", datos);
@@ -1061,11 +1088,11 @@ function init() {
           $("#divModalActualizarActivo").modal("hide");
           listarActivosTable();
           const idArticulo = $("#frmEditarActivo").data("idArticulo");
-          if (idArticulo) {
-            listarActivosTableModal({
-              IdArticulo: idArticulo
-            });
-          }
+          // if (idArticulo) {
+          //   // listarActivosTableModal({
+          //   //   IdArticulo: idArticulo,
+          //   // });
+          // }
         } else {
           Swal.fire(
             "Error",
@@ -1525,79 +1552,11 @@ function listarActivosTable() {
     autoWidth: false,
     destroy: true,
     ajax: {
-      url: "../../controllers/GestionarActivosController.php?action=Consultar",
-      type: "POST",
-      dataType: "json",
-      dataSrc: function (json) {
-        return json || [];
-      },
-    },
-    columns: [
-      {
-        data: null,
-        render: (data, type, row) =>
-          `<div class="btn-group">
-            <button type="button" class="btn btn-info btn-sm dropdown-toggle align-content-center" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <i class="fas fa-cog"></i>
-            </button>
-            <div class="dropdown-menu">
-              <button class="dropdown-item btnVerDetalle" type="button">
-                <i class="fas fa-bars text-success"></i> Detalle
-              </button>
-              <button class="dropdown-item btnImprimirActivo" type="button">
-                <i class="fas fa-print text-warning"></i> Imprimir Ingreso
-              </button>
-            </div>
-          </div>`,
-      },
-      { data: "Codigo" },
-      { data: "NombreActivo" },
-      { data: "IdEmpresa" },
-      { data: "Locacion" },
-      { data: "Cantidad" },
-      { data: "ValorTotal" },
-    ],
-    language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
-    },
-  });
-}
-
-function listarActivosTableModal(articulo) {
-  $("#tblTodosActivos").DataTable({
-    aProcessing: true,
-    aServerSide: true,
-    layout: {
-      topStart: {
-        buttons: [
-          {
-            extend: "excelHtml5",
-            title: "Listado Activos",
-            text: "<i class='fas fa-file-excel'></i> Exportar",
-            autoFilter: true,
-            sheetName: "Data",
-            exportOptions: {
-              columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-            },
-          },
-          "pageLength",
-          "colvis",
-        ],
-      },
-      bottom: "paging",
-      bottomStart: null,
-      bottomEnd: null,
-    },
-    lengthChange: false,
-    colReorder: true,
-    autoWidth: false,
-    destroy: true,
-    ajax: {
       url: "../../controllers/GestionarActivosController.php?action=ConsultarActivosRelacionados",
       type: "POST",
       data: {
-        IdArticulo: articulo.IdArticulo,
-        IdActivo: articulo.IdActivo,
+        IdArticulo: "",
+        IdActivo: "",
       },
       dataType: "json",
       dataSrc: function (json) {
@@ -1634,13 +1593,15 @@ function listarActivosTableModal(articulo) {
       { data: "idActivo", visible: false, searchable: false },
       { data: "CodigoActivo" },
       { data: "NumeroSerie" },
-      { data: "NombreArticulo" },
-      { data: "MarcaArticulo" },
+      { data: "NombreActivoVisible" },
+      { data: "Marca" },
       { data: "Sucursal" },
       { data: "Proveedor" },
       { data: "Estado" },
       { data: "valorAdquisicion" },
       { data: "idResponsable" },
+      { data: "TotalRelacionadosPorArticulo" },
+      { data: "TotalRelacionadosPorPadre" },
       { data: "idArticulo", visible: false },
       { data: "idAmbiente", visible: false },
       { data: "idCategoria", visible: false },
@@ -1654,6 +1615,97 @@ function listarActivosTableModal(articulo) {
   });
 }
 
+// function listarActivosTableModal(articulo) {
+//   $("#tblTodosActivos").DataTable({
+//     aProcessing: true,
+//     aServerSide: true,
+//     layout: {
+//       topStart: {
+//         buttons: [
+//           {
+//             extend: "excelHtml5",
+//             title: "Listado Activos",
+//             text: "<i class='fas fa-file-excel'></i> Exportar",
+//             autoFilter: true,
+//             sheetName: "Data",
+//             exportOptions: {
+//               columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+//             },
+//           },
+//           "pageLength",
+//           "colvis",
+//         ],
+//       },
+//       bottom: "paging",
+//       bottomStart: null,
+//       bottomEnd: null,
+//     },
+//     lengthChange: false,
+//     colReorder: true,
+//     autoWidth: false,
+//     destroy: true,
+//     ajax: {
+//       url: "../../controllers/GestionarActivosController.php?action=ConsultarActivosRelacionados",
+//       type: "POST",
+//       data: {
+//         IdArticulo: articulo.IdArticulo,
+//         IdActivo: articulo.IdActivo,
+//       },
+//       dataType: "json",
+//       dataSrc: function (json) {
+//         return json || [];
+//       },
+//     },
+//     columns: [
+//       {
+//         data: null,
+//         render: (data, type, row) =>
+//           `<div class="btn-group">
+//             <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+//             <i class="fas fa-cog"></i>
+//             </button>
+//             <div class="dropdown-menu">
+//               <button class="dropdown-item btnEditarActivo" type="button">
+//                 <i class="fas fa-edit text-warning"></i> Editar
+//               </button>
+//               <button class="dropdown-item btnAsignarResponsable" type="button">
+//                 <i class="fas fa-user-plus text-info"></i> Asignar Responsable
+//               </button>
+//               <button class="dropdown-item btnVerHistorial" type="button">
+//                 <i class="fas fa-history text-primary"></i> Ver Historial
+//               </button>
+//               <button class="dropdown-item btnImprimirActivo" type="button">
+//                 <i class="fas fa-print text-secondary"></i> Imprimir Activo
+//               </button>
+//               <button class="dropdown-item btnDarBaja" type="button">
+//                 <i class="fas fa-ban text-danger"></i> Dar de Baja
+//               </button>
+//             </div>
+//         </div>`,
+//       },
+//       { data: "idActivo", visible: false, searchable: false },
+//       { data: "CodigoActivo" },
+//       { data: "NumeroSerie" },
+//       { data: "NombreArticulo" },
+//       { data: "MarcaArticulo" },
+//       { data: "Sucursal" },
+//       { data: "Proveedor" },
+//       { data: "Estado" },
+//       { data: "valorAdquisicion" },
+//       { data: "idResponsable" },
+//       { data: "idArticulo", visible: false },
+//       { data: "idAmbiente", visible: false },
+//       { data: "idCategoria", visible: false },
+//       { data: "DocIngresoAlmacen", visible: false },
+//       { data: "fechaAdquisicion", visible: false },
+//       { data: "observaciones", visible: false },
+//     ],
+//     language: {
+//       url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+//     },
+//   });
+// }
+
 $(document).on("click", ".btnVerDetalle", function () {
   // Abrir el modal
   $("#modalListarTodosActivos").modal("show");
@@ -1665,13 +1717,16 @@ $(document).on("click", ".btnVerDetalle", function () {
     return;
   }
   // Listar los activos en el modal, enviando el IdArticulo
-  listarActivosTableModal({ IdArticulo: datos.Codigo });
+  //listarActivosTableModal({ IdArticulo: datos.Codigo });
 });
 
 // Add the event handler for the print button
 $(document).on("click", ".btnImprimirActivo", function () {
   const fila = $(this).closest("tr");
-  const datos = $("#tblTodosActivos").DataTable().row(fila).data();
+  const datos =
+    $(fila).closest("table").attr("id") === "tblRegistros"
+      ? $("#tblRegistros").DataTable().row(fila).data()
+      : $("#tblTodosActivos").DataTable().row(fila).data();
 
   if (!datos) {
     Swal.fire(
@@ -1698,16 +1753,20 @@ function obtenerCombosActivos(callback) {
     url: "../../controllers/GestionarActivosController.php?action=combos",
     type: "POST",
     dataType: "json",
-    success: function(res) {
+    success: function (res) {
       if (res.status) {
         callback(res.data);
       } else {
-        Swal.fire("Error", "No se pudieron cargar los combos: " + res.message, "error");
+        Swal.fire(
+          "Error",
+          "No se pudieron cargar los combos: " + res.message,
+          "error"
+        );
       }
     },
-    error: function(xhr, status, error) {
+    error: function (xhr, status, error) {
       Swal.fire("Error", "Error al cargar combos: " + error, "error");
-    }
+    },
   });
 }
 
@@ -1819,7 +1878,9 @@ function addActivoManualForm(combos) {
             <div class="col-md-4">
               <div class="form-group">
                 <label for="fechaAdquisicion_${activoFormCount}">Fecha Adquisición: </label>
-                <input type="date" name="fechaAdquisicion[]" id="fechaAdquisicion_${activoFormCount}" class="form-control" value="${new Date().toISOString().slice(0, 10)}" required>
+                <input type="date" name="fechaAdquisicion[]" id="fechaAdquisicion_${activoFormCount}" class="form-control" value="${new Date()
+    .toISOString()
+    .slice(0, 10)}" required>
               </div>
             </div>
             <div class="col-md-12">
@@ -1841,16 +1902,24 @@ function addActivoManualForm(combos) {
   // No es necesario reasignar for/id salvo que cambie el orden
 
   // Initialize Select2 for static combos after they are populated
-    newForm.find(`[name='Responsable[]']`).select2({ dropdownParent: newForm, theme: 'bootstrap4', width: '100%' });
-    newForm.find(`[name='Estado[]']`).select2({ dropdownParent: newForm, theme: 'bootstrap4', width: '100%' });
-    newForm.find(`[name='Categoria[]']`).select2({ dropdownParent: newForm, theme: 'bootstrap4', width: '100%' });
-    newForm.find(`[name='Ambiente[]']`).select2({ dropdownParent: newForm, theme: 'bootstrap4', width: '100%' });
+  newForm
+    .find(`[name='Responsable[]']`)
+    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%" });
+  newForm
+    .find(`[name='Estado[]']`)
+    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%" });
+  newForm
+    .find(`[name='Categoria[]']`)
+    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%" });
+  newForm
+    .find(`[name='Ambiente[]']`)
+    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%" });
 
   // Proveedor: inicializar Select2 con AJAX para búsqueda dinámica
   newForm.find('[name="Proveedor[]"]').select2({
     dropdownParent: newForm,
     minimumInputLength: 2,
-    theme: 'bootstrap4',
+    theme: "bootstrap4",
     language: {
       inputTooShort: function (args) {
         return "Ingresar mas de 2 caracteres.";
@@ -1860,7 +1929,7 @@ function addActivoManualForm(combos) {
       },
       searching: function () {
         return "Buscando...";
-      }
+      },
     },
     ajax: {
       url: "../../controllers/GestionarActivosController.php?action=comboProveedor",
@@ -1869,27 +1938,36 @@ function addActivoManualForm(combos) {
       delay: 250,
       data: function (params) {
         return {
-          filtro: params.term // término de búsqueda
+          filtro: params.term, // término de búsqueda
         };
       },
       processResults: function (data) {
         // data ya debe ser un array de objetos {id, text}
         return {
-          results: data || []
+          results: data || [],
         };
       },
-      cache: true
+      cache: true,
     },
     placeholder: "Ingresar/Seleccionar Proveedor",
-    allowClear: true
+    allowClear: true,
   });
 
   // Cargar combos normales
   if (combos) {
-    newForm.find(`[name='Responsable[]']`).html(combos.responsable).trigger('change');
-    newForm.find(`[name='Estado[]']`).html(combos.estado).trigger('change');
-    newForm.find(`[name='Categoria[]']`).html(combos.categorias).trigger('change');
-    newForm.find(`[name='Ambiente[]']`).html(combos.ambientes).trigger('change');
+    newForm
+      .find(`[name='Responsable[]']`)
+      .html(combos.responsable)
+      .trigger("change");
+    newForm.find(`[name='Estado[]']`).html(combos.estado).trigger("change");
+    newForm
+      .find(`[name='Categoria[]']`)
+      .html(combos.categorias)
+      .trigger("change");
+    newForm
+      .find(`[name='Ambiente[]']`)
+      .html(combos.ambientes)
+      .trigger("change");
     // No cargar combos.proveedores aquí
   }
   if (typeof $.fn.CardWidget === "function") {
@@ -1906,7 +1984,9 @@ function addActivoManualForm(combos) {
 function updateActivoFormNumbers() {
   // Solo actualiza el número de formularios y el atributo data-form-number
   $("#activosContainer .activo-manual-form").each(function (index) {
-    $(this).find(".activo-num").text(`#${index + 1}`);
+    $(this)
+      .find(".activo-num")
+      .text(`#${index + 1}`);
     $(this).attr("data-form-number", index + 1);
     // No reasignes for/id salvo que sea estrictamente necesario
   });

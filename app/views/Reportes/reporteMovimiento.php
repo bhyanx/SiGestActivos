@@ -526,8 +526,8 @@ try {
                                 <td><?php echo $i++; ?></td>
                                 <td><?php echo $detalle['Codigo'] ?? ''; ?></td>
                                 <td class="description-col"><?php echo $detalle['nombreActivo'] ?? ''; ?></td>
-                                <td>[CANTIDAD]</td>
-                                <td>[UNIDAD DE DESPACHO]</td>
+                                <td><?php echo $detalle['Cantidad'] ?? '1'; ?></td>
+                                <td>UM</td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>

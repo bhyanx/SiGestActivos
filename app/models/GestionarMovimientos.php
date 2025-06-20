@@ -153,8 +153,8 @@ class GestionarMovimientos
             SELECT 
                 a.IdActivo,
                 a.CodigoActivo,
-                a.NombreArticulo,
-                a.MarcaArticulo,
+                a.NombreActivoVisible,
+                a.Marca,
                 s.Nombre_local AS Sucursal,
                 amb.nombre AS Ambiente,
                 a.NumeroSerie
@@ -164,7 +164,7 @@ class GestionarMovimientos
             WHERE a.IdEmpresa = ? 
             AND a.IdSucursal = ?
             AND a.idEstado = 1
-            ORDER BY a.NombreArticulo";
+            ORDER BY a.NombreActivoVisible";
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idEmpresa, PDO::PARAM_INT);
@@ -251,7 +251,7 @@ class GestionarMovimientos
                 m.estado,
                 m.fechaAnulacion,
                 tm.nombre as tipoMovimiento,
-                a.NombreArticulo,
+                a.NombreActivoVisible,
                 a.CodigoActivo,
                 so.Nombre_local as sucursalOrigen,
                 sd.Nombre_local as sucursalDestino,
@@ -394,7 +394,7 @@ class GestionarMovimientos
     public function obtenerDetallesMovimiento($idMovimiento)
     {
         try {
-            $sql = "SELECT a.CodigoActivo as Codigo, a.NombreArticulo as nombreActivo, 
+            $sql = "SELECT a.CodigoActivo as Codigo, a.NombreActivoVisible as nombreActivo, 
                     amb1.nombre as ambienteOrigen, 
                     amb2.nombre as ambienteDestino, 
                     u1.NombreTrabajador as responsableOrigen, 

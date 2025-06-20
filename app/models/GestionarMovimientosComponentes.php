@@ -16,8 +16,8 @@ class GestionarMovimientosComponentes
             SELECT 
                 a.IdActivo,
                 a.CodigoActivo,
-                ISNULL(a.NombreArticulo, '') as NombreArticulo,
-                ISNULL(a.MarcaArticulo, '') as MarcaArticulo,
+                ISNULL(a.NombreActivoVisible, '') as NombreArticulo,
+                ISNULL(a.Marca, '') as MarcaArticulo,
                 ISNULL(s.Nombre_local, '') AS Sucursal,
                 ISNULL(amb.nombre, '') AS Ambiente,
                 ISNULL(a.NumeroSerie, '') as NumeroSerie
@@ -32,7 +32,8 @@ class GestionarMovimientosComponentes
                 $sql .= " AND a.IdSucursal = :sucursal";
             }
             
-            $sql .= " ORDER BY a.NombreArticulo";
+            $sql .= " ORDER BY a.NombreActivoVisible";
+
             
             $stmt = $this->db->prepare($sql);
             
@@ -55,8 +56,8 @@ class GestionarMovimientosComponentes
             SELECT 
                 a.IdActivo,
                 a.CodigoActivo,
-                ISNULL(a.NombreArticulo, '') as NombreArticulo,
-                ISNULL(a.MarcaArticulo, '') as MarcaArticulo,
+                ISNULL(a.NombreActivoVisible, '') as NombreArticulo,
+                ISNULL(a.Marca, '') as MarcaArticulo,
                 ISNULL(a.NumeroSerie, '') as NumeroSerie,
                 ISNULL(s.Nombre_local, '') AS Sucursal,
                 ISNULL(amb.nombre, '') AS Ambiente
@@ -65,7 +66,7 @@ class GestionarMovimientosComponentes
             INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
             WHERE a.idActivoPadre = ?
             AND a.idEstado = 1
-            ORDER BY a.NombreArticulo";
+            ORDER BY a.NombreActivoVisible";
             
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idActivoPadre, PDO::PARAM_INT);
@@ -113,28 +114,29 @@ class GestionarMovimientosComponentes
         try {
             $sql = "
             SELECT 
-                dm.IdDetalleMovimiento,
-                c.IdActivo as IdComponente,
-                c.CodigoActivo as CodigoComponente,
-                ISNULL(c.NombreArticulo, '') as NombreComponente,
-                ISNULL(ap_origen.CodigoActivo + ' - ' + ap_origen.NombreArticulo, '') as ActivoPadreOrigen,
-                ISNULL(ap_destino.CodigoActivo + ' - ' + ap_destino.NombreArticulo, '') as ActivoPadreDestino,
-                ISNULL(s.Nombre_local, '') as Sucursal,
-                ISNULL(amb.nombre, '') as Ambiente,
-                ISNULL(CONCAT(t.NombreTrabajador, ' ', t.ApellidoPaterno), '') as Autorizador,
-                ISNULL(CONCAT(r.NombreTrabajador, ' ', r.ApellidoPaterno), '') as Responsable,
-                m.FechaMovimiento
-            FROM tDetalleMovimiento dm
-            INNER JOIN tMovimientos m ON dm.IdMovimiento = m.IdMovimiento
-            INNER JOIN vActivos c ON dm.IdActivo = c.IdActivo
-            INNER JOIN vActivos ap_origen ON dm.IdActivoPadreOrigen = ap_origen.IdActivo
-            INNER JOIN vActivos ap_destino ON dm.IdActivoPadreNuevo = ap_destino.IdActivo
-            INNER JOIN vUnidadesdeNegocio s ON m.IdSucursalDestino = s.cod_UnidadNeg
-            INNER JOIN tAmbiente amb ON dm.IdAmbienteNueva = amb.idAmbiente
-            INNER JOIN tTrabajador t ON m.IdAutorizador = t.codTrabajador
-            INNER JOIN tTrabajador r ON dm.IdResponsableNueva = r.codTrabajador
-            WHERE m.IdTipoMovimiento = 8
-            AND m.estado = 'A'";
+    dm.IdDetalleMovimiento,
+    c.IdActivo AS IdComponente,
+    c.CodigoActivo AS CodigoComponente,
+    ISNULL(c.NombreActivoVisible, '') AS NombreComponente,
+	tm.nombre AS TipoMovimiento,
+    ISNULL(ap_origen.CodigoActivo + ' - ' + ap_origen.NombreActivoVisible, '') AS ActivoPadreOrigen,
+    ISNULL(ap_destino.CodigoActivo + ' - ' + ap_destino.NombreActivoVisible, '') AS ActivoPadreDestino,
+    ISNULL(s.Nombre_local, '') AS Sucursal,
+    ISNULL(amb.nombre, '') AS Ambiente,
+    ISNULL(CONCAT(t.NombreTrabajador, ' ', t.ApellidoPaterno), '') AS Autorizador,
+    ISNULL(CONCAT(r.NombreTrabajador, ' ', r.ApellidoPaterno), '') AS Responsable,
+    m.FechaMovimiento
+FROM tDetalleMovimiento dm
+INNER JOIN tMovimientos m ON dm.IdMovimiento = m.IdMovimiento
+INNER JOIN vActivos c ON dm.IdActivo = c.IdActivo
+LEFT JOIN tTipoMovimiento tm ON dm.IdTipo_Movimiento = tm.idTipoMovimiento
+LEFT JOIN vActivos ap_origen ON dm.IdActivoPadre_Anterior = ap_origen.IdActivo
+LEFT JOIN vActivos ap_destino ON dm.IdActivoPadre_Nuevo = ap_destino.IdActivo
+LEFT JOIN vUnidadesdeNegocio s ON m.IdSucursalDestino = s.cod_UnidadNeg
+LEFT JOIN tAmbiente amb ON dm.IdAmbiente_Nuevo = amb.idAmbiente
+LEFT JOIN vEmpleados t ON m.IdAutorizador = t.codTrabajador
+LEFT JOIN vEmpleados r ON dm.IdResponsable_Nuevo = r.codTrabajador
+WHERE m.idTipoMovimiento = 8";
 
             $params = [];
 
