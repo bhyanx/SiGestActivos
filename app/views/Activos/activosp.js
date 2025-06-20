@@ -523,6 +523,8 @@ function init() {
       return;
     }
 
+    $("#frmEditarActivo").data("idArticulo", datos.idArticulo);
+
     $("#tituloModalActualizarActivo").html(
       '<i class="fa fa-edit"></i> Editar Activo'
     );
@@ -749,11 +751,82 @@ function init() {
       return;
     }
 
-    // Aquí puedes implementar la lógica para mostrar el historial
-    Swal.fire({
-      title: "Historial del Activo",
-      text: "Funcionalidad en desarrollo",
-      icon: "info",
+    // Lógica para mostrar el historial del activo
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=verHistorial",
+      type: "POST",
+      data: { idActivo: datos.idActivo },
+      dataType: "json",
+      success: function (res) {
+        if (res.status && res.data.length > 0) {
+          let historialHtml = `
+            <div class="modal fade" id="modalHistorialActivo" tabindex="-1" role="dialog" aria-labelledby="modalHistorialLabel" aria-hidden="true">
+              <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                  <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalHistorialLabel">Historial del Activo: ${datos.CodigoActivo}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <table id="tblHistorialActivo" class="table table-bordered table-striped table-sm" style="width:100%;">
+                      <thead>
+                        <tr>
+                          <th>Fecha</th>
+                          <th>Acción</th>
+                          <th>Usuario Mod.</th>
+                          <th>Campo Modificado</th>
+                          <th>Valor Anterior</th>
+                          <th>Valor Nuevo</th>
+                        </tr>
+                      </thead>
+                      <tbody>`;
+
+          res.data.forEach(item => {
+            historialHtml += `
+              <tr>
+                <td>${item.FechaModificacion}</td>
+                <td>${item.Accion}</td>
+                <td>${item.UserMod}</td>
+                <td>${item.CampoModificado}</td>
+                <td>${item.ValorAnterior || ''}</td>
+                <td>${item.ValorNuevo || ''}</td>
+              </tr>`;
+          });
+
+          historialHtml += `
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+
+          // Eliminar modal anterior si existe
+          $("#modalHistorialActivo").remove();
+          // Agregar nuevo modal al body
+          $("body").append(historialHtml);
+          // Inicializar datatable
+          $("#tblHistorialActivo").DataTable({
+            language: { url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+            responsive: true,
+            destroy: true,
+            order: [[0, 'desc']]
+          });
+          // Mostrar el modal
+          $("#modalHistorialActivo").modal("show");
+
+        } else {
+          Swal.fire("Historial del Activo", res.data.length === 0 ? "No se encontró historial para este activo." : "Error al obtener el historial: " + res.message, "info");
+        }
+      },
+      error: function (xhr, status, error) {
+        Swal.fire("Error", "No se pudo obtener el historial del activo: " + error, "error");
+      }
     });
   });
 
@@ -987,6 +1060,12 @@ function init() {
           Swal.fire("Éxito", res.message, "success");
           $("#divModalActualizarActivo").modal("hide");
           listarActivosTable();
+          const idArticulo = $("#frmEditarActivo").data("idArticulo");
+          if (idArticulo) {
+            listarActivosTableModal({
+              IdArticulo: idArticulo
+            });
+          }
         } else {
           Swal.fire(
             "Error",

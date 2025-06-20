@@ -474,9 +474,9 @@ class GestionarActivos
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT COUNT(*) as existe 
-                FROM tActivos 
-                WHERE IdActivo = ? 
+                SELECT COUNT(*) as existe
+                FROM tActivos
+                WHERE IdActivo = ?
                 AND IdResponsable IS NOT NULL
             ");
             $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
@@ -485,6 +485,42 @@ class GestionarActivos
             return $resultado['existe'] > 0;
         } catch (\PDOException $e) {
             error_log("Error in verificarResponsableExistente: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+public function consultarActivosIndividuales()
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT
+                    a.idActivo,
+                    a.codigo AS Codigo,
+                    a.nombre AS NombreActivo,
+                    a.idEmpresa AS IdEmpresa,
+                    s.nombre AS Locacion,
+                    1 AS Cantidad,
+                    a.valorAdquisicion AS ValorTotal
+                FROM tActivos a
+                LEFT JOIN vUnidadesdeNegocio s ON a.idSucursal = s.cod_UnidadNeg
+                WHERE a.idArticulo IS NULL AND a.idDocIngresoAlm IS NULL
+            ");
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error in consultarActivosIndividuales: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
+    public function obtenerHistorialActivo($idActivo)
+    {
+        try {
+            $stmt = $this->db->prepare("EXEC sp_ConsultarHistorialActivo @pIdActivo = ?");
+            $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error in obtenerHistorialActivo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }

@@ -331,13 +331,23 @@ switch ($action) {
     case 'Actualizar':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
+                $idActivo = isset($_POST['IdActivo']) ? (int)$_POST['IdActivo'] : null;
+                if (!$idActivo) {
+                    throw new Exception("El ID del activo es requerido.");
+                }
+
+                $original_activo = $activos->obtenerActivoPorId($idActivo);
+                if (!$original_activo) {
+                    throw new Exception("Activo no encontrado con ID " . $idActivo);
+                }
+
                 $data = [
-                    'IdActivo' => isset($_POST['IdActivo']) ? (int)$_POST['IdActivo'] : null,
-                    'Serie' => $_POST['Serie'] ?? null,
-                    'IdEstado' => (isset($_POST['IdEstado']) && is_numeric($_POST['IdEstado']) && $_POST['IdEstado'] !== '') ? (int)$_POST['IdEstado'] : null,
-                    'IdAmbiente' => (isset($_POST['IdAmbiente']) && is_numeric($_POST['IdAmbiente']) && $_POST['IdAmbiente'] !== '') ? (int)$_POST['IdAmbiente'] : null,
-                    'IdCategoria' => (isset($_POST['IdCategoria']) && is_numeric($_POST['IdCategoria']) && $_POST['IdCategoria'] !== '') ? (int)$_POST['IdCategoria'] : null,
-                    'Observaciones' => $_POST['Observaciones'] ?? null,
+                    'IdActivo' => $idActivo,
+                    'Serie' => isset($_POST['Serie']) ? $_POST['Serie'] : $original_activo['NumeroSerie'],
+                    'IdEstado' => (isset($_POST['IdEstado']) && $_POST['IdEstado'] !== '') ? (int)$_POST['IdEstado'] : $original_activo['idEstado'],
+                    'IdAmbiente' => (isset($_POST['IdAmbiente']) && $_POST['IdAmbiente'] !== '') ? (int)$_POST['IdAmbiente'] : $original_activo['idAmbiente'],
+                    'IdCategoria' => (isset($_POST['IdCategoria']) && $_POST['IdCategoria'] !== '') ? (int)$_POST['IdCategoria'] : $original_activo['idCategoria'],
+                    'Observaciones' => isset($_POST['Observaciones']) ? $_POST['Observaciones'] : $original_activo['observaciones'],
                     'UserMod' => $_SESSION['CodEmpleado'] ?? null,
                     'Accion' => 2
                 ];
@@ -713,6 +723,19 @@ ORDER BY a.Descripcion_articulo;
                 'status' => false,
                 'message' => $e->getMessage()
             ]);
+        }
+        break;
+
+    case 'verHistorial':
+        try {
+            $idActivo = $_POST['idActivo'] ?? null;
+            if (!$idActivo) {
+                throw new Exception("ID del activo no proporcionado");
+            }
+            $historial = $activos->obtenerHistorialActivo($idActivo);
+            echo json_encode(['status' => true, 'data' => $historial]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => false, 'message' => $e->getMessage()]);
         }
         break;
 
