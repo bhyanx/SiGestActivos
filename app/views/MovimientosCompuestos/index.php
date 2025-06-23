@@ -61,7 +61,7 @@ session_start();
                                                     <input type="date" class="form-control" name="filtroFecha" id="filtroFecha" value="<?php echo date('Y-m-d'); ?>">
                                                 </div>
                                             </div>
-                                            <div class="col-md-2 offset-md-4">
+                                            <div class="col-md-2 offset-md-6">
                                                 <div class="form-group mb-0">
                                                     <label for="">&nbsp;</label>
                                                     <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">
@@ -77,10 +77,61 @@ session_start();
                                                     </button>
                                                 </div>
                                             </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group mb-0">
+                                                    <label for="">&nbsp;</label>
+                                                    <button type="button" class="btn btn-info btn-sm btn-block" id="btnasignacion">
+                                                        <i class="fas fa-boxes-stacked"></i> Asignar Componente
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </form>
+                        </div>
+                        <div class="col-12" id="divformularioasignacion" style="display: none;">
+                            <div class="card card-info">
+                                <div class="card-header">
+                                    <h3 class="card-title"><i class="fas fa-boxes-stacked"></i> Asignar Componentes a Activo Padre</h3>
+                                </div>
+                                <div class="card-body">
+                                    <form id="formAsignarComponente" method="post">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="IdActivoPadre">Activo Padre:</label>
+                                                    <select class="form-control" name="IdActivoPadre" id="IdActivoPadre" required></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="IdActivoComponente">Componentes:</label>
+                                                    <select class="form-control" name="IdActivoComponente[]" id="IdActivoComponente" multiple="multiple" required></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label for="Observaciones">Observaciones:</label>
+                                                    <textarea class="form-control" name="Observaciones" id="Observaciones" rows="3"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-2 offset-md-8">
+                                                <button type="button" class="btn btn-danger btn-block" id="btnCancelarAsignacion">
+                                                    <i class="fa fa-times"></i> Cancelar
+                                                </button>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="submit" class="btn btn-info btn-block" id="btnGuardarAsignacion">
+                                                    <i class="fa fa-save"></i> Guardar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-12" id="divtblmovimientos" style="display: none;">
                             <div class="card">
@@ -157,7 +208,7 @@ session_start();
                                                         <select name="IdSucursalDestino" id="IdSucursalDestino" class="form-control" required></select>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-2">
+                                                <div class="col-md-2 offset-md-8">
                                                     <div class="form-group">
                                                         <label for="">&nbsp;</label>
                                                         <button type="button" class="btn btn-danger btn-block" id="btncancelarempresa">

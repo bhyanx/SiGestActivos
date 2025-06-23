@@ -27,20 +27,20 @@ class GestionarMovimientosComponentes
             WHERE a.IdEmpresa = 1 
             AND a.idEstado = 1
             AND a.EsPadre = 1";
-            
+
             if ($sucursal) {
                 $sql .= " AND a.IdSucursal = :sucursal";
             }
-            
+
             $sql .= " ORDER BY a.NombreActivoVisible";
 
-            
+
             $stmt = $this->db->prepare($sql);
-            
+
             if ($sucursal) {
                 $stmt->bindParam(':sucursal', $sucursal, PDO::PARAM_INT);
             }
-            
+
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
@@ -67,7 +67,7 @@ class GestionarMovimientosComponentes
             WHERE a.idActivoPadre = ?
             AND a.idEstado = 1
             ORDER BY a.NombreActivoVisible";
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idActivoPadre, PDO::PARAM_INT);
             $stmt->execute();
@@ -157,6 +157,22 @@ WHERE m.idTipoMovimiento = 8";
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             error_log("Error in consultarMovimientosEntreActivos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+    public function asignarComponenteActivo($data)
+    {
+        try {
+            $stmt = $this->db->prepare('EXEC sp_AsignarComponenteActivo @pIdActivoPadre = ?, @pIdActivoComponente = ?, @pObservaciones = ?, @pFechaAsignacion = ?, @pUserMod = ?');
+            $stmt->bindParam(1, $data['IdActivoPadre'], \PDO::PARAM_INT);
+            $stmt->bindParam(2, $data['IdActivoComponente'], \PDO::PARAM_INT);
+            $stmt->bindParam(3, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(4, $data['FechaAsignacion'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(5, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->execute();
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error in asignarComponenteActivo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }

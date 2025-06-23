@@ -1261,7 +1261,7 @@ $(document).on("click", ".btnDarBajaDesdeModal", function () {
   $(document).on("click", ".btnImprimirDesdeModal", function () {
     const idActivo = $(this).data("idActivo");
     window.open(
-      `/app/views/Reportes/reporteActivo.php?idActivo=${idActivo}`,
+      `../../views/Reportes/reporteActivo.php?idActivo=${idActivo}`,
       "_blank"
     );
   });

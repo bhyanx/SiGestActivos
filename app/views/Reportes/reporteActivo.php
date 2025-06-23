@@ -1,371 +1,527 @@
 <?php
-// Asegurarnos de que no haya salida antes del PDF
-ob_start();
+session_start();
+require_once("../../config/configuracion.php");
+require_once("../../models/GestionarActivos.php");
 
-// Definir la ruta de las fuentes y cargar las clases necesarias
-define('FPDF_FONTPATH', __DIR__ . '/../../../public/plugins/fpdf/font/');
-require_once(__DIR__ . '/../../../public/plugins/fpdf/fpdf.php');
-require_once(__DIR__ . '/../../models/GestionarActivos.php');
+$activos = new GestionarActivos();
+$idActivo = $_GET['idActivo'] ?? null;
 
-// Verificar que no haya errores de PHP
-error_reporting(E_ALL);
-ini_set('display_errors', 0);
-
-class PDF extends FPDF
-{
-    public $show_footer = true;
-    protected $skipFooter = false;
-    protected $widths;
-    protected $aligns;
-
-    function __construct()
-    {
-        parent::__construct();
-        // No need to add fonts as Helvetica is a core font
-    }
-
-    function SetWidths($w)
-    {
-        $this->widths = $w;
-    }
-
-    function SetAligns($a)
-    {
-        $this->aligns = $a;
-    }
-
-    function Row($data)
-    {
-        $nb = 0;
-        for($i=0; $i<count($data); $i++)
-            $nb = max($nb, $this->NbLines($this->widths[$i], $data[$i]));
-        $h = 5*$nb;
-        $this->CheckPageBreak($h);
-        for($i=0; $i<count($data); $i++)
-        {
-            $w = $this->widths[$i];
-            $a = isset($this->aligns[$i]) ? $this->aligns[$i] : 'L';
-            $x = $this->GetX();
-            $y = $this->GetY();
-            $this->Rect($x, $y, $w, $h);
-            $this->MultiCell($w, 5, $data[$i], 0, $a);
-            $this->SetXY($x+$w, $y);
-        }
-        $this->Ln($h);
-    }
-
-    function CheckPageBreak($h)
-    {
-        if($this->GetY()+$h>$this->PageBreakTrigger)
-            $this->AddPage($this->CurOrientation);
-    }
-
-    function NbLines($w, $txt)
-    {
-        if(!isset($this->CurrentFont))
-            $this->Error('No font has been set');
-        $cw = &$this->CurrentFont['cw'];
-        if($w==0)
-            $w = $this->w-$this->rMargin-$this->x;
-        $wmax = ($w-2*$this->cMargin)*1000/$this->FontSize;
-        $s = str_replace("\r",'',$txt);
-        $nb = strlen($s);
-        if($nb>0 && $s[$nb-1]=="\n")
-            $nb--;
-        $sep = -1;
-        $i = 0;
-        $j = 0;
-        $l = 0;
-        $nl = 1;
-        while($i<$nb)
-        {
-            $c = $s[$i];
-            if($c=="\n")
-            {
-                $i++;
-                $sep = -1;
-                $j = $i;
-                $l = 0;
-                $nl++;
-                continue;
-            }
-            if($c==' ')
-                $sep = $i;
-            $l += $cw[$c];
-            if($l>$wmax)
-            {
-                if($sep==-1)
-                {
-                    if($i==$j)
-                        $i++;
-                }
-                else
-                    $i = $sep+1;
-                $sep = -1;
-                $j = $i;
-                $l = 0;
-                $nl++;
-            }
-            else
-                $i++;
-        }
-        return $nl;
-    }
-
-    function Header()
-    {
-        $this->SetFont('Helvetica','B',12);
-        $this->Cell(0,10,utf8_decode('REPORTE DE ACTIVO'),0,1,'C');
-        $this->Ln(5);
-    }
-
-    function Footer()
-    {
-        if($this->show_footer && !$this->skipFooter) {
-            $this->SetY(-15);
-            $this->SetFont('Helvetica','I',8);
-            $this->Cell(0,10,utf8_decode('Página ').$this->PageNo().'/{nb}',0,0,'C');
-        }
-    }
-
-    function CuerpoActivo($datos)
-    {
-        $this->SetFont('Helvetica','B',10);
-        $this->Cell(0,10,utf8_decode('INFORMACIÓN DEL ACTIVO'),0,1,'L');
-        $this->Ln(2);
-
-        // Datos del activo
-        $this->SetFont('Helvetica','',10);
-        $this->SetWidths(array(50,140));
-        $this->SetAligns(array('L','L'));
-
-        $this->Row(array(utf8_decode('Código:'), utf8_decode($datos['CodigoActivo'])));
-        $this->Row(array(utf8_decode('Nombre:'), utf8_decode($datos['NombreArticulo'])));
-        $this->Row(array(utf8_decode('Marca:'), utf8_decode($datos['MarcaArticulo'])));
-        $this->Row(array(utf8_decode('Serie:'), utf8_decode($datos['NumeroSerie'])));
-        $this->Row(array(utf8_decode('Sucursal:'), utf8_decode($datos['Sucursal'])));
-        $this->Row(array(utf8_decode('Ambiente:'), utf8_decode($datos['Ambiente'])));
-        $this->Row(array(utf8_decode('Estado:'), utf8_decode($datos['Estado'])));
-        $this->Row(array(utf8_decode('Categoría:'), utf8_decode($datos['Categoria'])));
-        
-        if(!empty($datos['FechaAdquisicion'])) {
-            $this->Row(array(utf8_decode('Fecha de Adquisición:'), utf8_decode($datos['FechaAdquisicion'])));
-        }
-        if(!empty($datos['ValorAdquisicion'])) {
-            $this->Row(array(utf8_decode('Valor de Adquisición:'), utf8_decode('S/ ' . number_format($datos['ValorAdquisicion'], 2))));
-        }
-        if(!empty($datos['Observaciones'])) {
-            $this->Row(array(utf8_decode('Observaciones:'), utf8_decode($datos['Observaciones'])));
-        }
-    }
-
-    function CuerpoMovimiento($datos)
-    {
-        $this->SetFont('Arial','',10);
-
-        // Información del movimiento
-        $this->Cell(0,10,'FECHA: ' . date('d/m/Y', strtotime($datos['FechaMovimiento'])), 0, 1);
-        $this->Cell(0,10,'MOVIMIENTO: ' . $datos['idMovimiento'], 0, 1);
-        $this->MultiCell(0, 7, 'TIPO DE MOVIMIENTO: ' . $datos['tipoMovimiento']);
-
-        // Datos del responsable y destinatario
-        $this->Ln(5);
-        $this->Cell(0,10,'DATOS DEL RESPONSABLE Y DESTINATARIO',0,1);
-        $this->Cell(95,10,'Nombre (Entrega): ' . $datos['responsableOrigen'], 0, 0);
-        $this->Cell(0,10,'Nombre (Recibe): ' . $datos['responsableDestino'], 0, 1);
-        $this->Cell(95,10,'Sucursal Origen: ' . $datos['sucursalOrigen'], 0, 0);
-        $this->Cell(0,10,'Sucursal Destino: ' . $datos['sucursalDestino'], 0, 1);
-        $this->Cell(95,10,'Ambiente Origen: ' . $datos['ambienteOrigen'], 0, 0);
-        $this->Cell(0,10,'Ambiente Destino: ' . $datos['ambienteDestino'], 0, 1);
-
-        // Información de los activos
-        $this->Ln(5);
-        $this->Cell(0,10,'INFORMACION BASICA DE LOS ACTIVOS',0,1);
-        $this->SetFillColor(200,200,200);
-        $this->Cell(30,10,'Codigo',1,0,'C',true);
-        $this->Cell(80,10,'Descripcion',1,0,'C',true);
-        $this->Cell(50,10,'Marca',1,0,'C',true);
-        $this->Cell(30,10,'No. Serial',1,1,'C',true);
-
-        foreach($datos['activos'] as $activo){
-            $this->Cell(30,10,$activo['CodigoActivo'],1);
-            $this->Cell(80,10,$activo['NombreArticulo'],1);
-            $this->Cell(50,10,$activo['MarcaArticulo'],1);
-            $this->Cell(30,10,$activo['NumeroSerie'],1,1);
-        }
-
-        // Clausula y observaciones
-        $this->Ln(8);
-        $this->MultiCell(0,7,"CLAUSULA DE COMPROMISO:\nComo funcionario de la empresa declaro que los activos relacionados en el presente formato están bajo mi responsabilidad y me comprometo a darles el uso adecuado y a reportar cualquier novedad que se presente con los mismos.");
-
-        $this->Ln(5);
-        $this->MultiCell(0,7,"OBSERVACIONES: " . ($datos['observaciones'] ?? 'Sin observaciones'));
-
-        // Firmas
-        $this->Ln(15);
-        $this->Cell(60,10,'Vo.Bo. Activos Fijos',0,0,'C');
-        $this->Cell(60,10,'Firma Responsable del Activo',0,0,'C');
-        $this->Cell(60,10,'Firma Quien Recibe',0,1,'C');
-        $this->Cell(60,10,'','T',0,'C');
-        $this->Cell(60,10,'','T',0,'C');
-        $this->Cell(60,10,'','T',1,'C');
-    }
-}
-
-// Función para generar el PDF de un activo
-function generarPDFActivo($idActivo) {
-    try {
-        // Obtener datos del activo
-        $gestionarActivos = new GestionarActivos();
-        $datosActivo = $gestionarActivos->obtenerActivoPorId($idActivo);
-        
-        if (empty($datosActivo)) {
-            throw new Exception("No se encontró el activo especificado");
-        }
-
-        // Crear y generar el PDF
-        $pdf = new PDF();
-        $pdf->AliasNbPages();
-        $pdf->AddPage();
-        $pdf->CuerpoActivo($datosActivo);
-        
-        // Generar nombre del archivo
-        $nombreArchivo = 'activo_' . $idActivo . '_' . date('YmdHis') . '.pdf';
-        
-        // Guardar el PDF
-        $pdf->Output('F', __DIR__ . '/../../../public/reports/' . $nombreArchivo);
-        
-        return $nombreArchivo;
-    } catch (Exception $e) {
-        error_log("Error al generar PDF: " . $e->getMessage());
-        throw $e;
-    }
-}
-
-// Función para generar el PDF
-function generarPDFMovimiento($idMovimiento) {
-    try {
-        // Obtener datos del movimiento
-        $gestionarMovimientos = new GestionarMovimientos();
-        $datosMovimiento = $gestionarMovimientos->obtenerHistorialMovimiento($idMovimiento);
-        
-        if (empty($datosMovimiento)) {
-            throw new Exception("No se encontró el movimiento especificado");
-        }
-
-        // Preparar datos para el PDF
-        $datos = $datosMovimiento[0]; // Tomamos el primer registro ya que contiene la información principal
-        
-        // Crear y generar el PDF
-        $pdf = new PDF();
-        $pdf->AliasNbPages();
-        $pdf->AddPage();
-        $pdf->CuerpoMovimiento($datos);
-        
-        // Generar nombre del archivo
-        $nombreArchivo = 'movimiento_' . $idMovimiento . '_' . date('YmdHis') . '.pdf';
-        
-        // Guardar el PDF
-        $pdf->Output('F', __DIR__ . '/../../../public/reports/' . $nombreArchivo);
-        
-        return $nombreArchivo;
-    } catch (Exception $e) {
-        error_log("Error al generar PDF: " . $e->getMessage());
-        throw $e;
-    }
-}
-
-// Endpoint para generar el reporte
-if (isset($_GET['idActivo'])) {
-    try {
-        $nombreArchivo = generarPDFActivo($_GET['idActivo']);
-        header('Content-Type: application/pdf');
-        header('Content-Disposition: inline; filename="' . $nombreArchivo . '"');
-        readfile(__DIR__ . '/../../../public/reports/' . $nombreArchivo);
-    } catch (Exception $e) {
-        echo "Error al generar el reporte: " . $e->getMessage();
-    }
-} elseif (isset($_GET['idMovimiento'])) {
-    try {
-        $nombreArchivo = generarPDFMovimiento($_GET['idMovimiento']);
-        header('Content-Type: application/pdf');
-        header('Content-Disposition: inline; filename="' . $nombreArchivo . '"');
-        readfile(__DIR__ . '/../../../public/reports/' . $nombreArchivo);
-    } catch (Exception $e) {
-        echo "Error al generar el reporte: " . $e->getMessage();
-    }
+if (!$idActivo) {
+    die("ID de Activo no proporcionado");
 }
 
 try {
-    // Obtener datos del activo
-    $objActivo = new GestionarActivos();
-    
-    // Determinar el parámetro a usar
-    $codigoActivo = null;
-    if (isset($_GET['codigo'])) {
-        $codigoActivo = $_GET['codigo'];
-    } elseif (isset($_GET['idActivo'])) {
-        // Si tenemos idActivo, primero obtenemos el código
-        $filtros = [
-            'pCodigo' => null,
-            'pIdEmpresa' => null,
-            'pIdSucursal' => null,
-            'pIdCategoria' => null,
-            'pIdEstado' => null
-        ];
-        $resultados = $objActivo->consultarActivos($filtros);
-        $activo = array_filter($resultados, function($item) {
-            return $item['idActivo'] == $_GET['idActivo'];
-        });
-        $activo = array_values($activo)[0] ?? null;
-        if ($activo) {
-            $codigoActivo = $activo['CodigoActivo'];
-        }
+    $detalleActivo = $activos->obtenerActivoPorId($idActivo);
+    if (!$detalleActivo) {
+        die("No se encontró el activo con el ID proporcionado");
     }
-
-    if (empty($codigoActivo)) {
-        throw new Exception('No se proporcionó un código de activo válido');
-    }
-
-    // Consultar el activo usando el código
-    $filtros = [
-        'pCodigo' => $codigoActivo,
-        'pIdEmpresa' => null,
-        'pIdSucursal' => null,
-        'pIdCategoria' => null,
-        'pIdEstado' => null
-    ];
-
-    $resultados = $objActivo->consultarActivos($filtros);
-    $datos = $resultados[0] ?? null;
-
-    if (!$datos) {
-        throw new Exception('Activo no encontrado');
-    }
-
-    // Limpiar cualquier salida anterior
-    ob_clean();
-
-    // Generar PDF
-    $pdf = new PDF();
-    $pdf->AliasNbPages();
-    $pdf->AddPage();
-    $pdf->CuerpoActivo($datos);
-    
-    // Limpiar buffer y enviar PDF
-    ob_end_clean();
-    $pdf->Output('I', 'Reporte_Activo_' . $datos['CodigoActivo'] . '.pdf');
-
+    $componentes = $activos->obtenerComponente($idActivo);
 } catch (Exception $e) {
-    // Limpiar cualquier salida anterior
-    ob_clean();
-    
-    // Enviar error como JSON
-    header('Content-Type: application/json');
-    echo json_encode([
-        'error' => true,
-        'message' => $e->getMessage()
-    ]);
-    exit;
+    die("Error al obtener datos del activo: " . $e->getMessage());
 }
 ?>
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha Técnica de Activo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Arial Narrow", Arial, sans-serif;
+            font-size: 10px;
+            line-height: 1.4;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .document {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            padding: 40px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #28A745;
+        }
+
+        .company-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-placeholder {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .company-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .company-name {
+            color: #28A745;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .company-subname {
+            color: #28A745;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .address {
+            font-size: 10px;
+            line-height: 1.3;
+            color: #666;
+        }
+
+        .document-info {
+            border: 1px solid #28A745;
+            padding: 10px;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .ruc {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #28A745;
+        }
+
+        .ficha-title {
+            font-weight: bold;
+            margin: 5px 0;
+            color: #28A745;
+        }
+
+        .ficha-number {
+            font-weight: bold;
+            color: #28A745;
+        }
+
+        .section {
+            margin-bottom: 15px;
+        }
+
+        .section-divider {
+            border-bottom: 1px solid #ddd;
+            margin: 6px 0;
+        }
+
+        .activo-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .label {
+            color: #28A745;
+            font-weight: bold;
+            min-width: 120px;
+        }
+
+        .value {
+            flex: 1;
+        }
+
+        .activo-info-title {
+            color: #28A745;
+            font-weight: bold;
+            margin: 15px 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        .activo-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .activo-table th,
+        .activo-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .activo-table th {
+            background-color: #28A745;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+            width: 30%;
+        }
+
+        .activo-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .aditional-info {
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            padding: 15px;
+        }
+
+        .aditional-title {
+            color: #28A745;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .description {
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            padding: 15px;
+        }
+
+        .description-title {
+            color: #28A745;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .qr-section {
+            display: flex;
+            gap: 10px;
+        }
+
+        .qr-placeholder {
+            width: 80px;
+            height: 80px;
+            border: 1px solid #ddd;
+        }
+
+        .qr-text {
+            font-size: 9px;
+            max-width: 200px;
+        }
+
+        .client-confirmation {
+            border: 1px solid #ddd;
+            padding: 15px;
+            width: 300px;
+        }
+
+        .confirmation-title {
+            color: #28A745;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .signature-field {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .signature-label {
+            color: #28A745;
+            font-weight: bold;
+        }
+
+        .thanks-section {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 200px;
+            margin: 0 auto 5px auto;
+        }
+
+        .signature-name {
+            text-align: center;
+            font-size: 10px;
+            margin-top: 5px;
+        }
+
+        .signature-dni {
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .signature-section {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+
+        .signature-box {
+            text-align: center;
+            width: 200px;
+        }
+
+        .signature-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 10px;
+        }
+
+        @media print {
+            .btn {
+                display: none !important;
+            }
+
+            body {
+                padding: 0;
+                margin: 0;
+            }
+
+            .document {
+                box-shadow: none;
+                border: none;
+            }
+
+            /* Ocultar fecha, hora y URL en la impresión */
+            @page {
+                margin: 0;
+            }
+
+            body::before,
+            body::after {
+                display: none !important;
+            }
+
+            /* Ocultar encabezados y pies de página del navegador */
+            @page :first {
+                margin-top: 0;
+            }
+
+            @page :left {
+                margin-left: 0;
+            }
+
+            @page :right {
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="document">
+        <!-- Header -->
+        <div class="header">
+            <div class="company-info">
+                <div class="logo-placeholder">
+                    <img src="../../../public/img/Logo-Lubriseng.png" alt="Logo de Lubriseng" style="width: 100px; height: auto;">
+                </div>
+                <div class="company-details">
+                    <div class="company-name">LUBRISENG</div>
+                    <div class="company-subname">Gestión de Activos</div>
+                    <div class="address">
+                        Dirección fiscal: [DIRECCIÓN FISCAL]<br>
+                        Sucursal: [SUCURSAL]
+                    </div>
+                </div>
+            </div>
+            <div class="document-info">
+                <div class="ruc">R.U.C. [RUC]</div>
+                <div class="ficha-title">FICHA TÉCNICA DE ACTIVO</div>
+                <div class="ficha-number">N° <?php echo $detalleActivo['CodigoActivo'] ?? ''; ?></div>
+            </div>
+        </div>
+        <!-- Activo Details -->
+        <div class="activo-details">
+            <div>
+                <div class="detail-row">
+                    <div class="label">Código:</div>
+                    <div class="value"><?php echo $detalleActivo['CodigoActivo'] ?? ''; ?></div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">Nombre:</div>
+                    <div class="value"><?php echo $detalleActivo['NombreActivoVisible'] ?? ''; ?></div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">Categoría:</div>
+                    <div class="value"><?php echo $detalleActivo['Categoria'] ?? ''; ?></div>
+                </div>
+            </div>
+            <div>
+                <div class="detail-row">
+                    <div class="label">Fecha de Adquisición:</div>
+                    <div class="value"><?php echo date('d/m/Y', strtotime($detalleActivo['fechaAdquisicion'] ?? '')); ?></div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">Estado:</div>
+                    <div class="value"><?php echo $detalleActivo['Estado'] ?? ''; ?></div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">Ubicación:</div>
+                    <div class="value"><?php echo $detalleActivo['Sucursal']. ' - ' . $detalleActivo['Ambiente']; ?></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Activo Information -->
+        <div class="activo-info">
+            <div class="activo-info-title">INFORMACIÓN TÉCNICA DEL ACTIVO</div>
+            <table class="activo-table">
+                <tbody>
+                    <tr>
+                        <th>Marca:</th>
+                        <td><?php echo $detalleActivo['Marca'] ?? ''; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Número de Serie:</th>
+                        <td><?php echo $detalleActivo['NumeroSerie'] ?? ''; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Valor de Adquisición:</th>
+                        <td><?php echo $detalleActivo['valorAdquisicion'] ?? ''; ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="aditional-info">
+            <div class="aditional-title">INFORMACIÓN ADICIONAL</div>
+            <div class="detail-row">
+                <div class="label">Proveedor:</div>
+                <div class="value"><?php echo $detalleActivo['Proveedor'] ?? ''; ?></div>
+            </div>
+            <!-- <div class="detail-row">
+                <div class="label">Garantía (meses):</div>
+                <div class="value"><?php //echo $detalleActivo['Garantia'] ?? ''; ?></div>
+            </div> -->
+        </div>
+
+        <!-- Components -->
+        <div class="activo-info">
+            <div class="activo-info-title">COMPONENTES DEL ACTIVO</div>
+            <table class="activo-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($componentes)): ?>
+                        <?php foreach ($componentes as $componente): ?>
+                            <tr>
+                                <td><?php echo $componente['CodigoComponente'] ?? ''; ?></td>
+                                <td><?php echo $componente['NombreComponente'] ?? ''; ?></td>
+                                <td><?php echo $componente['Observaciones'] ?? ''; ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="3" style="text-align: center;">No hay componentes asociados a este activo.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Description -->
+        <!-- <div class="description">
+            <div class="description-title">Descripción:</div>
+            <div><?php //echo $detalleActivo['descripcion'] ?? ''; ?></div>
+        </div> -->
+
+        <!-- Conformidad -->
+        <div class="section">
+            <div class="signature-section">
+                <div class="signature-box">
+                    <div class="signature-line"></div>
+                    <div class="signature-name"><?php echo $detalleActivo['NombreResponsable'] ?? ''; ?></div>
+                    <div class="signature-dni">DNI: <?php echo $detalleActivo['idResponsable'] ?></div>
+                    <div class="title-signature">Responsable</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div style="text-align: center; margin-top: 20px; padding: 20px;">
+        <button onclick="window.print()" class="btn btn-primary" style="margin-right: 10px;">
+            <i class="fas fa-print"></i> Imprimir
+        </button>
+        <button onclick="descargarPDF()" class="btn btn-success">
+            <i class="fas fa-file-pdf"></i> Descargar PDF
+        </button>
+    </div>
+
+    <!-- Script para descargar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function descargarPDF() {
+            const element = document.querySelector('.document');
+            const opt = {
+                margin: 1,
+                filename: 'ficha_tecnica_<?php echo $detalleActivo['idActivo'] ?? ''; ?>.pdf',
+                image: {
+                    type: 'jpeg',
+                    quality: 0.98
+                },
+                html2canvas: {
+                    scale: 2
+                },
+                jsPDF: {
+                    unit: 'cm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+
+</html>

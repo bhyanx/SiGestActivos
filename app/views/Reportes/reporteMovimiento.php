@@ -42,6 +42,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guía de Remisión Electrónica</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -393,6 +394,47 @@ try {
             font-size: 10px;
         }
 
+
+        /* Action Buttons */
+        .action-buttons {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-print {
+            background:#0074da;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background:#0072c9;
+        }
+
+        .btn-pdf {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-pdf:hover {
+            background: #c82333;
+        }
+
+
         @media print {
             .btn {
                 display: none !important;
@@ -575,14 +617,13 @@ try {
             </div>
         </div>
     </div>
-
-    <!-- Botones de acción -->
-    <div style="text-align: center; margin-top: 20px; padding: 20px;">
-        <button onclick="window.print()" class="btn btn-primary" style="margin-right: 10px;">
-            <i class="fas fa-print"></i> Imprimir
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button onclick="window.print()" class="btn btn-print">
+            <i class="fas fa-print text-white"></i> Imprimir
         </button>
-        <button onclick="descargarPDF()" class="btn btn-success">
-            <i class="fas fa-file-pdf"></i> Descargar PDF
+        <button onclick="descargarPDF()" class="btn btn-pdf">
+            <i class="fas fa-file-pdf text-white"></i> Descargar PDF
         </button>
     </div>
 

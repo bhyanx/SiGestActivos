@@ -118,10 +118,37 @@ switch ($action) {
         }
         break;
 
+    case 'asignarComponente':
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception("Método no permitido");
+            }
+
+            $data = [
+                'IdActivoPadre' => $_POST['IdActivoPadre'] ?? null,
+                'IdActivoComponente' => $_POST['IdActivoComponente'] ?? null,
+                'Observaciones' => $_POST['Observaciones'] ?? null,
+                'FechaAsignacion' => date('Y-m-d H:i:s'),
+                'UserMod' => $_SESSION['usuario'] ?? 'usuario_default'
+            ];
+
+            $resultado = $movimientosComponentes->asignarComponenteActivo($data);
+            echo json_encode([
+                'success' => true,
+                'message' => 'Componente asignado correctamente'
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al asignar el componente: ' . $e->getMessage()
+            ]);
+        }
+        break;
+
     default:
         echo json_encode([
             'status' => false,
             'message' => 'Acción no válida'
         ]);
         break;
-} 
+}

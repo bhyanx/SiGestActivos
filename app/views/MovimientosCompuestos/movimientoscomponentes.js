@@ -43,6 +43,81 @@ function init() {
       $("#divlistadomovimientos").hide();
     });
 
+  // Botón para abrir el formulario de asignación de componentes
+  $("#btnasignacion")
+    .off("click")
+    .on("click", function () {
+      $("#divformularioasignacion").show();
+      $("#divlistadomovimientos").hide();
+      $("#divtblmovimientos").hide();
+      cargarActivosParaAsignacion();
+    });
+
+  // Botón para cancelar la asignación de componentes
+  $("#btnCancelarAsignacion")
+    .off("click")
+    .on("click", function () {
+      $("#divformularioasignacion").hide();
+      $("#divlistadomovimientos").show();
+      $("#divtblmovimientos").show();
+    });
+
+  // Manejar el envío del formulario de asignación de componentes
+  $("#formAsignarComponente")
+    .off("submit")
+    .on("submit", function (e) {
+      e.preventDefault();
+      const formData = $(this).serialize();
+      
+      Swal.fire({
+        title: "Procesando",
+        text: "Guardando la asignación...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      $.ajax({
+        url: "../../controllers/GestionarMovimientosComponentesController.php?action=asignarComponente",
+        type: "POST",
+        data: formData,
+        dataType: "json",
+        success: function (res) {
+          Swal.close();
+          if (res.success) {
+            Swal.fire({
+              title: "Éxito",
+              text: res.message,
+              icon: "success"
+            }).then(() => {
+              $("#divformularioasignacion").hide();
+              $("#divlistadomovimientos").show();
+              $("#divtblmovimientos").show();
+              $("#formAsignarComponente")[0].reset();
+              if ($.fn.DataTable.isDataTable("#tblMovimientos")) {
+                $("#tblMovimientos").DataTable().ajax.reload(null, false);
+              }
+            });
+          } else {
+            Swal.fire({
+              title: "Error",
+              text: res.message,
+              icon: "error"
+            });
+          }
+        },
+        error: function (xhr, status, error) {
+          Swal.close();
+          Swal.fire({
+            title: "Error",
+            text: "Error al comunicarse con el servidor",
+            icon: "error"
+          });
+        }
+      });
+    });
+
   // Botón procesar en generarmov
   $("#btnprocesarempresa")
     .off("click")
@@ -313,6 +388,66 @@ function cargarActivosPadres() {
     // Si no hay sucursal destino seleccionada, limpiar el selector
     $("#IdActivoPadreDestino").empty().append('<option value="">Seleccione un activo padre</option>').trigger('change');
   }
+}
+
+function cargarActivosParaAsignacion() {
+  // Cargar activos padres
+  $.ajax({
+    url: "../../controllers/GestionarMovimientosComponentesController.php?action=listarActivosPadres",
+    type: "POST",
+    data: { tipo: 'todos' },
+    dataType: "json",
+    success: function (res) {
+      if (res.status) {
+        $("#IdActivoPadre").empty();
+        $("#IdActivoPadre").append('<option value="">Seleccione un activo padre</option>');
+        
+        res.data.forEach(function (activo) {
+          const option = `<option value="${activo.IdActivo}">${activo.CodigoActivo} - ${activo.NombreArticulo}</option>`;
+          $("#IdActivoPadre").append(option);
+        });
+
+        $("#IdActivoPadre").select2({
+          theme: "bootstrap4",
+          width: "100%",
+        });
+      } else {
+        Swal.fire("Error", res.message, "error");
+      }
+    },
+    error: function (xhr, status, error) {
+      Swal.fire("Error", "Error al cargar los activos padres: " + error, "error");
+    },
+  });
+
+  // Cargar componentes disponibles
+  $.ajax({
+    url: "../../controllers/GestionarMovimientosComponentesController.php?action=listarComponentesDisponibles",
+    type: "POST",
+    dataType: "json",
+    success: function (res) {
+      if (res.status) {
+        $("#IdActivoComponente").empty();
+        $("#IdActivoComponente").append('<option value="">Seleccione uno o más componentes</option>');
+        
+        res.data.forEach(function (componente) {
+          const option = `<option value="${componente.IdActivo}">${componente.CodigoActivo} - ${componente.NombreArticulo}</option>`;
+          $("#IdActivoComponente").append(option);
+        });
+
+        $("#IdActivoComponente").select2({
+          theme: "bootstrap4",
+          width: "100%",
+          multiple: true
+        });
+      } else {
+        Swal.fire("Error", res.message, "error");
+      }
+    },
+    error: function (xhr, status, error) {
+      Swal.fire("Error", "Error al cargar los componentes: " + error, "error");
+    },
+  });
 }
 
 function cargarComponentesActivo(idActivoPadre) {
