@@ -430,7 +430,7 @@ session_start();
                                 <div class="card-footer">
                                     <div class="row">
                                         <div class="col-12 col-md-6 mb-2 mb-md-0">
-                                            <button type="button" class="btn btn-danger btn-sm btn-block" id="btncancelarficha">
+                                            <button type="button" class="btn btn-danger btn-sm btn-block" id="btnsalirmov">
                                                 <i class="fa fa-times"></i> Cerrar
                                             </button>
                                         </div>

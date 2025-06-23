@@ -100,6 +100,50 @@ function init() {
       $("#divlistadomovimientos").show();
     });
 
+  $("#btnVolver")
+    .off("click")
+    .on("click", function () {
+      Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Se perderán los cambios realizados",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar",
+        cancelButtonColor: "#d33",
+        cancelButtonText: "No, continuar aquí",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $("#divregistroMovimiento").hide();
+          // $("#divgenerarmov").show();
+          $("#divtblmovimientos").show();
+          $("#divlistadomovimientos").show();
+        }
+      });
+    });
+
+    $("#btnCancelarMovComp")
+    .off("click")
+    .on("click", function () {
+      Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Se perderán los cambios realizados",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar",
+        cancelButtonColor: "#d33",
+        cancelButtonText: "No, continuar aquí",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $("#divregistroMovimiento").hide();
+          //$("#divgenerarmov").show();
+          $("#divtblmovimientos").show();
+          $("#divlistadomovimientos").show();
+        }
+      });
+    });
+    
   // Al seleccionar un activo padre origen, cargar sus componentes
   $("#IdActivoPadreOrigen").on("change", function () {
     const idActivoPadre = $(this).val();
@@ -554,12 +598,6 @@ function listarMovimientos() {
               <button class="dropdown-item btnVerDetalle" type="button">
                 <i class="fas fa-eye text-info"></i> Ver Detalle
               </button>
-              <button class="dropdown-item btnAnularMovimiento" type="button">
-                <i class="fas fa-ban text-danger"></i> Anular Movimiento
-              </button>
-              <button class="dropdown-item btnVerHistorial" type="button">
-                <i class="fas fa-history text-primary"></i> Ver Historial
-              </button>
             </div>
           </div>`,
       },
@@ -632,7 +670,61 @@ $(document).on("click", ".btnVerDetalle", function () {
   });
 });
 
-$(document).on("click", ".btnAnularMovimiento", function () {
+// $(document).on("click", ".btnAnularMovimiento", function () {
+//   const fila = $(this).closest("tr");
+//   const datos = $("#tblMovimientos").DataTable().row(fila).data();
+
+//   if (!datos) {
+//     Swal.fire(
+//       "Error",
+//       "No se pudo obtener la información del movimiento.",
+//       "error"
+//     );
+//     return;
+//   }
+
+//   Swal.fire({
+//     title: "¿Estás seguro?",
+//     text: "¿Deseas anular este movimiento?",
+//     icon: "warning",
+//     showCancelButton: true,
+//     confirmButtonColor: "#3085d6",
+//     cancelButtonColor: "#d33",
+//     confirmButtonText: "Sí, anular",
+//     cancelButtonText: "Cancelar",
+//   }).then((result) => {
+//     if (result.isConfirmed) {
+//       $.ajax({
+//         url: "../../controllers/GestionarMovimientoController.php?action=anularMovimiento",
+//         type: "POST",
+//         data: { idMovimiento: datos.IdDetalleMovimiento },
+//         dataType: "json",
+//         success: function (res) {
+//           if (res.status) {
+//             Swal.fire({
+//               title: "Éxito",
+//               text: res.message,
+//               icon: "success",
+//             }).then(() => {
+//               $("#tblMovimientos").DataTable().ajax.reload();
+//             });
+//           } else {
+//             Swal.fire("Error", res.message, "error");
+//           }
+//         },
+//         error: function (xhr, status, error) {
+//           Swal.fire(
+//             "Error",
+//             "Error al procesar la solicitud: " + error,
+//             "error"
+//           );
+//         },
+//       });
+//     }
+//   });
+// });
+
+$(document).on("click", ".btnVerHistorial", function () {
   const fila = $(this).closest("tr");
   const datos = $("#tblMovimientos").DataTable().row(fila).data();
 
@@ -646,43 +738,21 @@ $(document).on("click", ".btnAnularMovimiento", function () {
   }
 
   Swal.fire({
-    title: "¿Estás seguro?",
-    text: "¿Deseas anular este movimiento?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Sí, anular",
-    cancelButtonText: "Cancelar",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      $.ajax({
-        url: "../../controllers/GestionarMovimientoController.php?action=anularMovimiento",
-        type: "POST",
-        data: { idMovimiento: datos.IdDetalleMovimiento },
-        dataType: "json",
-        success: function (res) {
-          if (res.status) {
-            Swal.fire({
-              title: "Éxito",
-              text: res.message,
-              icon: "success",
-            }).then(() => {
-              $("#tblMovimientos").DataTable().ajax.reload();
-            });
-          } else {
-            Swal.fire("Error", res.message, "error");
-          }
-        },
-        error: function (xhr, status, error) {
-          Swal.fire(
-            "Error",
-            "Error al procesar la solicitud: " + error,
-            "error"
-          );
-        },
-      });
-    }
+    title: "Historial de Movimientos",
+    html: `
+      <div class="text-left">
+        <p><strong>ID Componente:</strong> ${datos.IdComponente}</p>
+        <p><strong>Nombre Componente:</strong> ${datos.NombreComponente}</p>
+        <p><strong>Activo Padre Origen:</strong> ${datos.ActivoPadreOrigen}</p>
+        <p><strong>Activo Padre Destino:</strong> ${datos.ActivoPadreDestino}</p>
+        <p><strong>Sucursal:</strong> ${datos.Sucursal}</p>
+        <p><strong>Ambiente:</strong> ${datos.Ambiente}</p>
+        <p><strong>Autorizador:</strong> ${datos.Autorizador}</p>
+        <p><strong>Responsable:</strong> ${datos.Responsable}</p>
+        <p><strong>Fecha:</strong> ${datos.FechaMovimiento}</p>
+      </div>
+    `,
+    width: "600px",
   });
 });
 

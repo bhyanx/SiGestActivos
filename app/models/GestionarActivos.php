@@ -524,4 +524,28 @@ public function consultarActivosIndividuales()
             throw $e;
         }
     }
+
+    public function obtenerComponente($idActivo){
+        try {
+            $stmt = $this->db->prepare("SELECT 
+    c.IdActivoComponente,
+    aComponente.CodigoActivo AS CodigoComponente,
+    aComponente.NombreActivoVisible AS NombreComponente,
+    c.IdActivoPadre,
+    aPadre.CodigoActivo AS CodigoPadre,
+    aPadre.NombreActivoVisible AS NombrePadre,
+    c.FechaAsignacion,
+    c.Observaciones
+FROM tRelacionActivoComponente c
+JOIN vActivos aComponente ON aComponente.IdActivo = c.IdActivoComponente
+JOIN vActivos aPadre ON aPadre.IdActivo = c.IdActivoPadre
+WHERE c.Activo = 1 AND c.IdActivoPadre = ?");
+            $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error in obtenerComponente: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e; 
+        }
+    }
 }

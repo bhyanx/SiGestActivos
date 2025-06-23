@@ -412,6 +412,22 @@ switch ($action) {
         }
         break;
 
+    case 'obtenerComponentes':
+        try {
+            $idActivoPadre = $_POST['idActivoPadre'];
+            $info = $activos->obtenerComponente($idActivoPadre);
+            echo json_encode([
+                'status' => true,
+                'data' => $info
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+
     case 'get_activo':
         try {
             $filtros = [

@@ -37,6 +37,28 @@ function init() {
     }
   );
 
+  $("#btnvolver")
+    .off("click")
+    .on("click", function () {
+      Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Se perderán los cambios realizados",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar",
+        cancelButtonColor: "#d33",
+        cancelButtonText: "No, continuar aquí",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $("#divregistroMovimiento").hide();
+          //$("#divgenerarmov").show();
+          $("#divtblmovimientos").show();
+          $("#divlistadomovimientos").show();
+        }
+      });
+    });
+
   $(document).on("click", "#btnBuscarIdItem, .btnagregardet", function () {
     $("#ModalArticulos").modal("show");
     listarActivosModal();
@@ -61,6 +83,29 @@ function init() {
         }
       });
     });
+
+  $("#btnsalirmov")
+    .off("click")
+    .on("click", function () {
+      Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Se perderán los cambios realizados",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6 ",
+        confirmButtonText: "Aceptar",
+        cancelButtonColor: "#d33",
+        cancelButtonText: "No, continuar aquí",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $("#divregistroMovimiento").hide();
+          $("#divgenerarmov").hide();
+          $("#divtblmovimientos").show();
+          $("#divlistadomovimientos").show();
+        }
+      });
+    });
+
 
   // Ocultar secciones al cargar
   $("#divgenerarmov").hide();
@@ -1015,60 +1060,60 @@ function listarActivosModal() {
 }
 
 // Agregar los manejadores de eventos para los nuevos botones
-$(document).on("click", ".btnAnularMovimiento", function () {
-  const fila = $(this).closest("tr");
-  const datos = $("#tblMovimientos").DataTable().row(fila).data();
+// $(document).on("click", ".btnAnularMovimiento", function () {
+//   const fila = $(this).closest("tr");
+//   const datos = $("#tblMovimientos").DataTable().row(fila).data();
 
-  if (!datos) {
-    Swal.fire(
-      "Error",
-      "No se pudo obtener la información del movimiento.",
-      "error"
-    );
-    return;
-  }
+//   if (!datos) {
+//     Swal.fire(
+//       "Error",
+//       "No se pudo obtener la información del movimiento.",
+//       "error"
+//     );
+//     return;
+//   }
 
-  Swal.fire({
-    title: "¿Estás seguro?",
-    text: "¿Deseas anular este movimiento?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Sí, anular",
-    cancelButtonText: "Cancelar",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      $.ajax({
-        url: "../../controllers/GestionarMovimientoController.php?action=anularMovimiento",
-        type: "POST",
-        data: { idMovimiento: datos.IdDetalleMovimiento },
-        dataType: "json",
-        success: function (res) {
-          if (res.status) {
-            Swal.fire({
-              title: "Éxito",
-              text: res.message,
-              icon: "success",
-            }).then(() => {
-              // Recargar la tabla
-              $("#tblMovimientos").DataTable().ajax.reload();
-            });
-          } else {
-            Swal.fire("Error", res.message, "error");
-          }
-        },
-        error: function (xhr, status, error) {
-          Swal.fire(
-            "Error",
-            "Error al procesar la solicitud: " + error,
-            "error"
-          );
-        },
-      });
-    }
-  });
-});
+//   Swal.fire({
+//     title: "¿Estás seguro?",
+//     text: "¿Deseas anular este movimiento?",
+//     icon: "warning",
+//     showCancelButton: true,
+//     confirmButtonColor: "#3085d6",
+//     cancelButtonColor: "#d33",
+//     confirmButtonText: "Sí, anular",
+//     cancelButtonText: "Cancelar",
+//   }).then((result) => {
+//     if (result.isConfirmed) {
+//       $.ajax({
+//         url: "../../controllers/GestionarMovimientoController.php?action=anularMovimiento",
+//         type: "POST",
+//         data: { idMovimiento: datos.IdDetalleMovimiento },
+//         dataType: "json",
+//         success: function (res) {
+//           if (res.status) {
+//             Swal.fire({
+//               title: "Éxito",
+//               text: res.message,
+//               icon: "success",
+//             }).then(() => {
+//               // Recargar la tabla
+//               $("#tblMovimientos").DataTable().ajax.reload();
+//             });
+//           } else {
+//             Swal.fire("Error", res.message, "error");
+//           }
+//         },
+//         error: function (xhr, status, error) {
+//           Swal.fire(
+//             "Error",
+//             "Error al procesar la solicitud: " + error,
+//             "error"
+//           );
+//         },
+//       });
+//     }
+//   });
+// });
 
 $(document).on("click", ".btnVerHistorial", function () {
   const fila = $(this).closest("tr");

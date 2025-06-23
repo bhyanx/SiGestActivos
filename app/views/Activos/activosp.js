@@ -513,8 +513,8 @@ function init() {
   $(document).on("click", ".btnEditarActivo", function () {
     const fila = $(this).closest("tr");
     const datos =
-      $(fila).closest("table").attr("id") === "tblRegistros"
-        ? $("#tblRegistros").DataTable().row(fila).data()
+      $(fila).closest("table").attr("id") === "modalDetallesActivo"
+        ? $("#modalDetallesActivo").DataTable().row(fila).data()
         : $("#tblTodosActivos").DataTable().row(fila).data();
 
     if (!datos) {
@@ -597,13 +597,9 @@ function init() {
 
   // Manejador para el botón de Asignar Responsable
   $(document).on("click", ".btnAsignarResponsable", function () {
-    const fila = $(this).closest("tr");
-    const datos =
-      $(fila).closest("table").attr("id") === "tblRegistros"
-        ? $("#tblRegistros").DataTable().row(fila).data()
-        : $("#tblTodosActivos").DataTable().row(fila).data();
+    const idActivo = $(this).data("idActivo");
 
-    if (!datos) {
+    if (!idActivo) {
       Swal.fire(
         "Error",
         "No se pudo obtener la información del activo.",
@@ -616,7 +612,7 @@ function init() {
     $.ajax({
       url: "../../controllers/GestionarActivosController.php?action=verificarResponsable",
       type: "POST",
-      data: { idActivo: datos.idActivo },
+      data: { idActivo: idActivo },
       dataType: "json",
       success: function (res) {
         if (res.status) {
@@ -631,7 +627,7 @@ function init() {
           }
 
           // Si no tiene responsable, continuar con el proceso normal
-          $("#frmAsignarResponsable").data("idActivo", datos.idActivo);
+          $("#frmAsignarResponsable").data("idActivo", idActivo);
 
           $.ajax({
             url: "../../controllers/GestionarActivosController.php?action=combos",
@@ -747,8 +743,8 @@ function init() {
     width: "100%",
   });
 
-  // Manejador para el botón de Ver Historial
-  $(document).on("click", ".btnVerHistorial", function () {
+  // Manejador para el botón de Ver (detalles completos del activo)
+  $(document).on("click", ".btnVerDetalles", function () {
     const fila = $(this).closest("tr");
     const datos =
       $(fila).closest("table").attr("id") === "tblRegistros"
@@ -764,82 +760,380 @@ function init() {
       return;
     }
 
-    // Lógica para mostrar el historial del activo
+    // Lógica para mostrar los detalles completos del activo
     $.ajax({
-      url: "../../controllers/GestionarActivosController.php?action=verHistorial",
+      url: "../../controllers/GestionarActivosController.php?action=obtenerActivoPorId",
       type: "POST",
       data: { idActivo: datos.idActivo },
       dataType: "json",
       success: function (res) {
-        if (res.status && res.data.length > 0) {
-          let historialHtml = `
-            <div class="modal fade" id="modalHistorialActivo" tabindex="-1" role="dialog" aria-labelledby="modalHistorialLabel" aria-hidden="true">
-              <div class="modal-dialog modal-xl" role="document">
-                <div class="modal-content">
-                  <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="modalHistorialLabel">Historial del Activo: ${datos.CodigoActivo}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                  <div class="modal-body">
-                    <table id="tblHistorialActivo" class="table table-bordered table-striped table-sm" style="width:100%;">
-                      <thead>
+        if (res.status && res.data) {
+          let activo = res.data;
+          // let detallesHtml = `
+          //   <div class="modal fade" id="modalDetallesActivo" tabindex="-1" role="dialog" aria-labelledby="modalDetallesLabel" aria-hidden="true">
+          //     <div class="modal-dialog modal-xl" role="document">
+          //       <div class="modal-content">
+          //         <div class="modal-header bg-primary text-white">
+          //           <h5 class="modal-title" id="modalDetallesLabel">Detalles del Activo: ${
+          //             datos.CodigoActivo
+          //           }</h5>
+          //           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          //             <span aria-hidden="true">&times;</span>
+          //           </button>
+          //         </div>
+          //         <div class="modal-body">
+          //           <div class="row">
+          //             <div class="col-md-6">
+          //               <h6><strong>Información General</strong></h6>
+          //               <table class="table table-bordered table-sm">
+          //                 <tr><th>ID Activo</th><td>${activo.idActivo}</td></tr>
+          //                 <tr><th>Código</th><td>${
+          //                   activo.CodigoActivo
+          //                 }</td></tr>
+          //                 <tr><th>Serie</th><td>${
+          //                   activo.NumeroSerie || "-"
+          //                 }</td></tr>
+          //                 <tr><th>Nombre</th><td>${
+          //                   activo.NombreActivoVisible
+          //                 }</td></tr>
+          //                 <tr><th>Marca</th><td>${activo.Marca || "-"}</td></tr>
+          //                 <tr><th>Estado</th><td>${
+          //                   activo.Estado || "-"
+          //                 }</td></tr>
+          //                 <tr><th>Categoría</th><td>${
+          //                   activo.Categoria || "-"
+          //                 }</td></tr>
+          //                 <tr><th>Valor Adquisición</th><td>${
+          //                   activo.valorAdquisicion
+          //                 }</td></tr>
+          //                 <tr><th>Fecha Adquisición</th><td>${
+          //                   activo.fechaAdquisicion || "-"
+          //                 }</td></tr>
+          //                 <tr><th>Responsable</th><td>${
+          //                   activo.Responsable || "-"
+          //                 }</td></tr>
+          //                 <tr><th>Ambiente</th><td>${
+          //                   activo.Ambiente || "-"
+          //                 }</td></tr>
+          //                 <tr><th>Sucursal</th><td>${
+          //                   activo.Sucursal || "-"
+          //                 }</td></tr>
+          //                 <tr><th>Proveedor</th><td>${
+          //                   activo.Proveedor || "-"
+          //                 }</td></tr>
+          //                 <tr><th>Observaciones</th><td>${
+          //                   activo.observaciones || "-"
+          //                 }</td></tr>
+          //               </table>
+          //             </div>
+          //             <div class="col-md-6">
+          //               <h6><strong>Movimientos del Activo</strong></h6>
+          //               <div id="movimientosActivo"></div>
+          //               <h6 class="mt-3"><strong>Componentes del Activo</strong></h6>
+          //               <div id="componentesActivo"></div>
+          //             </div>
+          //           </div>
+          //         </div>
+          //         <div class="modal-footer">
+          //           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          //         </div>
+          //       </div>
+          //     </div>
+          //   </div>`;
+
+          // Eliminar modal anterior si existe
+          $("#modalDetallesActivo").remove();
+          // Agregar nuevo modal al body con el diseño mejorado
+          let modalHtml = `
+
+    <!-- Modal Mejorado -->
+    <div class="modal fade" id="modalDetallesActivo" tabindex="-1" aria-labelledby="modalDetallesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content shadow-lg">
+                <!-- Header del Modal -->
+                <div class="modal-header bg-gradient-primary text-white border-0">
+                    <div class="d-flex align-items-center">
+                        <i class="fab fa-dropbox m-3 fs-4"></i>
+                        <div>
+                            <h5 class="modal-title mb-0" id="modalDetallesLabel">Detalles del Activo</h5>
+                            <small class="opacity-75">Código: ${activo.CodigoActivo}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Body del Modal -->
+                <div class="modal-body p-0">
+                    <div class="container-fluid p-4">
+                        <div class="row g-4">
+                            <!-- Información General -->
+                            <div class="col-lg-6">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-light border-0 py-3">
+                                        <h6 class="card-title mb-0 text-primary">
+                                            <i class="fas fa-info-circle me-2"></i>Información General
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-sm-6">
+                                                <div class="info-item">
+                                                    <label class="form-label text-muted small mb-1">ID Activo</label>
+                                                    <div class="fw-semibold"> ${activo.idActivo}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="info-item">
+                                                    <label class="form-label text-muted small mb-1">Código</label>
+                                                    <div class="fw-semibold"> ${activo.CodigoActivo}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="info-item">
+                                                    <label class="form-label text-muted small mb-1">Serie</label>
+                                                    <div class="fw-semibold"> ${activo.NumeroSerie}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="info-item">
+                                                    <label class="form-label text-muted small mb-1">Estado</label>
+                                                    <span class="badge bg-success"> ${activo.Estado}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="info-item">
+                                                    <label class="form-label text-muted small mb-1">Nombre</label>
+                                                    <div class="fw-semibold"> ${activo.NombreActivoVisible}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="info-item">
+                                                    <label class="form-label text-muted small mb-1">Marca</label>
+                                                    <div class="fw-semibold"> ${activo.Marca}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="info-item">
+                                                    <label class="form-label text-muted small mb-1">Categoría</label>
+                                                    <div class="fw-semibold">${activo.Categoria}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="info-item">
+                                                    <label class="form-label text-muted small mb-1">Valor Adquisición</label>
+                                                    <div class="fw-semibold text-success">${activo.valorAdquisicion}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="info-item">
+                                                    <label class="form-label text-muted small mb-1">Fecha Adquisición</label>
+                                                    <div class="fw-semibold">${activo.fechaAdquisicion}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="info-item">
+                                                    <label class="form-label text-muted small mb-1">Responsable</label>
+                                                    <div class="fw-semibold">${activo.NombreResponsable}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="info-item">
+                                                    <label class="form-label text-muted small mb-1">Ambiente</label>
+                                                    <div class="fw-semibold">${activo.Ambiente}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="info-item">
+                                                    <label class="form-label text-muted small mb-1">Sucursal</label>
+                                                    <div class="fw-semibold">${activo.Sucursal}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="info-item">
+                                                    <label class="form-label text-muted small mb-1">Proveedor</label>
+                                                    <div class="fw-semibold">${activo.Proveedor}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="info-item">
+                                                    <label class="form-label text-muted small mb-1">Observaciones</label>
+                                                    <div class="fw-semibold">${activo.observaciones}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Componentes -->
+                            <div class="col-lg-6">
+                                <!-- Componentes -->
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header bg-light border-0 py-3">
+                                        <h6 class="card-title mb-0 text-primary">
+                                            <i class="fas fa-puzzle-piece me-2"></i>Componentes del Activo
+                                        </h6>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div id="componentesActivo">
+                                            <p>Cargando componentes...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer del Modal -->
+                <div class="modal-footer border-0 bg-light">
+                    <div class="d-flex">
+                        <button type="button" class="btn btn-outline-primary btnEditarDesdeModal m-2" data-id-activo="${activo.idActivo}">
+                            <i class="fas fa-edit me-2"></i>Editar
+                        </button>
+                        <button type="button" class="btn btn-outline-success btnImprimirDesdeModal m-2" data-id-activo="${activo.idActivo}">
+                            <i class="fas fa-print me-2"></i>Imprimir
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btnDarBajaDesdeModal m-2" data-id-activo="${activo.idActivo}">
+                            <i class="fas fa-trash-alt me-2"></i>Baja
+                        </button>
+                        <button type="button" class="btn btn-outline-info btnAsignarResponsable m-2" data-id-activo="${activo.idActivo}">
+                            <i class="fas fa-user-edit me-2"></i>Asignar Responsable
+                        </button> 
+                        <button type="button" class="btn btn-danger m-2" data-dismiss="modal"><i class="fa fa-times"></i> Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+          $("body").append(modalHtml);
+
+          // Cargar movimientos del activo
+          $.ajax({
+            url: "../../controllers/GestionarActivosController.php?action=verHistorial",
+            type: "POST",
+            data: { idActivo: datos.idActivo },
+            dataType: "json",
+            success: function (historialRes) {
+              if (historialRes.status && historialRes.data.length > 0) {
+                let movimientosHtml = `
+                  <table id="tblMovimientosActivo" class="table table-bordered table-striped table-sm" style="width:100%;">
+                    <thead>
+                      <tr>
+                        <th>Fecha</th>
+                        <th>Acción</th>
+                        <th>Usuario Mod.</th>
+                        <th>Campo Modificado</th>
+                        <th>Valor Anterior</th>
+                        <th>Valor Nuevo</th>
+                      </tr>
+                    </thead>
+                    <tbody>`;
+
+                historialRes.data.forEach((item) => {
+                  movimientosHtml += `
+                    <tr>
+                      <td>${item.FechaModificacion}</td>
+                      <td>${item.Accion}</td>
+                      <td>${item.UserMod}</td>
+                      <td>${item.CampoModificado}</td>
+                      <td>${item.ValorAnterior || ""}</td>
+                      <td>${item.ValorNuevo || ""}</td>
+                    </tr>`;
+                });
+
+                movimientosHtml += `</tbody></table>`;
+                $("#movimientosActivo").html(movimientosHtml);
+
+                $("#tblMovimientosActivo").DataTable({
+                  language: {
+                    url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+                  },
+                  responsive: true,
+                  destroy: true,
+                  order: [[0, "desc"]],
+                  pageLength: 5,
+                });
+              } else {
+                $("#movimientosActivo").html(
+                  "<p>No se encontraron movimientos para este activo.</p>"
+                );
+              }
+            },
+            error: function () {
+              $("#movimientosActivo").html(
+                "<p>Error al cargar los movimientos del activo.</p>"
+              );
+            },
+          });
+
+          // Cargar componentes del activo dinámicamente desde el servidor
+          $.ajax({
+            url: "../../controllers/GestionarActivosController.php?action=obtenerComponentes",
+            type: "POST",
+            data: { idActivoPadre: datos.idActivo },
+            dataType: "json",
+            success: function (componentesRes) {
+              if (componentesRes.status && componentesRes.data.length > 0) {
+                let componentesHtml = `
+                  <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                      <thead class="table-light">
                         <tr>
-                          <th>Fecha</th>
-                          <th>Acción</th>
-                          <th>Usuario Mod.</th>
-                          <th>Campo Modificado</th>
-                          <th>Valor Anterior</th>
-                          <th>Valor Nuevo</th>
+                          <th class="border-0 py-3">Código</th>
+                          <th class="border-0 py-3">Componente</th>
+                          <th class="border-0 py-3">Fecha</th>
+                          <th class="border-0 py-3">Estado</th>
                         </tr>
                       </thead>
                       <tbody>`;
 
-          res.data.forEach((item) => {
-            historialHtml += `
-              <tr>
-                <td>${item.FechaModificacion}</td>
-                <td>${item.Accion}</td>
-                <td>${item.UserMod}</td>
-                <td>${item.CampoModificado}</td>
-                <td>${item.ValorAnterior || ""}</td>
-                <td>${item.ValorNuevo || ""}</td>
-              </tr>`;
-          });
+                componentesRes.data.forEach((item) => {
+                  componentesHtml += `
+                    <tr>
+                      <td class="py-3">
+                        <code class="text-primary">${
+                          item.CodigoComponente
+                        }</code>
+                      </td>
+                      <td class="py-3">
+                        <div class="fw-semibold">${item.NombreComponente}</div>
+                        <small class="text-muted">${
+                          item.Descripcion || "-"
+                        }</small>
+                      </td>
+                      <td class="py-3">${item.FechaAsignacion || "-"}</td>
+                      <td class="py-3">
+                        <span class="badge bg-success-subtle text-success">${
+                          item.Estado || "Activo"
+                        }</span>
+                      </td>
+                    </tr>`;
+                });
 
-          historialHtml += `
+                componentesHtml += `
                       </tbody>
                     </table>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                  </div>
-                </div>
-              </div>
-            </div>`;
-
-          // Eliminar modal anterior si existe
-          $("#modalHistorialActivo").remove();
-          // Agregar nuevo modal al body
-          $("body").append(historialHtml);
-          // Inicializar datatable
-          $("#tblHistorialActivo").DataTable({
-            language: {
-              url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+                  </div>`;
+                $("#componentesActivo").html(componentesHtml);
+              } else {
+                $("#componentesActivo").html(
+                  "<p>No se encontraron componentes para este activo.</p>"
+                );
+              }
             },
-            responsive: true,
-            destroy: true,
-            order: [[0, "desc"]],
+            error: function () {
+              $("#componentesActivo").html(
+                "<p>Error al cargar los componentes del activo.</p>"
+              );
+            },
           });
+
           // Mostrar el modal
-          $("#modalHistorialActivo").modal("show");
+          $("#modalDetallesActivo").modal("show");
         } else {
           Swal.fire(
-            "Historial del Activo",
-            res.data.length === 0
-              ? "No se encontró historial para este activo."
-              : "Error al obtener el historial: " + res.message,
+            "Detalles del Activo",
+            "Error al obtener los detalles: " + res.message,
             "info"
           );
         }
@@ -847,11 +1141,129 @@ function init() {
       error: function (xhr, status, error) {
         Swal.fire(
           "Error",
-          "No se pudo obtener el historial del activo: " + error,
+          "No se pudo obtener los detalles del activo: " + error,
           "error"
         );
       },
     });
+  });
+
+  // Manejador para el botón Editar desde el modal de detalles
+  $(document).on("click", ".btnEditarDesdeModal", function () {
+    const idActivo = $(this).data("idActivo");
+
+    // Obtener datos del activo
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=obtenerActivoPorId",
+      type: "POST",
+      data: { idActivo: idActivo },
+      dataType: "json",
+      success: (res) => {
+        if (res.status) {
+          let data = res.data;
+          $("#frmEditarActivo").data("idArticulo", data.idArticulo);
+
+          $("#tituloModalActualizarActivo").html(
+            '<i class="fa fa-edit"></i> Editar Activo'
+          );
+
+          // Carga los combos y luego los datos del activo
+          cargarCombosModalActualizarActivo(() => {
+            // Cargar datos básicos
+            $("#IdActivoEditar").val(data.idActivo);
+            $("#IdActivo").val(data.idActivo);
+            $("#CodigoActivo").val(data.CodigoActivo);
+            $("#SerieActivo").val(data.NumeroSerie);
+            $("#DocIngresoAlmacen").val(data.DocIngresoAlmacen);
+            $("#IdArticulo").val(data.idArticulo);
+            $("#nombreArticulo").val(data.NombreActivoVisible);
+            $("#marca").val(data.Marca);
+            $("#fechaAdquisicion").val(data.fechaAdquisicion);
+            $("#Garantia").prop("checked", data.garantia == 1);
+            $("#Observaciones").val(data.observaciones);
+            $("#VidaUtil").val(data.vidaUtil);
+            $("#ValorAdquisicion").val(data.valorAdquisicion);
+
+            // Asignar valores a los combos
+            $("#IdEstado").val(data.idEstado).trigger("change");
+            $("#IdAmbiente").val(data.idAmbiente).trigger("change");
+            $("#IdCategoria")
+              .val(data.idCategoria)
+              .trigger("change")
+              .prop("disabled", true);
+
+            // Cerrar el modal de detalles
+            $("#modalDetallesActivo").modal("hide");
+
+            // Mostrar el modal de edición
+            $("#divModalActualizarActivo").modal({
+              backdrop: "static",
+              keyboard: false,
+            });
+          });
+        } else {
+          Swal.fire(
+            "Editar Activo",
+            "No se pudo obtener el activo: " + res.message,
+            "warning"
+          );
+        }
+      },
+      error: (xhr, status, error) => {
+        Swal.fire(
+          "Editar Activo",
+          "Error al obtener activo: " + error,
+          "error"
+        );
+      },
+    });
+  });
+
+$(document).on("click", ".btnDarBajaDesdeModal", function () {
+  const idActivo = $(this).data("idActivo");
+  // Guardar el ID del activo en el formulario
+  $("#frmBajaActivo").data("idActivo", idActivo);
+
+    // Cargar el combo de autorizadores
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=combos",
+      type: "POST",
+      dataType: "json",
+      success: function (res) {
+        if (res.status) {
+          $("#Autorizador").html(res.data.autorizador).trigger("change");
+          $("#Autorizador").select2({
+            theme: "bootstrap4",
+            dropdownParent: $("#modalBajaActivo"),
+            width: "100%",
+          });
+          // Mostrar el modal después de cargar el combo
+          $("#modalBajaActivo").modal("show");
+        } else {
+          Swal.fire(
+            "Error",
+            "No se pudieron cargar los autorizadores",
+            "error"
+          );
+        }
+      },
+      error: function (xhr, status, error) {
+        Swal.fire(
+          "Error",
+          "Error al cargar los autorizadores: " + error,
+          "error"
+        );
+      },
+    });
+  });
+
+  // Manejador para el botón Imprimir desde el modal de detalles
+  $(document).on("click", ".btnImprimirDesdeModal", function () {
+    const idActivo = $(this).data("idActivo");
+    window.open(
+      `/app/views/Reportes/reporteActivo.php?idActivo=${idActivo}`,
+      "_blank"
+    );
   });
 
   // Manejador para el botón de Dar de Baja
@@ -1568,26 +1980,9 @@ function listarActivosTable() {
         data: null,
         render: (data, type, row) =>
           `<div class="btn-group">
-            <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-cog"></i>
-            </button>
-            <div class="dropdown-menu">
-              <button class="dropdown-item btnEditarActivo" type="button">
-                <i class="fas fa-edit text-warning"></i> Editar
+              <button class="btn btn-primary btnVerDetalles" type="button">
+                <i class="fas fa-eye text-white"></i>
               </button>
-              <button class="dropdown-item btnAsignarResponsable" type="button">
-                <i class="fas fa-user-plus text-info"></i> Asignar Responsable
-              </button>
-              <button class="dropdown-item btnVerHistorial" type="button">
-                <i class="fas fa-history text-primary"></i> Ver Historial
-              </button>
-              <button class="dropdown-item btnImprimirActivo" type="button">
-                <i class="fas fa-print text-secondary"></i> Imprimir Activo
-              </button>
-              <button class="dropdown-item btnDarBaja" type="button">
-                <i class="fas fa-ban text-danger"></i> Dar de Baja
-              </button>
-            </div>
         </div>`,
       },
       { data: "idActivo", visible: false, searchable: false },
