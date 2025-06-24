@@ -22,7 +22,7 @@ class GestionarActivos
             $pIdSucursal = empty($data['pIdSucursal']) ? null : (int)$data['pIdSucursal'];
             $pIdCategoria = empty($data['pIdCategoria']) ? null : (int)$data['pIdCategoria'];
             $pIdEstado = empty($data['pIdEstado']) ? null : (int)$data['pIdEstado'];
-            $pAccion = 2;
+            $pAccion = 1;
 
             $stmt = $this->db->prepare('EXEC sp_ConsultarActivos @pCodigo = ?, @pIdEmpresa = ?, @pIdSucursal = ?, @pIdCategoria = ?, @pIdEstado = ?, @pAccion = ?');
             $stmt->bindParam(1, $pCodigo, \PDO::PARAM_STR | \PDO::PARAM_NULL);

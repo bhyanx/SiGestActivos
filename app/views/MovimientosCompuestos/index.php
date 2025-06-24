@@ -90,46 +90,114 @@ session_start();
                                 </div>
                             </form>
                         </div>
-                        <div class="col-12" id="divformularioasignacion" style="display: none;">
-                            <div class="card card-info">
-                                <div class="card-header">
-                                    <h3 class="card-title"><i class="fas fa-boxes-stacked"></i> Asignar Componentes a Activo Padre</h3>
-                                </div>
-                                <div class="card-body">
-                                    <form id="formAsignarComponente" method="post">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="IdActivoPadre">Activo Padre:</label>
-                                                    <select class="form-control" name="IdActivoPadre" id="IdActivoPadre" required></select>
+                        <div class="col-12" id="divformularioasignacion">
+                            <div class="alert alert-info alert-dismissible">
+                                <span id="lblSucursal"><?php echo $_SESSION['NombreSucursal'] ?></span>
+                                <button type="button" class="close btn" id="btnVolver">
+                                    <i class="fas fa-undo-alt"></i>
+                                </button>
+                                <!-- <input type="hidden" name="IdAutorizador" id="IdAutorizador"> -->
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card card-primary">
+                                        <div class="card-header">
+                                            <h3 class="card-title"><i class="fas fa-file-alt"></i> Asignar Activo Padre :</h3>
+                                            <div class="card-tools">
+                                                <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                                                    <i class="fas fa-expand"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="IdAsignacionPadre">Seleccionar Activo Padre:</label>
+                                                        <select class="form-control" name="IdAsignacionPadre" id="IdAsignacionPadre" required></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="SerieActivo">Serie Activo Padre:</label>
+                                                        <input type="text" class="form-control" name="SerieActivo" id="SerieActivo" placeholder="Serie Activo Padre" required>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="IdActivoComponente">Componentes:</label>
-                                                    <select class="form-control" name="IdActivoComponente[]" id="IdActivoComponente" multiple="multiple" required></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="card card-warning">
+                                    <div class="card-header">
+                                        <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Activos a asignar</h3>
+                                        <div class="card-tools">
+                                            <button type="button" class="btn btn-primary btn-sm" id="btnBuscarActivos">
+                                                <i class="fas fa-search"></i> Buscar Activos
+                                            </button>
+                                            <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                                                <i class="fas fa-expand"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-12 mb-3">
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" id="buscarActivo" placeholder="Buscar activo por código, nombre o serie...">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-outline-secondary" type="button" id="limpiarBusqueda">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <label for="Observaciones">Observaciones:</label>
-                                                    <textarea class="form-control" name="Observaciones" id="Observaciones" rows="3"></textarea>
+                                                <div class="table-responsive">
+                                                    <table id="tbldetalleactivos" class="table table-hover table-bordered table-striped table-sm w-100">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Código</th>
+                                                                <th>Nombre</th>
+                                                                <th>Marca</th>
+                                                                <th>Serie</th>
+                                                                <th>Observaciones</th>
+                                                                <th>Acción</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 mt-3">
+                                <div class="card">
+                                    <div class="card-footer">
                                         <div class="row">
-                                            <div class="col-md-2 offset-md-8">
-                                                <button type="button" class="btn btn-danger btn-block" id="btnCancelarAsignacion">
-                                                    <i class="fa fa-times"></i> Cancelar
+                                            <div class="col-12 col-md-6 mb-2 mb-md-0">
+                                                <button type="button" class="btn btn-danger btn-sm btn-block" id="btnCancelarAsignacion">
+                                                    <i class="fa fa-times"></i> Cerrar
                                                 </button>
                                             </div>
-                                            <div class="col-md-2">
-                                                <button type="submit" class="btn btn-info btn-block" id="btnGuardarAsignacion">
-                                                    <i class="fa fa-save"></i> Guardar
+                                            <div class="col-12 col-md-6">
+                                                <button type="button" class="btn btn-primary btn-sm btn-block" id="btnGuardarAsignacion">
+                                                    <i class="fa fa-check"></i> Guardar
                                                 </button>
                                             </div>
                                         </div>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -397,6 +465,31 @@ session_start();
             </div>
         </div>
     </div>
-</body>
 
-</html>
+    <!-- Modal de Búsqueda de Activos -->
+    <div class="modal fade" id="modalBuscarActivos" tabindex="-1" role="dialog" aria-labelledby="modalBuscarActivosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalBuscarActivosLabel">Buscar Activos</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="table-responsive">
+                                <table id="tblActivos" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Código</th>
+                                            <th>Nombre</th>
+                                            <th>Marca</th>
+                                            <th>Serie</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>

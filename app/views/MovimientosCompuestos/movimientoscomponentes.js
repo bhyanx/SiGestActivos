@@ -32,6 +32,7 @@ function init() {
   // Ocultar secciones al cargar
   $("#divgenerarmov").hide();
   $("#divregistroMovimiento").hide();
+  $("#divformularioasignacion").hide();
 
   // Botón para abrir el panel de generación de movimiento
   $("#btnnuevo")
@@ -50,6 +51,7 @@ function init() {
       $("#divformularioasignacion").show();
       $("#divlistadomovimientos").hide();
       $("#divtblmovimientos").hide();
+      $("#tbldetalleactivos tbody").empty();
       cargarActivosParaAsignacion();
     });
 
@@ -318,6 +320,91 @@ function init() {
     $("#IdActivoPadreOrigen").val("").trigger("change");
     $("#IdActivoPadreDestino").val("").trigger("change");
   });
+
+  // Evento para abrir el modal de búsqueda de activos
+  $(document).on("click", "#btnBuscarActivos", function () {
+    $("#modalBuscarActivos").modal("show");
+    listarActivosModalBusqueda();
+  });
+
+  // Evento para guardar la asignación de componentes
+  $(document).on("click", "#btnGuardarAsignacion", function () {
+    const idPadre = $("#IdAsignacionPadre").val();
+    if (!idPadre) {
+      Swal.fire("Error", "Debe seleccionar un activo padre.", "error");
+      return;
+    }
+    const filas = $("#tbldetalleactivos tbody tr");
+    if (filas.length === 0) {
+      Swal.fire("Error", "Debe agregar al menos un componente.", "error");
+      return;
+    }
+
+    let total = filas.length;
+    let exitos = 0;
+    let errores = 0;
+    let erroresMsg = [];
+
+    Swal.fire({
+      title: "Procesando",
+      text: "Asignando componentes...",
+      allowOutsideClick: false,
+      didOpen: () => { Swal.showLoading(); }
+    });
+
+    filas.each(function () {
+      const idComponente = $(this).data("id");
+      const observacion = $(this).find(".observacion-componente").val() || "";
+      $.ajax({
+        url: "../../controllers/GestionarMovimientosComponentesController.php?action=asignarComponente",
+        type: "POST",
+        data: {
+          IdActivoPadre: idPadre,
+          IdActivoComponente: idComponente,
+          Observaciones: observacion
+        },
+        dataType: "json",
+        success: function (res) {
+          if (res.success) {
+            exitos++;
+          } else {
+            errores++;
+            erroresMsg.push(res.message || "Error al asignar componente " + idComponente);
+          }
+          if (exitos + errores === total) {
+            Swal.close();
+            if (errores === 0) {
+              Swal.fire({
+                icon: "success",
+                title: "Éxito",
+                text: "Todos los componentes fueron asignados correctamente.",
+                timer: 1800
+              });
+              $("#tbldetalleactivos tbody").empty();
+            } else {
+              Swal.fire({
+                icon: "warning",
+                title: "Algunos errores",
+                html: erroresMsg.join("<br>")
+              });
+            }
+          }
+        },
+        error: function (xhr, status, error) {
+          errores++;
+          erroresMsg.push("Error de red al asignar componente " + idComponente);
+          if (exitos + errores === total) {
+            Swal.close();
+            Swal.fire({
+              icon: "warning",
+              title: "Algunos errores",
+              html: erroresMsg.join("<br>")
+            });
+          }
+        }
+      });
+    });
+  });
 }
 
 function cargarActivosPadres() {
@@ -391,64 +478,50 @@ function cargarActivosPadres() {
 }
 
 function cargarActivosParaAsignacion() {
-  // Cargar activos padres
+  // Cargar todos los activos disponibles para asignar como padre
   $.ajax({
-    url: "../../controllers/GestionarMovimientosComponentesController.php?action=listarActivosPadres",
+    url: "../../controllers/GestionarActivosController.php?action=ConsultarActivosRelacionados",
     type: "POST",
-    data: { tipo: 'todos' },
+    data: { IdArticulo: "", IdActivo: "" },
     dataType: "json",
     success: function (res) {
-      if (res.status) {
-        $("#IdActivoPadre").empty();
-        $("#IdActivoPadre").append('<option value="">Seleccione un activo padre</option>');
-        
-        res.data.forEach(function (activo) {
-          const option = `<option value="${activo.IdActivo}">${activo.CodigoActivo} - ${activo.NombreArticulo}</option>`;
-          $("#IdActivoPadre").append(option);
+      let data = res && res.length ? res : (res.data || []);
+      if (data.length > 0) {
+        $("#IdAsignacionPadre").empty();
+        $("#IdAsignacionPadre").append('<option value="">Seleccione un activo padre</option>');
+        data.forEach(function (activo) {
+          const id = activo.idActivo || activo.IdActivo;
+          const nombre = activo.NombreActivoVisible || activo.Nombre || activo.nombreActivoVisible;
+          const codigo = activo.CodigoActivo || activo.Codigo;
+          const serie = activo.NumeroSerie || activo.Serie || "";
+          $("#IdAsignacionPadre").append(`<option value="${id}">${codigo} - ${nombre} (${serie})</option>`);
         });
-
-        $("#IdActivoPadre").select2({
-          theme: "bootstrap4",
-          width: "100%",
-        });
+        if (!$("#IdAsignacionPadre").hasClass("select2-hidden-accessible")) {
+          $("#IdAsignacionPadre").select2({ theme: "bootstrap4", width: "100%" });
+        }
       } else {
-        Swal.fire("Error", res.message, "error");
+        Swal.fire("Error", "No se encontraron activos disponibles", "error");
       }
     },
     error: function (xhr, status, error) {
-      Swal.fire("Error", "Error al cargar los activos padres: " + error, "error");
-    },
+      Swal.fire("Error", "Error al cargar los activos: " + error, "error");
+    }
   });
-
-  // Cargar componentes disponibles
-  $.ajax({
-    url: "../../controllers/GestionarMovimientosComponentesController.php?action=listarComponentesDisponibles",
-    type: "POST",
-    dataType: "json",
-    success: function (res) {
-      if (res.status) {
-        $("#IdActivoComponente").empty();
-        $("#IdActivoComponente").append('<option value="">Seleccione uno o más componentes</option>');
-        
-        res.data.forEach(function (componente) {
-          const option = `<option value="${componente.IdActivo}">${componente.CodigoActivo} - ${componente.NombreArticulo}</option>`;
-          $("#IdActivoComponente").append(option);
-        });
-
-        $("#IdActivoComponente").select2({
-          theme: "bootstrap4",
-          width: "100%",
-          multiple: true
-        });
-      } else {
-        Swal.fire("Error", res.message, "error");
-      }
-    },
-    error: function (xhr, status, error) {
-      Swal.fire("Error", "Error al cargar los componentes: " + error, "error");
-    },
-  });
+  // No llenar la tabla de detalle aquí
 }
+
+// Evento para seleccionar/deseleccionar componentes en la tabla
+$(document).off("click", ".btnSeleccionarComponente").on("click", ".btnSeleccionarComponente", function () {
+  const $btn = $(this);
+  const $tr = $btn.closest("tr");
+  if ($tr.hasClass("table-success")) {
+    $tr.removeClass("table-success");
+    $btn.removeClass("btn-danger").addClass("btn-success").html('<i class="fa fa-check"></i> Seleccionar');
+  } else {
+    $tr.addClass("table-success");
+    $btn.removeClass("btn-success").addClass("btn-danger").html('<i class="fa fa-times"></i> Quitar');
+  }
+});
 
 function cargarComponentesActivo(idActivoPadre) {
   $.ajax({
@@ -1003,3 +1076,68 @@ function NotificacionToast(tipo, mensaje) {
   };
   toastr[tipo](mensaje);
 }
+
+// Función para listar activos en el modal de búsqueda
+function listarActivosModalBusqueda() {
+  if ($.fn.DataTable.isDataTable("#tblActivos")) {
+    $("#tblActivos").DataTable().destroy();
+  }
+  $("#tblActivos").DataTable({
+    ajax: {
+      url: "../../controllers/GestionarActivosController.php?action=ConsultarActivosRelacionados",
+      type: "POST",
+      data: { IdArticulo: "", IdActivo: "" },
+      dataType: "json",
+      dataSrc: function (json) {
+        return json && json.length ? json : (json.data || []);
+      },
+    },
+    columns: [
+      { data: "idActivo" },
+      { data: "CodigoActivo" },
+      { data: "NombreActivoVisible" },
+      { data: "Marca" },
+      { data: "NumeroSerie" },
+      {
+        data: null,
+        render: function (data, type, row) {
+          return `<button type="button" class="btn btn-success btn-sm btnAgregarActivoDetalle"><i class="fa fa-plus"></i> Agregar</button>`;
+        },
+      },
+    ],
+    language: {
+      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+    },
+    destroy: true,
+    responsive: true,
+    autoWidth: false,
+  });
+}
+
+// Evento para agregar un activo seleccionado al detalle
+$(document).on("click", ".btnAgregarActivoDetalle", function () {
+  const data = $("#tblActivos").DataTable().row($(this).closest("tr")).data();
+  if (!data) return;
+  // Verificar si ya está en el detalle
+  if ($(`#tbldetalleactivos tbody tr[data-id='${data.idActivo}']`).length > 0) {
+    NotificacionToast("warning", "El activo ya está en el detalle.");
+    return;
+  }
+  // Agregar al detalle
+  $("#tbldetalleactivos tbody").append(`
+    <tr data-id="${data.idActivo}">
+      <td>${data.CodigoActivo}</td>
+      <td>${data.NombreActivoVisible}</td>
+      <td>${data.Marca || ""}</td>
+      <td>${data.NumeroSerie || ""}</td>
+      <td><input type="text" class="form-control form-control-sm observacion-componente" placeholder="Observaciones"></td>
+      <td><button type="button" class="btn btn-danger btn-sm btnQuitarActivoDetalle"><i class="fa fa-trash"></i> Quitar</button></td>
+    </tr>
+  `);
+  NotificacionToast("success", "Activo agregado al detalle.");
+});
+
+// Evento para quitar un activo del detalle
+$(document).on("click", ".btnQuitarActivoDetalle", function () {
+  $(this).closest("tr").remove();
+});
