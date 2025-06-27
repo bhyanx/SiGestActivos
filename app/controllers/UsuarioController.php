@@ -137,6 +137,12 @@ switch ($action) {
                 $combos['empresas'] .= "<option value='{$row['cod_empresa']}'>{$row['Razon_empresa']}</option>";
             }
 
+            $rol = $combo->comboRol();
+            $combos['roles'] = '<option value="">Seleccione</option>';
+            foreach ($rol as $row) {
+                $combos['roles'] .= "<option value='{$row['IdRol']}'>{$row['NombreRol']}</option>";
+            }
+
 
             error_log("Combos generados: " . print_r($combos, true), 3, __DIR__ . '/../../logs/debug.log');
             echo json_encode(['status' => true, 'data' => $combos, 'message' => 'Combos cargados correctamente.']);

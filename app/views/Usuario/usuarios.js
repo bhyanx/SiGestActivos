@@ -64,6 +64,41 @@ function ListarCombos() {
   });
 }
 
+function ListarCombosRoles(elemento) {
+  $.ajax({
+    url: "../../controllers/GestionarUsuariosController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    async: false,
+
+    success: (res) => {
+      if (res.status) {
+        $(`#${elemento}`).html(res.data.roles).trigger("change");
+
+        $(`#${elemento}`).select2({
+          theme: "bootstrap4",
+          //dropdownParent: $("#ModalFiltros .modal-body"),
+          width: "100%",
+        });
+      } else {
+        Swal.fire(
+          "Filtro de roles",
+          "No se pudieron cargar los combos: " + res.message,
+          "warning"
+        );
+      }
+    },
+    error: (xhr, status, error) => {
+      Swal.fire(
+        "Filtros de roles",
+        "Error al cargar combos: " + error,
+        "error"
+      );
+    },
+  });
+}
+
+
 function guardaryeditarUsuarios(e) {
   e.preventDefault();
 

@@ -74,7 +74,7 @@ session_start();
                                                             <th>Descripcion</th>
                                                             <th>Sucursal</th>
                                                             <th>Estado</th>
-                                                            <th><i class="fa fa-cogs"></i></th>
+                                                            <th><i class="fas fa-gears"></i></th>
                                                         </tr>
                                                     </thead>
                                                 </table>
@@ -113,16 +113,34 @@ session_start();
                                                     <input type="text" class="form-control" id="descripcion" name="descripcion" required>
                                                 </div>
                                             </div>
+                                            <!-- <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="idEmpresa">Empresa:</label>
+                                                    <select name="idEmpresa" id="idEmpresa" class="form-control select2"></select>
+                                                </div>
+                                            </div>
                                             <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="idSucursal">Sucursal:</label>
+                                                    <select name="idSucursal" id="idSucursal" class="form-control select2"></select>
+                                                </div>
+                                            </div> -->
+                                            <!-- <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="estado">Estado:</label>
                                                     <select class="form-control select2" id="estado" name="estado" required></select>
+                                                </div>
+                                            </div> -->
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="CodAmbiente">Abreviación:</label>
+                                                    <input type="text" class="form-control" id="CodAmbiente" name="CodAmbiente">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Guardar</button>
+                                        <button type="submit" id="btnGuardarAmbiente" class="btn btn-success"><i class="fa fa-save"></i> Guardar</button>
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
                                     </div>
                                 </form>

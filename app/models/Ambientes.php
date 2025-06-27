@@ -63,8 +63,8 @@ class Ambientes
 
     public function crear($data){
         try{
-            $stmt = $this->db->prepare('INSERT INTO tAmbiente (nombre, descripcion, idSucursal, estado, fechaRegistro, fechaMod, userMod) VALUES (?,?,?,?, GETDATE(), GETDATE(), ?)');
-            $stmt->execute([$data['nombre'], $data['descripcion'], $data['idSucursal'], $data['estado'], $data['userMod']]);
+            $stmt = $this->db->prepare('INSERT INTO tAmbiente (nombre, descripcion, idEmpresa, idSucursal, estado, fechaRegistro, fechaMod, userMod, codigoAmbiente) VALUES (?,?,?,?,?, GETDATE(), GETDATE(), ?,?)');
+            $stmt->execute([$data['nombre'], $data['descripcion'], $data['idEmpresa'], $data['idSucursal'], $data['estado'], $data['userMod'], $data['codigoAmbiente']]);
             return $this->db->lastInsertId();
         }catch(\PDOException $e){
             error_log("Error in Ambientes::crear: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');

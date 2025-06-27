@@ -44,7 +44,7 @@ session_start();
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title"><i class="fa fa-list"></i>Lista de Usuarios</h3>
+                                    <h3 class="card-title"><i class="fa fa-list"></i>Lista de Permisos</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
@@ -59,16 +59,14 @@ session_start();
                                         </div>
                                         <div class="col-md-12">
                                             <div class="table-responsive">
-                                                <table id="tblUsuarios" class="table table-bordered table-striped">
+                                                <table id="tblPermisos" class="table table-bordered table-striped">
                                                     <thead>
                                                         <tr>
                                                             <th><i class="fa fa-cogs"></i></th>
-                                                            <th>DNI</th>
-                                                            <th>Nombres</th>
-                                                            <th>Apellidos</th>
+                                                            <th>Cod. Permiso</th>
+                                                            <th>Menu</th>
                                                             <th>Rol</th>
-                                                            <th>Clave</th>
-                                                            <th>Estado</th>
+                                                            <th>Permisos</th>
                                                         </tr>
                                                     </thead>
                                                 </table>
@@ -81,36 +79,37 @@ session_start();
                     </div>
 
                     <!-- MODAL PARA REGISTRAR USUARIOS -->
-                     <div class="modal fade" id="ModalUsuarios" tabindex="-1" role="dialog" aria-labelledby="ModalUsuariosLabel" aria-hidden="true">
+                    <div class="modal fade" id="ModalPermisos" tabindex="-1" role="dialog" aria-labelledby="ModalPermisosLabel" aria-hidden="true">
                         <div class="modal-dialog modal-lg" role="document">
                             <div class="modal-content">
-                                <form id="frmUsuarios" name="frmUsuario" method="POST">
+                                <form id="frmPermisos" name="frmPermisos" method="POST">
                                     <div class="modal-header bg-primary text-white">
-                                        <h5 class="modal-title" id="tituloModalUsuario"><i class="fa fa-plus-circle"></i> Nuevo Movimiento</h5>
+                                        <h5 class="modal-title" id="tituloModalPermisos"><i class="fa fa-plus-circle"></i> Asignar Permisos</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <input type="hidden" name="idUsuario" id="idUsuario" value="0">
+                                        <input type="hidden" name="codPermiso" id="codPermiso" value="0">
 
                                         <div class="row">
+
                                             <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <label for="IdUsuario">Codigo de Usuario:</label>
-                                                    <select class="form-control select2" id="IdUsuario" name="IdUsuario" required></select>
+                                                    <label for="CodMenu">Menu:</label>
+                                                    <select class="form-control select2" id="CodMenu" name="CodMenu" required></select>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <label for="rol">Rol:</label>
-                                                    <select class="form-control select2" id="idrol" name="idrol" required></select>
+                                                    <label for="idRol">Rol:</label>
+                                                    <select class="form-control select2" id="idRol" name="idRol" required></select>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <label for="clave">Clave de Acceso:</label>
-                                                    <select class="form-control select2" id="clave" name="clave" required></select>
+                                                    <label for="permiso">Permiso</label>
+                                                    <input type="checkbox" class="form-control" id="permiso" name="permiso" value="1">
                                                 </div>
                                             </div>
                                         </div>
@@ -122,7 +121,7 @@ session_start();
                                 </form>
                             </div>
                         </div>
-                     </div>
+                    </div>
                 </div>
             </section>
         </div>

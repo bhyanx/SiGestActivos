@@ -116,7 +116,7 @@ session_start();
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="clave">Clave de Acceso:</label>
-                                                    <select class="form-control select2" id="clave" name="clave" required></select>
+                                                    <input type="text" class="form-control" id="clave" name="clave" required>
                                                 </div>
                                             </div>
                                         </div>
