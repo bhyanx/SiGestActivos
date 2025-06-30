@@ -123,8 +123,8 @@ class GestionarMovimientosComponentes
     ISNULL(ap_destino.CodigoActivo + ' - ' + ap_destino.NombreActivoVisible, '') AS ActivoPadreDestino,
     ISNULL(s.Nombre_local, '') AS Sucursal,
     ISNULL(amb.nombre, '') AS Ambiente,
-    ISNULL(CONCAT(t.NombreTrabajador, ' ', t.ApellidoPaterno), '') AS Autorizador,
-    ISNULL(CONCAT(r.NombreTrabajador, ' ', r.ApellidoPaterno), '') AS Responsable,
+    ISNULL(t.NombreTrabajador, ' ') AS Autorizador,
+    ISNULL(r.NombreTrabajador, ' ') AS Responsable,
     m.FechaMovimiento
 FROM tDetalleMovimiento dm
 INNER JOIN tMovimientos m ON dm.IdMovimiento = m.IdMovimiento

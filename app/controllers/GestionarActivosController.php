@@ -54,6 +54,7 @@ switch ($action) {
 
     case 'ConsultarActivosRelacionados':
         try {
+            error_log("POST data recibida: " . print_r($_POST, true), 3, __DIR__ . '/../../logs/debug.log');
             $filtros = [
                 'pIdArticulo' => $_POST['IdArticulo'] ?? null,
                 'pCodigo' => $_POST['pCodigo'] ?? null,
@@ -62,6 +63,7 @@ switch ($action) {
                 'pIdCategoria' => $_POST['pIdCategoria'] ?? null,
                 'pIdEstado' => $_POST['pIdEstado'] ?? null
             ];
+            error_log("Filtros procesados: " . print_r($filtros, true), 3, __DIR__ . '/../../logs/debug.log');
             $resultados = $activos->consultarActivosRelacionados($filtros);
             error_log("Consultar resultados: " . print_r($resultados, true), 3, __DIR__ . '/../../logs/debug.log');
             echo json_encode($resultados ?: []);

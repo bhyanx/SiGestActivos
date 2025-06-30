@@ -69,6 +69,7 @@ class GestionarActivos
     public function consultarActivosRelacionados($data)
     {
         try {
+            error_log("Data recibida en modelo: " . print_r($data, true), 3, __DIR__ . '/../../logs/debug.log');
             //$empresa = $_SESSION['cod_empresa'] ??  null; 
             //$sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
             // Convertir cadenas vacías a null o enteros para parámetros numéricos
@@ -79,6 +80,8 @@ class GestionarActivos
             $pIdCategoria = empty($data['pIdCategoria']) ? null : (int)$data['pIdCategoria'];
             $pIdEstado = empty($data['pIdEstado']) ? null : (int)$data['pIdEstado'];
             $pAccion = 3;
+            
+            error_log("Valor de pIdCategoria después de procesamiento: " . $pIdCategoria, 3, __DIR__ . '/../../logs/debug.log');
 
             $stmt = $this->db->prepare('EXEC sp_ConsultarActivos @pIdArticulo = ?, @pCodigo = ?, @pIdEmpresa = ?, @pIdSucursal = ?, @pIdCategoria = ?, @pIdEstado = ?, @pAccion = ?');
             $stmt->bindParam(1, $pIdArticulo, \PDO::PARAM_INT | \PDO::PARAM_NULL);

@@ -40,7 +40,7 @@ function ListarCombosEmpresa(elemento) {
         $(`#${elemento}`).html(res.data.empresas).trigger("change");
       } else {
         Swal.fire(
-          "Filtro de movimientos",
+          "Filtro de empresas",
           "No se pudieron cargar los combos: " + res.message,
           "warning"
         );
@@ -48,7 +48,7 @@ function ListarCombosEmpresa(elemento) {
     },
     error: (xhr, status, error) => {
       Swal.fire(
-        "Filtros de movimientos",
+        "Filtros de empresas",
         "Error al cargar combos: " + error,
         "error"
       );

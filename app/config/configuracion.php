@@ -12,8 +12,9 @@ class Conectar
     public function ConexionBdPracticante()
     {
         try {
-            $conexion = new PDO("sqlsrv:Server=192.168.1.35;Database=bdActivos", "practsistAlfa", "Calichin2025");
+            //$conexion = new PDO("sqlsrv:Server=192.168.1.35;Database=bdActivos", "practsistAlfa", "Calichin2025");
             //$conexion = new PDO("sqlsrv:Server=BHYANX;Database=bdActivos", "", "");
+            $conexion = new PDO("sqlsrv:Server=localhost;Database=bdActivos", "sa", "Bryan260904");
             $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $conexion;
         } catch (PDOException $e) {
@@ -28,7 +29,8 @@ class Conectar
 
     public static function ruta()
     {
-        return 'http://192.168.1.54:8088/SiGestActivos/';
+        //return 'http://192.168.1.54:8088/SiGestActivos/';
+        return 'http://192.168.1.14/';
     }
 
     public static function rutaServidor()
@@ -42,5 +44,5 @@ date_default_timezone_set('America/Bogota');
 
 // Configuración de errores
 error_reporting(E_ALL);
-ini_set('display_errors', 0); // Desactivado para evitar HTML en respuestas JSON
+ini_set('display_errors', 1); // Desactivado para evitar HTML en respuestas JSON
 ?>

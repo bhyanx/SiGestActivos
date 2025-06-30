@@ -409,9 +409,9 @@ session_start();
                                                     </tbody>
                                                     <tfoot>
                                                         <tr>
-                                                            <th colspan="9" style="text-align: right;" class="bg-<?= $_SESSION['TemaColor'] ?>">TOTAL DETALLE &nbsp;&nbsp;</th>
+                                                            <th colspan="9" style="text-align: right;">TOTAL DETALLE &nbsp;&nbsp;</th>
                                                             <!-- <th style="text-align: right;"></th> -->
-                                                            <th class="text-center bg-<?= $_SESSION['TemaColor'] ?>">
+                                                            <th class="text-center">
                                                                 <span id="TotalSinIgV">0.00</span>
                                                             </th>
 

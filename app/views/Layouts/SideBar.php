@@ -19,6 +19,47 @@ function isCurrentRoute($menuRuta)
     return $currentPath === $menuRuta;
 }
 ?>
+<style>
+    .nav-sidebar .nav-item .nav-link {
+        color: #155724;
+        transition: all 0.2s ease-in-out;
+        border-radius: 6px;
+        margin: 2px 6px;
+    }
+
+    .nav-sidebar .nav-item .nav-link:hover {
+        background-color: #d4edda !important;
+        color: #155724 !important;
+        /* font-weight: 500; */
+    }
+
+    .nav-sidebar .nav-item .nav-link.active {
+        background-color: #28a745 !important;
+        color: white !important;
+        font-weight: bold;
+    }
+
+    .nav-sidebar .nav-item .nav-link.active i,
+    .nav-sidebar .nav-item .nav-link:hover i {
+        color: inherit !important;
+    }
+
+    .nav-sidebar .nav-treeview .nav-link {
+        padding-left: 2rem;
+        font-size: 14px;
+    }
+
+    .nav-sidebar .nav-treeview .nav-link:hover {
+        background-color: #c3e6cb !important;
+        color: #155724 !important;
+    }
+
+    .nav-icon {
+        min-width: 1.5rem;
+        text-align: center;
+    }
+</style>
+
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar elevation-4 sidebar-light-success">
     <!-- Brand Logo -->
