@@ -115,6 +115,7 @@ if (isset($_SESSION["IdRol"])) {
                                                                 <th>Estado</th>
                                                                 <th>Valor</th>
                                                                 <th>Responsable</th>
+                                                                <th>Nombre Responsable</th>
                                                                 <th>Art. Relacionados</th>
                                                                 <th>Act. Relacionados</th>
                                                             </tr>
