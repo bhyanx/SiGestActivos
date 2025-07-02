@@ -331,6 +331,9 @@ class GestionarActivos
         try {
             // Formatear fechas
             $fechaAdquisicion = !empty($data['FechaAdquisicion']) ? date('Y-m-d', strtotime($data['FechaAdquisicion'])) : date('Y-m-d');
+            // Convertir cadenas vacías a null para parámetros numéricos
+            $idDocumentoVenta = empty($data['IdDocumentoVenta']) ? null : $data['IdDocumentoVenta'];
+            $idOrdendeCompra = empty($data['IdOrdendeCompra']) ? null : $data['IdOrdendeCompra'];
 
             $stmt = $this->db->prepare('EXEC sp_GuardarActivoManual
                 @pIdActivo = ?,
@@ -359,8 +362,8 @@ class GestionarActivos
                 @pAccion = ?');
 
             $stmt->bindParam(1, $data['IdActivo'], \PDO::PARAM_INT);
-            $stmt->bindParam(2, $data['IdDocumentoVenta'], \PDO::PARAM_INT);
-            $stmt->bindParam(3, $data['IdOrdendeCompra'], \PDO::PARAM_INT);
+            $stmt->bindParam(2, $idDocumentoVenta, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(3, $idOrdendeCompra, \PDO::PARAM_INT | \PDO::PARAM_NULL);
             $stmt->bindParam(4, $data['Nombre'], \PDO::PARAM_STR);
             $stmt->bindParam(5, $data['Descripcion'], \PDO::PARAM_STR);
             $stmt->bindParam(6, $data['Codigo'], \PDO::PARAM_STR);
@@ -530,19 +533,15 @@ public function consultarActivosIndividuales()
 
     public function obtenerComponente($idActivo){
         try {
-            $stmt = $this->db->prepare("SELECT 
-    c.IdActivoComponente,
-    aComponente.CodigoActivo AS CodigoComponente,
-    aComponente.NombreActivoVisible AS NombreComponente,
-    c.IdActivoPadre,
-    aPadre.CodigoActivo AS CodigoPadre,
-    aPadre.NombreActivoVisible AS NombrePadre,
-    c.FechaAsignacion,
-    c.Observaciones
-FROM tRelacionActivoComponente c
-JOIN vActivos aComponente ON aComponente.IdActivo = c.IdActivoComponente
-JOIN vActivos aPadre ON aPadre.IdActivo = c.IdActivoPadre
-WHERE c.Activo = 1 AND c.IdActivoPadre = ?");
+            $stmt = $this->db->prepare("SELECT aHijo.IdActivo AS IdActivoComponente, 
+            aHijo.CodigoActivo AS CodigoComponente,
+            aHijo.NombreActivoVisible AS NombreComponente,
+            aPadre.IdActivo AS IdActivoPadre,
+            aPadre.CodigoActivo AS CodigoPadre,
+            aPadre.NombreActivoVisible AS NombrePadre
+            FROM vActivos aHijo
+            JOIN vActivos aPadre ON aPadre.IdActivo = aHijo.IdActivoPadre
+            WHERE aHijo.IdActivoPadre = ?");
             $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

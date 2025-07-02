@@ -88,7 +88,7 @@ if (isset($_SESSION["IdRol"])) {
                                     </div>
                                 </form>
                             </div>
-                            <div class="col-12" id="divtblactivos" style="display: none;">
+                            <div class="col-12" id="divtblRegistros" style="display: none;">
                                 <div class="card">
                                     <div class="card-header">
                                         <h3 class="card-title"><i class="fa fa-list"></i> Lista de Activos Registrados</h3>

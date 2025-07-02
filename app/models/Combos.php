@@ -31,7 +31,7 @@ class Combos
 
     public function comboEstadoActivo()
     {
-        $sql = "SELECT idEstadoActivo, nombre FROM tEstadoActivo";
+        $sql = "SELECT idEstadoActivo, nombre FROM tEstadoActivo WHERE idEstadoActivo NOT IN(3,2,4)";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);

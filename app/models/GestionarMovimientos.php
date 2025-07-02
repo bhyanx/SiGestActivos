@@ -375,7 +375,7 @@ class GestionarMovimientos
                 $sql .= " AND m.idTipoMovimiento = ?";
                 $params[] = $filtros['tipo'];
             }
-
+                                                                                                                                                                                                                                                                        
             if (!empty($filtros['fecha'])) {
                 $sql .= " AND CONVERT(date, m.fechaMovimiento) = ?";
                 $params[] = $filtros['fecha'];

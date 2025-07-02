@@ -1081,7 +1081,6 @@ function init() {
                         <tr>
                           <th class="border-0 py-3">Código</th>
                           <th class="border-0 py-3">Componente</th>
-                          <th class="border-0 py-3">Fecha</th>
                           <th class="border-0 py-3">Estado</th>
                         </tr>
                       </thead>
@@ -1101,7 +1100,6 @@ function init() {
                           item.Descripcion || "-"
                         }</small>
                       </td>
-                      <td class="py-3">${item.FechaAsignacion || "-"}</td>
                       <td class="py-3">
                         <span class="badge bg-success-subtle text-success">${
                           item.Estado || "Activo"
@@ -1871,11 +1869,11 @@ function ListarCombosFiltros() {
     success: (res) => {
       if (res.status) {
         $("#filtroCategoria").html(res.data.categorias).trigger("change");
-        $("#filtroSucursal").html(res.data.sucursales).trigger("change");
+        //$("#filtroSucursal").html(res.data.sucursales).trigger("change");
         $("#filtroAmbiente").html(res.data.ambientes).trigger("change");
-        $("#filtroCategoria, #filtroSucursal, #filtroAmbiente").select2({
+        $("#filtroCategoria, #filtroAmbiente").select2({
           theme: "bootstrap4",
-          dropdownParent: $("#divtblactivos .modal-body"),
+          dropdownParent: $("#divtblRegistros .modal-body"),
           width: "100%",
         });
       } else {
@@ -2262,7 +2260,7 @@ function addActivoManualForm(combos) {
             <div class="col-md-3">
               <div class="form-group">
                 <label for="Cantidad_${activoFormCount}"> Cantidad: </label>
-                <input type="number" name="Cantidad[]" id="Cantidad_${activoFormCount}" class="form-control" placeholder="Ej. 1" value="1" min="1" required readonly disabled>
+                <input type="number" name="Cantidad[]" id="Cantidad_${activoFormCount}" class="form-control" placeholder="Ej. 1" value="1" min="1" required>
               </div>
             </div>
             <div class="col-md-4">
