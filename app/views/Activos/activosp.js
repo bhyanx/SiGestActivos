@@ -1217,10 +1217,10 @@ function init() {
     });
   });
 
-$(document).on("click", ".btnDarBajaDesdeModal", function () {
-  const idActivo = $(this).data("idActivo");
-  // Guardar el ID del activo en el formulario
-  $("#frmBajaActivo").data("idActivo", idActivo);
+  $(document).on("click", ".btnDarBajaDesdeModal", function () {
+    const idActivo = $(this).data("idActivo");
+    // Guardar el ID del activo en el formulario
+    $("#frmBajaActivo").data("idActivo", idActivo);
 
     // Cargar el combo de autorizadores
     $.ajax({
@@ -1992,11 +1992,15 @@ function listarActivosTable() {
       { data: "Proveedor" },
       { data: "Estado" },
       { data: "valorAdquisicion" },
-      { data: "idResponsable", visible: false, searchable: false},
+      { data: "idResponsable", visible: false, searchable: false },
       { data: "NombreResponsable" },
-      { data: "TotalRelacionadosPorArticulo", visible: false, searchable:false },
-      { data: "TotalRelacionadosPorPadre", visible: false, searchable:false },
-      { data: "idArticulo", visible: false, searchable:false },
+      {
+        data: "TotalRelacionadosPorArticulo",
+        visible: false,
+        searchable: false,
+      },
+      { data: "TotalRelacionadosPorPadre", visible: false, searchable: false },
+      { data: "idArticulo", visible: false, searchable: false },
       { data: "idAmbiente", visible: false, searchable: false },
       { data: "idCategoria", visible: false, searchable: false },
       { data: "DocIngresoAlmacen", visible: false, searchable: false },

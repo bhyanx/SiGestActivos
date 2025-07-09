@@ -104,7 +104,6 @@ if (isset($_SESSION["IdRol"])) {
                                                         <thead class="table-success">
                                                             <tr>
                                                                 <th><i class="fas fa-cogs"></i></th>
-
                                                                 <th>Id Activo</th>
                                                                 <th>Código</th>
                                                                 <th>Serie</th>
@@ -134,8 +133,9 @@ if (isset($_SESSION["IdRol"])) {
                                                                 <th>Estado</th>
                                                                 <th>Valor</th>
                                                                 <th>Responsable</th>
-                                                                <th>Articulos Relacionados</th>
-                                                                <th>Activos Relacionados</th>
+                                                                <th>Nombre Responsable</th>
+                                                                <th>Art. Relacionados</th>
+                                                                <th>Act. Relacionados</th>
                                                             </tr>
                                                         </tfoot>
                                                     </table>

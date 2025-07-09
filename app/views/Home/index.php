@@ -1,7 +1,7 @@
 <?php
 require_once("../../config/configuracion.php");
 if (!isset($_SESSION["IdRol"])) {
-    header("Location:" .Conectar::ruta());
+    header("Location:" . Conectar::ruta());
     exit();
 }
 ?>
@@ -92,109 +92,69 @@ if (!isset($_SESSION["IdRol"])) {
                                 <p>Valor total de activos</p>
                             </div>
                             <div class="icon">
-                               <i class="fas fa-chart-line"></i>
+                                <i class="fas fa-chart-line"></i>
                             </div>
                             <a href="#" class="small-box-footer">Más Detalles <i class="fas fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-12 col-lg-12 col-xl-4 order-last">
-                        <div class="card bg-gradient-<?php // $_SESSION['TemaColor'] 
-                                                        ?>">
-                            <div class="card-header border-0">
-
-                                <h3 class="card-title">
-                                    <i class="far fa-calendar-alt"></i> Calendar
-                                </h3>
-                                <!-- tools card -->
-                                <div class="card-tools">
-                                    <!-- button with a dropdown -->
-                                    <button type="button" class="btn btn-<?php // $_SESSION['TemaColor'] 
-                                                                            ?> btn-sm" data-card-widget="collapse">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                </div>
-                                <!-- /. tools -->
-                            </div>
-                            <!-- /.card-header -->
-                            <div class="card-body pt-0">
-                                <!--The calendar -->
-                                <div id="calendar" style="width: 100%"></div>
-                            </div>
-                            <!-- /.card-body -->
+                <div class="col-6" id="divtblRegistros">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa fa-list"></i> Lista de Activos Registrados</h3>
                         </div>
-                    </div>
-                    <div class="col-md-12 col-lg-12 col-xl-8 d-none">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">Listado de Registros</h3>
-                                <div class="card-tools">
-                                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fa fa-minus"></i></button>
-                                </div>
-                            </div>
+                        <div class="dataTables_wrapper dt-bootstrap4">
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="row">
-                                            <div class="col-md-4 col-lg-2">
-                                                <div class="form-group">
-                                                    <label for="">Fecha Inicio:</label>
-                                                    <input type="date" name="" id="" class="form-control" value="<?php // date("Y-m-d") 
-                                                                                                                    ?>">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4 col-lg-2">
-                                                <div class="form-group">
-                                                    <label for="">Fecha Fin:</label>
-                                                    <input type="date" name="" id="" class="form-control" value="<?php // date("Y-m-d") 
-                                                                                                                    ?>">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-1 col-lg-1">
-                                                <div class="form-group">
-                                                    <label for="">Buscar</label>
-                                                    <button type="submit" class="btn btn-info btn-block"><i class="fa fa-search"></i></button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="table-responsive">
-                                            <table class="table table-bordered table-striped">
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col">#</th>
-                                                        <th scope="col">First</th>
-                                                        <th scope="col">Last</th>
-                                                        <th scope="col">Handle</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <th scope="row">1</th>
-                                                        <td>Mark</td>
-                                                        <td>Otto</td>
-                                                        <td>@mdo</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">2</th>
-                                                        <td>Jacob</td>
-                                                        <td>Thornton</td>
-                                                        <td>@fat</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">3</th>
-                                                        <td colspan="2">Larry the Bird</td>
-                                                        <td>@twitter</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                    <div class=""></div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="table-responsive">
+                                        <table id="tblRegistros" class="table table-bordered table-striped mt-4 table-hover">
+                                            <thead class="table-success">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Id Activo</th>
+                                                    <th>Código</th>
+                                                    <th>Serie</th>
+                                                    <th>Descripción</th>
+                                                    <th>Marca</th>
+                                                    <th>Sucursal</th>
+                                                    <th>Proveedor</th>
+                                                    <th>Estado</th>
+                                                    <th>Valor</th>
+                                                    <th>Responsable</th>
+                                                    <th>Nombre Res.</th>
+                                                    <th>Art. Relacionados</th>
+                                                    <th>Act. Relacionados</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Id Activo</th>
+                                                    <th>Código</th>
+                                                    <th>Serie</th>
+                                                    <th>Descripción</th>
+                                                    <th>Marca</th>
+                                                    <th>Sucursal</th>
+                                                    <th>Proveedor</th>
+                                                    <th>Estado</th>
+                                                    <th>Valor</th>
+                                                    <th>Responsable</th>
+                                                    <th>Nombre Res.</th>
+                                                    <th>Art. Relacionados</th>
+                                                    <th>Act. Relacionados</th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
+
                     </div>
                 </div>
             </section>
@@ -205,9 +165,8 @@ if (!isset($_SESSION["IdRol"])) {
     </div>
 
     <?php require_once "../Layouts/Footer.php"; ?>
+    <script src="home.js"></script>
 
 </body>
 
 </html>
-?>
-
