@@ -58,11 +58,10 @@ if (!isset($_SESSION["IdRol"])) {
                             <div class="icon">
                                 <i class="fas fa-box"></i>
                             </div>
-                            <a href="#" class="small-box-footer">Más Detalles <i class="fas fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-3 col-xl-2">
-                        <div class="small-box bg-warning shadow">
+                        <div class="small-box bg-primary shadow">
                             <div class="inner">
                                 <h3 id="lblcantidadoperativos">0</h3>
                                 <p>Activos Operativos</p>
@@ -70,11 +69,10 @@ if (!isset($_SESSION["IdRol"])) {
                             <div class="icon">
                                 <i class="fas fa-clipboard-check"></i>
                             </div>
-                            <a href="#" class="small-box-footer">Más Detalles <i class="fas fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-3 col-xl-2">
-                        <div class="small-box bg-danger shadow">
+                        <div class="small-box bg-warning shadow">
                             <div class="inner">
                                 <h3 id="lblcantidadactivosmantenimiento">0</h3>
                                 <p>Activos Mantenimiento</p>
@@ -82,19 +80,17 @@ if (!isset($_SESSION["IdRol"])) {
                             <div class="icon">
                                 <i class="fas fa-gears"></i>
                             </div>
-                            <a href="#" class="small-box-footer">Más Detalles <i class="fas fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-3 col-xl-2">
-                        <div class="small-box bg-info shadow">
+                        <div class="small-box bg-danger shadow">
                             <div class="inner">
-                                <h3 class="lblvalortotalactivos">0</h3>
-                                <p>Valor total de activos</p>
+                                <h3 id="lblcantidadactivosbaja">0</h3>
+                                <p>Activos Baja</p>
                             </div>
                             <div class="icon">
-                                <i class="fas fa-chart-line"></i>
+                                <i class="fas fa-ban"></i>
                             </div>
-                            <a href="#" class="small-box-footer">Más Detalles <i class="fas fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
                 </div>

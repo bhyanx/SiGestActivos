@@ -4,6 +4,7 @@ $(document).ready(function () {
 
 function init() {
   listarActivosTable();
+  Dashboard();
 }
 
 function listarActivosTable() {
@@ -79,5 +80,35 @@ function listarActivosTable() {
       { data: "fechaAdquisicion", visible: false, searchable: false },
       { data: "observaciones", visible: false, searchable: false },
     ],
+  });
+}
+
+function Dashboard() {
+  $.ajax({
+    url: "../../controllers/DashboardController.php?action=ConteoDashboard",
+    type: "POST",
+    async: false,
+    success: (res) => {
+      res = JSON.parse(res);
+      if (res.length > 0) {
+        for (let i = 0; i < res.length; i++) {
+          const element = res[i];
+          if (res[i]["Estado"] == "Operativa") {
+            $("#lblcantidadoperativos").html(res[i]["Cantidad"]);
+          } else if (res[i]["Estado"] == "Reparacion") {
+            $("#lblcantidadactivosmantenimiento").html(res[i]["Cantidad"]);
+          } else if (res[i]["Estado"] == "Baja") {
+            $("#lblcantidadactivosbaja").html(res[i]["Cantidad"]);
+          } else {
+            $("#lblcantidadactivos").html(res[i]["Cantidad"]);
+          }
+        }
+      } else {
+        $("#lblcantidadoperativos").html(0);
+        $("#lblcantidadactivosmantenimiento").html(0);
+        $("#lblcantidadactivosbaja").html(0);
+        $("#lblcantidadactivos").html(0);
+      }
+    },
   });
 }
