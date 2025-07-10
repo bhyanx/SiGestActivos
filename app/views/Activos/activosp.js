@@ -190,6 +190,9 @@ function init() {
     $("#divlistadoactivos").show();
     $("#divRegistroManualActivoMultiple").hide();
 
+    // ¡AQUÍ! Asegúrate de mostrar el div de la tabla
+    $("#divtblRegistros").show();
+
     if ($.fn.DataTable.isDataTable("#tblRegistros")) {
       $("#tblRegistros").DataTable().clear().destroy();
     }
