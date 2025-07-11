@@ -94,6 +94,7 @@ if (!isset($_SESSION["IdRol"])) {
                         </div>
                     </div>
                 </div>
+                <!-- SE HARÁ UNA MODIFICACIÓN PARA MOSTRAR LA CANTIDAD DE ACTIVOS QUE TIENE CADA USUARIO. -->
                 <div class="col-6" id="divtblRegistros">
                     <div class="card">
                         <div class="card-header">
@@ -153,6 +154,7 @@ if (!isset($_SESSION["IdRol"])) {
 
                     </div>
                 </div>
+                <!-- SE AGREGARÁ ALGUN GRAFICO DE BARRAS O LINEAL DE ACUERDO A LA CANTIDAD DE MOVIMIENTOS REALIZADOS POR SEMANA. -->
             </section>
             <!-- /.content -->
 
