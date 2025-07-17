@@ -359,14 +359,14 @@ try {
                 <div class="company-details">
                     <div class="company-name">LUBRISENG</div>
                     <div class="company-subname">Gestión de Activos</div>
-                    <div class="address">
+                    <!-- <div class="address">
                         Dirección fiscal: [DIRECCIÓN FISCAL]<br>
                         Sucursal: [SUCURSAL]
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <div class="document-info">
-                <div class="ruc">R.U.C. [RUC]</div>
+                <div class="ruc"></div>
                 <div class="ficha-title">FICHA TÉCNICA DE ACTIVO</div>
                 <div class="ficha-number">N° <?php echo $detalleActivo['CodigoActivo'] ?? ''; ?></div>
             </div>

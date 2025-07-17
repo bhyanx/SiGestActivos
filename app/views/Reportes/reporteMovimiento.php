@@ -26,11 +26,11 @@ try {
     // Obtener nombres de responsables y autorizadores
     $responsableOrigen = $movimientos->obtenerEmpleado($cabecera['responsableOrigen']);
     $responsableDestino = $movimientos->obtenerEmpleado($cabecera['responsableDestino']);
-    $autorizadorDestino = $movimientos->obtenerEmpleado($cabecera['autorizadorDestino']);
+    // $autorizadorDestino = $movimientos->obtenerEmpleado($cabecera['autorizadorDestino']);
 
     $cabecera['responsableOrigen'] = $responsableOrigen['NombreTrabajador'] ?? '';
     $cabecera['responsableDestino'] = $responsableDestino['NombreTrabajador'] ?? '';
-    $cabecera['autorizadorDestino'] = $autorizadorDestino['NombreTrabajador'] ?? '';
+    // $cabecera['autorizadorDestino'] = $autorizadorDestino['NombreTrabajador'] ?? '';
 } catch (Exception $e) {
     die("Error al obtener datos: " . $e->getMessage());
 }
@@ -538,7 +538,7 @@ try {
                 foreach ($tiposMovimiento as $tipo): ?>
                     <div class="checkbox-item">
                         <input type="checkbox" id="<?php echo strtolower(str_replace(' ', '_', $tipo['nombre'])); ?>"
-                            <?php echo ($tipoMov == $tipo['nombre']) ? 'checked' : ''; ?>>
+                            <?php echo ($tipoMov == $tipo['nombre']) ? 'checked' : ''; ?> disabled>
                         <label for="<?php echo strtolower(str_replace(' ', '_', $tipo['nombre'])); ?>"><?php echo $tipo['nombre']; ?></label>
                     </div>
                 <?php endforeach; ?>
@@ -595,8 +595,8 @@ try {
         <!-- Observations -->
         <div class="observations">
             <div class="observations-title">Observaciones:</div>
+            <div>Doc. Referencia: </div>
             <div><?php echo $cabecera['observaciones'] ?? ''; ?></div>
-            <div>Doc. Referencia: [DOC. REFERENCIA]</div>
         </div>
 
         <!-- Conformidad -->

@@ -146,6 +146,7 @@ function init() {
     .on("click", function () {
       $("#divregistroActivo").show();
       $("#tblRegistros").hide();
+      $("#divtblRegistros").hide();
       $("#divtblactivos").hide();
       $("#divlistadoactivos").hide();
       $("#divRegistroManualActivoMultiple").hide();
@@ -161,6 +162,8 @@ function init() {
     .on("click", function () {
       $("#divRegistroManualActivoMultiple").show();
       $("#divlistadoactivos").hide();
+      $("#tblRegistros").hide();
+      $("#divtblRegistros").hide();
       $("#divtblactivos").hide();
       $("#divregistroActivo").hide();
       $("#activosContainer").empty();
@@ -2305,16 +2308,17 @@ function addActivoManualForm(combos) {
   // Initialize Select2 for static combos after they are populated
   newForm
     .find(`[name='Responsable[]']`)
-    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%" });
+    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%", placeholder: "Seleccionar Responsable",});
   newForm
     .find(`[name='Estado[]']`)
-    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%" });
+    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%", placeholder: "Seleccionar Estado",});
   newForm
     .find(`[name='Categoria[]']`)
-    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%" });
+    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%", placeholder: "Seleccionar Categoria",});
   newForm
     .find(`[name='Ambiente[]']`)
-    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%" });
+    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%", placeholder: "Seleccionar Ambiente",
+    allowClear: true, });
 
   // Proveedor: inicializar Select2 con AJAX para búsqueda dinámica
   newForm.find('[name="Proveedor[]"]').select2({
