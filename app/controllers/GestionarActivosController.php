@@ -16,23 +16,23 @@ header('Content-Type: application/json');
 
 switch ($action) {
 
-    case 'Consultar':
-        try {
-            $filtros = [
-                //'pCodigo' => $_POST['pCodigo'] ?? null,
-                'pIdEmpresa' => $_SESSION['cod_empresa'] ?? null,
-                'pIdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
-                //'pIdCategoria' => $_POST['pIdCategoria'] ?? null,
-                //'pIdEstado' => $_POST['pIdEstado'] ?? null
-            ];
-            $resultados = $activos->consultarActivos($filtros);
-            error_log("Consultar resultados: " . print_r($resultados, true), 3, __DIR__ . '/../../logs/debug.log');
-            echo json_encode($resultados ?: []);
-        } catch (Exception $e) {
-            error_log("Error Consultar: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
-            echo json_encode(['status' => false, 'message' => 'Error al consultar activos: ' . $e->getMessage()]);
-        }
-        break;
+    // case 'Consultar':
+    //     try {
+    //         $filtros = [
+    //             //'pCodigo' => $_POST['pCodigo'] ?? null,
+    //             'pIdEmpresa' => $_SESSION['cod_empresa'] ?? null,
+    //             'pIdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
+    //             //'pIdCategoria' => $_POST['pIdCategoria'] ?? null,
+    //             //'pIdEstado' => $_POST['pIdEstado'] ?? null
+    //         ];
+    //         $resultados = $activos->consultarActivos($filtros);
+    //         error_log("Consultar resultados: " . print_r($resultados, true), 3, __DIR__ . '/../../logs/debug.log');
+    //         echo json_encode($resultados ?: []);
+    //     } catch (Exception $e) {
+    //         error_log("Error Consultar: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+    //         echo json_encode(['status' => false, 'message' => 'Error al consultar activos: ' . $e->getMessage()]);
+    //     }
+    //     break;
 
     case 'ConsultarActivos':
         try {
@@ -282,53 +282,112 @@ switch ($action) {
         }
         break;
 
-    // !COMENTADO POR DESUSO EN EL REGISTRO MANUAL DE ACTIVOS.
-    case 'RegistrarManual':
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            try {
-                $data = [
-                    'IdActivo' => $activo['IdActivo'] ?? null,
-                    'IdDocumentoVenta' => $activo['IdDocumentoVenta'] ?? null,
-                    'IdOrdendeCompra' => $activo['IdOrdendeCompra'] ?? null,
-                    'Nombre' => $activo['Nombre'] ?? null,
-                    'Descripcion' => $activo['Descripcion'] ?? null,
-                    'Codigo' => $activo['Codigo'] ?? null,
-                    'Serie' => $activo['Serie'] ?? null,
-                    'IdEstado' => $activo['IdEstado'] ?? null,
-                    'Garantia' => $activo['Garantia'] ?? 0,
-                    'IdResponsable' => $activo['IdResponsable'] ?? null,
-                    'FechaFinGarantia' => $activo['FechaFinGarantia'] ?? null,
-                    'IdProveedor' => $activo['IdProveedor'] ?? null,
-                    'Observaciones' => $activo['Observaciones'] ?? null,
-                    'IdEmpresa' => $_SESSION['cod_empresa'] ?? null,
-                    'IdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
-                    'IdAmbiente' => $activo['IdAmbiente'] ?? null,
-                    'IdCategoria' => $activo['IdCategoria'] ?? null,
-                    'VidaUtil' => $activo['VidaUtil'] ?? 3,
-                    'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
-                    'FechaAdquisicion' => $activo['FechaAdquisicion'] ?? date('Y-m-d'),
-                    'UserMod' => $_SESSION['CodEmpleado'] ?? 'SYSTEM',
-                    'MotivoBaja' => $activo['MotivoBaja'] ?? null,
-                    'Cantidad' => $activo['Cantidad'] ?? 1,
-                    'Accion' => $activo['Accion'] ?? 1
-                ];
-
-                error_log("Data for registrarActivosManual: " . print_r($data, true), 3, __DIR__ . '/../../logs/debug.log');
-
-                $activos->registrarActivosManual($data);
-                echo json_encode([
-                    'status' => true,
-                    'message' => 'Activos registrados con éxito.'
-                ]);
-            } catch (Exception $e) {
-                error_log("Error RegistrarManual: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Error al registrar activos manualmente: ' . $e->getMessage()
-                ]);
+        case 'GuardarActivos':
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                try {
+                    // Obtener los datos del array de activos
+                    $activosArray = json_decode($_POST['activos'], true);
+                    if (!$activosArray) {
+                        throw new Exception("No se recibieron datos de activos válidos");
+                    }
+    
+                    $resultados = [];
+                    foreach ($activosArray as $activo) {
+                        // Formatear fechas
+                        $fechaFinGarantia = !empty($activo['FechaFinGarantia']) ? date('Y-m-d', strtotime($activo['FechaFinGarantia'])) : null;
+                        $fechaAdquisicion = !empty($activo['FechaAdquisicion']) ? date('Y-m-d', strtotime($activo['FechaAdquisicion'])) : date('Y-m-d');
+                        
+    
+                        $data = [
+                            //'IdActivo' => null,
+                            'IdDocIngresoAlm' => $activo['IdDocIngresoAlm'],
+                            'IdArticulo' => $activo['IdArticulo'],
+                            //'Codigo' => null, // El SP generará el código automáticamente
+                            'IdEstado' => $activo['IdEstado'],
+                            'Garantia' => isset($activo['Garantia']) ? (int)$activo['Garantia'] : 0,
+                            'FechaFinGarantia' => $fechaFinGarantia,
+                            'IdProveedor' => $activo['IdProveedor'] ?? null,
+                            'IdEmpresa' => $_SESSION['IdEmpresa'] ?? '',
+                            'IdSucursal' => $_SESSION['IdSucursal'],
+                            'IdAmbiente' => $activo['IdAmbiente'],
+                            'IdCategoria' => $activo['IdCategoria'] ?? 2,
+                            'VidaUtil' => $activo['VidaUtil'] ?? 3,
+                            'Serie' => $activo['Serie'],
+                            'Observaciones' => $activo['Observaciones'] ?? '',
+                            'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
+                            'FechaAdquisicion' => $fechaAdquisicion,
+                            'UserMod' => $_SESSION['CodEmpleado']
+                        ];
+    
+                        $activos->GuardarActivos($data);
+                        $resultados[] = [
+                            'status' => true,
+                            'message' => 'Activo registrado correctamente'
+                        ];
+                    }
+    
+                    echo json_encode([
+                        'status' => true,
+                        'message' => 'Activos registrados con éxito.',
+                        'data' => $resultados
+                    ]);
+                } catch (Exception $e) {
+                    error_log("Error Registrar: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+                    echo json_encode([
+                        'status' => false,
+                        'message' => 'Error al registrar activos: ' . $e->getMessage()
+                    ]);
+                }
             }
-        }
-        break;
+            break;
+
+    // !COMENTADO POR DESUSO EN EL REGISTRO MANUAL DE ACTIVOS.
+    // case 'RegistrarManual':
+    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    //         try {
+    //             $data = [
+    //                 'IdActivo' => $activo['IdActivo'] ?? null,
+    //                 'IdDocumentoVenta' => $activo['IdDocumentoVenta'] ?? null,
+    //                 'IdOrdendeCompra' => $activo['IdOrdendeCompra'] ?? null,
+    //                 'Nombre' => $activo['Nombre'] ?? null,
+    //                 'Descripcion' => $activo['Descripcion'] ?? null,
+    //                 'Codigo' => $activo['Codigo'] ?? null,
+    //                 'Serie' => $activo['Serie'] ?? null,
+    //                 'IdEstado' => $activo['IdEstado'] ?? null,
+    //                 'Garantia' => $activo['Garantia'] ?? 0,
+    //                 'IdResponsable' => $activo['IdResponsable'] ?? null,
+    //                 'FechaFinGarantia' => $activo['FechaFinGarantia'] ?? null,
+    //                 'IdProveedor' => $activo['IdProveedor'] ?? null,
+    //                 'Observaciones' => $activo['Observaciones'] ?? null,
+    //                 'IdEmpresa' => $_SESSION['cod_empresa'] ?? null,
+    //                 'IdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
+    //                 'IdAmbiente' => $activo['IdAmbiente'] ?? null,
+    //                 'IdCategoria' => $activo['IdCategoria'] ?? null,
+    //                 'VidaUtil' => $activo['VidaUtil'] ?? 3,
+    //                 'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
+    //                 'FechaAdquisicion' => $activo['FechaAdquisicion'] ?? date('Y-m-d'),
+    //                 'UserMod' => $_SESSION['CodEmpleado'] ?? 'SYSTEM',
+    //                 'MotivoBaja' => $activo['MotivoBaja'] ?? null,
+    //                 'Cantidad' => $activo['Cantidad'] ?? 1,
+    //                 'Accion' => $activo['Accion'] ?? 1
+    //             ];
+
+    //             error_log("Data for registrarActivosManual: " . print_r($data, true), 3, __DIR__ . '/../../logs/debug.log');
+
+    //             $activos->registrarActivosManual($data);
+    //             echo json_encode([
+    //                 'status' => true,
+    //                 'message' => 'Activos registrados con éxito.'
+    //             ]);
+    //         } catch (Exception $e) {
+    //             error_log("Error RegistrarManual: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+    //             echo json_encode([
+    //                 'status' => false,
+    //                 'message' => 'Error al registrar activos manualmente: ' . $e->getMessage()
+    //             ]);
+    //         }
+    //     }
+    //     break;
 
     case 'Actualizar':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -757,7 +816,66 @@ ORDER BY a.Descripcion_articulo;
         }
         break;
 
-    case 'GuardarActivosManuales':
+    // case 'GuardarActivosManuales':
+    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    //         try {
+    //             $input = file_get_contents("php://input");
+    //             $requestData = json_decode($input, true);
+
+    //             if (!isset($requestData['activos']) || !is_array($requestData['activos'])) {
+    //                 throw new Exception("No se recibieron datos de activos válidos.");
+    //             }
+
+    //             $activosGuardados = [];
+    //             foreach ($requestData['activos'] as $activo) {
+    //                 // Preparar los datos para el modelo
+    //                 $data = [
+    //                     'IdActivo' => $activo['IdActivo'] ?? null,
+    //                     'IdDocumentoVenta' => $activo['IdDocumentoVenta'] ?? null,
+    //                     'IdOrdendeCompra' => $activo['IdOrdendeCompra'] ?? null,
+    //                     'Nombre' => $activo['Nombre'] ?? null,
+    //                     'Descripcion' => $activo['Descripcion'] ?? null,
+    //                     'Codigo' => $activo['Codigo'] ?? null,
+    //                     'Serie' => $activo['Serie'] ?? null,
+    //                     'IdEstado' => $activo['IdEstado'] ?? null,
+    //                     'Garantia' => $activo['Garantia'] ?? 0,
+    //                     'IdResponsable' => $activo['IdResponsable'] ?? null,
+    //                     'FechaFinGarantia' => $activo['FechaFinGarantia'] ?? null,
+    //                     'IdProveedor' => $activo['IdProveedor'] ?? null,
+    //                     'Observaciones' => $activo['Observaciones'] ?? null,
+    //                     'IdEmpresa' => $_SESSION['cod_empresa'] ?? null,
+    //                     'IdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
+    //                     'IdAmbiente' => $activo['IdAmbiente'] ?? null,
+    //                     'IdCategoria' => $activo['IdCategoria'] ?? null,
+    //                     'VidaUtil' => $activo['VidaUtil'] ?? 3,
+    //                     'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
+    //                     'FechaAdquisicion' => $activo['FechaAdquisicion'] ?? date('Y-m-d'),
+    //                     'UserMod' => $_SESSION['CodEmpleado'] ?? 'SYSTEM',
+    //                     'MotivoBaja' => $activo['MotivoBaja'] ?? null,
+    //                     'Cantidad' => $activo['Cantidad'] ?? 1,
+    //                     'Accion' => $activo['Accion'] ?? 1
+    //                 ];
+
+    //                 $activos->registrarActivosManual($data);
+    //                 $activosGuardados[] = $data['Nombre']; // Guardar el nombre del activo para la respuesta
+    //             }
+
+    //             echo json_encode([
+    //                 'status' => true,
+    //                 'message' => 'Activos (' . implode(', ', $activosGuardados) . ') registrados con éxito.',
+    //                 'data' => $activosGuardados
+    //             ]);
+    //         } catch (Exception $e) {
+    //             error_log("Error GuardarActivosManuales: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+    //             echo json_encode([
+    //                 'status' => false,
+    //                 'message' => 'Error al registrar activos manualmente: ' . $e->getMessage()
+    //             ]);
+    //         }
+    //     }
+    //     break;
+
+    case 'GuardarActivosManual':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $input = file_get_contents("php://input");
@@ -771,33 +889,31 @@ ORDER BY a.Descripcion_articulo;
                 foreach ($requestData['activos'] as $activo) {
                     // Preparar los datos para el modelo
                     $data = [
-                        'IdActivo' => $activo['IdActivo'] ?? null,
-                        'IdDocumentoVenta' => $activo['IdDocumentoVenta'] ?? null,
-                        'IdOrdendeCompra' => $activo['IdOrdendeCompra'] ?? null,
+                        //'IdActivo' => $activo['IdActivo'] ?? null,
+                        //'IdDocumentoVenta' => $activo['IdDocumentoVenta'] ?? null,
+                        //'IdOrdendeCompra' => $activo['IdOrdendeCompra'] ?? null,
                         'Nombre' => $activo['Nombre'] ?? null,
                         'Descripcion' => $activo['Descripcion'] ?? null,
-                        'Codigo' => $activo['Codigo'] ?? null,
-                        'Serie' => $activo['Serie'] ?? null,
                         'IdEstado' => $activo['IdEstado'] ?? null,
                         'Garantia' => $activo['Garantia'] ?? 0,
                         'IdResponsable' => $activo['IdResponsable'] ?? null,
                         'FechaFinGarantia' => $activo['FechaFinGarantia'] ?? null,
                         'IdProveedor' => $activo['IdProveedor'] ?? null,
-                        'Observaciones' => $activo['Observaciones'] ?? null,
                         'IdEmpresa' => $_SESSION['cod_empresa'] ?? null,
                         'IdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
                         'IdAmbiente' => $activo['IdAmbiente'] ?? null,
                         'IdCategoria' => $activo['IdCategoria'] ?? null,
                         'VidaUtil' => $activo['VidaUtil'] ?? 3,
+                        'Serie' => $activo['Serie'] ?? null,
+                        'Observaciones' => $activo['Observaciones'] ?? null,
                         'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
                         'FechaAdquisicion' => $activo['FechaAdquisicion'] ?? date('Y-m-d'),
                         'UserMod' => $_SESSION['CodEmpleado'] ?? 'SYSTEM',
-                        'MotivoBaja' => $activo['MotivoBaja'] ?? null,
+                        //'Codigo' => $activo['Codigo'] ?? null,
                         'Cantidad' => $activo['Cantidad'] ?? 1,
-                        'Accion' => $activo['Accion'] ?? 1
                     ];
 
-                    $activos->registrarActivosManual($data);
+                    $activos->GuardarActivosManual($data);
                     $activosGuardados[] = $data['Nombre']; // Guardar el nombre del activo para la respuesta
                 }
 

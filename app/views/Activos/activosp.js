@@ -396,10 +396,10 @@ function init() {
     });
 
     $.ajax({
-      url: "../../controllers/GestionarActivosController.php?action=RegistrarPrueba",
+      url: "../../controllers/GestionarActivosController.php?action=GuardarActivos",
       type: "POST",
       data: {
-        action: "RegistrarPrueba",
+        action: "GuardarActivos",
         activos: JSON.stringify(activos),
       },
       dataType: "json",
@@ -444,27 +444,25 @@ function init() {
     $("#activosContainer .activo-manual-form").each(function () {
       const form = $(this);
       const activo = {
-        IdActivo: null,
-        IdDocumentoVenta: form.find("input[name='idDocumentoVenta[]']").val(),
-        IdOrdendeCompra: form.find("input[name='idOrdendeCompra[]']").val(),
+        //IdDocumentoVenta: form.find("input[name='idDocumentoVenta[]']").val(),
+        //IdOrdendeCompra: form.find("input[name='idOrdendeCompra[]']").val(),
         Nombre: form.find("input[name='nombre[]']").val(),
         Descripcion: form.find("textarea[name='Descripcion[]']").val(),
-        Serie: form.find("input[name='serie[]']").val(),
         IdEstado: form.find("select[name='Estado[]']").val(),
         Garantia: 0,
-        IdEmpresa: null,
-        IdSucursal: null,
         IdResponsable: form.find("select[name='Responsable[]']").val(),
         IdProveedor: form.find("select[name='Proveedor[]']").val(),
-        Observaciones: form.find("textarea[name='Observaciones[]']").val(),
+        IdEmpresa: null,
+        IdSucursal: null,
         IdAmbiente: form.find("select[name='Ambiente[]']").val(),
         IdCategoria: form.find("select[name='Categoria[]']").val(),
+        Serie: form.find("input[name='serie[]']").val(),
+        Observaciones: form.find("textarea[name='Observaciones[]']").val(),
         ValorAdquisicion: parseFloat(
           form.find("input[name='ValorAdquisicion[]']").val()
         ),
         FechaAdquisicion: form.find("input[name='fechaAdquisicion[]']").val(),
         Cantidad: parseInt(form.find("input[name='Cantidad[]']").val()) || 1,
-        Accion: 1,
       };
       activos.push(activo);
     });
@@ -480,7 +478,7 @@ function init() {
       });
 
       $.ajax({
-        url: "../../controllers/GestionarActivosController.php?action=GuardarActivosManuales",
+        url: "../../controllers/GestionarActivosController.php?action=GuardarActivosManual",
         type: "POST",
         data: JSON.stringify({ activos: activos }),
         contentType: "application/json",
@@ -553,8 +551,8 @@ function init() {
             // Cargar datos básicos
             $("#IdActivoEditar").val(data.idActivo);
             $("#IdActivo").val(data.idActivo);
-            $("#CodigoActivo").val(data.CodigoActivo);
-            $("#SerieActivo").val(data.NumeroSerie);
+            $("#CodigoActivo").val(data.codigo);
+            $("#SerieActivo").val(data.serie);
             $("#DocIngresoAlmacen").val(data.DocIngresoAlmacen);
             $("#IdArticulo").val(data.idArticulo);
             $("#nombreArticulo").val(data.NombreActivoVisible);
@@ -775,242 +773,351 @@ function init() {
       success: function (res) {
         if (res.status && res.data) {
           let activo = res.data;
-          // let detallesHtml = `
-          //   <div class="modal fade" id="modalDetallesActivo" tabindex="-1" role="dialog" aria-labelledby="modalDetallesLabel" aria-hidden="true">
-          //     <div class="modal-dialog modal-xl" role="document">
-          //       <div class="modal-content">
-          //         <div class="modal-header bg-primary text-white">
-          //           <h5 class="modal-title" id="modalDetallesLabel">Detalles del Activo: ${
-          //             datos.CodigoActivo
-          //           }</h5>
-          //           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          //             <span aria-hidden="true">&times;</span>
-          //           </button>
-          //         </div>
-          //         <div class="modal-body">
-          //           <div class="row">
-          //             <div class="col-md-6">
-          //               <h6><strong>Información General</strong></h6>
-          //               <table class="table table-bordered table-sm">
-          //                 <tr><th>ID Activo</th><td>${activo.idActivo}</td></tr>
-          //                 <tr><th>Código</th><td>${
-          //                   activo.CodigoActivo
-          //                 }</td></tr>
-          //                 <tr><th>Serie</th><td>${
-          //                   activo.NumeroSerie || "-"
-          //                 }</td></tr>
-          //                 <tr><th>Nombre</th><td>${
-          //                   activo.NombreActivoVisible
-          //                 }</td></tr>
-          //                 <tr><th>Marca</th><td>${activo.Marca || "-"}</td></tr>
-          //                 <tr><th>Estado</th><td>${
-          //                   activo.Estado || "-"
-          //                 }</td></tr>
-          //                 <tr><th>Categoría</th><td>${
-          //                   activo.Categoria || "-"
-          //                 }</td></tr>
-          //                 <tr><th>Valor Adquisición</th><td>${
-          //                   activo.valorAdquisicion
-          //                 }</td></tr>
-          //                 <tr><th>Fecha Adquisición</th><td>${
-          //                   activo.fechaAdquisicion || "-"
-          //                 }</td></tr>
-          //                 <tr><th>Responsable</th><td>${
-          //                   activo.Responsable || "-"
-          //                 }</td></tr>
-          //                 <tr><th>Ambiente</th><td>${
-          //                   activo.Ambiente || "-"
-          //                 }</td></tr>
-          //                 <tr><th>Sucursal</th><td>${
-          //                   activo.Sucursal || "-"
-          //                 }</td></tr>
-          //                 <tr><th>Proveedor</th><td>${
-          //                   activo.Proveedor || "-"
-          //                 }</td></tr>
-          //                 <tr><th>Observaciones</th><td>${
-          //                   activo.observaciones || "-"
-          //                 }</td></tr>
-          //               </table>
-          //             </div>
-          //             <div class="col-md-6">
-          //               <h6><strong>Movimientos del Activo</strong></h6>
-          //               <div id="movimientosActivo"></div>
-          //               <h6 class="mt-3"><strong>Componentes del Activo</strong></h6>
-          //               <div id="componentesActivo"></div>
-          //             </div>
-          //           </div>
-          //         </div>
-          //         <div class="modal-footer">
-          //           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-          //         </div>
-          //       </div>
-          //     </div>
-          //   </div>`;
-
           // Eliminar modal anterior si existe
           $("#modalDetallesActivo").remove();
           // Agregar nuevo modal al body con el diseño mejorado
           let modalHtml = `
-
-    <!-- Modal Mejorado -->
-    <div class="modal fade" id="modalDetallesActivo" tabindex="-1" aria-labelledby="modalDetallesLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content shadow-lg">
-                <!-- Header del Modal -->
-                <div class="modal-header bg-gradient-primary text-white border-0">
-                    <div class="d-flex align-items-center">
-                        <i class="fab fa-dropbox m-3 fs-4"></i>
-                        <div>
-                            <h5 class="modal-title mb-0" id="modalDetallesLabel">Detalles del Activo</h5>
-                            <small class="opacity-75">Código: ${activo.CodigoActivo}</small>
-                        </div>
+<div class="modal fade" id="modalDetallesActivo" tabindex="-1" aria-labelledby="modalDetallesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0" style="border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.08);">
+            
+            <!-- Header del Modal -->
+            <div class="modal-header position-relative overflow-hidden border-0 p-3 bg-primary" style=" border-radius: 20px 20px 0 0;">
+                
+                <div class="d-flex align-items-center text-white w-100 position-relative">
+                    <div class="me-3 p-3 rounded-circle" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
+                        <i class="fas fa-box-open fs-4"></i>
                     </div>
-                </div>
-
-                <!-- Body del Modal -->
-                <div class="modal-body p-0">
-                    <div class="container-fluid p-4">
-                        <div class="row g-4">
-                            <!-- Información General -->
-                            <div class="col-lg-6">
-                                <div class="card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-light border-0 py-3">
-                                        <h6 class="card-title mb-0 text-primary">
-                                            <i class="fas fa-info-circle me-2"></i>Información General
-                                        </h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row g-3">
-                                            <div class="col-sm-6">
-                                                <div class="info-item">
-                                                    <label class="form-label text-muted small mb-1">ID Activo</label>
-                                                    <div class="fw-semibold"> ${activo.idActivo}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="info-item">
-                                                    <label class="form-label text-muted small mb-1">Código</label>
-                                                    <div class="fw-semibold"> ${activo.CodigoActivo}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="info-item">
-                                                    <label class="form-label text-muted small mb-1">Serie</label>
-                                                    <div class="fw-semibold"> ${activo.NumeroSerie}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="info-item">
-                                                    <label class="form-label text-muted small mb-1">Estado</label>
-                                                    <span class="badge bg-success"> ${activo.Estado}</span>
-                                                </div>
-                                            </div>
-                                            <div class="col-12">
-                                                <div class="info-item">
-                                                    <label class="form-label text-muted small mb-1">Nombre</label>
-                                                    <div class="fw-semibold"> ${activo.NombreActivoVisible}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="info-item">
-                                                    <label class="form-label text-muted small mb-1">Marca</label>
-                                                    <div class="fw-semibold"> ${activo.Marca}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="info-item">
-                                                    <label class="form-label text-muted small mb-1">Categoría</label>
-                                                    <div class="fw-semibold">${activo.Categoria}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="info-item">
-                                                    <label class="form-label text-muted small mb-1">Valor Adquisición</label>
-                                                    <div class="fw-semibold text-success">${activo.valorAdquisicion}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="info-item">
-                                                    <label class="form-label text-muted small mb-1">Fecha Adquisición</label>
-                                                    <div class="fw-semibold">${activo.fechaAdquisicion}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="info-item">
-                                                    <label class="form-label text-muted small mb-1">Responsable</label>
-                                                    <div class="fw-semibold">${activo.NombreResponsable}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="info-item">
-                                                    <label class="form-label text-muted small mb-1">Ambiente</label>
-                                                    <div class="fw-semibold">${activo.Ambiente}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="info-item">
-                                                    <label class="form-label text-muted small mb-1">Sucursal</label>
-                                                    <div class="fw-semibold">${activo.Sucursal}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="info-item">
-                                                    <label class="form-label text-muted small mb-1">Proveedor</label>
-                                                    <div class="fw-semibold">${activo.Proveedor}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-12">
-                                                <div class="info-item">
-                                                    <label class="form-label text-muted small mb-1">Observaciones</label>
-                                                    <div class="fw-semibold">${activo.observaciones}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Componentes -->
-                            <div class="col-lg-6">
-                                <!-- Componentes -->
-                                <div class="card border-0 shadow-sm">
-                                    <div class="card-header bg-light border-0 py-3">
-                                        <h6 class="card-title mb-0 text-primary">
-                                            <i class="fas fa-puzzle-piece me-2"></i>Componentes del Activo
-                                        </h6>
-                                    </div>
-                                    <div class="card-body p-0">
-                                        <div id="componentesActivo">
-                                            <p>Cargando componentes...</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="flex-grow-1">
+                        <h4 class="modal-title mb-1 fw-bold" id="modalDetallesLabel">Detalles del Activo</h4>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge px-3 py-2 rounded-pill" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
+                                <i class="fas fa-barcode me-1"></i>
+                                ${activo.codigo}
+                            </span>
+                            <span class="badge bg-white text-cyan-600 px-3 py-2 rounded-pill fw-semibold">
+                                <i class="fas fa-check-circle me-1"></i>
+                                ${activo.Estado}
+                            </span>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Footer del Modal -->
-                <div class="modal-footer border-0 bg-light">
-                    <div class="d-flex">
-                        <button type="button" class="btn btn-outline-primary btnEditarDesdeModal m-2" data-id-activo="${activo.idActivo}">
-                            <i class="fas fa-edit me-2"></i>Editar
-                        </button>
-                        <button type="button" class="btn btn-outline-success btnImprimirDesdeModal m-2" data-id-activo="${activo.idActivo}">
-                            <i class="fas fa-print me-2"></i>Imprimir
-                        </button>
-                        <button type="button" class="btn btn-outline-danger btnDarBajaDesdeModal m-2" data-id-activo="${activo.idActivo}">
-                            <i class="fas fa-trash-alt me-2"></i>Baja
-                        </button>
-                        <button type="button" class="btn btn-outline-info btnAsignarResponsable m-2" data-id-activo="${activo.idActivo}">
-                            <i class="fas fa-user-edit me-2"></i>Asignar Responsable
-                        </button> 
-                        <button type="button" class="btn btn-danger m-2" data-dismiss="modal"><i class="fa fa-times"></i> Cerrar</button>
                     </div>
                 </div>
             </div>
+            
+            <!-- Body del Modal -->
+            <div class="modal-body p-0" style="background: #f8fafc;">
+                
+                <!-- Tarjeta Principal del Activo -->
+                <div class="container-fluid p-4">
+                    <div class="card border-0 shadow-sm mb-2 bg-success" style="border-radius: 16px;">
+                        <div class="card-body text-white p-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h5 class="mb-2 fw-bold">${activo.NombreActivo}</h5>
+                                    <p class="mb-0 opacity-90">
+                                        <i class="fas fa-tag me-2"></i> ${activo.Categoria}
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                    <div class="d-inline-block px-4 py-2 rounded-pill" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
+                                        <i class="fas fa-dollar-sign me-1"></i>
+                                        <span class="fw-bold fs-5">${activo.valorAdquisicion}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-4">
+                        
+                        <!-- Columna Izquierda - Información General -->
+                        <div class="col-lg-6">
+                            <div class="card h-100 border-0 shadow-sm" style="border-radius: 16px;">
+                                <div class="card-header border-0 py-2" style="background: linear-gradient( #d1fae5 100%); border-radius: 16px 16px 0 0;">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3 p-2 rounded-circle">
+                                            <i class="fas fa-info-circle text-emerald-600"></i>
+                                        </div>
+                                        <h6 class="mb-0 fw-bold text-emerald-700">Información General</h6>
+                                    </div>
+                                </div>
+                                <div class="card-body p-2">
+                                    <div class="row g-3">
+                                        
+                                        <!-- Fila 1: ID y Código -->
+                                        <div class="col-sm-6">
+                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">ID Activo</label>
+                                                <div class="fw-semibold text-slate-700">${activo.idActivo}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Código</label>
+                                                <div class="fw-bold text-slate-700">${activo.codigo}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Fila 2: Serie y Estado -->
+                                        <div class="col-sm-6">
+                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Serie</label>
+                                                <div class="fw-bold text-slate-700">${activo.Serie}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="info-card p-2 rounded-3 h-100 text" style="background: #f0fdfa; border-left: 4px solid #28A745;">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Estado</label>
+                                                <span class="badge bg-emerald-500 text-white px-3 py-2 rounded-pill">
+                                                    <i class="fas fa-check-circle me-1"></i>
+                                                    ${activo.Estado}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Fila 3: Nombre del Activo -->
+                                        <div class="col-12">
+                                            <div class="info-card p-2 rounded-3" style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border-left: 4px solid #0d9488;">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Nombre del Activo</label>
+                                                <div class="fw-bold text-slate-700 fs-6">${activo.NombreActivo}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Fila 4: Marca y Categoría -->
+                                        <div class="col-sm-6">
+                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Marca</label>
+                                                <div class="fw-bold text-slate-700">${activo.Marca}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Categoría</label>
+                                                <div class="fw-bold text-slate-700">${activo.Categoria}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Fila 5: Valor y Fecha -->
+                                        <div class="col-sm-6">
+                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Valor Adquisición</label>
+                                                <div class="fw-bold text-emerald-600 fs-6">
+                                                    <i class="fas fa-dollar-sign me-1 text-success-500"></i>
+                                                    ${activo.valorAdquisicion}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Fecha Adquisición</label>
+                                                <div class="fw-bold text-slate-700">
+                                                    <i class="fas fa-calendar-alt me-2 text-success-500"></i>
+                                                    ${activo.fechaAdquisicion}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Fila 6: Responsable y Ambiente -->
+                                        <div class="col-sm-6">
+                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Responsable</label>
+                                                <div class="fw-bold text-slate-700">
+                                                    <i class="fas fa-user me-2 text-success-500"></i>
+                                                    ${activo.Responsable}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                           <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Ambiente</label>
+                                                <div class="fw-bold text-slate-700">
+                                                    <i class="fas fa-map-marker-alt me-2 text-success-500"></i>
+                                                    ${activo.Ambiente}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Fila 7: Proveedor -->
+                                        <div class="col-sm-6">
+                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Proveedor</label>
+                                                <div class="fw-bold text-slate-700">
+                                                    <i class="fas fa-building me-2 text-success-500"></i>
+                                                    ${activo.idProveedor}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Fila 8: Observaciones -->
+                                        <div class="col-12">
+                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
+                                                <label class="form-label text-dark small mb-2 fw-semibold text-uppercase">
+                                                    <i class="fas fa-sticky-note me-1"></i>
+                                                    Observaciones
+                                                </label>
+                                                <div class="fw-semibold text-slate-600">${activo.Observaciones}</div>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Columna Derecha - Componentes -->
+                        <div class="col-lg-6">
+                            <div class="card h-100 border-0 shadow-sm" style="border-radius: 16px;">
+                                <div class="card-header border-0 py-4" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 16px 16px 0 0;">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3 p-2 rounded-circle" style="background: rgba(6, 182, 212, 0.1);">
+                                                <i class="fas fa-puzzle-piece text-cyan-600"></i>
+                                            </div>
+                                            <h6 class="mb-0 fw-bold text-cyan-700">Componentes del Activo</h6>
+                                        </div>
+                                        <span class="badge bg-cyan-500 text-white px-3 py-2 rounded-pill">
+                                            <i class="fas fa-cogs me-1"></i>
+                                            Activo
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div id="componentesActivo" class="p-4">
+                                        <div class="d-flex align-items-center justify-content-center py-5">
+                                            <div class="text-center">
+                                                <div class="spinner-border text-cyan-500 mb-3" role="status" style="width: 3rem; height: 3rem;">
+                                                    <span class="visually-hidden">Cargando...</span>
+                                                </div>
+                                                <p class="text-dark mb-0 fw-semibold">Cargando componentes...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer del Modal -->
+            <div class="modal-footer border-0 p-4" style="background: #f8fafc; border-radius: 0 0 20px 20px;">
+                <div class="d-flex flex-wrap gap-3 w-100 justify-content-center">
+                    <button type="button" class="btn btn-outline-cyan btnEditarDesdeModal px-4 py-2 rounded-pill shadow-sm" data-id-activo="${activo.idActivo}" style="min-width: 120px; border-color: #06b6d4; color: #0891b2;">
+                        <i class="fas fa-edit me-2"></i>Editar
+                    </button>
+                    <button type="button" class="btn btn-outline-emerald btnImprimirDesdeModal px-4 py-2 rounded-pill shadow-sm" data-id-activo="${activo.idActivo}" style="min-width: 120px; border-color: #10b981; color: #059669;">
+                        <i class="fas fa-print me-2"></i>Imprimir
+                    </button>
+                    <button type="button" class="btn btn-cyan btnAsignarResponsable px-4 py-2 rounded-pill shadow-sm" data-id-activo="${activo.idActivo}" style="min-width: 140px; background-color: #06b6d4; border-color: #06b6d4; color: white;">
+                        <i class="fas fa-user-edit me-2"></i>Asignar
+                    </button>
+                    <button type="button" class="btn btn-outline-slate btnDarBajaDesdeModal px-4 py-2 rounded-pill shadow-sm" data-id-activo="${activo.idActivo}" style="min-width: 120px; border-color: #64748b; color: #475569;">
+                        <i class="fas fa-trash-alt me-2"></i>Dar de Baja
+                    </button>
+                    <button type="button" class="btn btn-outline-slate px-4 py-2 rounded-pill shadow-sm" data-bs-dismiss="modal" style="min-width: 100px; border-color: #64748b; color: #475569;">
+                        <i class="fas fa-times me-2"></i>Cerrar
+                    </button>
+                </div>
+            </div>
+            
         </div>
-    </div>`;
+    </div>
+</div>
+
+<style>
+/* Paleta de colores minimalista verde/celeste */
+.text-emerald-600 { color: #059669 !important; }
+.text-emerald-700 { color: #047857 !important; }
+.text-emerald-500 { color: #10b981 !important; }
+.text-cyan-500 { color: #06b6d4 !important; }
+.text-cyan-600 { color: #0891b2 !important; }
+.text-cyan-700 { color: #0e7490 !important; }
+.text-teal-500 { color: #14b8a6 !important; }
+.text-dark { color: #64748b !important; }
+.text-slate-600 { color: #475569 !important; }
+.text-slate-700 { color: #334155 !important; }
+
+.bg-emerald-500 { background-color: #10b981 !important; }
+.bg-cyan-500 { background-color: #06b6d4 !important; }
+
+/* Animaciones suaves */
+.info-card {
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.1);
+}
+
+.btn {
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.btn-outline-cyan:hover {
+    background-color: #06b6d4;
+    border-color: #06b6d4;
+    color: white;
+}
+
+.btn-outline-emerald:hover {
+    background-color: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+
+.btn-outline-slate:hover {
+    background-color: #64748b;
+    border-color: #64748b;
+    color: white;
+}
+
+.modal-content {
+    animation: modalSlideIn 0.4s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Spinner personalizado */
+.spinner-border {
+    border-width: 0.25em;
+}
+
+.text-cyan-500.spinner-border {
+    border-color: #a7f3d0;
+    border-right-color: #06b6d4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .btn {
+        min-width: auto !important;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+</style>`;
           $("body").append(modalHtml);
 
           // Cargar movimientos del activo
@@ -1176,11 +1283,11 @@ function init() {
             // Cargar datos básicos
             $("#IdActivoEditar").val(data.idActivo);
             $("#IdActivo").val(data.idActivo);
-            $("#CodigoActivo").val(data.CodigoActivo);
-            $("#SerieActivo").val(data.NumeroSerie);
+            $("#CodigoActivo").val(data.codigo);
+            $("#SerieActivo").val(data.Serie);
             $("#DocIngresoAlmacen").val(data.DocIngresoAlmacen);
             $("#IdArticulo").val(data.idArticulo);
-            $("#nombreArticulo").val(data.NombreActivoVisible);
+            $("#nombreArticulo").val(data.NombreActivo);
             $("#marca").val(data.Marca);
             $("#fechaAdquisicion").val(data.fechaAdquisicion);
             $("#Garantia").prop("checked", data.garantia == 1);
@@ -1436,26 +1543,26 @@ function init() {
     });
   }
 
-  function cargarArticulosPorDocIngreso(idDoc, callback) {
-    $.ajax({
-      url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc",
-      type: "POST",
-      data: { IdDocIngresoAlm: idDoc },
-      dataType: "json",
-      success: (res) => {
-        if (res.status) {
-          let options = '<option value="">Seleccione un artículo</option>';
-          res.data.forEach((item) => {
-            options += `<option value="${item.IdArticulo}">${item.Nombre}</option>`;
-          });
-          $("#IdArticulo").html(options);
-          if (typeof callback === "function") {
-            callback();
-          }
-        }
-      },
-    });
-  }
+  // function cargarArticulosPorDocIngreso(idDoc, callback) {
+  //   $.ajax({
+  //     url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc",
+  //     type: "POST",
+  //     data: { IdDocIngresoAlm: idDoc },
+  //     dataType: "json",
+  //     success: (res) => {
+  //       if (res.status) {
+  //         let options = '<option value="">Seleccione un artículo</option>';
+  //         res.data.forEach((item) => {
+  //           options += `<option value="${item.IdArticulo}">${item.Nombre}</option>`;
+  //         });
+  //         $("#IdArticulo").html(options);
+  //         if (typeof callback === "function") {
+  //           callback();
+  //         }
+  //       }
+  //     },
+  //   });
+  // }
 
   // Modificar el evento submit del formulario
   $("#frmEditarActivo").on("submit", function (e) {
@@ -1968,7 +2075,7 @@ function listarActivosTable() {
     autoWidth: false,
     destroy: true,
     ajax: {
-      url: "../../controllers/GestionarActivosController.php?action=ConsultarActivosRelacionados",
+      url: "../../controllers/GestionarActivosController.php?action=ConsultarActivos",
       type: "POST",
       data: {
         IdArticulo: "",
@@ -1980,6 +2087,49 @@ function listarActivosTable() {
       },
     },
     columns: [
+      { data: "idActivo" },
+      { data: "codigo" },
+      { data: "NombreActivo" },
+      { data: "idEstadoActivo", visible: false, searchable: false },
+      {
+        data: "Estado",
+        render: function (data, type, row) {
+          switch (data) {
+            case "Operativa":
+              return '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Operativo</span>';
+            case "Reparación":
+              return '<span class="badge bg-danger"><i class="fas fa-wrench me-1"></i> Reparación</span>';
+            case "Baja":
+              return '<span class="badge bg-warning text-dark"><i class="fas fa-times-circle me-1"></i> Baja</span>';
+            case "Vendido":
+              return '<span class="badge bg-secondary"><i class="fas fa-dollar-sign me-1"></i> Vendido</span>';
+            case "Regular":
+              return '<span class="badge bg-info"><i class="fas fa-exclamation-circle me-1"></i> Regular</span>';
+            case "Malo":
+              return '<span class="badge bg-dark"><i class="fas fa-skull-crossbones me-1"></i> Malo</span>';
+            default:
+              return '<span class="badge bg-dark"><i class="fas fa-question-circle me-1"></i> Desconocido</span>';
+          }
+        },
+      },
+      { data: "idCategoria", visible: false, searchable: false },
+      { data: "idEmpresa", visible: false, searchable: false },
+      { data: "idSucursal", visible: false, searchable: false },
+      { data: "idAmbiente", visible: false, searchable: false },
+      { data: "NombreAmbiente" },
+      {
+        data: "Responsable",
+        render: function (data, type, row) {
+          if (data === "No Asignado" || data === null || data === "") {
+            return '<span class="badge bg-dark">No Asignado</span>';
+          } else {
+            return data;
+          }
+        },
+      },
+      { data: "Serie" },
+      { data: "valorAdquisicion" },
+      { data: "fechaRegistro" },
       {
         data: null,
         render: (data, type, row) =>
@@ -1989,29 +2139,6 @@ function listarActivosTable() {
               </button>
         </div>`,
       },
-      { data: "idActivo", visible: false, searchable: false },
-      { data: "CodigoActivo" },
-      { data: "NumeroSerie" },
-      { data: "NombreActivoVisible" },
-      { data: "Marca" },
-      { data: "Sucursal" },
-      { data: "Proveedor" },
-      { data: "Estado" },
-      { data: "valorAdquisicion" },
-      { data: "idResponsable", visible: false, searchable: false },
-      { data: "NombreResponsable" },
-      {
-        data: "TotalRelacionadosPorArticulo",
-        visible: false,
-        searchable: false,
-      },
-      { data: "TotalRelacionadosPorPadre", visible: false, searchable: false },
-      { data: "idArticulo", visible: false, searchable: false },
-      { data: "idAmbiente", visible: false, searchable: false },
-      { data: "idCategoria", visible: false, searchable: false },
-      { data: "DocIngresoAlmacen", visible: false, searchable: false },
-      { data: "fechaAdquisicion", visible: false, searchable: false },
-      { data: "observaciones", visible: false, searchable: false },
     ],
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
@@ -2306,19 +2433,31 @@ function addActivoManualForm(combos) {
   // No es necesario reasignar for/id salvo que cambie el orden
 
   // Initialize Select2 for static combos after they are populated
-  newForm
-    .find(`[name='Responsable[]']`)
-    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%", placeholder: "Seleccionar Responsable",});
-  newForm
-    .find(`[name='Estado[]']`)
-    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%", placeholder: "Seleccionar Estado",});
-  newForm
-    .find(`[name='Categoria[]']`)
-    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%", placeholder: "Seleccionar Categoria",});
-  newForm
-    .find(`[name='Ambiente[]']`)
-    .select2({ dropdownParent: newForm, theme: "bootstrap4", width: "100%", placeholder: "Seleccionar Ambiente",
-    allowClear: true, });
+  newForm.find(`[name='Responsable[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Responsable",
+  });
+  newForm.find(`[name='Estado[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Estado",
+  });
+  newForm.find(`[name='Categoria[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Categoria",
+  });
+  newForm.find(`[name='Ambiente[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Ambiente",
+    allowClear: true,
+  });
 
   // Proveedor: inicializar Select2 con AJAX para búsqueda dinámica
   newForm.find('[name="Proveedor[]"]').select2({

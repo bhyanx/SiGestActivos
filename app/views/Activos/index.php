@@ -61,7 +61,7 @@ if (isset($_SESSION["IdRol"])) {
                                                 </div>
                                                 <div class="col-md-2 offset-md-6">
                                                     <div class="form-group mb-0">
-                                                        <label for="">&nbsp;</label>
+                                                        <label>&nbsp;</label>
                                                         <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">
                                                             <i class="fa fa-search"></i> Buscar
                                                         </button>
@@ -69,7 +69,7 @@ if (isset($_SESSION["IdRol"])) {
                                                 </div>
                                                 <div class="col-md-2">
                                                     <div class="form-group mb-0">
-                                                        <label for="">&nbsp;</label>
+                                                        <label>&nbsp;</label>
                                                         <button type="button" class="btn btn-success btn-sm btn-block" id="btnnuevo">
                                                             <i class="fa fa-plus"></i> Nuevo
                                                         </button>
@@ -77,7 +77,7 @@ if (isset($_SESSION["IdRol"])) {
                                                 </div>
                                                 <div class="col-md-2">
                                                     <div class="form-group mb-0">
-                                                        <label for="">&nbsp;</label>
+                                                        <label>&nbsp;</label>
                                                         <button type="button" class="btn btn-info btn-sm btn-block" id="btnCrearActivo">
                                                             <i class="fa fa-plus"></i> Crear Activo
                                                         </button>
@@ -103,39 +103,41 @@ if (isset($_SESSION["IdRol"])) {
                                                     <table id="tblRegistros" class="table table-bordered table-striped mt-4 table-hover">
                                                         <thead class="table-success">
                                                             <tr>
-                                                                <th><i class="fas fa-cogs"></i></th>
-                                                                <th>Id Activo</th>
+                                                                <th>Id</th>
                                                                 <th>Código</th>
-                                                                <th>Serie</th>
-                                                                <th>Descripción</th>
-                                                                <th>Marca</th>
-                                                                <th>Sucursal</th>
-                                                                <th>Proveedor</th>
+                                                                <th>Nombre</th>
+                                                                <th>Id Estado</th>
                                                                 <th>Estado</th>
+                                                                <th>Id Categoria</th>
+                                                                <th>Id Empresa</th>
+                                                                <th>Id Sucursal</th>
+                                                                <th>Id Ambiente</th>
+                                                                <th>Nombre Ambiente</th>
+                                                                <th>Asignado a</th>
+                                                                <th>Serie</th>
                                                                 <th>Valor</th>
-                                                                <th>Responsable</th>
-                                                                <th>Nombre Responsable</th>
-                                                                <th>Art. Relacionados</th>
-                                                                <th>Act. Relacionados</th>
+                                                                <th>F. Ingreso</th>
+                                                                <th><i class="fas fa-cogs"></i></th>
                                                             </tr>
                                                         </thead>
                                                         <tbody></tbody>
                                                         <tfoot>
                                                             <tr>
-                                                                <th><i class="fas fa-cogs"></i></th>
-                                                                <th>Id Activo</th>
+                                                                <th>Id</th>
                                                                 <th>Código</th>
-                                                                <th>Serie</th>
-                                                                <th>Descripción</th>
-                                                                <th>Marca</th>
-                                                                <th>Sucursal</th>
-                                                                <th>Proveedor</th>
+                                                                <th>Nombre</th>
+                                                                <th>Id Estado</th>
                                                                 <th>Estado</th>
+                                                                <th>Id Categoria</th>
+                                                                <th>Id Empresa</th>
+                                                                <th>Id Sucursal</th>
+                                                                <th>Id Ambiente</th>
+                                                                <th>Nombre Ambiente</th>
+                                                                <th>Asignado a</th>
+                                                                <th>Serie</th>
                                                                 <th>Valor</th>
-                                                                <th>Responsable</th>
-                                                                <th>Nombre Responsable</th>
-                                                                <th>Art. Relacionados</th>
-                                                                <th>Act. Relacionados</th>
+                                                                <th>F. Compra</th>
+                                                                <th><i class="fas fa-cogs"></i></th>
                                                             </tr>
                                                         </tfoot>
                                                     </table>
@@ -334,85 +336,85 @@ if (isset($_SESSION["IdRol"])) {
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <label for="nombre">Nombre</label>
+                                                        <label>Nombre</label>
                                                         <input type="text" name="nombre[]" class="form-control" placeholder="Ej. Mouse Logitech" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <label for="serie">Serie</label>
+                                                        <label>Serie</label>
                                                         <input type="text" name="serie[]" class="form-control" placeholder="Ej. ML-123" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <label for="Estado">Estado</label>
+                                                        <label>Estado</label>
                                                         <select name="Estado[]" class="form-control select-2" required></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12">
                                                     <div class="form-group">
-                                                        <label for="descripcion">Descripción</label>
+                                                        <label>Descripción</label>
                                                         <textarea name="Descripcion[]" class="form-control" placeholder="Ej. Mouse Logitech color negro"></textarea>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="empresa">Empresa</label>
+                                                        <label>Empresa</label>
                                                         <input type="text" class="form-control" name="empresa[]" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="unidadNegocio">Unidad de Negocio</label>
+                                                        <label>Unidad de Negocio</label>
                                                         <input type="text" class="form-control" name="unidadNegocio[]" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="Responsable">Responsable</label>
+                                                        <label>Responsable</label>
                                                         <select name="Responsable[]" class="form-control select-2" required></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-8">
                                                     <div class="form-group">
-                                                        <label for="Categoria">Categoria</label>
+                                                        <label>Categoria</label>
                                                         <select name="Categoria[]" class="form-control select-2" required></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-8">
                                                     <div class="form-group">
-                                                        <label for="Ambiente">Ambiente:</label>
+                                                        <label>Ambiente:</label>
                                                         <select name="Ambiente[]" class="form-control select-2"></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-8">
                                                     <div class="form-group">
-                                                        <label for="Proveedor">Proveedor</label>
+                                                        <label>Proveedor</label>
                                                         <select name="Proveedor[]" class="form-control select-2"></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <label for="Cantidad"> Cantidad: </label>
+                                                        <label> Cantidad: </label>
                                                         <input type="text" name="Cantidad[]" class="form-control" placeholder="Ej. 1" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <label for="ValorAdquisicion">Valor Adquisición:</label>
+                                                        <label>Valor Adquisición:</label>
                                                         <input type="text" name="ValorAdquisicion[]" class="form-control" placeholder="Ej. 10.00" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="fechaAdquisicion">Fecha Adquisición: </label>
+                                                        <label>Fecha Adquisición: </label>
                                                         <input type="date" name="fechaAdquisicion[]" class="form-control" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12">
                                                     <div class="form-group">
-                                                        <label for="Observaciones">Observaciones: </label>
+                                                        <label>Observaciones: </label>
                                                         <textarea name="Observaciones[]" class="form-control" rows="3" placeholder="Ingrese las observaciones según el activo..."></textarea>
                                                     </div>
                                                 </div>
@@ -565,25 +567,25 @@ if (isset($_SESSION["IdRol"])) {
                                                 <div class="row">
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <label for="">Id Activo</label>
+                                                            <label for="IdActivo">Id Activo</label>
                                                             <input type="text" id="IdActivo" name="IdActivo" class="form-control" disabled>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <label for="">Codigo Activo</label>
+                                                            <label for="CodigoActivo">Codigo Activo</label>
                                                             <input type="text" id="CodigoActivo" name="CodigoActivo" class="form-control" disabled>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <label for="">Serie Activo</label>
+                                                            <label for="SerieActivo">Serie Activo</label>
                                                             <input type="text" id="SerieActivo" name="SerieActivo" class="form-control">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <label for="">Doc. Ingreso Almacén</label>
+                                                            <label for="DocIngresoAlmacen">Doc. Ingreso Almacén</label>
                                                             <input type="text" id="DocIngresoAlmacen" name="DocIngresoAlmacen" class="form-control" disabled>
                                                         </div>
                                                     </div>
@@ -607,19 +609,19 @@ if (isset($_SESSION["IdRol"])) {
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <label for="estado">Estado</label>
+                                                            <label for="IdEstado">Estado</label>
                                                             <select name="IdEstado" id="IdEstado" class="form-control select-2"></select>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-8">
                                                         <div class="form-group">
-                                                            <label for="ambiente">Ambiente:</label>
+                                                            <label for="IdAmbiente">Ambiente:</label>
                                                             <select name="IdAmbiente" id="IdAmbiente" class="form-control select-2"></select>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <div class="form-group">
-                                                            <label for="categoria">Categoria</label>
+                                                            <label for="IdCategoria">Categoria</label>
                                                             <select name="IdCategoria" id="IdCategoria" class="form-control select-2"></select>
                                                         </div>
                                                     </div>
@@ -660,7 +662,7 @@ if (isset($_SESSION["IdRol"])) {
                                                 <div class="row">
                                                     <div class="col-md-8">
                                                         <div class="form-group">
-                                                            <label for="autorizador">Autorizador</label>
+                                                            <label for="Autorizador">Autorizador</label>
                                                             <select name="Autorizador" id="Autorizador" class="form-control select-2"></select>
                                                         </div>
                                                     </div>
@@ -695,7 +697,7 @@ if (isset($_SESSION["IdRol"])) {
                                                 <div class="row">
                                                     <div class="col-md-8">
                                                         <div class="form-group">
-                                                            <label for="responsable">Responsable</label>
+                                                            <label for="Responsable">Responsable</label>
                                                             <select name="Responsable" id="Responsable" class="form-control select-2"></select>
                                                         </div>
                                                     </div>
