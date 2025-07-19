@@ -312,7 +312,133 @@ function init() {
   });
 
   $(document).on("click", ".btnQuitarActivo", function () {
-    $(this).closest("tr").remove();
+    const filaActual = $(this).closest("tr");
+    const activoId = filaActual.data("id");
+
+    // Remover la fila principal y todas las filas generadas por procesamiento
+    $(`#tbldetalleactivoreg tbody tr[data-id='${activoId}']`).remove();
+  });
+
+  // Manejador para el botón "Procesar Cantidad"
+  $(document).on("click", ".btnProcesarCantidad", function () {
+    const filaActual = $(this).closest("tr");
+    const activoId = filaActual.data("id");
+    const activoNombre = filaActual.data("activo-nombre");
+    const activoMarca = filaActual.data("activo-marca");
+    const cantidad = parseInt(filaActual.find("input.cantidad").val()) || 1;
+
+    if (cantidad <= 1) {
+      NotificacionToast(
+        "info",
+        "La cantidad debe ser mayor a 1 para procesar."
+      );
+      return;
+    }
+
+    // Verificar si ya se procesó este activo
+    if (
+      $(
+        `#tbldetalleactivoreg tbody tr[data-id='${activoId}'][data-procesado='true']`
+      ).length > 0
+    ) {
+      NotificacionToast(
+        "warning",
+        "Este activo ya ha sido procesado. Elimine las filas generadas primero."
+      );
+      return;
+    }
+
+    // Obtener los valores de la fila principal
+    const serie = filaActual.find("input[name='serie[]']").val();
+    const valor = filaActual.find("input[name='valor[]']").val();
+    const observaciones = filaActual
+      .find("textarea[name='observaciones[]']")
+      .val();
+    const ambienteId = filaActual.find("select.ambiente").val();
+    const categoriaId = filaActual.find("select.categoria").val();
+
+    // Validar que los campos principales estén llenos
+    if (!ambienteId || !categoriaId) {
+      NotificacionToast(
+        "error",
+        "Debe seleccionar ambiente y categoría antes de procesar."
+      );
+      return;
+    }
+
+    Swal.fire({
+      title: "Procesar Cantidad",
+      text: `Se crearán ${cantidad} filas individuales para el activo "${activoNombre}". Cada una tendrá su propia serie.`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Sí, procesar",
+      cancelButtonColor: "#d33",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Marcar la fila original como procesada y ocultar el botón procesar
+        filaActual.attr("data-procesado", "true");
+        filaActual.find(".btnProcesarCantidad").hide();
+        filaActual.find("input.cantidad").prop("disabled", true).val(1);
+
+        // Crear las filas individuales
+        for (let i = 1; i < cantidad; i++) {
+          const numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
+          const selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
+          const selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
+          const inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
+          const inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" disabled>`;
+
+          const nuevaFila = `<tr data-id='${activoId}' class='table-info activo-procesado' data-procesado='true' data-activo-nombre="${activoNombre}" data-activo-marca="${activoMarca}">
+                        <td>${activoId}</td>
+                        <td>${activoNombre} <small class="text-muted">(${
+            i + 1
+          }/${cantidad})</small></td>
+                        <td>${activoMarca}</td>
+                        
+                        <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie ${
+                          i + 1
+                        }" value="${serie ? serie + "-" + (i + 1) : ""}"></td>
+                        <td>${inputEstadoActivo}</td>
+                        <td>${selectAmbiente}</td>
+                        <td>${selectCategoria}</td>
+                        <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}"></td>
+                        <td>${inputCantidad}</td>
+                        <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observaciones}</textarea></td>
+                        <td>
+                          <button type='button' class='btn btn-danger btn-sm btnQuitarActivo' title="Eliminar esta fila">
+                            <i class='fa fa-trash'></i>
+                          </button>
+                        </td>
+                    </tr>`;
+
+          $("#tbldetalleactivoreg tbody").append(nuevaFila);
+
+          // Cargar combos para la nueva fila
+          ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
+          ListarCombosCategoria(`comboCategoria${numeroFilas}`);
+
+          // Establecer los valores seleccionados en los combos
+          setTimeout(() => {
+            $(`#comboAmbiente${numeroFilas}`).val(ambienteId).trigger("change");
+            $(`#comboCategoria${numeroFilas}`)
+              .val(categoriaId)
+              .trigger("change");
+          }, 500);
+        }
+
+        // Actualizar la serie de la fila original
+        if (serie) {
+          filaActual.find("input[name='serie[]']").val(serie + "-1");
+        }
+
+        NotificacionToast(
+          "success",
+          `Se han creado ${cantidad} filas individuales para el activo "${activoNombre}".`
+        );
+      }
+    });
   });
 
   $("#btnGuardarActivo").on("click", function (e) {
@@ -902,7 +1028,7 @@ function init() {
                                             <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
                                                 <label class="form-label small mb-1 fw-bold text-uppercase">Valor Adquisición</label>
                                                 <div class="fw-bold text-emerald-600 fs-6">
-                                                    <i class="fas fa-dollar-sign me-1 text-success-500"></i>
+                                                    <i class="fas fa-hand-holding-dollar me-1 text-success-500"></i>
                                                     ${activo.valorAdquisicion}
                                                 </div>
                                             </div>
@@ -943,7 +1069,7 @@ function init() {
                                                 <label class="form-label small mb-1 fw-bold text-uppercase">Proveedor</label>
                                                 <div class="fw-bold text-slate-700">
                                                     <i class="fas fa-building me-2 text-success-500"></i>
-                                                    ${activo.idProveedor}
+                                                    ${activo.RazonSocial}
                                                 </div>
                                             </div>
                                         </div>
@@ -1793,9 +1919,10 @@ function agregarActivoAlDetalle(activo) {
         var selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
         var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
         var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
-        var inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1">`;
+        var inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" data-activo-id="${activo.id}">`;
+        var btnProcesar = `<button type="button" class=" me-4 btn btn-info btn-sm btnProcesarCantidad" data-activo-id="${activo.id}" title="Procesar cantidad"><i class="fa fa-cogs"></i></button>`;
 
-        var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
+        var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp activo-principal' data-activo-nombre="${activo.nombre}" data-activo-marca="${activo.marca}">
                     <td>${activo.id}</td>
                     <td>${activo.nombre}</td>
                     <td>${activo.marca}</td>
@@ -1807,7 +1934,12 @@ function agregarActivoAlDetalle(activo) {
                     <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor"></td>
                     <td>${inputCantidad}</td>
                     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea></td>
-                    <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
+                    <td>
+                      <div class="btn-group">
+                        ${btnProcesar}
+                        <button type='button' class='btn btn-danger btn-sm btnQuitarActivo me-4'><i class='fa fa-trash'></i></button>
+                      </div>
+                    </td>
                 </tr>`;
         $("#tbldetalleactivoreg tbody").append(nuevaFila);
 
@@ -2117,6 +2249,7 @@ function listarActivosTable() {
       { data: "idSucursal", visible: false, searchable: false },
       { data: "idAmbiente", visible: false, searchable: false },
       { data: "NombreAmbiente" },
+      { data: "idResponsable", visible: false, searchable: false },
       {
         data: "Responsable",
         render: function (data, type, row) {

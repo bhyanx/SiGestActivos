@@ -112,7 +112,8 @@ if (isset($_SESSION["IdRol"])) {
                                                                 <th>Id Empresa</th>
                                                                 <th>Id Sucursal</th>
                                                                 <th>Id Ambiente</th>
-                                                                <th>Nombre Ambiente</th>
+                                                                <th>Ubicación</th>
+                                                                <th>Id. Responsable</th>
                                                                 <th>Asignado a</th>
                                                                 <th>Serie</th>
                                                                 <th>Valor</th>
@@ -132,11 +133,12 @@ if (isset($_SESSION["IdRol"])) {
                                                                 <th>Id Empresa</th>
                                                                 <th>Id Sucursal</th>
                                                                 <th>Id Ambiente</th>
-                                                                <th>Nombre Ambiente</th>
+                                                                <th>Ubicación</th>
+                                                                <th>Id. Responsable</th>
                                                                 <th>Asignado a</th>
                                                                 <th>Serie</th>
                                                                 <th>Valor</th>
-                                                                <th>F. Compra</th>
+                                                                <th>F. Ingreso</th>
                                                                 <th><i class="fas fa-cogs"></i></th>
                                                             </tr>
                                                         </tfoot>
