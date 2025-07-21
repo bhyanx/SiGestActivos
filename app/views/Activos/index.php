@@ -773,6 +773,104 @@ if (isset($_SESSION["IdRol"])) {
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- MODAL PARA PROCESAR CANTIDAD DE ACTIVOS -->
+                            <div class="modal fade" id="modalProcesarCantidad" tabindex="-1" role="dialog" aria-labelledby="modalProcesarCantidadLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-info">
+                                            <h5 class="modal-title" id="modalProcesarCantidadLabel">
+                                                <i class="fas fa-cogs"></i> Procesar Cantidad de Activos
+                                            </h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-info-circle"></i>
+                                                <strong>Información:</strong> Se crearán filas individuales para cada unidad del activo.
+                                                Cada una tendrá su propia serie y podrá ser gestionada independientemente.
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="card">
+                                                        <div class="card-header bg-light">
+                                                            <h6 class="mb-0"><i class="fas fa-box"></i> Información del Activo</h6>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <strong>Nombre:</strong> <span id="modalActivoNombre">-</span>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <strong>Marca:</strong> <span id="modalActivoMarca">-</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="modalCantidadTotal">
+                                                            <i class="fas fa-hashtag"></i> Cantidad Total:
+                                                        </label>
+                                                        <input type="number" class="form-control" id="modalCantidadTotal" min="2" max="100" readonly>
+                                                        <small class="form-text text-muted">Cantidad actual del activo</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="modalSerieBase">
+                                                            <i class="fas fa-barcode"></i> Serie Base:
+                                                        </label>
+                                                        <input type="text" class="form-control" id="modalSerieBase" placeholder="Ej: ABC123">
+                                                        <small class="form-text text-muted">Se agregará -1, -2, -3... a cada serie</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="modalObservacionesBase">
+                                                            <i class="fas fa-sticky-note"></i> Observaciones Base:
+                                                        </label>
+                                                        <textarea class="form-control" id="modalObservacionesBase" rows="2" placeholder="Observaciones que se aplicarán a todos los activos"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="alert alert-warning">
+                                                        <i class="fas fa-exclamation-triangle"></i>
+                                                        <strong>Importante:</strong>
+                                                        <ul class="mb-0 mt-2">
+                                                            <li>Se crearán <strong><span id="cantidadACrear">0</span></strong> filas individuales</li>
+                                                            <li>Cada activo tendrá su propia serie única</li>
+                                                            <li>Los valores de ambiente, categoría y valor se copiarán automáticamente</li>
+                                                            <li>Podrás editar cada activo individualmente después del procesamiento</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                <i class="fas fa-times"></i> Cancelar
+                                            </button>
+                                            <button type="button" class="btn btn-info" id="btnConfirmarProcesar">
+                                                <i class="fas fa-cogs"></i> Procesar Activos
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                 </section>
             </div>
