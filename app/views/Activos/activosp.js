@@ -404,14 +404,34 @@ function init() {
       },
     });
 
-    // Marcar la fila original como procesada y ocultar el botón procesar
+    // Generar un ID único para el grupo
+    const grupoId = `grupo_${activoId}_${Date.now()}`;
+    
+    // Marcar la fila original como procesada y agregar distintivo
     filaActual.attr("data-procesado", "true");
+    filaActual.attr("data-grupo-id", grupoId);
+    filaActual.addClass("activo-grupo-principal");
     filaActual.find(".btnProcesarCantidad").hide();
     filaActual.find("input.cantidad").prop("disabled", true).val(1);
     
-    // Actualizar la serie de la fila original
+    // Actualizar la serie de la fila original y agregar distintivo visual
     filaActual.find("input[name='serie[]']").val(serieBase + "-1");
     filaActual.find("textarea[name='observaciones[]']").val(observacionesBase);
+    
+    // Agregar distintivo visual a la fila principal
+    const distintivoPrincipal = `<span class="badge badge-primary grupo-badge">👑 Principal</span>`;
+    filaActual.find("td:eq(1)").html(`${activoNombre} ${distintivoPrincipal}`);
+    
+    // Agregar botón para agregar más unidades a la fila principal
+    const btnAgregarMas = `<button type='button' class='btn btn-success btn-sm btnAgregarMasUnidades ms-1' data-grupo-id='${grupoId}' title="Agregar más unidades a este grupo"><i class='fa fa-plus'></i> +1</button>`;
+    filaActual.find("td:last").html(`
+      <div class="btn-group">
+        ${btnAgregarMas}
+        <button type='button' class='btn btn-danger btn-sm btnQuitarActivo' title="Eliminar todo el grupo">
+          <i class='fa fa-trash'></i>
+        </button>
+      </div>
+    `);
 
     // Crear las filas individuales
     for (let i = 1; i < cantidad; i++) {
