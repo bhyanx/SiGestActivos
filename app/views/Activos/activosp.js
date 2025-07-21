@@ -682,17 +682,20 @@ function init() {
     console.log("Botón colapsar clickeado");
     const grupoId = $(this).data("grupo-id");
     const btnIcon = $(this).find("i");
-    const filasHijas = $(`tr[data-grupo-id='${grupoId}']`).not('.activo-grupo-principal');
+    const filasHijas = $(`tr[data-grupo-id='${grupoId}']`).not(
+      ".activo-grupo-principal"
+    );
 
     console.log(
       `Grupo: ${grupoId}, Filas hijas encontradas: ${filasHijas.length}`
     );
     console.log("¿Filas hijas visibles?", filasHijas.is(":visible"));
     console.log("Filas hijas:", filasHijas);
-    
+
     // Verificar si la primera fila hija está visible
     const primeraFilaHija = filasHijas.first();
-    const estaVisible = primeraFilaHija.length > 0 ? primeraFilaHija.is(":visible") : false;
+    const estaVisible =
+      primeraFilaHija.length > 0 ? primeraFilaHija.is(":visible") : false;
     console.log("¿Primera fila hija visible?", estaVisible);
 
     if (estaVisible) {
@@ -1058,78 +1061,201 @@ function init() {
     e.preventDefault();
 
     const activos = [];
-    $("#activosContainer .activo-manual-form").each(function () {
-      const form = $(this);
-      const activo = {
-        //IdDocumentoVenta: form.find("input[name='idDocumentoVenta[]']").val(),
-        //IdOrdendeCompra: form.find("input[name='idOrdendeCompra[]']").val(),
-        Nombre: form.find("input[name='nombre[]']").val(),
-        Descripcion: form.find("textarea[name='Descripcion[]']").val(),
-        IdEstado: form.find("select[name='Estado[]']").val(),
-        Garantia: 0,
-        IdResponsable: form.find("select[name='Responsable[]']").val(),
-        IdProveedor: form.find("select[name='Proveedor[]']").val(),
-        IdEmpresa: null,
-        IdSucursal: null,
-        IdAmbiente: form.find("select[name='Ambiente[]']").val(),
-        IdCategoria: form.find("select[name='Categoria[]']").val(),
-        Serie: form.find("input[name='serie[]']").val(),
-        Observaciones: form.find("textarea[name='Observaciones[]']").val(),
-        ValorAdquisicion: parseFloat(
-          form.find("input[name='ValorAdquisicion[]']").val()
-        ),
-        FechaAdquisicion: form.find("input[name='fechaAdquisicion[]']").val(),
-        Cantidad: parseInt(form.find("input[name='Cantidad[]']").val()) || 1,
-      };
-      activos.push(activo);
+    let totalActivosPreview = 0;
+
+    // Primero, recopilar activos de las tablas de preview (activos procesados)
+    $("[id^='tblPreviewActivos_'] tbody tr").each(function () {
+      const fila = $(this);
+      const formId = fila.data("form-id");
+      const form = $(`[data-form-number='${formId}']`);
+
+      if (form.length > 0) {
+        const activo = {
+          Nombre: form.find("input[name='nombre[]']").val(),
+          Descripcion: form.find("textarea[name='Descripcion[]']").val(),
+          IdEstado: form.find("select[name='Estado[]']").val(),
+          Garantia: 0,
+          IdResponsable: form.find("select[name='Responsable[]']").val(),
+          IdProveedor: form.find("select[name='Proveedor[]']").val(),
+          IdEmpresa: null,
+          IdSucursal: null,
+          IdAmbiente: form.find("select[name='Ambiente[]']").val(),
+          IdCategoria: form.find("select[name='Categoria[]']").val(),
+          Serie: fila.find(".serie-manual").val(), // Serie única de la tabla
+          Observaciones: form.find("textarea[name='Observaciones[]']").val(),
+          ValorAdquisicion: parseFloat(
+            form.find("input[name='ValorAdquisicion[]']").val()
+          ),
+          FechaAdquisicion: form.find("input[name='fechaAdquisicion[]']").val(),
+          Cantidad: 1, // Cada fila de preview es 1 activo individual
+        };
+        activos.push(activo);
+        totalActivosPreview++;
+      }
     });
 
-    if (activos.length > 0) {
-      Swal.fire({
-        title: "Procesando",
-        text: "Registrando activos...",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
+    // Luego, recopilar activos de formularios no procesados (cantidad = 1)
+    $("#activosContainer .activo-manual-form").each(function () {
+      const form = $(this);
+      const formId = form.data("form-number");
+      const tablaPreview = $(`#tblPreviewActivos_${formId} tbody tr`);
 
-      $.ajax({
-        url: "../../controllers/GestionarActivosController.php?action=GuardarActivosManual",
-        type: "POST",
-        data: JSON.stringify({ activos: activos }),
-        contentType: "application/json",
-        dataType: "json",
-        success: function (res) {
-          if (res.status) {
-            Swal.fire({
-              icon: "success",
-              title: "Éxito",
-              text: res.message,
-              timer: 1500,
-            }).then(() => {
-              $("#activosContainer").empty();
-              activoFormCount = 0;
-            });
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "Error",
-              text: res.message,
-            });
-          }
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-          console.error("Error en la petición:", jqXHR.responseText);
+      // Solo agregar si no tiene tabla de preview (no fue procesado)
+      if (tablaPreview.length === 0) {
+        const cantidad =
+          parseInt(form.find("input[name='Cantidad[]']").val()) || 1;
+
+        if (cantidad === 1) {
+          const activo = {
+            Nombre: form.find("input[name='nombre[]']").val(),
+            Descripcion: form.find("textarea[name='Descripcion[]']").val(),
+            IdEstado: form.find("select[name='Estado[]']").val(),
+            Garantia: 0,
+            IdResponsable: form.find("select[name='Responsable[]']").val(),
+            IdProveedor: form.find("select[name='Proveedor[]']").val(),
+            IdEmpresa: null,
+            IdSucursal: null,
+            IdAmbiente: form.find("select[name='Ambiente[]']").val(),
+            IdCategoria: form.find("select[name='Categoria[]']").val(),
+            Serie: form.find("input[name='serie[]']").val(),
+            Observaciones: form.find("textarea[name='Observaciones[]']").val(),
+            ValorAdquisicion: parseFloat(
+              form.find("input[name='ValorAdquisicion[]']").val()
+            ),
+            FechaAdquisicion: form
+              .find("input[name='fechaAdquisicion[]']")
+              .val(),
+            Cantidad: 1,
+          };
+          activos.push(activo);
+        } else {
+          NotificacionToast(
+            "warning",
+            `El formulario #${formId} tiene cantidad > 1. Use "Procesar Activo" primero.`
+          );
+          return false;
+        }
+      }
+    });
+
+    if (activos.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Sin Activos",
+        text: "No hay activos para guardar. Agregue al menos un activo o procese los formularios con cantidad > 1.",
+      });
+      return;
+    }
+
+    // Validar que todos los activos tengan los campos requeridos
+    const activosValidos = activos.every((activo) => {
+      return (
+        activo.Nombre &&
+        activo.Serie &&
+        activo.IdEstado &&
+        activo.IdCategoria &&
+        activo.IdResponsable &&
+        activo.ValorAdquisicion > 0
+      );
+    });
+
+    if (!activosValidos) {
+      Swal.fire({
+        icon: "error",
+        title: "Datos Incompletos",
+        text: "Todos los activos deben tener nombre, serie, estado, categoría, responsable y valor de adquisición.",
+      });
+      return;
+    }
+
+    // Mostrar confirmación con resumen
+    Swal.fire({
+      title: "Confirmar Guardado",
+      html: `
+        <div class="text-left">
+          <p><strong>Total de activos a guardar:</strong> ${activos.length}</p>
+          <p><strong>Activos procesados:</strong> ${totalActivosPreview}</p>
+          <p><strong>Activos simples:</strong> ${
+            activos.length - totalActivosPreview
+          }</p>
+          <hr>
+          <p class="text-info"><i class="fas fa-info-circle"></i> ¿Desea proceder con el guardado?</p>
+        </div>
+      `,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      confirmButtonText: "Sí, guardar",
+      cancelButtonColor: "#6c757d",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        guardarActivosManuales(activos);
+      }
+    });
+  });
+
+  // Función separada para guardar activos manuales
+  function guardarActivosManuales(activos) {
+    Swal.fire({
+      title: "Procesando",
+      text: "Registrando activos...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=GuardarActivosManual",
+      type: "POST",
+      data: JSON.stringify({ activos: activos }),
+      contentType: "application/json",
+      dataType: "json",
+      success: function (res) {
+        if (res.status) {
+          Swal.fire({
+            icon: "success",
+            title: "Éxito",
+            text: res.message,
+            timer: 2000,
+          }).then(() => {
+            // Limpiar todo
+            $("#activosContainer").empty();
+            activoFormCount = 0;
+
+            // Volver a la vista principal
+            $("#divRegistroManualActivoMultiple").hide();
+            $("#divlistadoactivos").show();
+            $("#divtblactivos").show();
+            $("#tblRegistros").show();
+
+            // Recargar tabla principal
+            listarActivosTable();
+
+            NotificacionToast(
+              "success",
+              "Activos guardados correctamente. Regresando a la lista principal."
+            );
+          });
+        } else {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: "Error al registrar los activos: " + errorThrown,
+            text: res.message,
           });
-        },
-      });
-    }
-  });
+        }
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.error("Error en la petición:", jqXHR.responseText);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error al registrar los activos: " + errorThrown,
+        });
+      },
+    });
+  }
 
   $(document).on("click", ".btnEditarActivo", function () {
     const fila = $(this).closest("tr");
@@ -3032,8 +3158,44 @@ function addActivoManualForm(combos) {
                 <textarea name="Observaciones[]" id="Observaciones_${activoFormCount}" class="form-control" rows="3" placeholder="Ingrese las observaciones según el activo..."></textarea>
               </div>
             </div>
+            <div class="col-md-12">
+              <div class="form-group text-center">
+                <button type="button" class="btn btn-info btnProcesarActivoManual" data-form-id="${activoFormCount}">
+                  <i class="fas fa-cogs"></i> Procesar Activo
+                </button>
+              </div>
+            </div>
           </div>
         </form>
+        
+        <!-- Tabla de previsualización de activos procesados -->
+        <div class="tabla-preview-activos" id="tablaPreview_${activoFormCount}" style="display: none;">
+          <hr>
+          <h6><i class="fas fa-eye"></i> Previsualización de Activos a Crear</h6>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered" id="tblPreviewActivos_${activoFormCount}">
+              <thead class="table-info">
+                <tr>
+                  <th>Serie</th>
+                  <th>Nombre</th>
+                  <th>Estado</th>
+                  <th>Categoría</th>
+                  <th>Responsable</th>
+                  <th>Ambiente</th>
+                  <th>Valor</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+              <tfoot>
+                <tr>
+                  <th colspan="7" class="text-right">Total Activos:</th>
+                  <th class="text-center"><span class="badge badge-info total-activos-preview">0</span></th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -3382,4 +3544,361 @@ $(document).ready(function () {
 
   // Agregar los estilos al head del documento
   $("head").append(modalStyles);
+});
+
+// Manejador para procesar activo manual
+$(document).on("click", ".btnProcesarActivoManual", function () {
+  const formId = $(this).data("form-id");
+  const form = $(`[data-form-number='${formId}']`);
+
+  // Obtener datos del formulario
+  const nombre = form.find("input[name='nombre[]']").val().trim();
+  const serie = form.find("input[name='serie[]']").val().trim();
+  const cantidad = parseInt(form.find("input[name='Cantidad[]']").val()) || 1;
+  const estado = form.find("select[name='Estado[]']").val();
+  const categoria = form.find("select[name='Categoria[]']").val();
+  const responsable = form.find("select[name='Responsable[]']").val();
+  const ambiente = form.find("select[name='Ambiente[]']").val();
+  const valor =
+    parseFloat(form.find("input[name='ValorAdquisicion[]']").val()) || 0;
+  const observaciones = form
+    .find("textarea[name='Observaciones[]']")
+    .val()
+    .trim();
+
+  // Validaciones
+  if (!nombre) {
+    NotificacionToast("error", "El nombre del activo es requerido");
+    return;
+  }
+
+  if (!serie) {
+    NotificacionToast("error", "La serie del activo es requerida");
+    return;
+  }
+
+  if (cantidad <= 1) {
+    NotificacionToast("info", "La cantidad debe ser mayor a 1 para procesar");
+    return;
+  }
+
+  if (!estado || !categoria || !responsable) {
+    NotificacionToast(
+      "error",
+      "Estado, categoría y responsable son requeridos"
+    );
+    return;
+  }
+
+  if (valor <= 0) {
+    NotificacionToast("error", "El valor de adquisición debe ser mayor a 0");
+    return;
+  }
+
+  // Validar series duplicadas en todas las tablas de preview
+  const validacion = validarSeriesDuplicadasManual(serie);
+  if (!validacion.esValida) {
+    Swal.fire({
+      title: "Serie Duplicada",
+      html: `
+        <p>La serie base "<strong>${serie}</strong>" ya existe en las previsualizaciones.</p>
+        <p>¿Desea generar una serie única automáticamente?</p>
+      `,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      confirmButtonText: "Sí, generar automáticamente",
+      cancelButtonColor: "#6c757d",
+      cancelButtonText: "No, cambiar manualmente",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const serieUnica = generarSerieUnicaManual(serie);
+        form.find("input[name='serie[]']").val(serieUnica);
+        NotificacionToast(
+          "info",
+          `Serie cambiada automáticamente a: ${serieUnica}`
+        );
+      }
+    });
+    return;
+  }
+
+  // Mostrar modal de confirmación con detalles
+  Swal.fire({
+    title: "Procesar Activo Manual",
+    html: `
+      <div class="text-left">
+        <p><strong>Activo:</strong> ${nombre}</p>
+        <p><strong>Serie Base:</strong> ${serie}</p>
+        <p><strong>Cantidad:</strong> ${cantidad} unidades</p>
+        <p><strong>Valor Unitario:</strong> S/${valor}</p>
+        <hr>
+        <p class="text-info"><i class="fas fa-info-circle"></i> Se crearán S/{cantidad} activos individuales con series únicas.</p>
+      </div>
+    `,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#17a2b8",
+    confirmButtonText: "Sí, procesar",
+    cancelButtonColor: "#6c757d",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      procesarActivoManual(formId, {
+        nombre,
+        serie,
+        cantidad,
+        estado,
+        categoria,
+        responsable,
+        ambiente,
+        valor,
+        observaciones,
+      });
+    }
+  });
+});
+
+// Función para procesar activo manual
+function procesarActivoManual(formId, datos) {
+  const form = $(`[data-form-number='${formId}']`);
+  const tablaPreview = $(`#tblPreviewActivos_${formId} tbody`);
+  const divTabla = $(`#tablaPreview_${formId}`);
+
+  // Mostrar loading
+  Swal.fire({
+    title: "Procesando Activo Manual",
+    html: `
+      <div class="procesamiento-container">
+        <div class="progress mb-3" style="height: 25px;">
+          <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
+               role="progressbar" style="width: 0%" id="progressBarManual">
+            <span class="progress-text">0%</span>
+          </div>
+        </div>
+        <div class="procesamiento-info">
+          <p class="mb-2"><i class="fas fa-cogs fa-spin text-info"></i> <span id="procesamientoTextoManual">Preparando activos...</span></p>
+          <small class="text-muted" id="procesamientoDetalleManual">Configurando ${datos.cantidad} unidades para "${datos.nombre}"</small>
+        </div>
+      </div>
+    `,
+    allowOutsideClick: false,
+    showConfirmButton: false,
+    customClass: {
+      popup: "procesamiento-popup",
+    },
+  });
+
+  // Función para actualizar progreso
+  function actualizarProgresoManual(actual, total, texto) {
+    const porcentaje = Math.round((actual / total) * 100);
+    $("#progressBarManual").css("width", porcentaje + "%");
+    $("#progressBarManual .progress-text").text(porcentaje + "%");
+    $("#procesamientoTextoManual").text(texto);
+    $("#procesamientoDetalleManual").text(
+      `Procesando unidad ${actual} de ${total}`
+    );
+  }
+
+  // Obtener textos de los selects
+  const estadoTexto = form
+    .find("select[name='Estado[]'] option:selected")
+    .text();
+  const categoriaTexto = form
+    .find("select[name='Categoria[]'] option:selected")
+    .text();
+  const responsableTexto = form
+    .find("select[name='Responsable[]'] option:selected")
+    .text();
+  const ambienteTexto = form
+    .find("select[name='Ambiente[]'] option:selected")
+    .text();
+
+  // Crear filas progresivamente
+  let activosCreados = 0;
+
+  function crearActivoManualProgresivo(indice) {
+    if (indice >= datos.cantidad) {
+      finalizarProcesamientoManual();
+      return;
+    }
+
+    actualizarProgresoManual(
+      indice + 1,
+      datos.cantidad,
+      `Creando activo ${indice + 1}/${datos.cantidad}...`
+    );
+
+    const serieActual = `${datos.serie}-${indice + 1}`;
+    const grupoId = `manual_${formId}_${Date.now()}`;
+
+    const nuevaFila = `
+      <tr data-grupo-manual="${grupoId}" data-form-id="${formId}">
+        <td>
+          <input type="text" class="form-control form-control-sm serie-manual" value="${serieActual}" readonly>
+        </td>
+        <td>${datos.nombre}</td>
+        <td>${estadoTexto}</td>
+        <td>${categoriaTexto}</td>
+        <td>${responsableTexto}</td>
+        <td>${ambienteTexto || "No asignado"}</td>
+        <td>S/.${datos.valor.toFixed(2)}</td>
+        <td>
+          <button type="button" class="btn btn-danger btn-sm btnEliminarActivoManual" title="Eliminar este activo">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+
+    tablaPreview.append(nuevaFila);
+
+    // Efecto visual
+    const ultimaFila = tablaPreview.find("tr:last");
+    ultimaFila.hide().fadeIn(300);
+
+    activosCreados++;
+
+    // Continuar con el siguiente
+    setTimeout(() => {
+      crearActivoManualProgresivo(indice + 1);
+    }, 200);
+  }
+
+  function finalizarProcesamientoManual() {
+    actualizarProgresoManual(
+      datos.cantidad,
+      datos.cantidad,
+      "¡Procesamiento completado!"
+    );
+
+    setTimeout(() => {
+      Swal.close();
+
+      // Mostrar tabla de preview
+      divTabla.show();
+
+      // Actualizar contador
+      actualizarContadorPreview(formId);
+
+      // Deshabilitar campos del formulario
+      form.find("input, select, textarea").prop("disabled", true);
+      form.find(".btnProcesarActivoManual").hide();
+
+      // Mostrar botón de reset
+      form.find(".btnProcesarActivoManual").after(`
+        <button type="button" class="btn btn-warning btnResetActivoManual ms-2" data-form-id="${formId}">
+          <i class="fas fa-undo"></i> Resetear
+        </button>
+      `);
+
+      NotificacionToast(
+        "success",
+        `Se han creado ${datos.cantidad} activos en la previsualización.`
+      );
+    }, 800);
+  }
+
+  // Iniciar procesamiento
+  setTimeout(() => {
+    crearActivoManualProgresivo(0);
+  }, 500);
+}
+
+// Función para validar series duplicadas en formularios manuales
+function validarSeriesDuplicadasManual(serieBase) {
+  const seriesExistentes = [];
+
+  // Revisar todas las tablas de preview
+  $("[id^='tblPreviewActivos_'] tbody tr").each(function () {
+    const serie = $(this).find(".serie-manual").val();
+    if (serie) {
+      seriesExistentes.push(serie.toLowerCase());
+    }
+  });
+
+  // También revisar la tabla principal si existe
+  $("#tbldetalleactivoreg tbody tr").each(function () {
+    const serie = $(this).find("input[name='serie[]']").val();
+    if (serie) {
+      seriesExistentes.push(serie.toLowerCase());
+    }
+  });
+
+  return {
+    esValida: !seriesExistentes.includes(serieBase.toLowerCase()),
+    seriesExistentes: seriesExistentes,
+  };
+}
+
+// Función para generar serie única en formularios manuales
+function generarSerieUnicaManual(serieBase) {
+  let contador = 1;
+  let serieNueva = serieBase;
+
+  while (!validarSeriesDuplicadasManual(serieNueva).esValida) {
+    contador++;
+    serieNueva = `${serieBase}-V${contador}`;
+  }
+
+  return serieNueva;
+}
+
+// Función para actualizar contador de preview
+function actualizarContadorPreview(formId) {
+  const totalActivos = $(`#tblPreviewActivos_${formId} tbody tr`).length;
+  $(`#tblPreviewActivos_${formId} .total-activos-preview`).text(totalActivos);
+}
+
+// Manejador para eliminar activo individual de preview
+$(document).on("click", ".btnEliminarActivoManual", function () {
+  const fila = $(this).closest("tr");
+  const formId = fila.data("form-id");
+
+  Swal.fire({
+    title: "¿Eliminar este activo?",
+    text: "Se eliminará solo esta unidad de la previsualización.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonColor: "#6c757d",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fila.remove();
+      actualizarContadorPreview(formId);
+      NotificacionToast("success", "Activo eliminado de la previsualización.");
+    }
+  });
+});
+
+// Manejador para resetear formulario manual
+$(document).on("click", ".btnResetActivoManual", function () {
+  const formId = $(this).data("form-id");
+  const form = $(`[data-form-number='${formId}']`);
+
+  Swal.fire({
+    title: "¿Resetear formulario?",
+    text: "Se eliminarán todos los activos de la previsualización y se habilitará el formulario.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#ffc107",
+    confirmButtonText: "Sí, resetear",
+    cancelButtonColor: "#6c757d",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Limpiar tabla de preview
+      $(`#tblPreviewActivos_${formId} tbody`).empty();
+      $(`#tablaPreview_${formId}`).hide();
+
+      // Habilitar formulario
+      form.find("input, select, textarea").prop("disabled", false);
+      form.find(".btnProcesarActivoManual").show();
+      form.find(".btnResetActivoManual").remove();
+
+      NotificacionToast("success", "Formulario reseteado correctamente.");
+    }
+  });
 });
