@@ -153,7 +153,7 @@ function init() {
       $("#tituloModalMovimiento").html(
         '<i class="fa fa-plus-circle"></i> Registrar Movimiento'
       );
-      $("#frmMovimiento")[0].reset();
+      $("#frmArticulos")[0].reset();
       $("#ModalArticulos").modal("show");
     });
 
@@ -231,33 +231,6 @@ function init() {
     }
   });
 
-  /*$("#frmDetalleMovimiento").on("submit", function (e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-
-    $.ajax({
-      url: "../../controllers/GestionarMovimientoController.php?action=AgregarDetalle",
-      type: "POST",
-      data: formData,
-      contentType: false,
-      processData: false,
-      dataType: "json",
-      success: function (res) {
-        if (res.status) {
-          console.log("Server response:", res);
-          Swal.fire("Éxito", "Activo agregado al movimiento", "success");
-          $("#IdActivo").val("").trigger("change");
-          $("#CodigoActivo, #SucursalActual, #AmbienteActual").val("");
-        } else {
-          Swal.fire("Error", res.message, "error");
-        }
-      },
-      error: function () {
-        Swal.fire("Error", "No se pudo agregar el activo.", "error");
-      },
-    });
-  });*/
-
   $("#ModalArticulos").on("shown.bs.modal", function () {
     let docIngreso = $("#inputDocIngresoAlm").val().trim();
     if (docIngreso) {
@@ -314,9 +287,56 @@ function init() {
   $(document).on("click", ".btnQuitarActivo", function () {
     const filaActual = $(this).closest("tr");
     const activoId = filaActual.data("id");
+    const grupoId = filaActual.data("grupo-id");
 
-    // Remover la fila principal y todas las filas generadas por procesamiento
-    $(`#tbldetalleactivoreg tbody tr[data-id='${activoId}']`).remove();
+    if (filaActual.hasClass("activo-grupo-principal")) {
+      // Si es la fila principal, eliminar todo el grupo
+      Swal.fire({
+        title: "¿Eliminar todo el grupo?",
+        text: "Se eliminarán todas las unidades de este activo.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        confirmButtonText: "Sí, eliminar todo",
+        cancelButtonColor: "#6c757d",
+        cancelButtonText: "Cancelar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          if (grupoId) {
+            // Eliminar todas las filas del grupo
+            $(
+              `#tbldetalleactivoreg tbody tr[data-grupo-id='${grupoId}']`
+            ).remove();
+          } else {
+            // Eliminar todas las filas con el mismo ID (método anterior)
+            $(`#tbldetalleactivoreg tbody tr[data-id='${activoId}']`).remove();
+          }
+          NotificacionToast("success", "Grupo eliminado completamente.");
+        }
+      });
+    } else if (grupoId) {
+      // Si es una fila hija, eliminar solo esta unidad
+      Swal.fire({
+        title: "¿Eliminar esta unidad?",
+        text: "Solo se eliminará esta unidad específica.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonColor: "#6c757d",
+        cancelButtonText: "Cancelar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          filaActual.remove();
+          // Actualizar los badges del grupo
+          actualizarBadgesGrupo(grupoId);
+          NotificacionToast("success", "Unidad eliminada.");
+        }
+      });
+    } else {
+      // Fila normal sin grupo (método anterior)
+      $(`#tbldetalleactivoreg tbody tr[data-id='${activoId}']`).remove();
+    }
   });
 
   // Manejador para el botón "Procesar Cantidad" - Abre el modal
@@ -328,28 +348,43 @@ function init() {
     const cantidad = parseInt(filaActual.find("input.cantidad").val()) || 1;
 
     if (cantidad <= 1) {
-      NotificacionToast("info", "La cantidad debe ser mayor a 1 para procesar.");
+      NotificacionToast(
+        "info",
+        "La cantidad debe ser mayor a 1 para procesar."
+      );
       return;
     }
 
     // Verificar si ya se procesó este activo
-    if ($(`#tbldetalleactivoreg tbody tr[data-id='${activoId}'][data-procesado='true']`).length > 0) {
-      NotificacionToast("warning", "Este activo ya ha sido procesado. Elimine las filas generadas primero.");
+    if (
+      $(
+        `#tbldetalleactivoreg tbody tr[data-id='${activoId}'][data-procesado='true']`
+      ).length > 0
+    ) {
+      NotificacionToast(
+        "warning",
+        "Este activo ya ha sido procesado. Elimine las filas generadas primero."
+      );
       return;
     }
 
     // Validar que los campos principales estén llenos
     const ambienteId = filaActual.find("select.ambiente").val();
     const categoriaId = filaActual.find("select.categoria").val();
-    
+
     if (!ambienteId || !categoriaId) {
-      NotificacionToast("error", "Debe seleccionar ambiente y categoría antes de procesar.");
+      NotificacionToast(
+        "error",
+        "Debe seleccionar ambiente y categoría antes de procesar."
+      );
       return;
     }
 
     // Obtener los valores de la fila principal
     const serie = filaActual.find("input[name='serie[]']").val();
-    const observaciones = filaActual.find("textarea[name='observaciones[]']").val();
+    const observaciones = filaActual
+      .find("textarea[name='observaciones[]']")
+      .val();
 
     // Configurar el modal con los datos
     $("#modalActivoNombre").text(activoNombre);
@@ -375,7 +410,7 @@ function init() {
     const activoId = $("#modalProcesarCantidad").data("activoId");
     const activoNombre = $("#modalProcesarCantidad").data("activoNombre");
     const activoMarca = $("#modalProcesarCantidad").data("activoMarca");
-    
+
     const cantidad = parseInt($("#modalCantidadTotal").val()) || 1;
     const serieBase = $("#modalSerieBase").val().trim();
     const observacionesBase = $("#modalObservacionesBase").val().trim();
@@ -383,6 +418,34 @@ function init() {
     // Validar serie base
     if (!serieBase) {
       NotificacionToast("error", "Debe ingresar una serie base.");
+      return;
+    }
+
+    // Validar series duplicadas
+    const validacion = validarSeriesDuplicadas(serieBase);
+    if (!validacion.esValida) {
+      Swal.fire({
+        title: "Serie Duplicada",
+        html: `
+          <p>La serie base "<strong>${serieBase}</strong>" ya existe en la tabla.</p>
+          <p>¿Desea generar una serie única automáticamente?</p>
+        `,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        confirmButtonText: "Sí, generar automáticamente",
+        cancelButtonColor: "#6c757d",
+        cancelButtonText: "No, cambiar manualmente",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const serieUnica = generarSerieUnica(serieBase);
+          $("#modalSerieBase").val(serieUnica);
+          NotificacionToast(
+            "info",
+            `Serie cambiada automáticamente a: ${serieUnica}`
+          );
+        }
+      });
       return;
     }
 
@@ -394,38 +457,57 @@ function init() {
     // Cerrar el modal
     $("#modalProcesarCantidad").modal("hide");
 
-    // Mostrar loading
+    // Mostrar loading progresivo
     Swal.fire({
-      title: "Procesando",
-      text: "Creando activos individuales...",
+      title: "Procesando Activos",
+      html: `
+        <div class="procesamiento-container">
+          <div class="progress mb-3" style="height: 25px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
+                 role="progressbar" style="width: 0%" id="progressBar">
+              <span class="progress-text">0%</span>
+            </div>
+          </div>
+          <div class="procesamiento-info">
+            <p class="mb-2"><i class="fas fa-cogs fa-spin text-info"></i> <span id="procesamientoTexto">Preparando activos...</span></p>
+            <small class="text-muted" id="procesamientoDetalle">Configurando ${cantidad} unidades para "${activoNombre}"</small>
+          </div>
+        </div>
+      `,
       allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
+      showConfirmButton: false,
+      customClass: {
+        popup: "procesamiento-popup",
       },
     });
 
     // Generar un ID único para el grupo
     const grupoId = `grupo_${activoId}_${Date.now()}`;
-    
+
     // Marcar la fila original como procesada y agregar distintivo
     filaActual.attr("data-procesado", "true");
     filaActual.attr("data-grupo-id", grupoId);
     filaActual.addClass("activo-grupo-principal");
     filaActual.find(".btnProcesarCantidad").hide();
     filaActual.find("input.cantidad").prop("disabled", true).val(1);
-    
+
     // Actualizar la serie de la fila original y agregar distintivo visual
     filaActual.find("input[name='serie[]']").val(serieBase + "-1");
     filaActual.find("textarea[name='observaciones[]']").val(observacionesBase);
-    
+
     // Agregar distintivo visual a la fila principal
     const distintivoPrincipal = `<span class="badge badge-primary grupo-badge">👑 Principal</span>`;
     filaActual.find("td:eq(1)").html(`${activoNombre} ${distintivoPrincipal}`);
-    
-    // Agregar botón para agregar más unidades a la fila principal
+
+    // Agregar botones de control del grupo a la fila principal
+    const btnColapsar =
+      cantidad > 2
+        ? `<button type='button' class='btn btn-outline-secondary btn-sm btnColapsarGrupo me-1' data-grupo-id='${grupoId}' title="Colapsar/Expandir grupo"><i class='fa fa-chevron-down'></i></button>`
+        : "";
     const btnAgregarMas = `<button type='button' class='btn btn-success btn-sm btnAgregarMasUnidades ms-1' data-grupo-id='${grupoId}' title="Agregar más unidades a este grupo"><i class='fa fa-plus'></i> +1</button>`;
     filaActual.find("td:last").html(`
       <div class="btn-group">
+        ${btnColapsar}
         ${btnAgregarMas}
         <button type='button' class='btn btn-danger btn-sm btnQuitarActivo' title="Eliminar todo el grupo">
           <i class='fa fa-trash'></i>
@@ -433,20 +515,56 @@ function init() {
       </div>
     `);
 
-    // Crear las filas individuales
-    for (let i = 1; i < cantidad; i++) {
+    // Debug: verificar que el botón se creó
+    console.log(
+      `Grupo ${grupoId}: cantidad=${cantidad}, botón colapsar creado:`,
+      btnColapsar !== ""
+    );
+
+    // Función para actualizar el progreso
+    function actualizarProgreso(actual, total, texto) {
+      const porcentaje = Math.round((actual / total) * 100);
+      $("#progressBar").css("width", porcentaje + "%");
+      $("#progressBar .progress-text").text(porcentaje + "%");
+      $("#procesamientoTexto").text(texto);
+      $("#procesamientoDetalle").text(
+        `Procesando unidad ${actual} de ${total}`
+      );
+    }
+
+    // Crear las filas individuales de forma progresiva
+    let ultimaFilaInsertada = filaActual;
+
+    // Función recursiva para crear filas con delay y progreso visual
+    function crearFilaProgresiva(indice) {
+      if (indice >= cantidad) {
+        // Todas las filas creadas, finalizar
+        finalizarProcesamiento();
+        return;
+      }
+
+      const i = indice;
+      actualizarProgreso(i, cantidad, `Creando activo ${i + 1}/${cantidad}...`);
+
       const numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
       const selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
       const selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
       const inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
       const inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" disabled>`;
 
-      const nuevaFila = `<tr data-id='${activoId}' class='table-info activo-procesado' data-procesado='true' data-activo-nombre="${activoNombre}" data-activo-marca="${activoMarca}">
+      const distintivo = `<span class="badge badge-info grupo-badge">📦 ${
+        i + 1
+      }/${cantidad}</span>`;
+      const indentacion = `<span class="grupo-indent">└─</span>`;
+
+      const nuevaFila = `<tr data-id='${activoId}' class='table-info activo-procesado activo-grupo-hijo' data-procesado='true' data-grupo-id='${grupoId}' data-activo-nombre="${activoNombre}" data-activo-marca="${activoMarca}">
                     <td>${activoId}</td>
-                    <td>${activoNombre} <small class="text-muted">(${i + 1}/${cantidad})</small></td>
+                    <td>${indentacion} ${activoNombre} ${distintivo}</td>
                     <td>${activoMarca}</td>
                     
-                    <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie ${i + 1}" value="${serieBase}-${i + 1}"></td>
+                    <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie ${
+                      i + 1
+                    }" value="${serieBase}-${i + 1}"></td>
                     <td>${inputEstadoActivo}</td>
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
@@ -454,13 +572,18 @@ function init() {
                     <td>${inputCantidad}</td>
                     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea></td>
                     <td>
-                      <button type='button' class='btn btn-danger btn-sm btnQuitarActivo' title="Eliminar esta fila">
+                      <button type='button' class='btn btn-danger btn-sm btnQuitarActivo' title="Eliminar solo esta unidad">
                         <i class='fa fa-trash'></i>
                       </button>
                     </td>
                 </tr>`;
 
-      $("#tbldetalleactivoreg tbody").append(nuevaFila);
+      // Insertar la nueva fila con animación
+      ultimaFilaInsertada.after(nuevaFila);
+      ultimaFilaInsertada = ultimaFilaInsertada.next();
+
+      // Efecto visual de aparición
+      ultimaFilaInsertada.hide().fadeIn(300);
 
       // Cargar combos para la nueva fila
       ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
@@ -470,14 +593,56 @@ function init() {
       setTimeout(() => {
         $(`#comboAmbiente${numeroFilas}`).val(ambienteId).trigger("change");
         $(`#comboCategoria${numeroFilas}`).val(categoriaId).trigger("change");
-      }, 500);
+      }, 100);
+
+      // Continuar con la siguiente fila después de un pequeño delay
+      setTimeout(() => {
+        crearFilaProgresiva(indice + 1);
+      }, 300); // 300ms entre cada fila para efecto visual
     }
 
-    // Cerrar loading y mostrar éxito
+    // Función para finalizar el procesamiento
+    function finalizarProcesamiento() {
+      actualizarProgreso(cantidad, cantidad, "¡Procesamiento completado!");
+
+      setTimeout(() => {
+        Swal.close();
+        NotificacionToast(
+          "success",
+          `Se han creado ${cantidad} filas individuales para el activo "${activoNombre}".`
+        );
+        // Actualizar contador total
+        actualizarContadorTotal();
+
+        // Auto-colapsar grupos grandes (más de 5 unidades)
+        if (cantidad > 5) {
+          console.log(
+            `Intentando auto-colapsar grupo ${grupoId} con ${cantidad} unidades`
+          );
+          const btnColapsar = $(
+            `button[data-grupo-id='${grupoId}'].btnColapsarGrupo`
+          );
+          console.log(`Botón colapsar encontrado: ${btnColapsar.length > 0}`);
+          if (btnColapsar.length > 0) {
+            setTimeout(() => {
+              console.log("Ejecutando auto-colapso");
+              btnColapsar.click();
+              NotificacionToast(
+                "info",
+                `Grupo auto-colapsado por tener ${cantidad} unidades. Click en 📁 para expandir.`
+              );
+            }, 500);
+          } else {
+            console.log("No se encontró el botón colapsar para auto-colapso");
+          }
+        }
+      }, 800);
+    }
+
+    // Iniciar el procesamiento progresivo inmediatamente
     setTimeout(() => {
-      Swal.close();
-      NotificacionToast("success", `Se han creado ${cantidad} filas individuales para el activo "${activoNombre}".`);
-    }, 1000);
+      crearFilaProgresiva(1); // Empezar desde 1 porque 0 ya existe (fila principal)
+    }, 200);
   });
 
   // Actualizar contador cuando cambie la cantidad en el modal
@@ -485,6 +650,286 @@ function init() {
     const cantidad = parseInt($(this).val()) || 0;
     $("#cantidadACrear").text(cantidad);
   });
+
+  // Validación en tiempo real de series duplicadas
+  $(document).on("input", "#modalSerieBase", function () {
+    const serieBase = $(this).val().trim();
+    const inputElement = $(this);
+
+    if (serieBase.length > 0) {
+      const validacion = validarSeriesDuplicadas(serieBase);
+
+      if (!validacion.esValida) {
+        inputElement.addClass("is-invalid");
+        inputElement.next(".invalid-feedback").remove();
+        inputElement.after(`
+          <div class="invalid-feedback">
+            <i class="fas fa-exclamation-triangle"></i> Esta serie ya existe en la tabla
+          </div>
+        `);
+      } else {
+        inputElement.removeClass("is-invalid");
+        inputElement.next(".invalid-feedback").remove();
+      }
+    } else {
+      inputElement.removeClass("is-invalid");
+      inputElement.next(".invalid-feedback").remove();
+    }
+  });
+
+  // Manejador para colapsar/expandir grupos
+  $(document).on("click", ".btnColapsarGrupo", function () {
+    console.log("Botón colapsar clickeado");
+    const grupoId = $(this).data("grupo-id");
+    const btnIcon = $(this).find("i");
+    const filasHijas = $(`tr[data-grupo-id='${grupoId}']`).not('.activo-grupo-principal');
+
+    console.log(
+      `Grupo: ${grupoId}, Filas hijas encontradas: ${filasHijas.length}`
+    );
+    console.log("¿Filas hijas visibles?", filasHijas.is(":visible"));
+    console.log("Filas hijas:", filasHijas);
+    
+    // Verificar si la primera fila hija está visible
+    const primeraFilaHija = filasHijas.first();
+    const estaVisible = primeraFilaHija.length > 0 ? primeraFilaHija.is(":visible") : false;
+    console.log("¿Primera fila hija visible?", estaVisible);
+
+    if (estaVisible) {
+      console.log("Colapsando grupo...");
+      // Colapsar grupo
+      filasHijas.hide();
+      btnIcon.removeClass("fa-chevron-down").addClass("fa-chevron-right");
+      $(this).attr("title", "Expandir grupo");
+
+      // Agregar indicador de grupo colapsado
+      const filaPrincipal = $(
+        `tr[data-grupo-id='${grupoId}'].activo-grupo-principal`
+      );
+      const activoNombre = filaPrincipal.data("activo-nombre");
+      const totalUnidades = filasHijas.length + 1;
+
+      const distintivoPrincipal = `<span class="badge badge-warning grupo-badge">📁 Colapsado (${totalUnidades} unidades)</span>`;
+      filaPrincipal
+        .find("td:eq(1)")
+        .html(`${activoNombre} ${distintivoPrincipal}`);
+      console.log("Grupo colapsado exitosamente");
+    } else {
+      console.log("Expandiendo grupo...");
+      // Expandir grupo
+      filasHijas.show();
+      btnIcon.removeClass("fa-chevron-right").addClass("fa-chevron-down");
+      $(this).attr("title", "Colapsar grupo");
+
+      // Restaurar badges normales
+      actualizarBadgesGrupo(grupoId);
+      console.log("Grupo expandido exitosamente");
+    }
+  });
+
+  // Manejador para agregar más unidades a un grupo existente
+  $(document).on("click", ".btnAgregarMasUnidades", function () {
+    const grupoId = $(this).data("grupo-id");
+    const filaPrincipal = $(
+      `tr[data-grupo-id='${grupoId}'].activo-grupo-principal`
+    );
+    const filasGrupo = $(`tr[data-grupo-id='${grupoId}']`);
+
+    if (filaPrincipal.length === 0) {
+      NotificacionToast("error", "No se pudo encontrar el grupo principal.");
+      return;
+    }
+
+    // Obtener datos del grupo
+    const activoId = filaPrincipal.data("id");
+    const activoNombre = filaPrincipal.data("activo-nombre");
+    const activoMarca = filaPrincipal.data("activo-marca");
+    const serieBase = filaPrincipal
+      .find("input[name='serie[]']")
+      .val()
+      .replace("-1", "");
+    const valor = filaPrincipal.find("input[name='valor[]']").val();
+    const observacionesBase = filaPrincipal
+      .find("textarea[name='observaciones[]']")
+      .val();
+    const ambienteId = filaPrincipal.find("select.ambiente").val();
+    const categoriaId = filaPrincipal.find("select.categoria").val();
+
+    // Calcular el siguiente número de serie
+    const cantidadActual = filasGrupo.length;
+    const siguienteNumero = cantidadActual + 1;
+
+    Swal.fire({
+      title: "Agregar Unidad",
+      text: `¿Desea agregar una unidad más al grupo "${activoNombre}"?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      confirmButtonText: "Sí, agregar",
+      cancelButtonColor: "#6c757d",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Crear nueva fila
+        const numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
+        const selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
+        const selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
+        const inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
+        const inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" disabled>`;
+
+        const distintivo = `<span class="badge badge-info grupo-badge">📦 ${siguienteNumero}/${siguienteNumero}</span>`;
+        const indentacion = `<span class="grupo-indent">└─</span>`;
+
+        const nuevaFila = `<tr data-id='${activoId}' class='table-info activo-procesado activo-grupo-hijo' data-procesado='true' data-grupo-id='${grupoId}' data-activo-nombre="${activoNombre}" data-activo-marca="${activoMarca}">
+                      <td>${activoId}</td>
+                      <td>${indentacion} ${activoNombre} ${distintivo}</td>
+                      <td>${activoMarca}</td>
+                      
+                      <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie ${siguienteNumero}" value="${serieBase}-${siguienteNumero}"></td>
+                      <td>${inputEstadoActivo}</td>
+                      <td>${selectAmbiente}</td>
+                      <td>${selectCategoria}</td>
+                      <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}"></td>
+                      <td>${inputCantidad}</td>
+                      <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea></td>
+                      <td>
+                        <button type='button' class='btn btn-danger btn-sm btnQuitarActivo' title="Eliminar solo esta unidad">
+                          <i class='fa fa-trash'></i>
+                        </button>
+                      </td>
+                  </tr>`;
+
+        // Insertar la nueva fila después de la última fila del grupo
+        const ultimaFilaGrupo = $(`tr[data-grupo-id='${grupoId}']`).last();
+        ultimaFilaGrupo.after(nuevaFila);
+
+        // Cargar combos para la nueva fila
+        ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
+        ListarCombosCategoria(`comboCategoria${numeroFilas}`);
+
+        // Establecer los valores seleccionados en los combos
+        setTimeout(() => {
+          $(`#comboAmbiente${numeroFilas}`).val(ambienteId).trigger("change");
+          $(`#comboCategoria${numeroFilas}`).val(categoriaId).trigger("change");
+        }, 500);
+
+        // Actualizar los badges de todas las filas del grupo
+        actualizarBadgesGrupo(grupoId);
+
+        NotificacionToast(
+          "success",
+          `Se agregó una unidad más al grupo "${activoNombre}".`
+        );
+      }
+    });
+  });
+
+  // Función para actualizar los badges de numeración de un grupo
+  function actualizarBadgesGrupo(grupoId) {
+    const filasGrupo = $(`tr[data-grupo-id='${grupoId}']`);
+    const total = filasGrupo.length;
+    const filaPrincipal = filasGrupo.filter(".activo-grupo-principal");
+
+    filasGrupo.each(function (index) {
+      const fila = $(this);
+      const activoNombre = fila.data("activo-nombre");
+
+      if (fila.hasClass("activo-grupo-principal")) {
+        // Fila principal - actualizar botones si es necesario
+        const distintivoPrincipal = `<span class="badge badge-primary grupo-badge">👑 Principal (${total} unidades)</span>`;
+        fila.find("td:eq(1)").html(`${activoNombre} ${distintivoPrincipal}`);
+
+        // Actualizar botones de control
+        const btnColapsar =
+          total > 2
+            ? `<button type='button' class='btn btn-outline-secondary btn-sm btnColapsarGrupo me-1' data-grupo-id='${grupoId}' title="Colapsar grupo"><i class='fa fa-chevron-down'></i></button>`
+            : "";
+        const btnAgregarMas = `<button type='button' class='btn btn-success btn-sm btnAgregarMasUnidades ms-1' data-grupo-id='${grupoId}' title="Agregar más unidades a este grupo"><i class='fa fa-plus'></i> +1</button>`;
+
+        fila.find("td:last").html(`
+          <div class="btn-group">
+            ${btnColapsar}
+            ${btnAgregarMas}
+            <button type='button' class='btn btn-danger btn-sm btnQuitarActivo' title="Eliminar todo el grupo">
+              <i class='fa fa-trash'></i>
+            </button>
+          </div>
+        `);
+      } else {
+        // Filas hijas
+        const distintivo = `<span class="badge badge-info grupo-badge">📦 ${
+          index + 1
+        }/${total}</span>`;
+        const indentacion = `<span class="grupo-indent">└─</span>`;
+        fila
+          .find("td:eq(1)")
+          .html(`${indentacion} ${activoNombre} ${distintivo}`);
+      }
+    });
+
+    // Actualizar contador total después de cambios en grupo
+    actualizarContadorTotal();
+  }
+
+  // Función para actualizar contador total en tiempo real
+  function actualizarContadorTotal() {
+    const totalFilas = $("#tbldetalleactivoreg tbody tr").length;
+    const totalGrupos =
+      $("#tbldetalleactivoreg tbody tr.activo-grupo-principal").length +
+      $("#tbldetalleactivoreg tbody tr:not([data-grupo-id])").length;
+
+    $("#CantRegistros").html(`
+      <div class="contador-detalle">
+        <span class="badge badge-success">${totalFilas} Activos</span>
+        <span class="badge badge-info">${totalGrupos} Grupos</span>
+      </div>
+    `);
+
+    // Actualizar también el título de la sección
+    const tituloDetalle =
+      totalFilas > 0
+        ? `Detalles <small class="text-muted">(${totalFilas} activos en ${totalGrupos} grupos)</small>`
+        : "Detalles";
+
+    $("#tbldetalleactivoreg")
+      .closest(".card")
+      .find('h5:contains("Detalles")')
+      .html(`<i class="fas fa-list"></i> ${tituloDetalle}`);
+  }
+
+  // Función para validar series duplicadas
+  function validarSeriesDuplicadas(serieBase, grupoId = null) {
+    const seriesExistentes = [];
+
+    $("#tbldetalleactivoreg tbody tr").each(function () {
+      const fila = $(this);
+      const serie = fila.find("input[name='serie[]']").val();
+      const filaGrupoId = fila.data("grupo-id");
+
+      // Solo validar contra series de otros grupos o activos sin grupo
+      if (serie && (!grupoId || filaGrupoId !== grupoId)) {
+        seriesExistentes.push(serie.toLowerCase());
+      }
+    });
+
+    return {
+      esValida: !seriesExistentes.includes(serieBase.toLowerCase()),
+      seriesExistentes: seriesExistentes,
+    };
+  }
+
+  // Función para generar serie única automáticamente
+  function generarSerieUnica(serieBase) {
+    let contador = 1;
+    let serieNueva = serieBase;
+
+    while (!validarSeriesDuplicadas(serieNueva).esValida) {
+      contador++;
+      serieNueva = `${serieBase}-V${contador}`;
+    }
+
+    return serieNueva;
+  }
 
   $("#btnGuardarActivo").on("click", function (e) {
     e.preventDefault();
@@ -530,7 +975,8 @@ function init() {
             row.find("textarea[name='observaciones[]']").val() || "",
           IdEstado: 1, // Estado por defecto: Operativo
           Garantia: 0, // Por defecto sin garantía
-          IdSucursal: null, // Se obtiene de la sesión en el backend
+          Proveedor: row.find("input[name='proveedor[]']").val() || "",
+          //IdSucursal: null, // Se obtiene de la sesión en el backend
           UserMod: userMod,
           Accion: 1, // 1 = Insertar
           Cantidad: 1, // Agregar la cantidad al objeto
@@ -1900,14 +2346,12 @@ function listarActivosModal(docIngresoAlm) {
       { data: "IdArticulo" },
       { data: "Nombre" },
       { data: "Marca" },
-      { data: "Empresa" },
-      { data: "IdUnidadNegocio" },
-      { data: "NombreLocal" },
+      { data: "Proveedor" },
       {
         data: null,
         render: function (data, type, row) {
           return (
-            '<button class="btn btn-success btn-sm btnSeleccionarActivo" data-id="' +
+            '<button class="btn btn-success align-self-center btn-sm btnSeleccionarActivo" data-id="' +
             row.idArticulo +
             '"><i class="fa fa-check"></i></button>'
           );
@@ -2001,6 +2445,8 @@ function agregarActivoAlDetalle(activo) {
           "success",
           `Activo <b>${activo.nombre}</b> agregado al detalle.`
         );
+        // Actualizar contador total
+        actualizarContadorTotal();
         return true;
       } else {
         NotificacionToast("error", res.message);
@@ -2502,18 +2948,6 @@ function addActivoManualForm(combos) {
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
-                <label for="idDocumentoVenta_${activoFormCount}">Documento de Venta</label>
-                <input type="text" name="idDocumentoVenta[]" id="idDocumentoVenta_${activoFormCount}" class="form-control" placeholder="Doc. Venta"/>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="idOrdendeCompra_${activoFormCount}">Orden de Compra</label>
-                <input type="text" name="idOrdendeCompra[]" id="idOrdendeCompra_${activoFormCount}" class="form-control" placeholder="Orden Compra"/>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
                 <label for="nombre_${activoFormCount}">Nombre</label>
                 <input type="text" name="nombre[]" id="nombre_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech" required>
               </div>
@@ -2536,6 +2970,18 @@ function addActivoManualForm(combos) {
                 <select name="Categoria[]" id="Categoria_${activoFormCount}" class="form-control select-2" required></select>
               </div>
             </div>
+             <div class="col-md-4">
+              <div class="form-group">
+                <label for="Responsable_${activoFormCount}">Responsable</label>
+                <select name="Responsable[]" id="Responsable_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Proveedor_${activoFormCount}">Proveedor</label>
+                <select name="Proveedor[]" id="Proveedor_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
             <div class="col-md-12">
               <div class="form-group">
                 <label for="descripcion_${activoFormCount}">Descripción</label>
@@ -2552,18 +2998,6 @@ function addActivoManualForm(combos) {
               <div class="form-group">
                 <label for="unidadNegocio_${activoFormCount}">Unidad de Negocio</label>
                 <input type="text" class="form-control" name="unidadNegocio[]" id="unidadNegocio_${activoFormCount}" disabled>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="Responsable_${activoFormCount}">Responsable</label>
-                <select name="Responsable[]" id="Responsable_${activoFormCount}" class="form-control select-2" required></select>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="Proveedor_${activoFormCount}">Proveedor</label>
-                <select name="Proveedor[]" id="Proveedor_${activoFormCount}" class="form-control select-2" required></select>
               </div>
             </div>
             <div class="col-md-4">
@@ -2754,7 +3188,7 @@ $("#activosContainer .card").each(function () {
   }
 });
 // Estilos CSS para el modal de procesamiento
-$(document).ready(function() {
+$(document).ready(function () {
   // Agregar estilos CSS dinámicamente
   const modalStyles = `
     <style>
@@ -2809,9 +3243,143 @@ $(document).ready(function() {
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
       }
+      
+      /* Estilos para los grupos de activos */
+      .activo-grupo-principal {
+        background-color: #e8f5e8 !important;
+        border-left: 4px solid #28a745;
+        font-weight: bold;
+      }
+      
+      .activo-grupo-hijo {
+        background-color: #e3f2fd !important;
+        border-left: 4px solid #2196f3;
+      }
+      
+      .grupo-indent {
+        color: #6c757d;
+        font-weight: bold;
+        margin-right: 8px;
+        font-family: monospace;
+      }
+      
+      .grupo-badge {
+        font-size: 0.75em;
+        margin-left: 8px;
+        padding: 4px 8px;
+        border-radius: 12px;
+      }
+      
+      .badge-primary.grupo-badge {
+        background-color: #28a745;
+        color: white;
+      }
+      
+      .badge-info.grupo-badge {
+        background-color: #17a2b8;
+        color: white;
+      }
+      
+      /* Hover effects para las filas de grupo */
+      .activo-grupo-principal:hover {
+        background-color: #d4edda !important;
+      }
+      
+      .activo-grupo-hijo:hover {
+        background-color: #bbdefb !important;
+      }
+      
+      /* Botón agregar más unidades */
+      .btnAgregarMasUnidades {
+        transition: all 0.3s ease;
+      }
+      
+      .btnAgregarMasUnidades:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        background-color: #218838;
+      }
+      
+      /* Botón colapsar grupos */
+      .btnColapsarGrupo {
+        transition: all 0.3s ease;
+      }
+      
+      .btnColapsarGrupo:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        background-color: #5a6268;
+        color: white;
+      }
+      
+      /* Badge para grupos colapsados */
+      .badge-warning.grupo-badge {
+        background-color: #ffc107;
+        color: #212529;
+      }
+      
+      /* Contador detalle mejorado */
+      .contador-detalle {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .contador-detalle .badge {
+        font-size: 0.85em;
+        padding: 6px 12px;
+      }
+      
+      /* Estilos para el loader de procesamiento */
+      .procesamiento-popup {
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      }
+      
+      .procesamiento-container {
+        padding: 20px;
+        text-align: center;
+      }
+      
+      .progress {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      .progress-bar {
+        transition: width 0.3s ease;
+        border-radius: 15px;
+        position: relative;
+      }
+      
+      .progress-text {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        line-height: 25px;
+        color: white;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      }
+      
+      .procesamiento-info {
+        margin-top: 15px;
+      }
+      
+      .procesamiento-info p {
+        font-size: 1.1em;
+        color: #495057;
+      }
+      
+      .procesamiento-info small {
+        font-size: 0.9em;
+        color: #6c757d;
+      }
     </style>
   `;
-  
+
   // Agregar los estilos al head del documento
-  $('head').append(modalStyles);
+  $("head").append(modalStyles);
 });

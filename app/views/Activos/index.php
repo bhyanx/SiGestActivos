@@ -265,7 +265,7 @@ if (isset($_SESSION["IdRol"])) {
 
                                 <!-- Modal Articulos -->
                                 <div class="modal fade" id="ModalArticulos" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalArticulosTitle">
-                                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+                                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document" id="frmArticulos">
                                         <div class="modal-content">
                                             <div class="modal-header dragable_touch">
                                                 <h5 class="modal-title" id="ModalArticulosTitulo"><i class="fas fa-box"></i> Lista de artículos</h5>
@@ -284,9 +284,7 @@ if (isset($_SESSION["IdRol"])) {
                                                                         <th>Id</th>
                                                                         <th>Nombre</th>
                                                                         <th>Marca</th>
-                                                                        <th>Empresa</th>
-                                                                        <th>Id.Unidad Negocio</th>
-                                                                        <th>Nombre Local</th>
+                                                                        <th>Proveedor</th>
                                                                         <th><i class="fa fa-cogs"></i></th>
                                                                     </tr>
                                                                 </thead>
@@ -298,9 +296,7 @@ if (isset($_SESSION["IdRol"])) {
                                                                         <th>Id</th>
                                                                         <th>Nombre</th>
                                                                         <th>Marca</th>
-                                                                        <th>Empresa</th>
-                                                                        <th>Id.Unidad Negocio</th>
-                                                                        <th>Nombre Local</th>
+                                                                        <th>Proveedor</th>
                                                                         <th><i class="fa fa-cogs"></i></th>
                                                                     </tr>
                                                                 </tfoot>

@@ -306,7 +306,7 @@ switch ($action) {
                             'IdEstado' => $activo['IdEstado'],
                             'Garantia' => isset($activo['Garantia']) ? (int)$activo['Garantia'] : 0,
                             'FechaFinGarantia' => $fechaFinGarantia,
-                            'IdProveedor' => $activo['IdProveedor'] ?? null,
+                            'IdProveedor' => $activo['IdProveedor'],
                             'IdEmpresa' => $_SESSION['IdEmpresa'] ?? '',
                             'IdSucursal' => $_SESSION['IdSucursal'],
                             'IdAmbiente' => $activo['IdAmbiente'],
@@ -643,19 +643,20 @@ ORDER BY a.Descripcion_articulo;
             }
 
             $stmt = $db->prepare("
-            SELECT 
-        ing.idDocIngAlmacen AS IdDocIngresoAlm,
-        ing.idarticulo AS IdArticulo, 
-        a.Descripcion_articulo AS Nombre,
-        a.DescripcionMarca AS Marca,
-		e.Razon_empresa AS Empresa,
-        ing.cod_UnidadNeg AS IdUnidadNegocio,
-        ing.Nombre_local AS NombreLocal
-    FROM vListadoDeArticulosPorDocIngresoAlmacen ing
-    INNER JOIN vArticulos a ON ing.IdArticulo = a.IdArticulo
-	LEFT JOIN vEmpresas e ON ing.Cod_Empresa = e.cod_empresa 
-    WHERE ing.idDocIngAlmacen = ?
-    ORDER BY a.Descripcion_articulo;
+            SELECT ing.idDocIngAlmacen AS IdDocIngresoAlm,
+            ing.idarticulo AS IdArticulo, 
+            a.Descripcion_articulo AS Nombre,
+            a.DescripcionMarca AS Marca,
+		    e.Razon_empresa AS Empresa,
+            ing.cod_UnidadNeg AS IdUnidadNegocio,
+            ing.Nombre_local AS NombreLocal,
+            p.RazonSocial AS Proveedor
+            FROM vListadoDeArticulosPorDocIngresoAlmacen ing
+            INNER JOIN vArticulos a ON ing.IdArticulo = a.IdArticulo
+            LEFT JOIN vEmpresas e ON ing.Cod_Empresa = e.cod_empresa 
+            LEFT JOIN vEntidadExternaGeneralProveedor p ON p.Documento = ing.Documento
+            WHERE ing.idDocIngAlmacen = ?
+            ORDER BY a.Descripcion_articulo;
         ");
             $stmt->execute([$IdDocIngresoAlm]);
             $articulos = [];
@@ -667,6 +668,7 @@ ORDER BY a.Descripcion_articulo;
                     'Empresa'  => $row['Empresa'] ?? '',
                     'IdUnidadNegocio' => $row['IdUnidadNegocio'],
                     'NombreLocal' => $row['NombreLocal'],
+                    'Proveedor' => $row['Proveedor'],
                 ];
             }
 
