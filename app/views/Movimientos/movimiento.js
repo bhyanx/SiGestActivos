@@ -231,7 +231,7 @@ function init() {
           // Si se guardó el movimiento principal, proceder a guardar los detalles
           Swal.fire({
             title: "Movimiento Creado",
-            text: `Se ha creado el movimiento con código: ${res.codMovimiento}`,
+            text: `Se ha creado el movimiento con código: ${res.codigoMovimiento}`,
             icon: "success",
           }).then(() => {
             guardarDetallesMovimiento(res.idMovimiento);
@@ -268,8 +268,8 @@ function init() {
         success: function (res) {
           if (res.status) {
             $("#CodigoActivo").val(res.data.CodigoActivo || "");
-            $("#SucursalActual").val(res.data.SucursalActual || "");
-            $("#AmbienteActual").val(res.data.AmbienteActual || "");
+            $("#SucursalActual").val(res.data.Sucursal || "");
+            $("#AmbienteActual").val(res.data.Ambiente || "");
           } else {
             $("#CodigoActivo, #SucursalActual, #AmbienteActual").val("");
           }
@@ -354,7 +354,7 @@ function init() {
           }).then(() => {
             // Limpia solo el select de activo y los campos visuales
             $("#IdActivo").val("").trigger("change");
-            $("#CodigoActivo, #SucursalActual, #AmbienteActual").val("");
+            $("#CodigoActivo, #Sucursal, #Ambiente").val("");
             // Limpiar la tabla de detalle
             $("#tbldetalleactivomov tbody").empty();
           });
@@ -388,7 +388,7 @@ function init() {
     }
 
     // Validar que el activo tenga todos los datos necesarios
-    if (!activo.id || !activo.nombre || !activo.sucursal || !activo.ambiente) {
+    if (!activo.id || !activo.nombre || !activo.Ambiente || !activo.Sucursal) {
       NotificacionToast(
         "error",
         "El activo no tiene todos los datos necesarios"
@@ -398,19 +398,30 @@ function init() {
 
     var numeroFilas = $("#tbldetalleactivomov").find("tbody tr").length;
 
-    var selectAmbienteDestino = `<select class='form-control form-control-sm ambiente-destino' name='ambiente_destino[]' id="comboAmbiente${numeroFilas}" required></select>`;
-    var selectResponsableDestino = `<select class='form-control form-control-sm responsable-destino' name='responsable_destino[]' id="comboResponsable${numeroFilas}" required></select>`;
+    var selectAmbienteDestino = `<select class='form-control form-control-sm ambiente-destino' name='ambiente_destino[]' id="comboAmbiente${numeroFilas}" required>
+      <option value="">Seleccione ambiente...</option>
+    </select>`;
+    var selectResponsableDestino = `<select class='form-control form-control-sm responsable-destino' name='responsable_destino[]' id="comboResponsable${numeroFilas}" required>
+      <option value="">Seleccione responsable...</option>
+    </select>`;
 
-    var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp'>
-      <td>${activo.id}</td>
-      <td>${activo.codigo}</td>
+    // Indicador visual de origen vs destino
+    var badgeOrigen = `<span class="badge badge-info">Origen</span>`;
+    var badgeDestino = `<span class="badge badge-success">Destino</span>`;
+
+    var nuevaFila = `<tr data-id='${activo.id}' class='table-light border-left border-success border-3 agregado-temp'>
+      <td class="text-center">${activo.id}</td>
+      <td><strong>${activo.codigo}</strong></td>
       <td>${activo.nombre}</td>
-      <td>${activo.marca}</td>
-      <td>${activo.sucursal}</td>
-      <td>${activo.ambiente}</td>
-      <td>${selectAmbienteDestino}</td>
-      <td>${selectResponsableDestino}</td>
-      <td><button type='button' class='btn btn-danger btn-sm btnQuitarActivo'><i class='fa fa-trash'></i></button></td>
+      <td>${badgeOrigen} ${activo.Sucursal}</td>
+      <td>${badgeOrigen} ${activo.Ambiente}</td>
+      <td>${badgeDestino} ${selectAmbienteDestino}</td>
+      <td>${badgeDestino} ${selectResponsableDestino}</td>
+      <td class="text-center">
+        <button type='button' class='btn btn-danger btn-sm btnQuitarActivo' title='Quitar activo'>
+          <i class='fa fa-trash'></i>
+        </button>
+      </td>
     </tr>`;
     $("#tbldetalleactivomov tbody").append(nuevaFila);
 
@@ -418,32 +429,84 @@ function init() {
     ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
     ListarCombosResponsable(`comboResponsable${numeroFilas}`);
 
-    // Agregar validación al cambiar los combos
+    // Agregar validación mejorada al cambiar los combos
     $(`#comboAmbiente${numeroFilas}, #comboResponsable${numeroFilas}`).on(
       "change",
       function () {
+        const $this = $(this);
         const ambienteVal = $(`#comboAmbiente${numeroFilas}`).val();
         const responsableVal = $(`#comboResponsable${numeroFilas}`).val();
 
-        if (!ambienteVal || !responsableVal) {
-          $(this).addClass("is-invalid");
+        // Validación individual
+        if (!$this.val()) {
+          $this.addClass("is-invalid").removeClass("is-valid");
         } else {
-          $(this).removeClass("is-invalid");
+          $this.removeClass("is-invalid").addClass("is-valid");
         }
+
+        // Actualizar contador de activos listos
+        actualizarContadorActivosListos();
       }
     );
 
+    // Animación de entrada
     setTimeout(function () {
-      $("#tbldetalleactivomov tbody tr.agregado-temp").removeClass(
-        "table-success agregado-temp"
-      );
-    }, 1000);
+      $("#tbldetalleactivomov tbody tr.agregado-temp")
+        .removeClass("table-light agregado-temp")
+        .addClass("table-active");
+      
+      setTimeout(function() {
+        $("#tbldetalleactivomov tbody tr.table-active").removeClass("table-active");
+      }, 1000);
+    }, 100);
 
     NotificacionToast(
       "success",
       `Activo <b>${activo.nombre}</b> agregado al detalle.`
     );
+    
+    // Cerrar modal automáticamente
+    $("#ModalArticulos").modal("hide");
+    
+    // Actualizar contador
+    actualizarContadorActivosListos();
+    
     return true;
+  }
+
+  // Función para actualizar el contador de activos listos para procesar
+  function actualizarContadorActivosListos() {
+    const totalActivos = $("#tbldetalleactivomov tbody tr").length;
+    let activosListos = 0;
+    
+    $("#tbldetalleactivomov tbody tr").each(function() {
+      const ambiente = $(this).find(".ambiente-destino").val();
+      const responsable = $(this).find(".responsable-destino").val();
+      
+      if (ambiente && responsable) {
+        activosListos++;
+      }
+    });
+    
+    // Actualizar badge en el botón guardar
+    const $btnGuardar = $("#btnGuardarMov");
+    
+    if (totalActivos === 0) {
+      $btnGuardar.prop("disabled", true)
+        .removeClass("btn-success").addClass("btn-secondary")
+        .html('<i class="fa fa-save"></i> Guardar Movimiento');
+    } else if (activosListos === totalActivos) {
+      $btnGuardar.prop("disabled", false)
+        .removeClass("btn-secondary").addClass("btn-success")
+        .html(`<i class="fa fa-save"></i> Registrar Movimiento (${totalActivos} activo${totalActivos > 1 ? 's' : ''})`);
+    } else {
+      $btnGuardar.prop("disabled", true)
+        .removeClass("btn-success").addClass("btn-secondary")
+        .html(`<i class="fa fa-save"></i> Completar datos (${activosListos}/${totalActivos})`);
+    }
+    
+    // Remover cualquier mensaje de advertencia previo
+    $("#mensaje-destinos-inconsistentes").remove();
   }
 
   // Botón para agregar otro activo (limpia el formulario de detalle)
@@ -459,18 +522,37 @@ function init() {
       id: $(this).data("id"),
       codigo: fila.find("td:eq(1)").text(),
       nombre: fila.find("td:eq(2)").text(),
-      marca: fila.find("td:eq(3)").text(),
-      sucursal: fila.find("td:eq(4)").text(),
-      ambiente: fila.find("td:eq(5)").text(),
+      Sucursal: fila.find("td:eq(3)").text(),
+      Ambiente: fila.find("td:eq(4)").text(),
     };
     agregarActivoAlDetalle(activo);
   });
 
   $(document).on("click", ".btnQuitarActivo", function () {
-    $(this).closest("tr").remove();
+    const $fila = $(this).closest("tr");
+    const nombreActivo = $fila.find("td:eq(2)").text();
+    
+    Swal.fire({
+      title: "¿Quitar activo?",
+      text: `¿Está seguro de quitar "${nombreActivo}" del movimiento?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, quitar",
+      cancelButtonText: "Cancelar"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $fila.fadeOut(300, function() {
+          $(this).remove();
+          actualizarContadorActivosListos();
+          NotificacionToast("info", `Activo <b>${nombreActivo}</b> removido del detalle.`);
+        });
+      }
+    });
   });
 
-  // Función para guardar el movimiento completo
+  // Función para guardar el movimiento completo usando el enfoque cabecera-detalle
   $("#btnGuardarMov").on("click", function () {
     // Verificar si hay detalles en la tabla
     if ($("#tbldetalleactivomov tbody tr").length === 0) {
@@ -478,50 +560,276 @@ function init() {
       return;
     }
 
-    // Obtener los datos del formulario principal
-    const formData = new FormData();
-    formData.append("IdTipo", $("#IdTipoMovimiento").val());
-    formData.append("autorizador", $("#IdAutorizador").val());
-    formData.append("sucursal_destino", $("#IdSucursalDestino").val());
-    formData.append("cod_empresa", $("#IdEmpresaDestino").val()); // Agregar el campo de empresa
-    formData.append("observacion", ""); // Si tienes campo de observaciones, agrégalo aquí
+    // Validar que todos los campos requeridos estén llenos
+    let camposFaltantes = [];
+    $("#tbldetalleactivomov tbody tr").each(function () {
+      const ambienteDestino = $(this).find(".ambiente-destino").val();
+      const responsableDestino = $(this).find(".responsable-destino").val();
+      const nombreActivo = $(this).find("td:eq(2)").text();
+
+      if (!ambienteDestino) {
+        camposFaltantes.push(`Ambiente destino para el activo ${nombreActivo}`);
+      }
+      if (!responsableDestino) {
+        camposFaltantes.push(`Responsable destino para el activo ${nombreActivo}`);
+      }
+    });
+
+    if (camposFaltantes.length > 0) {
+      Swal.fire({
+        title: "Campos Faltantes",
+        html: "Por favor complete los siguientes campos:<br><br>" + camposFaltantes.join("<br>"),
+        icon: "warning",
+      });
+      return;
+    }
 
     // Mostrar loading
     Swal.fire({
-      title: "Procesando",
-      text: "Guardando el movimiento...",
+      title: "Procesando Movimiento",
+      html: `
+        <div class="text-center">
+          <div class="spinner-border text-primary mb-3" role="status">
+            <span class="sr-only">Creando movimiento...</span>
+          </div>
+          <p>Paso 1: Creando cabecera del movimiento...</p>
+        </div>
+      `,
       allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
+      showConfirmButton: false
     });
 
-    // Primero guardar el movimiento principal
+    // PASO 1: Crear la cabecera del movimiento
+    const formDataMovimiento = new FormData();
+    formDataMovimiento.append("idTipoMovimiento", $("#IdTipoMovimiento").val());
+    formDataMovimiento.append("idAutorizador", $("#IdAutorizador").val());
+    formDataMovimiento.append("observaciones", `Movimiento de ${$("#tbldetalleactivomov tbody tr").length} activos`);
+
     $.ajax({
-      url: "../../controllers/GestionarMovimientoController.php?action=RegistrarMovimientoSolo",
+      url: "../../controllers/GestionarMovimientoController.php?action=RegistrarMovimiento",
       type: "POST",
-      data: formData,
+      data: formDataMovimiento,
       contentType: false,
       processData: false,
       dataType: "json",
-      success: function (res) {
-        if (res.status) {
-          // Si se guardó el movimiento principal, proceder a guardar los detalles
-          guardarDetallesMovimiento(res.idMovimiento);
+      success: function (resMovimiento) {
+        if (resMovimiento.status) {
+          // PASO 2: Agregar todos los activos al movimiento creado
+          Swal.update({
+            html: `
+              <div class="alert alert-success mb-3">
+                <h5><i class="fas fa-check-circle"></i> Movimiento Creado</h5>
+                <h4 class="text-primary"><strong>${resMovimiento.codMovimiento}</strong></h4>
+              </div>
+              <div class="progress mb-3">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
+                     style="width: 0%" id="progressBar">0/${$("#tbldetalleactivomov tbody tr").length}</div>
+              </div>
+              <div id="progressText">Paso 2: Agregando activos al movimiento...</div>
+            `
+          });
+
+          agregarActivosAlMovimiento(resMovimiento.idMovimiento, resMovimiento.codMovimiento);
         } else {
-          Swal.fire(
-            "Error",
-            res.message || "Error al registrar el movimiento",
-            "error"
-          );
+          Swal.fire({
+            title: "Error al Crear Movimiento",
+            html: `
+              <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> ${resMovimiento.message}
+              </div>
+            `,
+            icon: "error",
+            confirmButtonText: "Intentar de nuevo"
+          });
         }
       },
-      error: function () {
-        Swal.fire("Error", "Error al comunicarse con el servidor", "error");
+      error: function (xhr, status, error) {
+        console.error("Error en la petición:", error);
+        Swal.fire({
+          title: "Error de Comunicación",
+          html: `
+            <div class="alert alert-danger">
+              <i class="fas fa-wifi"></i> No se pudo comunicar con el servidor.<br>
+              <small>Error: ${error}</small>
+            </div>
+          `,
+          icon: "error",
+          confirmButtonText: "Reintentar"
+        });
       },
     });
   });
 
+  // Función para agregar todos los activos al movimiento creado
+  function agregarActivosAlMovimiento(idMovimiento, codMovimiento) {
+    let activosProcesados = 0;
+    let totalActivos = $("#tbldetalleactivomov tbody tr").length;
+    let errores = [];
+    let activosExitosos = [];
+
+    $("#tbldetalleactivomov tbody tr").each(function (index) {
+      const fila = $(this);
+      const nombreActivo = fila.find("td:eq(2)").text();
+      const detalleData = new FormData();
+
+      detalleData.append("idMovimiento", idMovimiento);
+      detalleData.append("idActivo", fila.find("td:eq(0)").text());
+      detalleData.append("idTipoMovimiento", $("#IdTipoMovimiento").val());
+      detalleData.append("idAmbienteNuevo", fila.find(".ambiente-destino").val());
+      detalleData.append("idResponsableNuevo", fila.find(".responsable-destino").val());
+      detalleData.append("idAutorizador", $("#IdAutorizador").val());
+
+      $.ajax({
+        url: "../../controllers/GestionarMovimientoController.php?action=AgregarDetalleMovimiento",
+        type: "POST",
+        data: detalleData,
+        contentType: false,
+        processData: false,
+        dataType: "json",
+        success: function (res) {
+          activosProcesados++;
+          
+          // Actualizar progreso
+          const porcentaje = (activosProcesados / totalActivos) * 100;
+          $("#progressBar").css("width", porcentaje + "%").text(`${activosProcesados}/${totalActivos}`);
+          $("#progressText").text(`Procesando: ${nombreActivo} - ${res.status ? 'Éxito' : 'Error'}`);
+          
+          if (res.status) {
+            activosExitosos.push(nombreActivo);
+          } else {
+            errores.push(`${nombreActivo}: ${res.message}`);
+          }
+
+          // Cuando todos los activos se hayan procesado
+          if (activosProcesados === totalActivos) {
+            setTimeout(() => {
+              if (errores.length === 0) {
+                Swal.fire({
+                  title: "¡Movimiento Completado Exitosamente!",
+                  html: `
+                    <div class="alert alert-success">
+                      <h5><i class="fas fa-check-circle text-success"></i> Código de Movimiento</h5>
+                      <h3 class="text-primary"><strong>${codMovimiento}</strong></h3>
+                      <p class="mb-0"><strong>${activosExitosos.length} activos</strong> procesados correctamente</p>
+                    </div>
+                    
+                    <div class="row mt-4">
+                      <div class="col-md-6">
+                        <div class="card border-info">
+                          <div class="card-header bg-info text-white">
+                            <i class="fas fa-info-circle"></i> Información del Movimiento
+                          </div>
+                          <div class="card-body">
+                            <p><strong>Código:</strong> ${codMovimiento}</p>
+                            <p><strong>Total de activos:</strong> ${activosExitosos.length}</p>
+                            <p><strong>Tipo:</strong> ${$("#IdTipoMovimiento option:selected").text()}</p>
+                            <p><strong>Autorizador:</strong> ${$("#IdAutorizador option:selected").text()}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="col-md-6">
+                        <div class="card border-success">
+                          <div class="card-header bg-success text-white">
+                            <i class="fas fa-boxes"></i> Activos Procesados
+                          </div>
+                          <div class="card-body" style="max-height: 250px; overflow-y: auto;">
+                            ${activosExitosos.map(nombre => 
+                              `<div class="d-flex justify-content-between align-items-center border-bottom py-1">
+                                <span><i class="fas fa-box text-success"></i> ${nombre}</span>
+                                <span class="badge badge-success">✓</span>
+                              </div>`
+                            ).join('')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="mt-3 p-3 bg-light rounded">
+                      <small class="text-muted">
+                        <i class="fas fa-search"></i> Para consultar este movimiento, busque por el código: <strong>${codMovimiento}</strong>
+                      </small>
+                    </div>
+                  `,
+                  icon: "success",
+                  width: "900px",
+                  confirmButtonText: "Continuar",
+                  confirmButtonColor: "#28a745"
+                }).then(() => {
+                  limpiarYRecargar();
+                });
+              } else {
+                let mensajeExito = activosExitosos.length > 0 ? 
+                  `<div class="alert alert-success mb-3">
+                    <h5><i class="fas fa-check-circle"></i> Movimiento: <strong>${codMovimiento}</strong></h5>
+                    <strong>Exitosos (${activosExitosos.length}):</strong><br>
+                    ${activosExitosos.map(activo => `• <i class="fas fa-box text-success"></i> ${activo}`).join('<br>')}
+                  </div>` : '';
+                
+                Swal.fire({
+                  title: "Movimiento Completado con Advertencias",
+                  html: `
+                    ${mensajeExito}
+                    <div class="alert alert-warning">
+                      <strong>Errores (${errores.length}):</strong><br>
+                      ${errores.map(error => `• <i class="fas fa-exclamation-triangle text-warning"></i> ${error}`).join('<br>')}
+                    </div>
+                    <div class="mt-3 text-muted">
+                      <small><i class="fas fa-info-circle"></i> Los activos exitosos están bajo el código: <strong>${codMovimiento}</strong></small>
+                    </div>
+                  `,
+                  icon: "warning",
+                  width: "700px"
+                }).then(() => {
+                  limpiarYRecargar();
+                });
+              }
+            }, 500);
+          }
+        },
+        error: function (xhr, status, error) {
+          activosProcesados++;
+          
+          // Actualizar progreso
+          const porcentaje = (activosProcesados / totalActivos) * 100;
+          $("#progressBar").css("width", porcentaje + "%").text(`${activosProcesados}/${totalActivos}`);
+          $("#progressText").text(`Error en: ${nombreActivo}`);
+          
+          errores.push(`${nombreActivo}: Error de comunicación - ${error}`);
+
+          if (activosProcesados === totalActivos) {
+            setTimeout(() => {
+              Swal.fire({
+                title: "Error en el Proceso",
+                html: `
+                  <div class="alert alert-danger">
+                    <h5>Movimiento: <strong>${codMovimiento}</strong></h5>
+                    <strong>Errores encontrados:</strong><br>
+                    ${errores.map(error => `• <i class="fas fa-times text-danger"></i> ${error}`).join('<br>')}
+                  </div>
+                `,
+                icon: "error",
+                width: "600px"
+              });
+            }, 500);
+          }
+        },
+      });
+    });
+  }
+
+
+
+  // Función para limpiar y recargar
+  function limpiarYRecargar() {
+    $("#divregistroMovimiento").hide();
+    $("#divtblmovimientos").show();
+    $("#divlistadomovimientos").show();
+    $("#tbldetalleactivomov tbody").empty();
+    ListarMovimientos();
+  }
+
+  // Función legacy para compatibilidad - ya no se usa con el nuevo procedimiento
   function guardarDetallesMovimiento(idMovimiento) {
     let detallesGuardados = 0;
     let totalDetalles = $("#tbldetalleactivomov tbody tr").length;
@@ -576,6 +884,7 @@ function init() {
                 $("#divregistroMovimiento").hide();
                 $("#divtblmovimientos").show();
                 $("#divlistadomovimientos").show();
+                $("#tbldetalleactivomov tbody").empty();
                 ListarMovimientos();
               });
             } else {
@@ -589,6 +898,7 @@ function init() {
                 $("#divregistroMovimiento").hide();
                 $("#divtblmovimientos").show();
                 $("#divlistadomovimientos").show();
+                $("#tbldetalleactivomov tbody").empty();
                 ListarMovimientos();
               });
             }
@@ -935,9 +1245,9 @@ function ListarMovimientos() {
                         </div>`;
         },
       },
-      { data: "CodMovimiento" },
+      { data: "codigoMovimiento" },
       { data: "tipoMovimiento" },
-      { data: "sucursalOrigen" },
+      //{ data: "sucursalOrigen" },
       { data: "sucursalDestino" },
       { data: "empresaDestino" },
       { data: "autorizador" },
@@ -1031,9 +1341,9 @@ function listarActivosModal() {
     },
     columns: [
       { data: "IdActivo" },
-      { data: "CodigoActivo" },
-      { data: "NombreActivoVisible" },
-      { data: "Marca" },
+      { data: "codigo" },
+      { data: "NombreActivo" },
+      //{ data: "Marca" },
       { data: "Sucursal" },
       { data: "Ambiente" },
       {
@@ -1151,7 +1461,7 @@ $(document).on("click", ".btnVerHistorial", function () {
             }</td>
             <td>${item.tipoMovimiento}</td>
             <td>${item.CodigoActivo} - ${item.NombreArticulo}</td>
-            <td>${item.sucursalOrigen} - ${item.ambienteOrigen}</td>
+            <td>${item.ambienteOrigen}</td>
             <td>${item.sucursalDestino} - ${item.ambienteDestino}</td>
           </tr>`;
         });

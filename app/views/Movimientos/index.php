@@ -122,7 +122,6 @@ session_start();
                                                         <th><i class="fa fa-cogs" title="Acciones"></i></th>
                                                         <th>Código</th>
                                                         <th>Tipo Movimiento</th>
-                                                        <th>Sucursal Origen</th>
                                                         <th>Sucursal Destino</th>
                                                         <th>Empresa Destino</th>
                                                         <th>Autorizador</th>
@@ -135,7 +134,6 @@ session_start();
                                                         <th><i class="fa fa-cogs" title="Acciones"></i></th>
                                                         <th>Código</th>
                                                         <th>Tipo Movimiento</th>
-                                                        <th>Sucursal Origen</th>
                                                         <th>Sucursal Destino</th>
                                                         <th>Empresa Destino</th>
                                                         <th>Autorizador</th>
@@ -166,13 +164,6 @@ session_start();
                                                 </div>
                                                 <div class="col-md-3">
                                                     <div class="form-group"><label for="CodAutorizador">Autorizador:</label><select name="CodAutorizador" id="CodAutorizador" class="form-control" required></select></div>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <div class="form-group">
-                                                        <label for="IdSucursalOrigen">Sucursal Origen:</label>
-                                                        <input type="text" class="form-control" name="IdSucursalOrigen" id="IdSucursalOrigen" readonly>
-                                                        <input type="hidden" name="IdSucursalOrigenValor" id="IdSucursalOrigenValor">
-                                                    </div>
                                                 </div>
                                                 <div class="col-md-2">
                                                     <div class="form-group">
@@ -397,7 +388,7 @@ session_start();
                                                             <th>ID</th>
                                                             <th>Código</th>
                                                             <th>Nombre</th>
-                                                            <th>Marca</th>
+                                                            <!-- <th>Marca</th> -->
                                                             <th>Sucursal</th>
                                                             <th>Ambiente</th>
                                                             <th>Ambiente Destino</th>
@@ -463,11 +454,10 @@ session_start();
                                                     <table id="tbllistarActivos" class="table table-bordered table-striped display nowrap" style="width:100%">
                                                         <thead>
                                                             <tr>
-
                                                                 <th>Id</th>
                                                                 <th>Código</th>
                                                                 <th>Nombre</th>
-                                                                <th>Marca</th>
+                                                                <!-- <th>Marca</th> -->
                                                                 <th>Sucursal</th>
                                                                 <th>Ambiente</th>
                                                                 <th><i class="fa fa-cogs"></i></th>
@@ -479,9 +469,9 @@ session_start();
                                                         <tfoot>
                                                             <tr>
                                                                 <th>Id</th>
-                                                                <!-- <th>Código</th> -->
+                                                                <th>Código</th>
                                                                 <th>Nombre</th>
-                                                                <th>Marca</th>
+                                                                <!-- <th>Marca</th> -->
                                                                 <th>Sucursal</th>
                                                                 <th>Ambiente</th>
                                                                 <th><i class="fa fa-cogs"></i></th>

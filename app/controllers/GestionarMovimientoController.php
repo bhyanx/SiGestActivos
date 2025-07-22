@@ -33,19 +33,19 @@ switch ($action) {
         break;
 
     // Registrar solo el movimiento principal (sin detalles)
-    case 'RegistrarMovimientoSolo':
+    case 'RegistrarMovimiento':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $data = [
-                    'idTipoMovimiento' => $_POST['IdTipo'],
-                    'idAutorizador' => $_POST['autorizador'],
-                    'idSucursalOrigen' => $_SESSION['cod_UnidadNeg'],
-                    'idSucursalDestino' => $_POST['sucursal_destino'],
-                    'idEmpresaOrigen' => $_SESSION['cod_empresa'],
-                    'idEmpresaDestino' => $_POST['cod_empresa'],
-                    'observaciones' => $_POST['observacion'] ?? ''
+                    'idTipoMovimiento' => $_POST['idTipoMovimiento'],
+                    'idAutorizador' => $_POST['idAutorizador'],
+                    'idEmpresa' => $_SESSION['cod_empresa'],
+                    'observaciones' => $_POST['observaciones'] ?? '',
+                    'userMod' => $_SESSION['usuario']
                 ];
+
                 $resultado = $movimientos->crearMovimientoConCodigo($data);
+
                 echo json_encode([
                     'status' => true,
                     'idMovimiento' => $resultado['idMovimiento'],
@@ -54,11 +54,68 @@ switch ($action) {
             } catch (Exception $e) {
                 echo json_encode([
                     'status' => false,
-                    'message' => 'Error al registrar el movimiento: ' . $e->getMessage()
+                    'message' => $e->getMessage()
                 ]);
             }
         }
         break;
+
+    case 'AgregarDetalleMovimiento':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $detalle = [
+                    'idMovimiento' => $_POST['idMovimiento'],
+                    'idActivo' => $_POST['idActivo'],
+                    'idTipoMovimiento' => $_POST['idTipoMovimiento'],
+                    'idAmbienteNuevo' => $_POST['idAmbienteNuevo'],
+                    'idResponsableNuevo' => $_POST['idResponsableNuevo'],
+                    'idAutorizador' => $_POST['idAutorizador'],
+                    'userMod' => $_SESSION['usuario']
+                ];
+
+                $movimientos->crearDetalleMovimiento($detalle);
+
+                echo json_encode(['status' => true]);
+            } catch (Exception $e) {
+                echo json_encode(['status' => false, 'message' => $e->getMessage()]);
+            }
+        }
+        break;
+
+
+
+    case 'RegistrarMovimientoActivos':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $ids = isset($_POST['activos']) ? json_decode($_POST['activos'], true) : [];
+                if (!is_array($ids) || empty($ids)) {
+                    throw new Exception("No se recibieron activos válidos.");
+                }
+
+                $codMovimiento = $movimientos->registrarMovimientoActivos(
+                    $ids,
+                    $_POST['idAmbienteDestino'],
+                    $_POST['idResponsableDestino'],
+                    $_POST['motivo'],
+                    $_SESSION['usuario'], // usuario logueado
+                    $_SESSION['cod_empresa'],
+                    $_SESSION['cod_UnidadNeg']
+                );
+
+                echo json_encode([
+                    'status' => true,
+                    'mensaje' => 'Movimiento registrado correctamente.',
+                    'codigoMovimiento' => $codMovimiento
+                ]);
+            } catch (Exception $e) {
+                echo json_encode([
+                    'status' => false,
+                    'mensaje' => 'Error: ' . $e->getMessage()
+                ]);
+            }
+        }
+        break;
+
 
     // Agregar detalle (activo) al movimiento
     case 'AgregarDetalle':
@@ -158,7 +215,7 @@ switch ($action) {
             $combos['sucursales'] = '<option value="">Seleccione</option>';
             $unidadNegocioActual = $_SESSION['cod_UnidadNeg'];
             $nombreSucursalActual = '';
-            
+
             foreach ($sucursales as $row) {
                 if ($row['cod_UnidadNeg'] == $unidadNegocioActual) {
                     $combos['sucursales'] .= "<option value='{$row['cod_UnidadNeg']}' selected>{$row['Nombre_local']}</option>";
@@ -211,7 +268,7 @@ switch ($action) {
                 if (!$idMovimiento) {
                     throw new Exception("ID de movimiento no proporcionado");
                 }
-                
+
                 $resultado = $movimientos->anularMovimiento($idMovimiento);
                 echo json_encode([
                     'status' => true,
@@ -233,7 +290,7 @@ switch ($action) {
             if (!$idMovimiento) {
                 throw new Exception("ID de movimiento no proporcionado");
             }
-            
+
             $historial = $movimientos->obtenerHistorialMovimiento($idMovimiento);
             echo json_encode([
                 'status' => true,

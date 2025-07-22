@@ -12,89 +12,67 @@ class GestionarMovimientos
 
     //! REGISTRAR MOVIMIENTO CON PROCEDIMIENTOS ALMACENADOS (escritura diferente)
 
-    public function crearMovimiento($data)
+    public function crearMovimientoConCodigo($data)
     {
         try {
-            $sql = "INSERT INTO tMovimientos (
-                FechaMovimiento, 
-                idTipoMovimiento, 
-                idAutorizador, 
-                idSucursalOrigen, 
-                idSucursalDestino,
-                idEmpresaDestino,
-                observaciones
-            ) VALUES (
-                GETDATE(), 
-                :idTipoMovimiento, 
-                :idAutorizador, 
-                :idSucursalOrigen, 
-                :idSucursalDestino,
-                :idEmpresaDestino,
-                :observaciones
-            )";
+            $sql = "DECLARE @nuevoIdMovimiento INT;
+                DECLARE @nuevoCodMovimiento VARCHAR(20);
+
+                EXEC sp_CrearMovimiento 
+                    @idTipoMovimiento = :idTipoMovimiento,
+                    @idAutorizador = :idAutorizador,
+                    @idEmpresa = :idEmpresa,
+                    @observaciones = :observaciones,
+                    @userMod = :userMod,
+                    @nuevoIdMovimiento = @nuevoIdMovimiento OUTPUT,
+                    @nuevoCodMovimiento = @nuevoCodMovimiento OUTPUT;
+
+                SELECT @nuevoIdMovimiento AS idMovimiento, @nuevoCodMovimiento AS codMovimiento;";
 
             $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':idTipoMovimiento', $data['idTipoMovimiento']);
-            $stmt->bindParam(':idAutorizador', $data['idAutorizador']);
-            $stmt->bindParam(':idSucursalOrigen', $data['idSucursalOrigen']);
-            $stmt->bindParam(':idSucursalDestino', $data['idSucursalDestino']);
-            $stmt->bindParam(':idEmpresaDestino', $data['idEmpresaDestino']);
-            $stmt->bindParam(':observaciones', $data['observaciones']);
+
+            $stmt->bindParam(':idTipoMovimiento', $data['idTipoMovimiento'], PDO::PARAM_INT);
+            $stmt->bindParam(':idAutorizador', $data['idAutorizador'], PDO::PARAM_STR);
+            $stmt->bindParam(':idEmpresa', $data['idEmpresa'], PDO::PARAM_INT);
+            $stmt->bindParam(':observaciones', $data['observaciones'], PDO::PARAM_STR);
+            $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
 
             $stmt->execute();
-            return $this->db->lastInsertId();
-        } catch (\PDOException $e) {
-            error_log("Error in registrarMovimiento: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
-            throw $e;
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Error al crear movimiento: " . $e->getMessage());
         }
     }
 
-    public function crearDetalleMovimiento($data)
+
+    public function crearDetalleMovimiento($detalle)
     {
         try {
             $sql = "EXEC sp_RegistrarDetalleMovimiento 
-                @IdMovimiento = :idMovimiento,
-                @IdActivo = :idActivo,
-                @IdTipo_Movimiento = :idTipoMovimiento,
-                @IdEmpresaDestino = :idEmpresaDestino,
-                @IdSucursal_Nueva = :idSucursalNueva,
-                @IdAmbiente_Nueva = :idAmbienteNueva,
-                @IdResponsable_Nueva = :idResponsableNueva,
-                @IdActivoPadre_Nuevo = :idActivoPadreNuevo,
-                @IdAutorizador = :idAutorizador";
+                    @IdMovimiento = :idMovimiento,
+                    @IdActivo = :idActivo,
+                    @IdTipo_Movimiento = :idTipoMovimiento,
+                    @IdAmbiente_Nuevo = :idAmbienteNuevo,
+                    @IdResponsable_Nuevo = :idResponsableNuevo,
+                    @IdAutorizador = :idAutorizador,
+                    @UserMod = :userMod";
 
             $stmt = $this->db->prepare($sql);
 
-            // Asegurar que los valores sean del tipo correcto
-            $idMovimiento = (int)$data['IdMovimiento'];
-            $idActivo = (int)$data['IdActivo'];
-            $idTipoMovimiento = (int)$data['IdTipo_Movimiento'];
-            $idEmpresaDestino = (int)$data['IdEmpresaDestino'];
-            $idSucursalNueva = (int)$data['IdSucursal_Nueva'];
-            $idAmbienteNueva = (int)$data['IdAmbiente_Nueva'];
-            $idResponsableNueva = (string)$data['IdResponsable_Nueva'];
-            $idActivoPadreNuevo = $data['IdActivoPadre_Nuevo'] ? (int)$data['IdActivoPadre_Nuevo'] : null;
-            $idAutorizador = (int)$data['IdAutorizador'];
+            $stmt->bindParam(':idMovimiento', $detalle['idMovimiento'], PDO::PARAM_INT);
+            $stmt->bindParam(':idActivo', $detalle['idActivo'], PDO::PARAM_INT);
+            $stmt->bindParam(':idTipoMovimiento', $detalle['idTipoMovimiento'], PDO::PARAM_INT);
+            $stmt->bindParam(':idAmbienteNuevo', $detalle['idAmbienteNuevo'], PDO::PARAM_INT);
+            $stmt->bindParam(':idResponsableNuevo', $detalle['idResponsableNuevo'], PDO::PARAM_STR);
+            $stmt->bindParam(':idAutorizador', $detalle['idAutorizador'], PDO::PARAM_STR);
+            $stmt->bindParam(':userMod', $detalle['userMod'], PDO::PARAM_STR);
 
-            $stmt->bindParam(':idMovimiento', $idMovimiento, PDO::PARAM_INT);
-            $stmt->bindParam(':idActivo', $idActivo, PDO::PARAM_INT);
-            $stmt->bindParam(':idTipoMovimiento', $idTipoMovimiento, PDO::PARAM_INT);
-            $stmt->bindParam(':idEmpresaDestino', $idEmpresaDestino, PDO::PARAM_INT);
-            $stmt->bindParam(':idSucursalNueva', $idSucursalNueva, PDO::PARAM_INT);
-            $stmt->bindParam(':idAmbienteNueva', $idAmbienteNueva, PDO::PARAM_INT);
-            $stmt->bindParam(':idResponsableNueva', $idResponsableNueva, PDO::PARAM_STR);
-            $stmt->bindParam(':idActivoPadreNuevo', $idActivoPadreNuevo, PDO::PARAM_INT);
-            $stmt->bindParam(':idAutorizador', $idAutorizador, PDO::PARAM_INT);
-
-            if (!$stmt->execute()) {
-                throw new PDOException("Error al ejecutar la consulta: " . implode(" ", $stmt->errorInfo()));
-            }
-
-            return true;
+            $stmt->execute();
         } catch (PDOException $e) {
-            throw new Exception("Error al crear el detalle del movimiento: " . $e->getMessage());
+            throw new Exception("Error al registrar detalle de movimiento: " . $e->getMessage());
         }
     }
+
 
     public function listarDetalleMovimientos($filtros = [])
     {
@@ -150,21 +128,15 @@ class GestionarMovimientos
     {
         try {
             $sql = "
-            SELECT 
-                a.IdActivo,
-                a.CodigoActivo,
-                a.NombreActivoVisible,
-                a.Marca,
-                s.Nombre_local AS Sucursal,
-                amb.nombre AS Ambiente,
-                a.NumeroSerie
+            SELECT a.IdActivo, a.Serie, a.codigo, a.NombreActivo, s.Nombre_local AS Sucursal
+            ,amb.nombre AS Ambiente
             FROM vActivos a
             INNER JOIN vUnidadesdeNegocio s ON a.IdSucursal = s.cod_UnidadNeg
             INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
-            WHERE a.IdEmpresa = ? 
+            WHERE a.IdEmpresa = ?
             AND a.IdSucursal = ?
-            AND a.idEstado = 1
-            ORDER BY a.NombreActivoVisible";
+            AND a.idEstado <> 3
+            ORDER BY a.NombreActivo";
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idEmpresa, PDO::PARAM_INT);
@@ -284,90 +256,134 @@ class GestionarMovimientos
         }
     }
 
-    public function crearMovimientoConCodigo($data)
+    // public function crearMovimientoConCodigo($data)
+    // {
+    //     try {
+    //         $sql = "DECLARE @nuevoIdMovimiento INT;
+    //                 DECLARE @nuevoCodMovimiento VARCHAR(20);
+
+    //                 EXEC sp_CrearMovimiento 
+    //                     @idTipoMovimiento = :idTipoMovimiento,
+    //                     @idAutorizador = :idAutorizador,
+    //                     @idSucursalOrigen = :idSucursalOrigen,
+    //                     @idSucursalDestino = :idSucursalDestino,
+    //                     @idEmpresaOrigen = :idEmpresaOrigen,
+    //                     @idEmpresaDestino = :idEmpresaDestino,
+    //                     @observaciones = :observaciones,
+    //                     @nuevoIdMovimiento = @nuevoIdMovimiento OUTPUT,
+    //                     @nuevoCodMovimiento = @nuevoCodMovimiento OUTPUT;
+
+    //                 SELECT @nuevoIdMovimiento as idMovimiento, @nuevoCodMovimiento as codMovimiento;";
+
+    //         $stmt = $this->db->prepare($sql);
+
+    //         // Asegurar que los valores sean del tipo correcto
+    //         $idTipoMovimiento = (int)$data['idTipoMovimiento'];
+    //         $idAutorizador = (int)$data['idAutorizador'];
+    //         $idSucursalOrigen = (int)$data['idSucursalOrigen'];
+    //         $idSucursalDestino = (int)$data['idSucursalDestino'];
+    //         $idEmpresaOrigen = (int)$data['idEmpresaOrigen'];
+    //         $idEmpresaDestino = (int)$data['idEmpresaDestino'];
+    //         $observaciones = (string)$data['observaciones'];
+
+    //         $stmt->bindParam(':idTipoMovimiento', $idTipoMovimiento, PDO::PARAM_INT);
+    //         $stmt->bindParam(':idAutorizador', $idAutorizador, PDO::PARAM_INT);
+    //         $stmt->bindParam(':idSucursalOrigen', $idSucursalOrigen, PDO::PARAM_INT);
+    //         $stmt->bindParam(':idSucursalDestino', $idSucursalDestino, PDO::PARAM_INT);
+    //         $stmt->bindParam(':idEmpresaOrigen', $idEmpresaOrigen, PDO::PARAM_INT);
+    //         $stmt->bindParam(':idEmpresaDestino', $idEmpresaDestino, PDO::PARAM_INT);
+    //         $stmt->bindParam(':observaciones', $observaciones, PDO::PARAM_STR);
+
+    //         if (!$stmt->execute()) {
+    //             throw new PDOException("Error al ejecutar la consulta: " . implode(" ", $stmt->errorInfo()));
+    //         }
+
+    //         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+    //         return [
+    //             'idMovimiento' => $resultado['idMovimiento'],
+    //             'codMovimiento' => $resultado['codMovimiento']
+    //         ];
+    //     } catch (PDOException $e) {
+    //         throw new Exception("Error al crear el movimiento: " . $e->getMessage());
+    //     }
+    // }
+
+    public function registrarMovimientoActivos($idsActivos, $idAmbienteDestino, $idResponsableDestino, $motivo, $userMod, $idEmpresaDestino, $idSucursalDestino)
     {
         try {
-            $sql = "DECLARE @nuevoIdMovimiento INT;
-                    DECLARE @nuevoCodMovimiento VARCHAR(20);
-                    
-                    EXEC sp_CrearMovimiento 
-                        @idTipoMovimiento = :idTipoMovimiento,
-                        @idAutorizador = :idAutorizador,
-                        @idSucursalOrigen = :idSucursalOrigen,
-                        @idSucursalDestino = :idSucursalDestino,
-                        @idEmpresaOrigen = :idEmpresaOrigen,
-                        @idEmpresaDestino = :idEmpresaDestino,
-                        @observaciones = :observaciones,
-                        @nuevoIdMovimiento = @nuevoIdMovimiento OUTPUT,
-                        @nuevoCodMovimiento = @nuevoCodMovimiento OUTPUT;
-                    
-                    SELECT @nuevoIdMovimiento as idMovimiento, @nuevoCodMovimiento as codMovimiento;";
+            // Construir el XML de activos
+            $xml = "<Activos>";
+            foreach ($idsActivos as $id) {
+                $xml .= "<Id>$id</Id>";
+            }
+            $xml .= "</Activos>";
+
+            // Consulta SQL
+            $sql = "DECLARE @nuevoCodMovimiento VARCHAR(20);
+                EXEC sp_RegistrarMovimientoActivo
+                    @pXmlActivos = :xmlActivos,
+                    @pIdAmbienteDestino = :idAmbienteDestino,
+                    @pIdResponsableDestino = :idResponsableDestino,
+                    @pMotivo = :motivo,
+                    @pUserMod = :userMod,
+                    @pIdEmpresaDestino = :idEmpresaDestino,
+                    @pIdSucursalDestino = :idSucursalDestino,
+                    @nuevoCodMovimiento = @nuevoCodMovimiento OUTPUT;
+                SELECT @nuevoCodMovimiento AS codMovimiento;";
 
             $stmt = $this->db->prepare($sql);
 
-            // Asegurar que los valores sean del tipo correcto
-            $idTipoMovimiento = (int)$data['idTipoMovimiento'];
-            $idAutorizador = (int)$data['idAutorizador'];
-            $idSucursalOrigen = (int)$data['idSucursalOrigen'];
-            $idSucursalDestino = (int)$data['idSucursalDestino'];
-            $idEmpresaOrigen = (int)$data['idEmpresaOrigen'];
-            $idEmpresaDestino = (int)$data['idEmpresaDestino'];
-            $observaciones = (string)$data['observaciones'];
-
-            $stmt->bindParam(':idTipoMovimiento', $idTipoMovimiento, PDO::PARAM_INT);
-            $stmt->bindParam(':idAutorizador', $idAutorizador, PDO::PARAM_INT);
-            $stmt->bindParam(':idSucursalOrigen', $idSucursalOrigen, PDO::PARAM_INT);
-            $stmt->bindParam(':idSucursalDestino', $idSucursalDestino, PDO::PARAM_INT);
-            $stmt->bindParam(':idEmpresaOrigen', $idEmpresaOrigen, PDO::PARAM_INT);
+            $stmt->bindParam(':xmlActivos', $xml, PDO::PARAM_STR);
+            $stmt->bindParam(':idAmbienteDestino', $idAmbienteDestino, PDO::PARAM_INT);
+            $stmt->bindParam(':idResponsableDestino', $idResponsableDestino, PDO::PARAM_STR);
+            $stmt->bindParam(':motivo', $motivo, PDO::PARAM_STR);
+            $stmt->bindParam(':userMod', $userMod, PDO::PARAM_STR);
             $stmt->bindParam(':idEmpresaDestino', $idEmpresaDestino, PDO::PARAM_INT);
-            $stmt->bindParam(':observaciones', $observaciones, PDO::PARAM_STR);
+            $stmt->bindParam(':idSucursalDestino', $idSucursalDestino, PDO::PARAM_INT);
 
-            if (!$stmt->execute()) {
-                throw new PDOException("Error al ejecutar la consulta: " . implode(" ", $stmt->errorInfo()));
-            }
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-            return [
-                'idMovimiento' => $resultado['idMovimiento'],
-                'codMovimiento' => $resultado['codMovimiento']
-            ];
+            return $result['codMovimiento'];
         } catch (PDOException $e) {
-            throw new Exception("Error al crear el movimiento: " . $e->getMessage());
+            throw new Exception("Error al registrar movimiento de activos: " . $e->getMessage());
         }
     }
+
+
 
     public function listarMovimientos($filtros = [])
     {
         try {
             $sql = "SELECT DISTINCT
-                    m.idMovimiento, 
-                    m.CodMovimiento, 
-                    tm.nombre as tipoMovimiento, 
-                    s1.Nombre_local as sucursalOrigen, 
-                    s2.Nombre_local as sucursalDestino, 
-                    e.Razon_empresa as empresaDestino, 
-                    u.NombreTrabajador as autorizador, 
+                    m.idMovimiento,
+                    m.codigoMovimiento,
+                    tm.nombre AS tipoMovimiento,
                     m.fechaMovimiento,
-                    m.observaciones
+                    m.userMod AS usuarioRegistro,
+                    MAX(e.Razon_empresa) AS empresaDestino,
+                    MAX(s.Nombre_local) AS sucursalDestino,
+                    MAX(u.NombreTrabajador) AS autorizador,
+                    m.fechaMovimiento
                 FROM tMovimientos m
                 INNER JOIN tTipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento
-                INNER JOIN vUnidadesdeNegocio s1 ON m.idSucursalOrigen = s1.cod_UnidadNeg
-                INNER JOIN vUnidadesdeNegocio s2 ON m.idSucursalDestino = s2.cod_UnidadNeg
-                INNER JOIN vEmpresas e ON m.idEmpresaDestino = e.cod_empresa
-                INNER JOIN vEmpleados u ON m.idAutorizador = u.codTrabajador
+                INNER JOIN tDetalleMovimiento dm ON dm.idMovimiento = m.idMovimiento
+                LEFT JOIN vEmpleados au ON dm.idAutorizador = au.codTrabajador
+                LEFT JOIN vEmpleados u ON au.codTrabajador = u.codTrabajador
+                LEFT JOIN tUbicacionActivo ua ON ua.idActivo = dm.idActivo AND ua.esActual = 1
+                LEFT JOIN vEmpresas e ON ua.idEmpresa = e.cod_empresa
+                LEFT JOIN vUnidadesdeNegocio s ON ua.idSucursal = s.cod_UnidadNeg
                 WHERE 1=1";
 
             $params = [];
 
             if (!empty($filtros['idEmpresa'])) {
-                $sql .= " AND (m.idEmpresaDestino = ? OR s1.Cod_Empresa = ?)";
-                $params[] = $filtros['idEmpresa'];
+                $sql .= " AND ua.idEmpresa = ?";
                 $params[] = $filtros['idEmpresa'];
             }
 
             if (!empty($filtros['idSucursal'])) {
-                $sql .= " AND (m.idSucursalOrigen = ? OR m.idSucursalDestino = ?)";
-                $params[] = $filtros['idSucursal'];
+                $sql .= " AND ua.idSucursal = ?";
                 $params[] = $filtros['idSucursal'];
             }
 
@@ -375,13 +391,14 @@ class GestionarMovimientos
                 $sql .= " AND m.idTipoMovimiento = ?";
                 $params[] = $filtros['tipo'];
             }
-                                                                                                                                                                                                                                                                        
+
             if (!empty($filtros['fecha'])) {
                 $sql .= " AND CONVERT(date, m.fechaMovimiento) = ?";
                 $params[] = $filtros['fecha'];
             }
 
-            $sql .= " ORDER BY m.fechaMovimiento DESC";
+            $sql .= " GROUP BY m.idMovimiento, m.codigoMovimiento, tm.nombre, m.fechaMovimiento, m.userMod
+                  ORDER BY m.fechaMovimiento DESC";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -390,6 +407,7 @@ class GestionarMovimientos
             throw new Exception("Error al listar movimientos: " . $e->getMessage());
         }
     }
+
 
     public function obtenerDetallesMovimiento($idMovimiento)
     {
@@ -466,7 +484,7 @@ ORDER BY m.fechaMovimiento DESC";
     {
         try {
             $sql = "SELECT * FROM vEmpresas WHERE cod_empresa = ?";
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idEmpresa, PDO::PARAM_INT);
             $stmt->execute();
@@ -480,7 +498,7 @@ ORDER BY m.fechaMovimiento DESC";
     {
         try {
             $sql = "SELECT idTipoMovimiento, nombre FROM tTipoMovimiento ORDER BY nombre";
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
