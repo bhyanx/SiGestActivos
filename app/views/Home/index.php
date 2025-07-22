@@ -98,7 +98,7 @@ if (!isset($_SESSION["IdRol"])) {
                 <div class="col-6" id="divtblRegistros">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fa fa-list"></i> Lista de Activos Registrados</h3>
+                            <h3 class="card-title"><i class="fa fa-list"></i> Listado de ingresos Recientes</h3>
                         </div>
                         <div class="dataTables_wrapper dt-bootstrap4">
                             <div class="card-body">
@@ -114,16 +114,17 @@ if (!isset($_SESSION["IdRol"])) {
                                                     <th>Id Activo</th>
                                                     <th>Código</th>
                                                     <th>Serie</th>
-                                                    <th>Descripción</th>
-                                                    <th>Marca</th>
-                                                    <th>Sucursal</th>
-                                                    <th>Proveedor</th>
+                                                    <th>Nombre</th>
+                                                    <th>idSucursal</th>
+                                                    <th>idProveedor</th>
                                                     <th>Estado</th>
                                                     <th>Valor</th>
                                                     <th>Responsable</th>
-                                                    <th>Nombre Res.</th>
-                                                    <th>Art. Relacionados</th>
-                                                    <th>Act. Relacionados</th>
+                                                    <th>idarticulo</th>
+                                                    <th>idAmbiente</th>
+                                                    <th>IdCategoria</th>
+                                                    <th>FechaAdquisición</th>
+                                                    <th>Observaciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody></tbody>
@@ -133,16 +134,17 @@ if (!isset($_SESSION["IdRol"])) {
                                                     <th>Id Activo</th>
                                                     <th>Código</th>
                                                     <th>Serie</th>
-                                                    <th>Descripción</th>
-                                                    <th>Marca</th>
-                                                    <th>Sucursal</th>
-                                                    <th>Proveedor</th>
+                                                    <th>Nombre</th>
+                                                    <th>idSucursal</th>
+                                                    <th>idProveedor</th>
                                                     <th>Estado</th>
                                                     <th>Valor</th>
                                                     <th>Responsable</th>
-                                                    <th>Nombre Res.</th>
-                                                    <th>Art. Relacionados</th>
-                                                    <th>Act. Relacionados</th>
+                                                    <th>idarticulo</th>
+                                                    <th>idAmbiente</th>
+                                                    <th>IdCategoria</th>
+                                                    <th>FechaAdquisición</th>
+                                                    <th>Observaciones</th>
                                                 </tr>
                                             </tfoot>
                                         </table>

@@ -2286,27 +2286,6 @@ function init() {
     });
   }
 
-  // function cargarArticulosPorDocIngreso(idDoc, callback) {
-  //   $.ajax({
-  //     url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc",
-  //     type: "POST",
-  //     data: { IdDocIngresoAlm: idDoc },
-  //     dataType: "json",
-  //     success: (res) => {
-  //       if (res.status) {
-  //         let options = '<option value="">Seleccione un artículo</option>';
-  //         res.data.forEach((item) => {
-  //           options += `<option value="${item.IdArticulo}">${item.Nombre}</option>`;
-  //         });
-  //         $("#IdArticulo").html(options);
-  //         if (typeof callback === "function") {
-  //           callback();
-  //         }
-  //       }
-  //     },
-  //   });
-  // }
-
   // Modificar el evento submit del formulario
   $("#frmEditarActivo").on("submit", function (e) {
     e.preventDefault();
@@ -2896,97 +2875,6 @@ function listarActivosTable() {
   });
 }
 
-// function listarActivosTableModal(articulo) {
-//   $("#tblTodosActivos").DataTable({
-//     aProcessing: true,
-//     aServerSide: true,
-//     layout: {
-//       topStart: {
-//         buttons: [
-//           {
-//             extend: "excelHtml5",
-//             title: "Listado Activos",
-//             text: "<i class='fas fa-file-excel'></i> Exportar",
-//             autoFilter: true,
-//             sheetName: "Data",
-//             exportOptions: {
-//               columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-//             },
-//           },
-//           "pageLength",
-//           "colvis",
-//         ],
-//       },
-//       bottom: "paging",
-//       bottomStart: null,
-//       bottomEnd: null,
-//     },
-//     lengthChange: false,
-//     colReorder: true,
-//     autoWidth: false,
-//     destroy: true,
-//     ajax: {
-//       url: "../../controllers/GestionarActivosController.php?action=ConsultarActivosRelacionados",
-//       type: "POST",
-//       data: {
-//         IdArticulo: articulo.IdArticulo,
-//         IdActivo: articulo.IdActivo,
-//       },
-//       dataType: "json",
-//       dataSrc: function (json) {
-//         return json || [];
-//       },
-//     },
-//     columns: [
-//       {
-//         data: null,
-//         render: (data, type, row) =>
-//           `<div class="btn-group">
-//             <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-//             <i class="fas fa-cog"></i>
-//             </button>
-//             <div class="dropdown-menu">
-//               <button class="dropdown-item btnEditarActivo" type="button">
-//                 <i class="fas fa-edit text-warning"></i> Editar
-//               </button>
-//               <button class="dropdown-item btnAsignarResponsable" type="button">
-//                 <i class="fas fa-user-plus text-info"></i> Asignar Responsable
-//               </button>
-//               <button class="dropdown-item btnVerHistorial" type="button">
-//                 <i class="fas fa-history text-primary"></i> Ver Historial
-//               </button>
-//               <button class="dropdown-item btnImprimirActivo" type="button">
-//                 <i class="fas fa-print text-secondary"></i> Imprimir Activo
-//               </button>
-//               <button class="dropdown-item btnDarBaja" type="button">
-//                 <i class="fas fa-ban text-danger"></i> Dar de Baja
-//               </button>
-//             </div>
-//         </div>`,
-//       },
-//       { data: "idActivo", visible: false, searchable: false },
-//       { data: "CodigoActivo" },
-//       { data: "NumeroSerie" },
-//       { data: "NombreArticulo" },
-//       { data: "MarcaArticulo" },
-//       { data: "Sucursal" },
-//       { data: "Proveedor" },
-//       { data: "Estado" },
-//       { data: "valorAdquisicion" },
-//       { data: "idResponsable" },
-//       { data: "idArticulo", visible: false },
-//       { data: "idAmbiente", visible: false },
-//       { data: "idCategoria", visible: false },
-//       { data: "DocIngresoAlmacen", visible: false },
-//       { data: "fechaAdquisicion", visible: false },
-//       { data: "observaciones", visible: false },
-//     ],
-//     language: {
-//       url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
-//     },
-//   });
-// }
-
 $(document).on("click", ".btnVerDetalle", function () {
   // Abrir el modal
   $("#modalListarTodosActivos").modal("show");
@@ -3018,11 +2906,6 @@ $(document).on("click", ".btnImprimirActivo", function () {
     return;
   }
 
-  // Abrir el reporte en una nueva ventanaMore actions
-  // window.open(
-  //   `/app/views/Reportes/index.php?idActivo=${datos.idActivo}`,
-  //   "_blank"
-  // );
   window.open(
     `/app/views/Reportes/reporteActivo.php?idActivo=${datos.idActivo}`,
     "_blank"
