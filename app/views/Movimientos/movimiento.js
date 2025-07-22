@@ -181,6 +181,10 @@ function init() {
       var autorizadorNombre = $("#CodAutorizador option:selected").text();
       $("#IdAutorizador").val($("#CodAutorizador").val());
       $("#lblautorizador").text("Autorizador: " + autorizadorNombre);
+      
+      // Transferir valores de empresa y sucursal destino para usar en el detalle
+      window.idempresaDestino = $("#IdEmpresaDestino").val();
+      window.idsucursalDestino = $("#IdSucursalDestino").val();
 
       // Opcional: limpiar el formulario
       $("#frmMovimiento")[0].reset();
@@ -603,7 +607,18 @@ function init() {
     const formDataMovimiento = new FormData();
     formDataMovimiento.append("idTipoMovimiento", $("#IdTipoMovimiento").val());
     formDataMovimiento.append("idAutorizador", $("#IdAutorizador").val());
+    formDataMovimiento.append("idEmpresaDestino", window.idempresaDestino);
+    formDataMovimiento.append("idSucursalDestino", window.idsucursalDestino);
     formDataMovimiento.append("observaciones", `Movimiento de ${$("#tbldetalleactivomov tbody tr").length} activos`);
+
+    // Depuración: mostrar datos que se enviarán
+    console.log("Datos a enviar cabecera:", {
+      idTipoMovimiento: $("#IdTipoMovimiento").val(),
+      idAutorizador: $("#IdAutorizador").val(),
+      idEmpresaDestino: window.idempresaDestino,
+      idSucursalDestino: window.idsucursalDestino,
+      observaciones: `Movimiento de ${$("#tbldetalleactivomov tbody tr").length} activos`
+    });
 
     $.ajax({
       url: "../../controllers/GestionarMovimientoController.php?action=RegistrarMovimiento",
@@ -672,15 +687,18 @@ function init() {
       const nombreActivo = fila.find("td:eq(2)").text();
       const detalleData = new FormData();
 
-      detalleData.append("idMovimiento", idMovimiento);
-      detalleData.append("idActivo", fila.find("td:eq(0)").text());
-      detalleData.append("idTipoMovimiento", $("#IdTipoMovimiento").val());
-      detalleData.append("idAmbienteNuevo", fila.find(".ambiente-destino").val());
-      detalleData.append("idResponsableNuevo", fila.find(".responsable-destino").val());
-      detalleData.append("idAutorizador", $("#IdAutorizador").val());
+      detalleData.append("IdMovimiento", idMovimiento);
+      detalleData.append("IdActivo", fila.find("td:eq(0)").text());
+      detalleData.append("IdTipo_Movimiento", $("#IdTipoMovimiento").val());
+      detalleData.append("IdAmbiente_Nueva", fila.find(".ambiente-destino").val());
+      detalleData.append("IdResponsable_Nueva", fila.find(".responsable-destino").val());
+      detalleData.append("IdAutorizador", $("#IdAutorizador").val());
+      detalleData.append("idSucursalDestino", window.idsucursalDestino || "");
+      detalleData.append("idEmpresaDestino", window.idempresaDestino || "");
+      detalleData.append("IdActivoPadre_Nuevo", null);
 
       $.ajax({
-        url: "../../controllers/GestionarMovimientoController.php?action=AgregarDetalleMovimiento",
+        url: "../../controllers/GestionarMovimientoController.php?action=AgregarDetalle",
         type: "POST",
         data: detalleData,
         contentType: false,

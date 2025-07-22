@@ -39,7 +39,10 @@ switch ($action) {
                 $data = [
                     'idTipoMovimiento' => $_POST['idTipoMovimiento'],
                     'idAutorizador' => $_POST['idAutorizador'],
-                    'idEmpresa' => $_SESSION['cod_empresa'],
+                    'idEmpresaOrigen' => $_SESSION['cod_empresa'],
+                    'idSucursalOrigen' => $_SESSION['cod_UnidadNeg'],
+                    'idEmpresaDestino' => $_POST['idEmpresaDestino'],
+                    'idSucursalDestino' => $_POST['idSucursalDestino'],
                     'observaciones' => $_POST['observaciones'] ?? '',
                     'userMod' => $_SESSION['usuario']
                 ];
@@ -60,77 +63,81 @@ switch ($action) {
         }
         break;
 
-    case 'AgregarDetalleMovimiento':
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            try {
-                $detalle = [
-                    'idMovimiento' => $_POST['idMovimiento'],
-                    'idActivo' => $_POST['idActivo'],
-                    'idTipoMovimiento' => $_POST['idTipoMovimiento'],
-                    'idAmbienteNuevo' => $_POST['idAmbienteNuevo'],
-                    'idResponsableNuevo' => $_POST['idResponsableNuevo'],
-                    'idAutorizador' => $_POST['idAutorizador'],
-                    'userMod' => $_SESSION['usuario']
-                ];
-
-                $movimientos->crearDetalleMovimiento($detalle);
-
-                echo json_encode(['status' => true]);
-            } catch (Exception $e) {
-                echo json_encode(['status' => false, 'message' => $e->getMessage()]);
-            }
-        }
-        break;
-
-
-
-    case 'RegistrarMovimientoActivos':
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            try {
-                $ids = isset($_POST['activos']) ? json_decode($_POST['activos'], true) : [];
-                if (!is_array($ids) || empty($ids)) {
-                    throw new Exception("No se recibieron activos válidos.");
-                }
-
-                $codMovimiento = $movimientos->registrarMovimientoActivos(
-                    $ids,
-                    $_POST['idAmbienteDestino'],
-                    $_POST['idResponsableDestino'],
-                    $_POST['motivo'],
-                    $_SESSION['usuario'], // usuario logueado
-                    $_SESSION['cod_empresa'],
-                    $_SESSION['cod_UnidadNeg']
-                );
-
-                echo json_encode([
-                    'status' => true,
-                    'mensaje' => 'Movimiento registrado correctamente.',
-                    'codigoMovimiento' => $codMovimiento
-                ]);
-            } catch (Exception $e) {
-                echo json_encode([
-                    'status' => false,
-                    'mensaje' => 'Error: ' . $e->getMessage()
-                ]);
-            }
-        }
-        break;
-
-
-    // Agregar detalle (activo) al movimiento
     case 'AgregarDetalle':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
+                // Recibe los datos de un solo activo
+                $data = [
+                    'idMovimiento' => $_POST['IdMovimiento'],
+                    'idActivo' => $_POST['IdActivo'],
+                    'idTipoMovimiento' => $_POST['IdTipo_Movimiento'],
+                    'idAmbienteNuevo' => $_POST['IdAmbiente_Nueva'] ?? null,
+                    'idResponsableNuevo' => $_POST['IdResponsable_Nueva'] ?? null,
+                    'idSucursalDestino' => $_POST['idSucursalDestino'],
+                    'idEmpresaDestino' => $_POST['idEmpresaDestino'],
+                    'idAutorizador' => $_POST['IdAutorizador'],
+                    'userMod' => $_SESSION['usuario']
+                ];
+
+                $movimientos->crearDetalleMovimiento($data);
+
+                echo json_encode(['status' => true]);
+            } catch (Exception $e) {
+                echo json_encode(['status' => false, 'message' => $e->getMessage()]);
+            }
+        }
+        break;
+
+
+
+
+    // case 'RegistrarMovimientoActivos':
+    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    //         try {
+    //             $ids = isset($_POST['activos']) ? json_decode($_POST['activos'], true) : [];
+    //             if (!is_array($ids) || empty($ids)) {
+    //                 throw new Exception("No se recibieron activos válidos.");
+    //             }
+
+    //             $codMovimiento = $movimientos->registrarMovimientoActivos(
+    //                 $ids,
+    //                 $_POST['idAmbienteDestino'],
+    //                 $_POST['idResponsableDestino'],
+    //                 $_POST['motivo'],
+    //                 $_SESSION['usuario'], // usuario logueado
+    //                 $_SESSION['cod_empresa'],
+    //                 $_SESSION['cod_UnidadNeg']
+    //             );
+
+    //             echo json_encode([
+    //                 'status' => true,
+    //                 'mensaje' => 'Movimiento registrado correctamente.',
+    //                 'codigoMovimiento' => $codMovimiento
+    //             ]);
+    //         } catch (Exception $e) {
+    //             echo json_encode([
+    //                 'status' => false,
+    //                 'mensaje' => 'Error: ' . $e->getMessage()
+    //             ]);
+    //         }
+    //     }
+    //     break;
+
+
+    // Agregar detalle (activo) al movimiento
+    /*case 'AgregarDetalle':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
                 $detalle = [
-                    'IdMovimiento' => $_POST['IdMovimiento'],
-                    'IdActivo' => $_POST['IdActivo'],
-                    'IdSucursal_Nueva' => $_POST['IdSucursal_Nueva'],
-                    'IdAmbiente_Nueva' => $_POST['IdAmbiente_Nueva'],
-                    'IdTipo_Movimiento' => $_POST['IdTipo_Movimiento'],
-                    'IdAutorizador' => $_POST['IdAutorizador'],
-                    'IdResponsable_Nueva' => $_POST['IdResponsable_Nueva'],
-                    'IdActivoPadre_Nuevo' => $_POST['IdActivoPadre_Nuevo'] ?? null,
-                    'IdEmpresaDestino' => $_POST['IdEmpresaDestino']
+                    'idMovimiento' => $_POST['IdMovimiento'],
+                    'idActivo' => $_POST['IdActivo'],
+                    'idTipoMovimiento' => $_POST['IdTipo_Movimiento'],
+                    'idAmbienteNuevo' => $_POST['IdAmbiente_Nueva'],
+                    'idResponsableNuevo' => $_POST['IdResponsable_Nueva'],
+                    'idSucursalDestino' => $_POST['IdSucursal_Nueva'],
+                    'idEmpresaDestino' => $_POST['IdEmpresaDestino'],
+                    'idAutorizador' => $_POST['IdAutorizador'],
+                    'userMod' => $_SESSION['usuario']
                 ];
                 $movimientos->crearDetalleMovimiento($detalle);
                 echo json_encode(['status' => true]);
@@ -138,7 +145,7 @@ switch ($action) {
                 echo json_encode(['status' => false, 'message' => $e->getMessage()]);
             }
         }
-        break;
+        break;*/
 
     // Listar activos para movimiento
     case 'ListarParaMovimiento':
@@ -334,16 +341,15 @@ switch ($action) {
         try {
             $filtros = [
                 'tipo' => $_POST['tipo'] ?? null,
-                'sucursal' => $_POST['sucursal'] ?? null,
                 'fecha' => $_POST['fecha'] ?? null,
                 'idEmpresa' => $_SESSION['cod_empresa'] ?? null,
-                'idSucursal' => $_SESSION['cod_UnidadNeg'] ?? null
+                'idSucursalOrigen' => $_SESSION['cod_UnidadNeg'] ?? null  // corregido aquí
             ];
 
-            $movimientos = $movimientos->listarMovimientos($filtros);
+            $resultado = $movimientos->listarMovimientos($filtros);
             echo json_encode([
                 'status' => true,
-                'data' => $movimientos
+                'data' => $resultado
             ]);
         } catch (Exception $e) {
             echo json_encode([
@@ -352,6 +358,7 @@ switch ($action) {
             ]);
         }
         break;
+
 
     case 'obtenerDetallesMovimiento':
         try {
