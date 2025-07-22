@@ -60,9 +60,6 @@ class GestionarMovimientos
                     @idTipoMovimiento = :idTipoMovimiento,
                     @idAmbienteNuevo = :idAmbienteNuevo,
                     @idResponsableNuevo = :idResponsableNuevo,
-                    @idSucursalDestino = :idSucursalDestino,
-                    @idEmpresaDestino = :idEmpresaDestino,
-                    @idAutorizador = :idAutorizador,
                     @userMod = :userMod";
 
             $stmt = $this->db->prepare($sql);
@@ -70,14 +67,8 @@ class GestionarMovimientos
             $stmt->bindParam(':idMovimiento', $data['idMovimiento'], PDO::PARAM_INT);
             $stmt->bindParam(':idActivo', $data['idActivo'], PDO::PARAM_INT);
             $stmt->bindParam(':idTipoMovimiento', $data['idTipoMovimiento'], PDO::PARAM_INT);
-
-            // Parámetros que pueden ser NULL
             $stmt->bindValue(':idAmbienteNuevo', $data['idAmbienteNuevo'], $data['idAmbienteNuevo'] !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
             $stmt->bindValue(':idResponsableNuevo', $data['idResponsableNuevo'], $data['idResponsableNuevo'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-
-            $stmt->bindParam(':idSucursalDestino', $data['idSucursalDestino'], PDO::PARAM_INT);
-            $stmt->bindParam(':idEmpresaDestino', $data['idEmpresaDestino'], PDO::PARAM_INT);
-            $stmt->bindParam(':idAutorizador', $data['idAutorizador'], PDO::PARAM_STR);
             $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
 
             $stmt->execute();
