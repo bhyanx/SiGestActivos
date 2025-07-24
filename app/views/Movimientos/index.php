@@ -230,8 +230,7 @@ session_start();
                     <div class="col-12" id="divregistroMovimiento">
                         <div class=" alert alert-info alert-dismissible">
                             <span id="lbldatossucmovimiento"></span>
-                            <span id="lblautorizador"></span>
-                            <span id="lblReceptor"></span>
+                            <span id="lblusuariorealizando">Usuario realizando el movimiento: <?php echo $_SESSION['PrimerNombre'] . ' ' . $_SESSION['ApellidoPaterno'] . ' ' . $_SESSION['ApellidoMaterno']; ?></span>
                             <button type="button" class="close btn" id="btnchangedatasucmovimiento"><i class="fas fa-undo-alt"></i></button>
                             <input type="hidden" name="IdTipoMovimiento" id="IdTipoMovimiento">
                             <input type="hidden" name="IdAutorizador" id="IdAutorizador">
@@ -255,16 +254,16 @@ session_start();
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="row">
-                                                    <!-- <div class="col-md-5">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="usuario_origen">Autorizador:</label>
+                                                            <input type="text" class="form-control" name="usuario_origen" id="usuario_origen" readonly>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label for="sucursal_origen">Sucursal origen:</label>
-                                                            <input class="form-control" name="sucursal_origen" id="sucursal_origen" readonly>
-                                                        </div>
-                                                    </div> -->
-                                                    <div class="col-md-7">
-                                                        <div class="form-group">
-                                                            <label for="usuario_origen">Usuario realizando el movimiento:</label>
-                                                            <input type="text" class="form-control" name="usuario_origen" id="usuario_origen" value="<?php echo $_SESSION['PrimerNombre'] . ' ' . $_SESSION['ApellidoPaterno'] . ' ' . $_SESSION['ApellidoMaterno']; ?>" readonly>
+                                                            <input class="form-control" name="sucursal_origen" id="sucursal_origen" value="<?php echo $_SESSION['Nombre_local'] ?? $_SESSION['NombreSucursal'] ?? 'No definida'; ?>" readonly>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -307,17 +306,18 @@ session_start();
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="row">
-                                                    <div class="col-md-5">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="usuario_destino">Receptor:</label>
+                                                            <input type="text" class="form-control" name="usuario_destino" id="usuario_destino" readonly>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label for="sucursal_destino">Sucursal destino:</label>
                                                             <input class="form-control" name="sucursal_destino" id="sucursal_destino" readonly>
                                                         </div>
                                                     </div>
-
-                                                    <!-- <div class="form-group">
-                                                            <label for="usuario_destino">Usuario que recibe:</label>
-                                                            <select class="form-control" name="usuario_destino" id="usuario_destino" required></select>
-                                                    </div> -->
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-md-6">
@@ -427,6 +427,52 @@ session_start();
                                                         </tr>
                                                     </tfoot>
                                                 </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card card-primary">
+                                <!-- /.card-header -->
+                                <div class="card-header">
+                                    <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Observaciones del Movimiento</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                                            <i class="fas fa-expand"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- /.card-body -->
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="observaciones">
+                                                    <i class="fas fa-edit"></i> Observaciones:
+                                                    <small class="text-muted">(Opcional)</small>
+                                                </label>
+                                                <textarea 
+                                                    class="form-control" 
+                                                    name="observaciones" 
+                                                    id="observaciones" 
+                                                    rows="4" 
+                                                    placeholder="Ingrese observaciones adicionales sobre este movimiento de activos..."
+                                                    maxlength="500"
+                                                    style="resize: vertical; min-height: 100px;"></textarea>
+                                                <div class="d-flex justify-content-between mt-1">
+                                                    <small class="form-text text-muted">
+                                                        <i class="fas fa-info-circle"></i> 
+                                                        Describa detalles importantes del movimiento, motivos, condiciones especiales, etc.
+                                                    </small>
+                                                    <small class="form-text text-muted">
+                                                        <span id="contador-caracteres">0</span>/500 caracteres
+                                                    </small>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

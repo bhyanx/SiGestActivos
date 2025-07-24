@@ -118,6 +118,22 @@ function init() {
   $("#divgenerarmov").hide();
   $("#divregistroMovimiento").hide();
 
+  // Contador de caracteres para observaciones
+  $(document).on("input", "#observaciones", function() {
+    const maxLength = 500;
+    const currentLength = $(this).val().length;
+    $("#contador-caracteres").text(currentLength);
+    
+    // Cambiar color según proximidad al límite
+    if (currentLength > maxLength * 0.9) {
+      $("#contador-caracteres").removeClass("text-muted text-warning").addClass("text-danger");
+    } else if (currentLength > maxLength * 0.7) {
+      $("#contador-caracteres").removeClass("text-muted text-danger").addClass("text-warning");
+    } else {
+      $("#contador-caracteres").removeClass("text-warning text-danger").addClass("text-muted");
+    }
+  });
+
   // Botón para abrir el panel de generación de movimiento
   $("#btnnuevo")
     .off("click")
@@ -197,15 +213,29 @@ function init() {
       $("#IdTipoMovimiento").val($("#IdTipoMovimientoMov").val());
       var autorizadorNombre = $("#CodAutorizador option:selected").text();
       $("#IdAutorizador").val($("#CodAutorizador").val());
-      $("#lblautorizador").text("Autorizador: " + autorizadorNombre);
 
       var receptorNombre = $("#CodReceptor option:selected").text();
       $("#IdReceptor").val($("#CodReceptor").val());
-      $("#lblReceptor").text("Receptor: " + receptorNombre);
+
+      // Llenar los campos de usuario origen (autorizador) y destino (receptor)
+      $("#usuario_origen").val(autorizadorNombre);
+      $("#usuario_destino").val(receptorNombre);
+
+      // Llenar sucursal destino
+      var sucursalDestinoNombre = $(
+        "#IdSucursalDestino option:selected"
+      ).text();
+      $("#sucursal_destino").val(sucursalDestinoNombre);
+
+      // La sucursal origen ya está establecida desde PHP, no la modificamos
 
       // Transferir valores de empresa y sucursal destino para usar en el detalle
       window.idempresaDestino = $("#IdEmpresaDestino").val();
       window.idsucursalDestino = $("#IdSucursalDestino").val();
+
+      // Limpiar observaciones para el nuevo movimiento
+      $("#observaciones").val("");
+      $("#contador-caracteres").text("0").removeClass("text-warning text-danger").addClass("text-muted");
 
       // Opcional: limpiar el formulario
       $("#frmMovimiento")[0].reset();
@@ -652,21 +682,19 @@ function init() {
     formDataMovimiento.append("idReceptor", $("#IdReceptor").val());
     formDataMovimiento.append("idEmpresaDestino", window.idempresaDestino);
     formDataMovimiento.append("idSucursalDestino", window.idsucursalDestino);
-    formDataMovimiento.append(
-      "observaciones",
-      `Movimiento de ${$("#tbldetalleactivomov tbody tr").length} activos`
-    );
+    
+    // Usar las observaciones ingresadas por el usuario
+    const observaciones = $("#observaciones").val().trim();
+    formDataMovimiento.append("observaciones", observaciones || "Sin observaciones adicionales");
 
     // Depuración: mostrar datos que se enviarán
     console.log("Datos a enviar cabecera:", {
       idTipoMovimiento: $("#IdTipoMovimiento").val(),
       idAutorizador: $("#IdAutorizador").val(),
-      idReceptor: $("#CodReceptor").val(),
+      idReceptor: $("#IdReceptor").val(),
       idEmpresaDestino: window.idempresaDestino,
       idSucursalDestino: window.idsucursalDestino,
-      observaciones: `Movimiento de ${
-        $("#tbldetalleactivomov tbody tr").length
-      } activos`,
+      observaciones: observaciones || "Sin observaciones adicionales",
     });
 
     $.ajax({
@@ -811,12 +839,6 @@ function init() {
                             <p><strong>Total de activos:</strong> ${
                               activosExitosos.length
                             }</p>
-                            <p><strong>Tipo:</strong> ${$(
-                              "#IdTipoMovimiento option:selected"
-                            ).text()}</p>
-                            <p><strong>Autorizador:</strong> ${$(
-                              "#IdAutorizador option:selected"
-                            ).text()}</p>
                           </div>
                         </div>
                       </div>
@@ -939,6 +961,11 @@ function init() {
     $("#divtblmovimientos").show();
     $("#divlistadomovimientos").show();
     $("#tbldetalleactivomov tbody").empty();
+    
+    // Limpiar observaciones y resetear contador
+    $("#observaciones").val("");
+    $("#contador-caracteres").text("0").removeClass("text-warning text-danger").addClass("text-muted");
+    
     ListarMovimientos();
   }
 
@@ -1042,10 +1069,12 @@ function init() {
 }
 
 function setSucursalOrigenDestino() {
-  var sucursalOrigenText = $("#IdSucursalOrigen").val();
+  // La sucursal origen ya está establecida desde PHP (sucursal del usuario actual)
+  // Solo actualizamos la sucursal destino si está disponible
   var sucursalDestinoText = $("#IdSucursalDestino option:selected").text();
-  $("#sucursal_origen").val(sucursalOrigenText);
-  $("#sucursal_destino").val(sucursalDestinoText);
+  if (sucursalDestinoText && sucursalDestinoText !== "") {
+    $("#sucursal_destino").val(sucursalDestinoText);
+  }
 }
 
 function ListarCombosResponsable(elemento) {
