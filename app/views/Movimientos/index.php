@@ -61,7 +61,16 @@ session_start();
                                                     <select class="form-control" name="filtroTipoMovimiento" id="filtroTipoMovimiento"></select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="filtroTipoListado">Tipo de Listado:</label>
+                                                    <select class="form-control" name="filtroTipoListado" id="filtroTipoListado">
+                                                        <option value="enviados">Movimientos Enviados</option>
+                                                        <option value="recibidos">Movimientos Recibidos</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
                                                 <div class="form-group">
                                                     <label for="filtroSucursal">Sucursal:</label>
                                                     <select class="form-control" name="filtroSucursal" id="filtroSucursal"></select>
@@ -73,13 +82,13 @@ session_start();
                                                     <select class="form-control" name="filtroAmbiente"id="filtroAmbiente"></select>
                                                 </div>
                                             </div> -->
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
                                                 <div class="form-group">
                                                     <label for="filtroFecha">Fecha Movimiento:</label>
                                                     <input type="date" class="form-control" name="filtroFecha" id="filtroFecha" value="<?php echo date('Y-m-d'); ?>">
                                                 </div>
                                             </div>
-                                            <div class="col-md-2 offset-md-6">
+                                            <div class="col-md-2 offset-md-2">
                                                 <div class="form-group mb-0">
                                                     <label for="">&nbsp;</label>
                                                     <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">
@@ -111,7 +120,7 @@ session_start();
                         <div class="col-12" id="divtblmovimientos" style="display: none;">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title"><i class="fa fa-list"></i> Lista de Movimientos Realizados</h3>
+                                    <h3 class="card-title" id="tituloTablaMovimientos"><i class="fa fa-list"></i> Lista de Movimientos Enviados</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="col-md-12">
@@ -158,7 +167,7 @@ session_start();
                                             <div class="row">
                                                 <div class="col-md-2">
                                                     <div class="form-group">
-                                                        <label for="IdTipoMovimientoMov">Tipo de Movimiento:</label>
+                                                        <label for="IdTipoMovimientoMov">Tipo Mov.:</label>
                                                         <select name="IdTipoMovimientoMov" id="IdTipoMovimientoMov" class="form-control" required></select>
                                                     </div>
                                                 </div>
@@ -175,6 +184,13 @@ session_start();
                                                     <div class="form-group">
                                                         <label for="IdSucursalDestino">Sucursal Destino:</label>
                                                         <select name="IdSucursalDestino" id="IdSucursalDestino" class="form-control" required></select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="CodReceptor">Receptor:</label>
+                                                        <select name="CodReceptor" id="CodReceptor" class="form-control" require></select>
                                                     </div>
                                                 </div>
 
@@ -196,7 +212,7 @@ session_start();
                                                 <div class="col-md-2">
                                                     <div class="form-group">
                                                         <label for="">&nbsp;</label>
-                                                        <button type="button" class="btn btn-primary btn-block" id="btnprocesarempresa" onclick="$('#IdTipoMovimiento').val($('#IdTipoMovimientoMov').val()); $('#IdAutorizador').val($('#CodAutorizador').val());">
+                                                        <button type="button" class="btn btn-primary btn-block" id="btnprocesarempresa" onclick="$('#IdTipoMovimiento').val($('#IdTipoMovimientoMov').val()); $('#IdAutorizador').val($('#CodAutorizador').val()); $('#IdReceptor').val($('#CodReceptor').val());">
                                                             <i class="fas fa-sync"></i> Procesar
                                                         </button>
                                                     </div>
@@ -215,9 +231,11 @@ session_start();
                         <div class=" alert alert-info alert-dismissible">
                             <span id="lbldatossucmovimiento"></span>
                             <span id="lblautorizador"></span>
+                            <span id="lblReceptor"></span>
                             <button type="button" class="close btn" id="btnchangedatasucmovimiento"><i class="fas fa-undo-alt"></i></button>
                             <input type="hidden" name="IdTipoMovimiento" id="IdTipoMovimiento">
                             <input type="hidden" name="IdAutorizador" id="IdAutorizador">
+                            <input type="hidden" name="IdReceptor" id="IdReceptor">
                         </div>
                         <div class="row">
                             <div class="col-md-6">
@@ -237,12 +255,12 @@ session_start();
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="row">
-                                                    <div class="col-md-5">
+                                                    <!-- <div class="col-md-5">
                                                         <div class="form-group">
                                                             <label for="sucursal_origen">Sucursal origen:</label>
                                                             <input class="form-control" name="sucursal_origen" id="sucursal_origen" readonly>
                                                         </div>
-                                                    </div>
+                                                    </div> -->
                                                     <div class="col-md-7">
                                                         <div class="form-group">
                                                             <label for="usuario_origen">Usuario realizando el movimiento:</label>
@@ -299,7 +317,7 @@ session_start();
                                                     <!-- <div class="form-group">
                                                             <label for="usuario_destino">Usuario que recibe:</label>
                                                             <select class="form-control" name="usuario_destino" id="usuario_destino" required></select>
-                                                        </div> -->
+                                                    </div> -->
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-md-6">

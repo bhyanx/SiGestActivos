@@ -77,6 +77,14 @@ class Combos
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+    public function comboReceptor()
+    {
+        $sql = "SELECT codTrabajador, NombreTrabajador FROM vEmpleados";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
     public function comboRol()
     {
         $sql = "SELECT IdRol, NombreRol FROM tRoles WHERE Estado = 1";

@@ -37,6 +37,14 @@ function init() {
     }
   );
 
+  // Evento para cambiar entre movimientos enviados y recibidos
+  $(document).on("change", "#filtroTipoListado", function () {
+    // Recargar la tabla con el nuevo tipo
+    if ($.fn.DataTable.isDataTable("#tblMovimientos")) {
+      ListarMovimientos();
+    }
+  });
+
   $("#btnvolver")
     .off("click")
     .on("click", function () {
@@ -106,7 +114,6 @@ function init() {
       });
     });
 
-
   // Ocultar secciones al cargar
   $("#divgenerarmov").hide();
   $("#divregistroMovimiento").hide();
@@ -135,6 +142,7 @@ function init() {
       const autorizador = $("#CodAutorizador").val();
       const sucursalDestino = $("#IdSucursalDestino").val();
       const empresaDestino = $("#IdEmpresaDestino").val();
+      const receptor = $("#CodReceptor").val();
 
       if (!tipoMovimiento) {
         Swal.fire({
@@ -172,6 +180,15 @@ function init() {
         return;
       }
 
+      if (!receptor) {
+        Swal.fire({
+          title: "Campo Requerido",
+          text: "Debe seleccionar un Receptor",
+          icon: "warning",
+        });
+        return;
+      }
+
       // Si todo está correcto, proceder con el procesamiento
       $("#divregistroMovimiento").show();
       $("#divgenerarmov").hide();
@@ -181,7 +198,11 @@ function init() {
       var autorizadorNombre = $("#CodAutorizador option:selected").text();
       $("#IdAutorizador").val($("#CodAutorizador").val());
       $("#lblautorizador").text("Autorizador: " + autorizadorNombre);
-      
+
+      var receptorNombre = $("#CodReceptor option:selected").text();
+      $("#IdReceptor").val($("#CodReceptor").val());
+      $("#lblReceptor").text("Receptor: " + receptorNombre);
+
       // Transferir valores de empresa y sucursal destino para usar en el detalle
       window.idempresaDestino = $("#IdEmpresaDestino").val();
       window.idsucursalDestino = $("#IdSucursalDestino").val();
@@ -458,9 +479,11 @@ function init() {
       $("#tbldetalleactivomov tbody tr.agregado-temp")
         .removeClass("table-light agregado-temp")
         .addClass("table-active");
-      
-      setTimeout(function() {
-        $("#tbldetalleactivomov tbody tr.table-active").removeClass("table-active");
+
+      setTimeout(function () {
+        $("#tbldetalleactivomov tbody tr.table-active").removeClass(
+          "table-active"
+        );
       }, 1000);
     }, 100);
 
@@ -468,13 +491,13 @@ function init() {
       "success",
       `Activo <b>${activo.nombre}</b> agregado al detalle.`
     );
-    
+
     // Cerrar modal automáticamente
     $("#ModalArticulos").modal("hide");
-    
+
     // Actualizar contador
     actualizarContadorActivosListos();
-    
+
     return true;
   }
 
@@ -482,33 +505,45 @@ function init() {
   function actualizarContadorActivosListos() {
     const totalActivos = $("#tbldetalleactivomov tbody tr").length;
     let activosListos = 0;
-    
-    $("#tbldetalleactivomov tbody tr").each(function() {
+
+    $("#tbldetalleactivomov tbody tr").each(function () {
       const ambiente = $(this).find(".ambiente-destino").val();
       const responsable = $(this).find(".responsable-destino").val();
-      
+
       if (ambiente && responsable) {
         activosListos++;
       }
     });
-    
+
     // Actualizar badge en el botón guardar
     const $btnGuardar = $("#btnGuardarMov");
-    
+
     if (totalActivos === 0) {
-      $btnGuardar.prop("disabled", true)
-        .removeClass("btn-success").addClass("btn-secondary")
+      $btnGuardar
+        .prop("disabled", true)
+        .removeClass("btn-success")
+        .addClass("btn-secondary")
         .html('<i class="fa fa-save"></i> Guardar Movimiento');
     } else if (activosListos === totalActivos) {
-      $btnGuardar.prop("disabled", false)
-        .removeClass("btn-secondary").addClass("btn-success")
-        .html(`<i class="fa fa-save"></i> Registrar Movimiento (${totalActivos} activo${totalActivos > 1 ? 's' : ''})`);
+      $btnGuardar
+        .prop("disabled", false)
+        .removeClass("btn-secondary")
+        .addClass("btn-success")
+        .html(
+          `<i class="fa fa-save"></i> Registrar Movimiento (${totalActivos} activo${
+            totalActivos > 1 ? "s" : ""
+          })`
+        );
     } else {
-      $btnGuardar.prop("disabled", true)
-        .removeClass("btn-success").addClass("btn-secondary")
-        .html(`<i class="fa fa-save"></i> Completar datos (${activosListos}/${totalActivos})`);
+      $btnGuardar
+        .prop("disabled", true)
+        .removeClass("btn-success")
+        .addClass("btn-secondary")
+        .html(
+          `<i class="fa fa-save"></i> Completar datos (${activosListos}/${totalActivos})`
+        );
     }
-    
+
     // Remover cualquier mensaje de advertencia previo
     $("#mensaje-destinos-inconsistentes").remove();
   }
@@ -535,7 +570,7 @@ function init() {
   $(document).on("click", ".btnQuitarActivo", function () {
     const $fila = $(this).closest("tr");
     const nombreActivo = $fila.find("td:eq(2)").text();
-    
+
     Swal.fire({
       title: "¿Quitar activo?",
       text: `¿Está seguro de quitar "${nombreActivo}" del movimiento?`,
@@ -544,13 +579,16 @@ function init() {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Sí, quitar",
-      cancelButtonText: "Cancelar"
+      cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        $fila.fadeOut(300, function() {
+        $fila.fadeOut(300, function () {
           $(this).remove();
           actualizarContadorActivosListos();
-          NotificacionToast("info", `Activo <b>${nombreActivo}</b> removido del detalle.`);
+          NotificacionToast(
+            "info",
+            `Activo <b>${nombreActivo}</b> removido del detalle.`
+          );
         });
       }
     });
@@ -575,14 +613,18 @@ function init() {
         camposFaltantes.push(`Ambiente destino para el activo ${nombreActivo}`);
       }
       if (!responsableDestino) {
-        camposFaltantes.push(`Responsable destino para el activo ${nombreActivo}`);
+        camposFaltantes.push(
+          `Responsable destino para el activo ${nombreActivo}`
+        );
       }
     });
 
     if (camposFaltantes.length > 0) {
       Swal.fire({
         title: "Campos Faltantes",
-        html: "Por favor complete los siguientes campos:<br><br>" + camposFaltantes.join("<br>"),
+        html:
+          "Por favor complete los siguientes campos:<br><br>" +
+          camposFaltantes.join("<br>"),
         icon: "warning",
       });
       return;
@@ -600,24 +642,31 @@ function init() {
         </div>
       `,
       allowOutsideClick: false,
-      showConfirmButton: false
+      showConfirmButton: false,
     });
 
     // PASO 1: Crear la cabecera del movimiento
     const formDataMovimiento = new FormData();
     formDataMovimiento.append("idTipoMovimiento", $("#IdTipoMovimiento").val());
     formDataMovimiento.append("idAutorizador", $("#IdAutorizador").val());
+    formDataMovimiento.append("idReceptor", $("#IdReceptor").val());
     formDataMovimiento.append("idEmpresaDestino", window.idempresaDestino);
     formDataMovimiento.append("idSucursalDestino", window.idsucursalDestino);
-    formDataMovimiento.append("observaciones", `Movimiento de ${$("#tbldetalleactivomov tbody tr").length} activos`);
+    formDataMovimiento.append(
+      "observaciones",
+      `Movimiento de ${$("#tbldetalleactivomov tbody tr").length} activos`
+    );
 
     // Depuración: mostrar datos que se enviarán
     console.log("Datos a enviar cabecera:", {
       idTipoMovimiento: $("#IdTipoMovimiento").val(),
       idAutorizador: $("#IdAutorizador").val(),
+      idReceptor: $("#CodReceptor").val(),
       idEmpresaDestino: window.idempresaDestino,
       idSucursalDestino: window.idsucursalDestino,
-      observaciones: `Movimiento de ${$("#tbldetalleactivomov tbody tr").length} activos`
+      observaciones: `Movimiento de ${
+        $("#tbldetalleactivomov tbody tr").length
+      } activos`,
     });
 
     $.ajax({
@@ -634,17 +683,24 @@ function init() {
             html: `
               <div class="alert alert-success mb-3">
                 <h5><i class="fas fa-check-circle"></i> Movimiento Creado</h5>
-                <h4 class="text-primary"><strong>${resMovimiento.codMovimiento}</strong></h4>
+                <h4 class="text-primary"><strong>${
+                  resMovimiento.codMovimiento
+                }</strong></h4>
               </div>
               <div class="progress mb-3">
                 <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
-                     style="width: 0%" id="progressBar">0/${$("#tbldetalleactivomov tbody tr").length}</div>
+                     style="width: 0%" id="progressBar">0/${
+                       $("#tbldetalleactivomov tbody tr").length
+                     }</div>
               </div>
               <div id="progressText">Paso 2: Agregando activos al movimiento...</div>
-            `
+            `,
           });
 
-          agregarActivosAlMovimiento(resMovimiento.idMovimiento, resMovimiento.codMovimiento);
+          agregarActivosAlMovimiento(
+            resMovimiento.idMovimiento,
+            resMovimiento.codMovimiento
+          );
         } else {
           Swal.fire({
             title: "Error al Crear Movimiento",
@@ -654,7 +710,7 @@ function init() {
               </div>
             `,
             icon: "error",
-            confirmButtonText: "Intentar de nuevo"
+            confirmButtonText: "Intentar de nuevo",
           });
         }
       },
@@ -669,7 +725,7 @@ function init() {
             </div>
           `,
           icon: "error",
-          confirmButtonText: "Reintentar"
+          confirmButtonText: "Reintentar",
         });
       },
     });
@@ -690,9 +746,16 @@ function init() {
       detalleData.append("IdMovimiento", idMovimiento);
       detalleData.append("IdActivo", fila.find("td:eq(0)").text());
       detalleData.append("IdTipo_Movimiento", $("#IdTipoMovimiento").val());
-      detalleData.append("IdAmbiente_Nueva", fila.find(".ambiente-destino").val());
-      detalleData.append("IdResponsable_Nueva", fila.find(".responsable-destino").val());
+      detalleData.append(
+        "IdAmbiente_Nueva",
+        fila.find(".ambiente-destino").val()
+      );
+      detalleData.append(
+        "IdResponsable_Nueva",
+        fila.find(".responsable-destino").val()
+      );
       detalleData.append("IdAutorizador", $("#IdAutorizador").val());
+      detalleData.append("IdReceptor", $("#IdReceptor").val());
       detalleData.append("idSucursalDestino", window.idsucursalDestino || "");
       detalleData.append("idEmpresaDestino", window.idempresaDestino || "");
       detalleData.append("IdActivoPadre_Nuevo", null);
@@ -706,12 +769,16 @@ function init() {
         dataType: "json",
         success: function (res) {
           activosProcesados++;
-          
+
           // Actualizar progreso
           const porcentaje = (activosProcesados / totalActivos) * 100;
-          $("#progressBar").css("width", porcentaje + "%").text(`${activosProcesados}/${totalActivos}`);
-          $("#progressText").text(`Procesando: ${nombreActivo} - ${res.status ? 'Éxito' : 'Error'}`);
-          
+          $("#progressBar")
+            .css("width", porcentaje + "%")
+            .text(`${activosProcesados}/${totalActivos}`);
+          $("#progressText").text(
+            `Procesando: ${nombreActivo} - ${res.status ? "Éxito" : "Error"}`
+          );
+
           if (res.status) {
             activosExitosos.push(nombreActivo);
           } else {
@@ -728,7 +795,9 @@ function init() {
                     <div class="alert alert-success">
                       <h5><i class="fas fa-check-circle text-success"></i> Código de Movimiento</h5>
                       <h3 class="text-primary"><strong>${codMovimiento}</strong></h3>
-                      <p class="mb-0"><strong>${activosExitosos.length} activos</strong> procesados correctamente</p>
+                      <p class="mb-0"><strong>${
+                        activosExitosos.length
+                      } activos</strong> procesados correctamente</p>
                     </div>
                     
                     <div class="row mt-4">
@@ -739,9 +808,15 @@ function init() {
                           </div>
                           <div class="card-body">
                             <p><strong>Código:</strong> ${codMovimiento}</p>
-                            <p><strong>Total de activos:</strong> ${activosExitosos.length}</p>
-                            <p><strong>Tipo:</strong> ${$("#IdTipoMovimiento option:selected").text()}</p>
-                            <p><strong>Autorizador:</strong> ${$("#IdAutorizador option:selected").text()}</p>
+                            <p><strong>Total de activos:</strong> ${
+                              activosExitosos.length
+                            }</p>
+                            <p><strong>Tipo:</strong> ${$(
+                              "#IdTipoMovimiento option:selected"
+                            ).text()}</p>
+                            <p><strong>Autorizador:</strong> ${$(
+                              "#IdAutorizador option:selected"
+                            ).text()}</p>
                           </div>
                         </div>
                       </div>
@@ -752,12 +827,15 @@ function init() {
                             <i class="fas fa-boxes"></i> Activos Procesados
                           </div>
                           <div class="card-body" style="max-height: 250px; overflow-y: auto;">
-                            ${activosExitosos.map(nombre => 
-                              `<div class="d-flex justify-content-between align-items-center border-bottom py-1">
+                            ${activosExitosos
+                              .map(
+                                (nombre) =>
+                                  `<div class="d-flex justify-content-between align-items-center border-bottom py-1">
                                 <span><i class="fas fa-box text-success"></i> ${nombre}</span>
                                 <span class="badge badge-success">✓</span>
                               </div>`
-                            ).join('')}
+                              )
+                              .join("")}
                           </div>
                         </div>
                       </div>
@@ -772,32 +850,44 @@ function init() {
                   icon: "success",
                   width: "900px",
                   confirmButtonText: "Continuar",
-                  confirmButtonColor: "#28a745"
+                  confirmButtonColor: "#28a745",
                 }).then(() => {
                   limpiarYRecargar();
                 });
               } else {
-                let mensajeExito = activosExitosos.length > 0 ? 
-                  `<div class="alert alert-success mb-3">
+                let mensajeExito =
+                  activosExitosos.length > 0
+                    ? `<div class="alert alert-success mb-3">
                     <h5><i class="fas fa-check-circle"></i> Movimiento: <strong>${codMovimiento}</strong></h5>
                     <strong>Exitosos (${activosExitosos.length}):</strong><br>
-                    ${activosExitosos.map(activo => `• <i class="fas fa-box text-success"></i> ${activo}`).join('<br>')}
-                  </div>` : '';
-                
+                    ${activosExitosos
+                      .map(
+                        (activo) =>
+                          `• <i class="fas fa-box text-success"></i> ${activo}`
+                      )
+                      .join("<br>")}
+                  </div>`
+                    : "";
+
                 Swal.fire({
                   title: "Movimiento Completado con Advertencias",
                   html: `
                     ${mensajeExito}
                     <div class="alert alert-warning">
                       <strong>Errores (${errores.length}):</strong><br>
-                      ${errores.map(error => `• <i class="fas fa-exclamation-triangle text-warning"></i> ${error}`).join('<br>')}
+                      ${errores
+                        .map(
+                          (error) =>
+                            `• <i class="fas fa-exclamation-triangle text-warning"></i> ${error}`
+                        )
+                        .join("<br>")}
                     </div>
                     <div class="mt-3 text-muted">
                       <small><i class="fas fa-info-circle"></i> Los activos exitosos están bajo el código: <strong>${codMovimiento}</strong></small>
                     </div>
                   `,
                   icon: "warning",
-                  width: "700px"
+                  width: "700px",
                 }).then(() => {
                   limpiarYRecargar();
                 });
@@ -807,12 +897,14 @@ function init() {
         },
         error: function (xhr, status, error) {
           activosProcesados++;
-          
+
           // Actualizar progreso
           const porcentaje = (activosProcesados / totalActivos) * 100;
-          $("#progressBar").css("width", porcentaje + "%").text(`${activosProcesados}/${totalActivos}`);
+          $("#progressBar")
+            .css("width", porcentaje + "%")
+            .text(`${activosProcesados}/${totalActivos}`);
           $("#progressText").text(`Error en: ${nombreActivo}`);
-          
+
           errores.push(`${nombreActivo}: Error de comunicación - ${error}`);
 
           if (activosProcesados === totalActivos) {
@@ -823,11 +915,16 @@ function init() {
                   <div class="alert alert-danger">
                     <h5>Movimiento: <strong>${codMovimiento}</strong></h5>
                     <strong>Errores encontrados:</strong><br>
-                    ${errores.map(error => `• <i class="fas fa-times text-danger"></i> ${error}`).join('<br>')}
+                    ${errores
+                      .map(
+                        (error) =>
+                          `• <i class="fas fa-times text-danger"></i> ${error}`
+                      )
+                      .join("<br>")}
                   </div>
                 `,
                 icon: "error",
-                width: "600px"
+                width: "600px",
               });
             }, 500);
           }
@@ -835,8 +932,6 @@ function init() {
       });
     });
   }
-
-
 
   // Función para limpiar y recargar
   function limpiarYRecargar() {
@@ -872,6 +967,7 @@ function init() {
         fila.find(".responsable-destino").val()
       );
       detalleData.append("IdAutorizador", $("#IdAutorizador").val());
+      detalleData.append("IdReceptor", $("#IdReceptor").val());
       detalleData.append("IdActivoPadre_Nuevo", null);
 
       // Guardar cada detalle
@@ -1092,7 +1188,9 @@ function ListarCombosFiltros() {
         $("#filtroAmbiente").html(res.data.ambientes).trigger("change");
         // $("#filtroSucursalDestino").html(res.data.sucursales).trigger("change");
 
-        $("#filtroTipoMovimiento, #filtroSucursal, #filtroAmbiente").select2({
+        $(
+          "#filtroTipoMovimiento, #filtroSucursal, #filtroAmbiente, #filtroTipoListado"
+        ).select2({
           theme: "bootstrap4",
           //dropdownParent: $("#ModalFiltros .modal-body"),
           width: "100%",
@@ -1142,10 +1240,13 @@ function ListarCombosMov() {
         // Cargar sucursales para el destino
         $("#IdSucursalDestino").html(res.data.sucursales);
 
+        // Cargar receptor
+        $("#CodReceptor").html(res.data.receptor);
+
         // Inicializar select2 una sola vez para los combos
         if (!$("#IdTipoMovimientoMov").hasClass("select2-hidden-accessible")) {
           $(
-            "#IdTipoMovimientoMov, #CodAutorizador, #IdSucursalDestino, #IdEmpresaDestino"
+            "#IdTipoMovimientoMov, #CodAutorizador, #IdSucursalDestino, #IdEmpresaDestino, #CodReceptor"
           ).select2({
             theme: "bootstrap4",
             width: "100%",
@@ -1202,11 +1303,27 @@ $(document).on("change", "#IdEmpresaDestino", function () {
   }
 });
 
-// Listar movimientos en una tabla DataTable
+// Función principal que decide qué tipo de movimientos listar
 function ListarMovimientos() {
+  const tipoListado = $("#filtroTipoListado").val();
+
+  if (tipoListado === "enviados") {
+    ListarMovimientosEnviados();
+  } else if (tipoListado === "recibidos") {
+    ListarMovimientosRecibidos();
+  }
+}
+
+// Listar movimientos enviados (desde mi sucursal)
+function ListarMovimientosEnviados() {
   if ($.fn.DataTable.isDataTable("#tblMovimientos")) {
     $("#tblMovimientos").DataTable().destroy();
   }
+
+  // Actualizar título
+  $("#tituloTablaMovimientos").html(
+    '<i class="fa fa-paper-plane"></i> Lista de Movimientos Enviados'
+  );
 
   $("#tblMovimientos").DataTable({
     aProcessing: true,
@@ -1217,7 +1334,91 @@ function ListarMovimientos() {
     iDisplayLength: 10,
     order: [[7, "desc"]], // Ordenar por fecha descendente
     ajax: {
-      url: "../../controllers/GestionarMovimientoController.php?action=listarMovimientos",
+      url: "../../controllers/GestionarMovimientoController.php?action=listarMovimientosEnviados",
+      type: "POST",
+      data: function (d) {
+        return {
+          tipo: $("#filtroTipoMovimiento").val(),
+          sucursal: $("#filtroSucursal").val(),
+          fecha: $("#filtroFecha").val(),
+        };
+      },
+      dataSrc: function (json) {
+        console.log("Datos recibidos:", json);
+        if (!json.status) {
+          NotificacionToast(
+            "error",
+            json.message || "Error al cargar los movimientos"
+          );
+          return [];
+        }
+        return json.data || [];
+      },
+      error: function (xhr, status, error) {
+        console.error("Error en la petición:", error);
+        NotificacionToast("error", "Error al cargar los movimientos: " + error);
+        return [];
+      },
+    },
+    columns: [
+      {
+        data: null,
+        render: function (data, type, row) {
+          return `
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-cogs"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#" onclick="verDetallesMovimiento(${row.idMovimiento})">
+                                    <i class="fas fa-list"></i> Ver Detalles
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="imprimirReporte(${row.idMovimiento})">
+                                    <i class="fas fa-print"></i> Imprimir Reporte
+                                </a>
+                            </div>
+                        </div>`;
+        },
+      },
+      { data: "codigoMovimiento" },
+      { data: "tipoMovimiento" },
+      //{ data: "sucursalOrigen" },
+      { data: "sucursalDestino" },
+      { data: "empresaDestino" },
+      { data: "autorizador" },
+      {
+        data: "fechaMovimiento",
+        render: function (data) {
+          return moment(data).format("DD/MM/YYYY HH:mm");
+        },
+      },
+    ],
+    language: {
+      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+    },
+  });
+}
+
+function ListarMovimientosRecibidos() {
+  if ($.fn.DataTable.isDataTable("#tblMovimientos")) {
+    $("#tblMovimientos").DataTable().destroy();
+  }
+
+  // Actualizar título
+  $("#tituloTablaMovimientos").html(
+    '<i class="fa fa-inbox"></i> Lista de Movimientos Recibidos'
+  );
+
+  $("#tblMovimientos").DataTable({
+    aProcessing: true,
+    aServerSide: false,
+    destroy: true,
+    //responsive: true,
+    bInfo: true,
+    iDisplayLength: 10,
+    order: [[7, "desc"]], // Ordenar por fecha descendente
+    ajax: {
+      url: "../../controllers/GestionarMovimientoController.php?action=listarMovimientosRecibidos",
       type: "POST",
       data: function (d) {
         return {

@@ -21,6 +21,7 @@ class GestionarMovimientos
                 EXEC sp_CrearMovimiento 
                     @idTipoMovimiento = :idTipoMovimiento,
                     @idAutorizador = :idAutorizador,
+                    @idReceptor = :idReceptor,
                     @idEmpresaOrigen = :idEmpresaOrigen,
                     @idSucursalOrigen = :idSucursalOrigen,
                     @idEmpresaDestino = :idEmpresaDestino,
@@ -35,6 +36,7 @@ class GestionarMovimientos
             $stmt = $this->db->prepare($sql);
 
             $stmt->bindParam(':idTipoMovimiento', $data['idTipoMovimiento'], PDO::PARAM_INT);
+            $stmt->bindParam(':idReceptor', $data['idReceptor'], PDO::PARAM_STR);
             $stmt->bindParam(':idAutorizador', $data['idAutorizador'], PDO::PARAM_STR);
             $stmt->bindParam(':idEmpresaOrigen', $data['idEmpresaOrigen'], PDO::PARAM_INT);
             $stmt->bindParam(':idSucursalOrigen', $data['idSucursalOrigen'], PDO::PARAM_INT);
@@ -358,54 +360,47 @@ class GestionarMovimientos
 
 
 
-    public function listarMovimientos($filtros = [])
+    public function listarMovimientosEnviados($filtros = [])
     {
         try {
-            $sql = "SELECT 
-            m.idMovimiento,
+            $sql = "SELECT m.idMovimiento,
             m.codigoMovimiento,
             tm.nombre AS tipoMovimiento,
             m.fechaMovimiento,
             m.userMod AS usuarioRegistro,
-
             eo.Razon_empresa AS empresaOrigen,
             so.Nombre_local AS sucursalOrigen,
-
             ed.Razon_empresa AS empresaDestino,
             sd.Nombre_local AS sucursalDestino,
-
             u.NombreTrabajador AS autorizador
 
-        FROM tMovimientos m
-        INNER JOIN tTipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento
-        INNER JOIN tDetalleMovimiento dm ON dm.idMovimiento = m.idMovimiento
+            FROM tMovimientos m
+            INNER JOIN tTipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento
+            INNER JOIN tDetalleMovimiento dm ON dm.idMovimiento = m.idMovimiento
 
-        -- Origen
-        LEFT JOIN vEmpresas eo ON dm.idEmpresaOrigen = eo.cod_empresa
-        LEFT JOIN vUnidadesdeNegocio so ON dm.idSucursalOrigen = so.cod_UnidadNeg
+            -- Origen
+            LEFT JOIN vEmpresas eo ON m.idEmpresaOrigen = eo.cod_empresa
+            LEFT JOIN vUnidadesdeNegocio so ON m.idSucursalOrigen = so.cod_UnidadNeg
 
-        -- Destino (ubicación actual)
-        LEFT JOIN tUbicacionActivo ua ON ua.idActivo = dm.idActivo AND ua.esActual = 1
-        LEFT JOIN vEmpresas ed ON ua.idEmpresa = ed.cod_empresa
-        LEFT JOIN vUnidadesdeNegocio sd ON ua.idSucursal = sd.cod_UnidadNeg
+            -- Destino
+            LEFT JOIN vEmpresas ed ON m.idEmpresaDestino= ed.cod_empresa
+            LEFT JOIN vUnidadesdeNegocio sd ON m.idSucursalDestino = sd.cod_UnidadNeg
 
-        -- Autorizador
-        LEFT JOIN vEmpleados u ON dm.idAutorizador = u.codTrabajador
-        WHERE 1=1";
+            -- Autorizador
+            LEFT JOIN vEmpleados u ON m.idAutorizador = u.codTrabajador
+            WHERE 1=1";
 
             $params = [];
 
             // Empresa: puede ser origen o destino
             if (!empty($filtros['idEmpresa'])) {
-                $sql .= " AND (dm.idEmpresaOrigen = ? OR ua.idEmpresa = ?)";
-                $params[] = $filtros['idEmpresa'];
+                $sql .= " AND (m.idEmpresaOrigen = ? )";
                 $params[] = $filtros['idEmpresa'];
             }
 
             // Sucursal: puede ser origen o destino
             if (!empty($filtros['idSucursalOrigen'])) {
-                $sql .= " AND (dm.idSucursalOrigen = ? OR ua.idSucursal = ?)";
-                $params[] = $filtros['idSucursalOrigen'];
+                $sql .= " AND (m.idSucursalOrigen = ? )";
                 $params[] = $filtros['idSucursalOrigen'];
             }
 
@@ -415,9 +410,10 @@ class GestionarMovimientos
             }
 
             if (!empty($filtros['fecha'])) {
+                $fecha = date('Y-m-d', strtotime($filtros['fecha']));
                 $sql .= " AND CONVERT(date, m.fechaMovimiento) = ?";
-                $params[] = $filtros['fecha'];
-            }
+                $params[] = $fecha;
+            }                      
 
             $sql .= " 
         GROUP BY 
@@ -442,7 +438,83 @@ class GestionarMovimientos
         }
     }
 
+    public function listarMovimientosRecibidos($filtros = [])
+    {
+        try {
+            $sql = "SELECT m.idMovimiento,
+            m.codigoMovimiento,
+            tm.nombre AS tipoMovimiento,
+            m.fechaMovimiento,
+            m.userMod AS usuarioRegistro,
+            eo.Razon_empresa AS empresaOrigen,
+            so.Nombre_local AS sucursalOrigen,
+            ed.Razon_empresa AS empresaDestino,
+            sd.Nombre_local AS sucursalDestino,
+            u.NombreTrabajador AS autorizador
 
+            FROM tMovimientos m
+            INNER JOIN tTipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento
+            INNER JOIN tDetalleMovimiento dm ON dm.idMovimiento = m.idMovimiento
+
+            -- Origen
+            LEFT JOIN vEmpresas eo ON m.idEmpresaOrigen = eo.cod_empresa
+            LEFT JOIN vUnidadesdeNegocio so ON m.idSucursalOrigen = so.cod_UnidadNeg
+
+            -- Destino
+            LEFT JOIN vEmpresas ed ON m.idEmpresaDestino= ed.cod_empresa
+            LEFT JOIN vUnidadesdeNegocio sd ON m.idSucursalDestino = sd.cod_UnidadNeg
+
+            -- Autorizador
+            LEFT JOIN vEmpleados u ON m.idAutorizador = u.codTrabajador
+            WHERE 1=1";
+
+            $params = [];
+
+            // Empresa: puede ser origen o destino
+            if (!empty($filtros['idEmpresa'])) {
+                $sql .= " AND (m.idEmpresaDestino = ? )";
+                $params[] = $filtros['idEmpresa'];
+            }
+
+            // Sucursal: puede ser origen o destino
+            if (!empty($filtros['idSucursalDestino'])) {
+                $sql .= " AND (m.idSucursalDestino = ? )";
+                $params[] = $filtros['idSucursalDestino'];
+            }
+
+            if (!empty($filtros['tipo'])) {
+                $sql .= " AND m.idTipoMovimiento = ?";
+                $params[] = $filtros['tipo'];
+            }
+
+            if (!empty($filtros['fecha'])) {
+                $fecha = date('Y-m-d', strtotime($filtros['fecha']));
+                $sql .= " AND CONVERT(date, m.fechaMovimiento) = ?";
+                $params[] = $fecha;
+            }                      
+
+            $sql .= " 
+        GROUP BY 
+            m.idMovimiento,
+            m.codigoMovimiento,
+            tm.nombre,
+            m.fechaMovimiento,
+            m.userMod,
+            eo.Razon_empresa,
+            so.Nombre_local,
+            ed.Razon_empresa,
+            sd.Nombre_local,
+            u.NombreTrabajador
+
+        ORDER BY m.fechaMovimiento DESC;";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Error al listar movimientos: " . $e->getMessage());
+        }
+    }
 
     public function obtenerDetallesMovimiento($idMovimiento)
     {
@@ -485,24 +557,27 @@ class GestionarMovimientos
     public function obtenerCabeceraMovimiento($idMovimiento)
     {
         try {
-            $sql = "SELECT m.idMovimiento, m.CodMovimiento, tm.nombre as tipoMovimiento, s1.Nombre_local as sucursalOrigen,
-	   eo.Razon_empresa as empresaOrigen, eo.Ruc_empresa as RucOrigen,
-	   e.Razon_empresa as empresaDestino, e.Ruc_empresa as RucDestino,
-	   s1.Direccion_local as DireccionOrigen, s2.Nombre_local as sucursalDestino, s2.Direccion_local as DireccionDestino,
-	   dm.idResponsable_Anterior as responsableOrigen, dm.IdResponsable_Nuevo as responsableDestino,
-	   dm.idAutorizador as dniAutorizador,
-       aut.NombreTrabajador as nombreAutorizador,
-	   m.observaciones, m.fechaMovimiento
-FROM tMovimientos m
-INNER JOIN tTipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento
-INNER JOIN vUnidadesdeNegocio s1 ON m.idSucursalOrigen = s1.cod_UnidadNeg
-INNER JOIN vUnidadesdeNegocio s2 ON m.idSucursalDestino = s2.cod_UnidadNeg
-LEFT JOIN vEmpresas eo ON m.idEmpresaOrigen = eo.cod_empresa
-INNER JOIN vEmpresas e ON m.idEmpresaDestino = e.cod_empresa
-INNER JOIN vEmpleados aut ON m.idAutorizador = aut.codTrabajador
-LEFT JOIN tDetalleMovimiento dm ON m.idMovimiento = dm.idMovimiento
-WHERE m.idMovimiento = ?
-ORDER BY m.fechaMovimiento DESC";
+            $sql = "SELECT m.idMovimiento, m.codigoMovimiento, tm.nombre as tipoMovimiento, s1.Nombre_local as sucursalOrigen,
+	        eo.Razon_empresa as empresaOrigen, eo.Ruc_empresa as RucOrigen,
+	        e.Razon_empresa as empresaDestino, e.Ruc_empresa as RucDestino,
+	        s1.Direccion_local as DireccionOrigen, s2.Nombre_local as sucursalDestino, s2.Direccion_local as DireccionDestino,
+	        dm.idResponsableAnterior as responsableOrigen, dm.idResponsableNuevo as responsableDestino,
+	        m.idAutorizador as dniAutorizador,
+            aut.NombreTrabajador as nombreAutorizador,
+	        m.idReceptor AS dniReceptor,
+	        rec.NombreTrabajador As nombreReceptor,
+	        m.observaciones, m.fechaMovimiento
+            FROM tMovimientos m
+            INNER JOIN tTipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento
+            INNER JOIN vUnidadesdeNegocio s1 ON m.idSucursalOrigen = s1.cod_UnidadNeg
+            INNER JOIN vUnidadesdeNegocio s2 ON m.idSucursalDestino = s2.cod_UnidadNeg
+            LEFT JOIN vEmpresas eo ON m.idEmpresaOrigen = eo.cod_empresa
+            INNER JOIN vEmpresas e ON m.idEmpresaDestino = e.cod_empresa
+            INNER JOIN vEmpleados aut ON m.idAutorizador = aut.codTrabajador
+            LEFT JOIN vEmpleados rec ON m.idReceptor = rec.codTrabajador
+            LEFT JOIN tDetalleMovimiento dm ON m.idMovimiento = dm.idMovimiento
+            WHERE m.idMovimiento = ?
+            ORDER BY m.fechaMovimiento DESC";
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idMovimiento, PDO::PARAM_INT);

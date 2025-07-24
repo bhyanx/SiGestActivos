@@ -39,6 +39,7 @@ switch ($action) {
                 $data = [
                     'idTipoMovimiento' => $_POST['idTipoMovimiento'],
                     'idAutorizador' => $_POST['idAutorizador'],
+                    'idReceptor' => $_POST['idReceptor'], 
                     'idEmpresaOrigen' => $_SESSION['cod_empresa'],
                     'idSucursalOrigen' => $_SESSION['cod_UnidadNeg'],
                     'idEmpresaDestino' => $_POST['idEmpresaDestino'],
@@ -76,6 +77,7 @@ switch ($action) {
                     'idSucursalDestino' => $_POST['idSucursalDestino'],
                     'idEmpresaDestino' => $_POST['idEmpresaDestino'],
                     'idAutorizador' => $_POST['IdAutorizador'],
+                    'idReceptor' => $_POST['IdReceptor'],
                     'userMod' => $_SESSION['usuario']
                 ];
 
@@ -243,6 +245,12 @@ switch ($action) {
                 $combos['autorizador'] .= "<option value='{$row['codTrabajador']}'>{$row['NombreTrabajador']}</option>";
             }
 
+            $receptor = $combo->comboReceptor();
+            $combos['receptor'] = '<option value="">Seleccione</option>';
+            foreach  ($receptor as $row) {
+                $combos['receptor'] .= "<option value='{$row['codTrabajador']}'>{$row['NombreTrabajador']}</option>";
+            }
+
             $responsable = $combo->comboResponsable();
             $combos['responsable'] = '<option value="">Seleccione</option>';
             foreach ($responsable as $row) {
@@ -337,16 +345,17 @@ switch ($action) {
         }
         break;
 
-    case 'listarMovimientos':
+    case 'listarMovimientosEnviados':
         try {
             $filtros = [
                 'tipo' => $_POST['tipo'] ?? null,
                 'fecha' => $_POST['fecha'] ?? null,
                 'idEmpresa' => $_SESSION['cod_empresa'] ?? null,
-                'idSucursalOrigen' => $_SESSION['cod_UnidadNeg'] ?? null  // corregido aquí
+                'idSucursalOrigen' => $_SESSION['cod_UnidadNeg'] ?? null,  // corregido aquí
+                //'idSucursalDestino' => $_POST['cod_UnidadNeg'] ?? null
             ];
 
-            $resultado = $movimientos->listarMovimientos($filtros);
+            $resultado = $movimientos->listarMovimientosEnviados($filtros);
             echo json_encode([
                 'status' => true,
                 'data' => $resultado
@@ -358,6 +367,29 @@ switch ($action) {
             ]);
         }
         break;
+
+        case 'listarMovimientosRecibidos':
+            try {
+                $filtros = [
+                    'tipo' => $_POST['tipo'] ?? null,
+                    'fecha' => $_POST['fecha'] ?? null,
+                    'idEmpresa' => $_SESSION['cod_empresa'] ?? null,
+                    'idSucursalDestino' => $_SESSION['cod_UnidadNeg'] ?? null,  // corregido aquí
+                    //'idSucursalDestino' => $_POST['cod_UnidadNeg'] ?? null
+                ];
+    
+                $resultado = $movimientos->listarMovimientosRecibidos($filtros);
+                echo json_encode([
+                    'status' => true,
+                    'data' => $resultado
+                ]);
+            } catch (Exception $e) {
+                echo json_encode([
+                    'status' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
+            break;
 
 
     case 'obtenerDetallesMovimiento':

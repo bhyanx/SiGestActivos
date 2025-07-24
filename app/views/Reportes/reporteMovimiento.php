@@ -496,32 +496,32 @@ try {
             <div class="document-info">
                 <div class="ruc">R.U.C. <?php echo $cabecera['RucOrigen'] ?? ''; ?></div>
                 <div class="guide-title">GESTION DE ALMACEN<br>MOVIMIENTO DE ACTIVOS</div>
-                <div class="guide-number">N° <?php echo $cabecera['CodMovimiento'] ?? ''; ?></div>
+                <div class="guide-number">N° <?php echo $cabecera['codigoMovimiento'] ?? ''; ?></div>
             </div>
         </div>
         <!-- Transfer Details -->
         <div class="transfer-details">
             <div>
                 <div class="detail-row">
-                    <div class="label">Fecha de inicio de traslado:</div>
+                    <div class="label">Fecha de inicio de traslado: </div>
                     <div class="value"><?php echo date('d/m/Y', strtotime($cabecera['fechaMovimiento'] ?? '')); ?></div>
                 </div>
                 <div class="detail-row">
-                    <div class="label">Destinatario:</div>
+                    <div class="label">Destinatario: </div>
                     <div class="value"><?php echo $cabecera['empresaDestino'] ?? ''; ?></div>
                 </div>
                 <div class="detail-row">
-                    <div class="label">RUC:</div>
+                    <div class="label">RUC: </div>
                     <div class="value"><?php echo $cabecera['RucDestino'] ?? ''; ?></div>
                 </div>
             </div>
             <div>
                 <div class="detail-row">
-                    <div class="label">Punto de partida:</div>
+                    <div class="label">Punto de partida: </div>
                     <div class="value"><?php echo $cabecera['sucursalOrigen'] ?? ''; ?><br><?php echo $cabecera['DireccionOrigen'] ?? ''; ?></div>
                 </div>
                 <div class="detail-row">
-                    <div class="label">Punto de llegada:</div>
+                    <div class="label">Punto de llegada: </div>
                     <div class="value"><?php echo $cabecera['sucursalDestino'] ?? ''; ?><br><?php echo $cabecera['DireccionDestino'] ?? ''; ?></div>
                 </div>
             </div>
@@ -566,7 +566,7 @@ try {
                         foreach ($detalles as $detalle): ?>
                             <tr>
                                 <td><?php echo $i++; ?></td>
-                                <td><?php echo $detalle['Codigo'] ?? ''; ?></td>
+                                <td><?php echo $detalle['codigoActivo'] ?? ''; ?></td>
                                 <td class="description-col"><?php echo $detalle['nombreActivo'] ?? ''; ?></td>
                                 <td><?php echo $detalle['Cantidad'] ?? '1'; ?></td>
                                 <td>UM</td>
@@ -610,8 +610,8 @@ try {
                 </div>
                 <div class="signature-box">
                     <div class="signature-line"></div>
-                    <div class="signature-name"><?php echo $cabecera['autorizadorNombre'] ?? ''; ?></div>
-                    <div class="signature-dni">DNI: <?php echo $cabecera['autorizadorDni'] ?? ''; ?></div>
+                    <div class="signature-name"><?php echo $cabecera['nombreReceptor'] ?? ''; ?></div>
+                    <div class="signature-dni">DNI: <?php echo $cabecera['dniReceptor'] ?? ''; ?></div>
                     <div class="title-signature">Receptor</div>
                 </div>
             </div>
