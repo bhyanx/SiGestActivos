@@ -264,58 +264,6 @@ class GestionarMovimientos
         }
     }
 
-    // public function crearMovimientoConCodigo($data)
-    // {
-    //     try {
-    //         $sql = "DECLARE @nuevoIdMovimiento INT;
-    //                 DECLARE @nuevoCodMovimiento VARCHAR(20);
-
-    //                 EXEC sp_CrearMovimiento 
-    //                     @idTipoMovimiento = :idTipoMovimiento,
-    //                     @idAutorizador = :idAutorizador,
-    //                     @idSucursalOrigen = :idSucursalOrigen,
-    //                     @idSucursalDestino = :idSucursalDestino,
-    //                     @idEmpresaOrigen = :idEmpresaOrigen,
-    //                     @idEmpresaDestino = :idEmpresaDestino,
-    //                     @observaciones = :observaciones,
-    //                     @nuevoIdMovimiento = @nuevoIdMovimiento OUTPUT,
-    //                     @nuevoCodMovimiento = @nuevoCodMovimiento OUTPUT;
-
-    //                 SELECT @nuevoIdMovimiento as idMovimiento, @nuevoCodMovimiento as codMovimiento;";
-
-    //         $stmt = $this->db->prepare($sql);
-
-    //         // Asegurar que los valores sean del tipo correcto
-    //         $idTipoMovimiento = (int)$data['idTipoMovimiento'];
-    //         $idAutorizador = (int)$data['idAutorizador'];
-    //         $idSucursalOrigen = (int)$data['idSucursalOrigen'];
-    //         $idSucursalDestino = (int)$data['idSucursalDestino'];
-    //         $idEmpresaOrigen = (int)$data['idEmpresaOrigen'];
-    //         $idEmpresaDestino = (int)$data['idEmpresaDestino'];
-    //         $observaciones = (string)$data['observaciones'];
-
-    //         $stmt->bindParam(':idTipoMovimiento', $idTipoMovimiento, PDO::PARAM_INT);
-    //         $stmt->bindParam(':idAutorizador', $idAutorizador, PDO::PARAM_INT);
-    //         $stmt->bindParam(':idSucursalOrigen', $idSucursalOrigen, PDO::PARAM_INT);
-    //         $stmt->bindParam(':idSucursalDestino', $idSucursalDestino, PDO::PARAM_INT);
-    //         $stmt->bindParam(':idEmpresaOrigen', $idEmpresaOrigen, PDO::PARAM_INT);
-    //         $stmt->bindParam(':idEmpresaDestino', $idEmpresaDestino, PDO::PARAM_INT);
-    //         $stmt->bindParam(':observaciones', $observaciones, PDO::PARAM_STR);
-
-    //         if (!$stmt->execute()) {
-    //             throw new PDOException("Error al ejecutar la consulta: " . implode(" ", $stmt->errorInfo()));
-    //         }
-
-    //         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-    //         return [
-    //             'idMovimiento' => $resultado['idMovimiento'],
-    //             'codMovimiento' => $resultado['codMovimiento']
-    //         ];
-    //     } catch (PDOException $e) {
-    //         throw new Exception("Error al crear el movimiento: " . $e->getMessage());
-    //     }
-    // }
-
     public function registrarMovimientoActivos($idsActivos, $idAmbienteDestino, $idResponsableDestino, $motivo, $userMod, $idEmpresaDestino, $idSucursalDestino)
     {
         try {
@@ -413,7 +361,7 @@ class GestionarMovimientos
                 $fecha = date('Y-m-d', strtotime($filtros['fecha']));
                 $sql .= " AND CONVERT(date, m.fechaMovimiento) = ?";
                 $params[] = $fecha;
-            }                      
+            }
 
             $sql .= " 
         GROUP BY 
@@ -491,7 +439,7 @@ class GestionarMovimientos
                 $fecha = date('Y-m-d', strtotime($filtros['fecha']));
                 $sql .= " AND CONVERT(date, m.fechaMovimiento) = ?";
                 $params[] = $fecha;
-            }                      
+            }
 
             $sql .= " 
         GROUP BY 
@@ -588,6 +536,123 @@ class GestionarMovimientos
         }
     }
 
+
+    // public function enviarActivosAMantenimiento($data)
+    // {
+    //     try {
+    //         // Construir el XML de activos
+    //         $xml = "<Activos>";
+    //         foreach ($data['idsActivos'] as $id) {
+    //             $xml .= "<idActivo>$id</idActivo>";
+    //         }
+    //         $xml .= "</Activos>";
+
+    //         // Consulta SQL para ejecutar el procedimiento almacenado
+    //         $sql = "EXEC sp_EnviarActivosAMantenimiento
+    //                 @pXmlActivos = :xmlActivos,
+    //                 @pIdTipoMantenimiento = :idTipoMantenimiento,
+    //                 @pFechaProgramada = :fechaProgramada,
+    //                 @pDescripcion = :descripcion,
+    //                 @pObservaciones = :observaciones,
+    //                 @pCostoEstimado = :costoEstimado,
+    //                 @pIdProveedor = :idProveedor,
+    //                 @pIdResponsable = :idResponsable,
+    //                 @pIdEstadoMantenimiento = :idEstadoMantenimiento,
+    //                 @pUserMod = :userMod";
+
+    //         $stmt = $this->db->prepare($sql);
+
+    //         $stmt->bindParam(':xmlActivos', $xml, PDO::PARAM_STR);
+    //         $stmt->bindParam(':idTipoMantenimiento', $data['idTipoMantenimiento'], PDO::PARAM_INT);
+    //         $stmt->bindValue(':fechaProgramada', $data['fechaProgramada'], $data['fechaProgramada'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+    //         $stmt->bindValue(':descripcion', $data['descripcion'], $data['descripcion'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+    //         $stmt->bindValue(':observaciones', $data['observaciones'], $data['observaciones'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+    //         $stmt->bindValue(':costoEstimado', $data['costoEstimado'], $data['costoEstimado'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+    //         $stmt->bindValue(':idProveedor', $data['idProveedor'], $data['idProveedor'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+    //         $stmt->bindValue(':idResponsable', $data['idResponsable'], $data['idResponsable'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+    //         $stmt->bindParam(':idEstadoMantenimiento', $data['idEstadoMantenimiento'], PDO::PARAM_INT);
+    //         $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
+
+    //         $stmt->execute();
+    //         return true;
+    //     } catch (PDOException $e) {
+    //         throw new Exception("Error al enviar activos a mantenimiento: " . $e->getMessage());
+    //     }
+    // }
+
+    public function enviarActivosAMantenimiento($data)
+    {
+        try {
+            // Construir el XML de activos
+            $xml = "<Activos>";
+            foreach ($data['idsActivos'] as $id) {
+                $xml .= "<idActivo>$id</idActivo>";
+            }
+            $xml .= "</Activos>";
+
+            // Consulta SQL para ejecutar el procedimiento almacenado
+            $sql = "EXEC sp_EnviarActivosAMantenimiento
+                    @pXmlActivos = :xmlActivos,
+                    @pIdTipoMantenimiento = :idTipoMantenimiento,
+                    @pFechaProgramada = :fechaProgramada,
+                    @pDescripcion = :descripcion,
+                    @pObservaciones = :observaciones,
+                    @pCostoEstimado = :costoEstimado,
+                    @pIdProveedor = :idProveedor,
+                    @pIdResponsable = :idResponsable,
+                    @pIdEstadoMantenimiento = :idEstadoMantenimiento,
+                    @pUserMod = :userMod";
+
+            $stmt = $this->db->prepare($sql);
+
+            $stmt->bindParam(':xmlActivos', $xml, PDO::PARAM_STR);
+            $stmt->bindParam(':idTipoMantenimiento', $data['idTipoMantenimiento'], PDO::PARAM_INT);
+            $stmt->bindValue(':fechaProgramada', $data['fechaProgramada'], $data['fechaProgramada'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindValue(':descripcion', $data['descripcion'], $data['descripcion'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindValue(':observaciones', $data['observaciones'], $data['observaciones'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindValue(':costoEstimado', $data['costoEstimado'], $data['costoEstimado'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindValue(':idProveedor', $data['idProveedor'], $data['idProveedor'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindValue(':idResponsable', $data['idResponsable'], $data['idResponsable'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindParam(':idEstadoMantenimiento', $data['idEstadoMantenimiento'], PDO::PARAM_INT);
+            $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
+
+            $stmt->execute();
+            return true;
+        } catch (PDOException $e) {
+            throw new Exception("Error al enviar activos a mantenimiento: " . $e->getMessage());
+        }
+    }
+
+    public function obtenerTiposMantenimiento()
+    {
+        try {
+            $sql = "SELECT idTipoMantenimiento, nombre 
+                    FROM tTipoMantenimiento 
+                    ORDER BY nombre";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Error al obtener tipos de mantenimiento: " . $e->getMessage());
+        }
+    }
+
+    public function obtenerEstadosMantenimiento()
+    {
+        try {
+            $sql = "SELECT idEstadoMantenimiento, nombre 
+                    FROM tEstadoMantenimiento
+                    ORDER BY nombre";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Error al obtener estados de mantenimiento: " . $e->getMessage());
+        }
+    }
+
     public function obtenerEmpleado($idEmpleado)
     {
         try {
@@ -603,6 +668,7 @@ class GestionarMovimientos
             throw new Exception("Error al obtener datos del empleado: " . $e->getMessage());
         }
     }
+
     public function obtenerEmpresa($idEmpresa)
     {
         try {
