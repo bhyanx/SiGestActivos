@@ -553,7 +553,7 @@ try {
                         <th class="code-col">CÓDIGO</th>
                         <th class="description-col">DESCRIPCIÓN DEL EQUIPO</th>
                         <th class="type-col">TIPO MANT.</th>
-                        <th class="observations-col">OBSERVACIONES</th>
+                        <!-- <th class="observations-col">OBSERVACIONES</th> -->
                     </tr>
                 </thead>
                 <tbody>
@@ -565,7 +565,7 @@ try {
                                 <td class="code-text"><?php echo $detalle['codigoActivo'] ?? ''; ?></td>
                                 <td class="description-col"><?php echo $detalle['nombreActivo'] ?? ''; ?></td>
                                 <td class="type-text"><?php echo $detalle['tipoMantenimiento'] ?? ''; ?></td>
-                                <td class="observations-text"><?php echo $detalle['observaciones'] ?? ''; ?></td>
+                                <!-- <td class="observations-text"><?php //echo $detalle['observaciones'] ?? ''; ?></td> -->
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
