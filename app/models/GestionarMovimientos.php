@@ -537,121 +537,7 @@ class GestionarMovimientos
     }
 
 
-    // public function enviarActivosAMantenimiento($data)
-    // {
-    //     try {
-    //         // Construir el XML de activos
-    //         $xml = "<Activos>";
-    //         foreach ($data['idsActivos'] as $id) {
-    //             $xml .= "<idActivo>$id</idActivo>";
-    //         }
-    //         $xml .= "</Activos>";
 
-    //         // Consulta SQL para ejecutar el procedimiento almacenado
-    //         $sql = "EXEC sp_EnviarActivosAMantenimiento
-    //                 @pXmlActivos = :xmlActivos,
-    //                 @pIdTipoMantenimiento = :idTipoMantenimiento,
-    //                 @pFechaProgramada = :fechaProgramada,
-    //                 @pDescripcion = :descripcion,
-    //                 @pObservaciones = :observaciones,
-    //                 @pCostoEstimado = :costoEstimado,
-    //                 @pIdProveedor = :idProveedor,
-    //                 @pIdResponsable = :idResponsable,
-    //                 @pIdEstadoMantenimiento = :idEstadoMantenimiento,
-    //                 @pUserMod = :userMod";
-
-    //         $stmt = $this->db->prepare($sql);
-
-    //         $stmt->bindParam(':xmlActivos', $xml, PDO::PARAM_STR);
-    //         $stmt->bindParam(':idTipoMantenimiento', $data['idTipoMantenimiento'], PDO::PARAM_INT);
-    //         $stmt->bindValue(':fechaProgramada', $data['fechaProgramada'], $data['fechaProgramada'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-    //         $stmt->bindValue(':descripcion', $data['descripcion'], $data['descripcion'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-    //         $stmt->bindValue(':observaciones', $data['observaciones'], $data['observaciones'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-    //         $stmt->bindValue(':costoEstimado', $data['costoEstimado'], $data['costoEstimado'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-    //         $stmt->bindValue(':idProveedor', $data['idProveedor'], $data['idProveedor'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-    //         $stmt->bindValue(':idResponsable', $data['idResponsable'], $data['idResponsable'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-    //         $stmt->bindParam(':idEstadoMantenimiento', $data['idEstadoMantenimiento'], PDO::PARAM_INT);
-    //         $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
-
-    //         $stmt->execute();
-    //         return true;
-    //     } catch (PDOException $e) {
-    //         throw new Exception("Error al enviar activos a mantenimiento: " . $e->getMessage());
-    //     }
-    // }
-
-    public function enviarActivosAMantenimiento($data)
-    {
-        try {
-            // Construir el XML de activos
-            $xml = "<Activos>";
-            foreach ($data['idsActivos'] as $id) {
-                $xml .= "<idActivo>$id</idActivo>";
-            }
-            $xml .= "</Activos>";
-
-            // Consulta SQL para ejecutar el procedimiento almacenado
-            $sql = "EXEC sp_EnviarActivosAMantenimiento
-                    @pXmlActivos = :xmlActivos,
-                    @pIdTipoMantenimiento = :idTipoMantenimiento,
-                    @pFechaProgramada = :fechaProgramada,
-                    @pDescripcion = :descripcion,
-                    @pObservaciones = :observaciones,
-                    @pCostoEstimado = :costoEstimado,
-                    @pIdProveedor = :idProveedor,
-                    @pIdResponsable = :idResponsable,
-                    @pIdEstadoMantenimiento = :idEstadoMantenimiento,
-                    @pUserMod = :userMod";
-
-            $stmt = $this->db->prepare($sql);
-
-            $stmt->bindParam(':xmlActivos', $xml, PDO::PARAM_STR);
-            $stmt->bindParam(':idTipoMantenimiento', $data['idTipoMantenimiento'], PDO::PARAM_INT);
-            $stmt->bindValue(':fechaProgramada', $data['fechaProgramada'], $data['fechaProgramada'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-            $stmt->bindValue(':descripcion', $data['descripcion'], $data['descripcion'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-            $stmt->bindValue(':observaciones', $data['observaciones'], $data['observaciones'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-            $stmt->bindValue(':costoEstimado', $data['costoEstimado'], $data['costoEstimado'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-            $stmt->bindValue(':idProveedor', $data['idProveedor'], $data['idProveedor'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-            $stmt->bindValue(':idResponsable', $data['idResponsable'], $data['idResponsable'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-            $stmt->bindParam(':idEstadoMantenimiento', $data['idEstadoMantenimiento'], PDO::PARAM_INT);
-            $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
-
-            $stmt->execute();
-            return true;
-        } catch (PDOException $e) {
-            throw new Exception("Error al enviar activos a mantenimiento: " . $e->getMessage());
-        }
-    }
-
-    public function obtenerTiposMantenimiento()
-    {
-        try {
-            $sql = "SELECT idTipoMantenimiento, nombre 
-                    FROM tTipoMantenimiento 
-                    ORDER BY nombre";
-
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            throw new Exception("Error al obtener tipos de mantenimiento: " . $e->getMessage());
-        }
-    }
-
-    public function obtenerEstadosMantenimiento()
-    {
-        try {
-            $sql = "SELECT idEstadoMantenimiento, nombre 
-                    FROM tEstadoMantenimiento
-                    ORDER BY nombre";
-
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            throw new Exception("Error al obtener estados de mantenimiento: " . $e->getMessage());
-        }
-    }
 
     public function obtenerEmpleado($idEmpleado)
     {
@@ -695,4 +581,6 @@ class GestionarMovimientos
             throw new Exception("Error al obtener tipos de movimiento: " . $e->getMessage());
         }
     }
+
+
 }

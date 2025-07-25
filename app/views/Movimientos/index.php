@@ -20,6 +20,19 @@ session_start();
         .dropdown-menu .show {
             position: fixed !important;
         }
+
+        /* Asegurar que el modal de artículos siempre esté visible */
+        #ModalArticulos {
+            z-index: 9999 !important;
+        }
+
+        #ModalArticulos .modal-backdrop {
+            z-index: 9998 !important;
+        }
+
+        .modal-backdrop.show {
+            z-index: 9998 !important;
+        }
     </style>
 </head>
 
@@ -338,7 +351,7 @@ session_start();
                             <input type="hidden" name="IdProveedorHidden" id="IdProveedorHidden">
                             <input type="hidden" name="IdResponsableHidden" id="IdResponsableHidden">
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="card card-warning">
@@ -455,7 +468,7 @@ session_start();
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="table-responsive">
                                         <table id="tblactivosmantenimiento" class="table table-hover table-bordered table-striped table-sm w-100">
                                             <thead>
@@ -734,17 +747,17 @@ session_start();
                                                     <i class="fas fa-edit"></i> Observaciones:
                                                     <small class="text-muted">(Opcional)</small>
                                                 </label>
-                                                <textarea 
-                                                    class="form-control" 
-                                                    name="observaciones" 
-                                                    id="observaciones" 
-                                                    rows="4" 
+                                                <textarea
+                                                    class="form-control"
+                                                    name="observaciones"
+                                                    id="observaciones"
+                                                    rows="4"
                                                     placeholder="Ingrese observaciones adicionales sobre este movimiento de activos..."
                                                     maxlength="500"
                                                     style="resize: vertical; min-height: 100px;"></textarea>
                                                 <div class="d-flex justify-content-between mt-1">
                                                     <small class="form-text text-muted">
-                                                        <i class="fas fa-info-circle"></i> 
+                                                        <i class="fas fa-info-circle"></i>
                                                         Describa detalles importantes del movimiento, motivos, condiciones especiales, etc.
                                                     </small>
                                                     <small class="form-text text-muted">
@@ -779,11 +792,60 @@ session_start();
 
 
                         <!-- Modal Articulos -->
-                        <div class="modal fade" id="ModalArticulos" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalArticulosTitle">
+                        <div class="modal fade" id="ModalArticulos" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalArticulosTitle" style="z-index: 9999 !important;"
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header dragable_touch">
+                                    <h5 class="modal-title" id="ModalArticulosTitulo"><i class="fas fa-box"></i> Lista de artículos</h5>
+                                    <button class="close" data-dismiss="modal" aria-label="Close">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="table-responsive">
+
+                                                <table id="tbllistarActivos" class="table table-bordered table-striped display nowrap" style="width:100%">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Id</th>
+                                                            <th>Código</th>
+                                                            <th>Nombre</th>
+                                                            <!-- <th>Marca</th> -->
+                                                            <th>Sucursal</th>
+                                                            <th>Ambiente</th>
+                                                            <th><i class="fa fa-cogs"></i></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <!-- Aquí se llenarán los datos dinámicamente -->
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th>Id</th>
+                                                            <th>Código</th>
+                                                            <th>Nombre</th>
+                                                            <!-- <th>Marca</th> -->
+                                                            <th>Sucursal</th>
+                                                            <th>Ambiente</th>
+                                                            <th><i class="fa fa-cogs"></i></th>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Articulos para Mantenimiento -->
+                        <div class="modal fade" id="ModalArticulosMantenimiento" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalArticulosMantenimientoTitle">
                             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header dragable_touch">
-                                        <h5 class="modal-title" id="ModalArticulosTitulo"><i class="fas fa-box"></i> Lista de artículos</h5>
+                                        <h5 class="modal-title" id="ModalArticulosMantenimientoTitulo"><i class="fas fa-tools"></i> Lista de activos para mantenimiento</h5>
                                         <button class="close" data-dismiss="modal" aria-label="Close">
                                             <span>&times;</span>
                                         </button>
@@ -792,14 +854,12 @@ session_start();
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="table-responsive">
-
-                                                    <table id="tbllistarActivos" class="table table-bordered table-striped display nowrap" style="width:100%">
+                                                    <table id="tbllistarActivosMantenimiento" class="table table-bordered table-striped display nowrap" style="width:100%">
                                                         <thead>
                                                             <tr>
                                                                 <th>Id</th>
                                                                 <th>Código</th>
                                                                 <th>Nombre</th>
-                                                                <!-- <th>Marca</th> -->
                                                                 <th>Sucursal</th>
                                                                 <th>Ambiente</th>
                                                                 <th><i class="fa fa-cogs"></i></th>
@@ -813,7 +873,6 @@ session_start();
                                                                 <th>Id</th>
                                                                 <th>Código</th>
                                                                 <th>Nombre</th>
-                                                                <!-- <th>Marca</th> -->
                                                                 <th>Sucursal</th>
                                                                 <th>Ambiente</th>
                                                                 <th><i class="fa fa-cogs"></i></th>
@@ -827,13 +886,14 @@ session_start();
                                 </div>
                             </div>
                         </div>
-
                     </div>
+
                 </div>
-            </section>
         </div>
-        <?php require_once("../Layouts/Footer.php"); ?>
-        <script src="movimiento.js"></script>
+        </section>
+    </div>
+    <?php require_once("../Layouts/Footer.php"); ?>
+    <script src="movimiento.js"></script>
     </div>
 </body>
 

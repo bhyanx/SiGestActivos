@@ -68,19 +68,12 @@ function init() {
     });
 
   $(document).on("click", "#btnBuscarIdItem, .btnagregardet", function () {
+    console.log("Abriendo modal para movimientos");
     $("#ModalArticulos").modal("show");
     listarActivosModal();
   });
 
-  // Eventos para mantenimiento
-  $(document).on(
-    "click",
-    "#btnBuscarActivoMant, .btnagregaractivomant",
-    function () {
-      $("#ModalArticulos").modal("show");
-      listarActivosModal();
-    }
-  );
+
 
   $("#btnchangedatasucmovimiento")
     .off("click")
@@ -127,8 +120,6 @@ function init() {
   // Ocultar secciones al cargar
   $("#divgenerarmov").hide();
   $("#divregistroMovimiento").hide();
-  $("#divgenerarmantenimiento").hide();
-  $("#divregistroMantenimiento").hide();
 
   // Contador de caracteres para observaciones
   $(document).on("input", "#observaciones", function () {
@@ -152,27 +143,7 @@ function init() {
     }
   });
 
-  // Contador de caracteres para observaciones de mantenimiento
-  $(document).on("input", "#ObservacionesMantenimiento", function () {
-    const maxLength = 500;
-    const currentLength = $(this).val().length;
-    $("#contador-caracteres-mant").text(currentLength);
 
-    // Cambiar color según proximidad al límite
-    if (currentLength > maxLength * 0.9) {
-      $("#contador-caracteres-mant")
-        .removeClass("text-muted text-warning")
-        .addClass("text-danger");
-    } else if (currentLength > maxLength * 0.7) {
-      $("#contador-caracteres-mant")
-        .removeClass("text-muted text-danger")
-        .addClass("text-warning");
-    } else {
-      $("#contador-caracteres-mant")
-        .removeClass("text-warning text-danger")
-        .addClass("text-muted");
-    }
-  });
 
   // Botón para abrir el panel de generación de movimiento
   $("#btnnuevo")
@@ -180,8 +151,6 @@ function init() {
     .on("click", function () {
       $("#divgenerarmov").show();
       $("#divregistroMovimiento").hide();
-      $("#divgenerarmantenimiento").hide();
-      $("#divregistroMantenimiento").hide();
       $("#divtblmovimientos").hide();
       $("#divlistadomovimientos").hide(); // Oculta el formulario de búsqueda
       $("#tituloModalMovimiento").html(
@@ -195,15 +164,7 @@ function init() {
   $("#btnmantenimiento")
     .off("click")
     .on("click", function () {
-      $("#divgenerarmantenimiento").show();
-      $("#divgenerarmov").hide();
-      $("#divregistroMovimiento").hide();
-      $("#divregistroMantenimiento").hide();
-      $("#divtblmovimientos").hide();
-      $("#divlistadomovimientos").hide();
-
-      // Cargar combos de mantenimiento
-      ListarCombosMantenimiento();
+      window.location.href = "../Mantenimiento/";
     });
 
   // Botón procesar en generarmov
@@ -311,127 +272,7 @@ function init() {
       $("#divlistadomovimientos").show(); // Muestra el formulario de búsqueda
     });
 
-  // Botón cancelar en mantenimiento
-  $("#btncancelarmantenimiento")
-    .off("click")
-    .on("click", function () {
-      $("#divgenerarmantenimiento").hide();
-      $("#divtblmovimientos").show();
-      $("#divlistadomovimientos").show();
-    });
 
-  // Botón procesar mantenimiento
-  $("#btnprocesarmantenimiento")
-    .off("click")
-    .on("click", function () {
-      // Validar campos obligatorios
-      const tipoMantenimiento = $("#IdTipoMantenimiento").val();
-      const estadoMantenimiento = $("#IdEstadoMantenimiento").val();
-
-      if (!tipoMantenimiento) {
-        Swal.fire({
-          title: "Campo Requerido",
-          text: "Debe seleccionar un tipo de mantenimiento",
-          icon: "warning",
-        });
-        return;
-      }
-
-      if (!estadoMantenimiento) {
-        Swal.fire({
-          title: "Campo Requerido",
-          text: "Debe seleccionar un estado de mantenimiento",
-          icon: "warning",
-        });
-        return;
-      }
-
-      // Si todo está correcto, proceder con el procesamiento
-      $("#divregistroMantenimiento").show();
-      $("#divgenerarmantenimiento").hide();
-
-      // Transferir valores de los combos a campos ocultos
-      $("#IdTipoMantenimientoHidden").val($("#IdTipoMantenimiento").val());
-      $("#IdEstadoMantenimientoHidden").val($("#IdEstadoMantenimiento").val());
-      $("#IdProveedorHidden").val($("#IdProveedor").val());
-      $("#IdResponsableHidden").val($("#IdResponsableMantenimiento").val());
-
-      // Llenar campos informativos
-      $("#tipoMantenimientoInfo").val(
-        $("#IdTipoMantenimiento option:selected").text()
-      );
-      $("#estadoMantenimientoInfo").val(
-        $("#IdEstadoMantenimiento option:selected").text()
-      );
-      $("#fechaProgramadaInfo").val(
-        $("#FechaProgramada").val() || "No programada"
-      );
-      $("#proveedorInfo").val(
-        $("#IdProveedor option:selected").text() || "No asignado"
-      );
-      $("#responsableInfo").val(
-        $("#IdResponsableMantenimiento option:selected").text() || "No asignado"
-      );
-      $("#costoEstimadoInfo").val(
-        $("#CostoEstimado").val()
-          ? "S/. " + $("#CostoEstimado").val()
-          : "No estimado"
-      );
-      $("#descripcionInfo").val(
-        $("#DescripcionMantenimiento").val() || "Sin descripción"
-      );
-      $("#observacionesInfo").val(
-        $("#ObservacionesMantenimiento").val() || "Sin observaciones"
-      );
-
-      // Limpiar tabla de activos
-      $("#tblactivosmantenimiento tbody").empty();
-      $("#TotalActivosMantenimiento").text("0");
-    });
-
-  // Botón salir mantenimiento
-  $("#btnsalirmantenimiento")
-    .off("click")
-    .on("click", function () {
-      Swal.fire({
-        title: "¿Estás seguro?",
-        text: "Se perderán los cambios realizados",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        confirmButtonText: "Aceptar",
-        cancelButtonColor: "#d33",
-        cancelButtonText: "No, continuar aquí",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          $("#divregistroMantenimiento").hide();
-          $("#divgenerarmantenimiento").hide();
-          $("#divtblmovimientos").show();
-          $("#divlistadomovimientos").show();
-        }
-      });
-    });
-
-  // Botón cambiar datos mantenimiento
-  $("#btnchangedatamantenimiento")
-    .off("click")
-    .on("click", function () {
-      Swal.fire({
-        title: "¿Estás seguro?",
-        text: "Se perderán los cambios realizados",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        confirmButtonText: "Aceptar",
-        cancelButtonColor: "#d33",
-        cancelButtonText: "No, continuar aquí",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          $("#divregistroMantenimiento").hide();
-          $("#divgenerarmantenimiento").show();
-        }
-      });
-    });
 
   // Botón cancelar en registro de movimiento
   $("#btnCancelarMovimiento")
@@ -491,6 +332,26 @@ function init() {
   $("#ModalDetalleMovimiento").on("show.bs.modal", function () {
     setSucursalOrigenDestino();
     setDestinoDetalle();
+  });
+
+  // Debug para el modal de artículos
+  $("#ModalArticulos").on("show.bs.modal", function () {
+    console.log("Modal de artículos se está abriendo");
+    
+    // Si estamos en mantenimiento, asegurar que el modal esté visible
+    if ($("#divgenerarmantenimiento").is(":visible") || $("#divregistroMantenimiento").is(":visible")) {
+      console.log("Abriendo desde mantenimiento - ajustando z-index");
+      $(this).css("z-index", "9999");
+      $(".modal-backdrop").css("z-index", "9998");
+    }
+  });
+
+  $("#ModalArticulos").on("shown.bs.modal", function () {
+    console.log("Modal de artículos se abrió completamente");
+  });
+
+  $("#ModalArticulos").on("hide.bs.modal", function () {
+    console.log("Modal de artículos se está cerrando");
   });
 
   // Al seleccionar un activo, autocompleta los datos de ese activo
@@ -777,12 +638,7 @@ function init() {
       Ambiente: fila.find("td:eq(4)").text(),
     };
 
-    // Verificar si estamos en modo mantenimiento o movimiento
-    if ($("#divregistroMantenimiento").is(":visible")) {
-      agregarActivoAMantenimiento(activo);
-    } else {
-      agregarActivoAlDetalle(activo);
-    }
+    agregarActivoAlDetalle(activo);
   });
 
   $(document).on("click", ".btnQuitarActivo", function () {
@@ -1811,6 +1667,8 @@ function listarActivosModal() {
   });
 }
 
+
+
 // Agregar los manejadores de eventos para los nuevos botones
 // $(document).on("click", ".btnAnularMovimiento", function () {
 //   const fila = $(this).closest("tr");
@@ -1932,479 +1790,3 @@ function imprimirReporte(idMovimiento) {
   );
 }
 
-// ==================== FUNCIONES DE MANTENIMIENTO ====================
-
-function ListarCombosMantenimiento() {
-  $.ajax({
-    url: "../../controllers/GestionarMovimientoController.php?action=combosMantenimiento",
-    type: "POST",
-    dataType: "json",
-    success: (res) => {
-      if (res.status) {
-        // Cargar tipos de mantenimiento
-        $("#IdTipoMantenimiento").html(res.data.tiposMantenimiento).trigger("change");
-        
-        // Cargar estados de mantenimiento
-        $("#IdEstadoMantenimiento").html(res.data.estadosMantenimiento).trigger("change");
-        
-        // Cargar responsables de mantenimiento
-        $("#IdResponsableMantenimiento").html(res.data.responsables).trigger("change");
-
-        // Inicializar select2 para los combos básicos
-        $("#IdTipoMantenimiento, #IdEstadoMantenimiento, #IdResponsableMantenimiento").select2({
-          theme: "bootstrap4",
-          width: "100%",
-        });
-
-        // Configurar el combo de proveedores con AJAX
-        $("#IdProveedor").select2({
-          minimumInputLength: 2,
-          theme: "bootstrap4",
-          width: "100%",
-          language: {
-            inputTooShort: function (args) {
-              return "Ingresar mas de 2 caracteres.";
-            },
-            noResults: function () {
-              return "Datos no encontrados.";
-            },
-            searching: function () {
-              return "Buscando...";
-            },
-          },
-          ajax: {
-            url: "../../controllers/GestionarActivosController.php?action=comboProveedor",
-            type: "GET",
-            dataType: "json",
-            delay: 250,
-            data: function (params) {
-              return {
-                filtro: params.term, // término de búsqueda
-              };
-            },
-            processResults: function (data) {
-              // data ya debe ser un array de objetos {id, text}
-              return {
-                results: data || [],
-              };
-            },
-            cache: true,
-          },
-          placeholder: "Ingresar/Seleccionar Proveedor",
-          allowClear: true,
-        });
-      } else {
-        Swal.fire(
-          "Mantenimiento de activos",
-          "No se pudieron cargar los combos: " + res.message,
-          "warning"
-        );
-      }
-    },
-    error: (xhr, status, error) => {
-      Swal.fire(
-        "Mantenimiento de activos",
-        "Error al cargar combos: " + error,
-        "error"
-      );
-    },
-  });
-}
-
-function agregarActivoAMantenimiento(activo) {
-  if ($(`#tblactivosmantenimiento tbody tr[data-id='${activo.id}']`).length > 0) {
-    NotificacionToast(
-      "error",
-      `El activo <b>${activo.nombre}</b> ya está en el mantenimiento.`
-    );
-    return false;
-  }
-
-  // Validar que el activo tenga todos los datos necesarios
-  if (!activo.id || !activo.nombre || !activo.Ambiente || !activo.Sucursal) {
-    NotificacionToast(
-      "error",
-      "El activo no tiene todos los datos necesarios"
-    );
-    return false;
-  }
-
-  var nuevaFila = `<tr data-id='${activo.id}' class='table-light border-left border-info border-3 agregado-temp'>
-    <td class="text-center">${activo.id}</td>
-    <td><strong>${activo.codigo}</strong></td>
-    <td>${activo.nombre}</td>
-    <td>${activo.Sucursal}</td>
-    <td>${activo.Ambiente}</td>
-    <td class="text-center">
-      <button type='button' class='btn btn-danger btn-sm btnQuitarActivoMant' title='Quitar activo'>
-        <i class='fa fa-trash'></i>
-      </button>
-    </td>
-  </tr>`;
-  
-  $("#tblactivosmantenimiento tbody").append(nuevaFila);
-
-  // Animación de entrada
-  setTimeout(function () {
-    $("#tblactivosmantenimiento tbody tr.agregado-temp")
-      .removeClass("table-light agregado-temp")
-      .addClass("table-active");
-
-    setTimeout(function () {
-      $("#tblactivosmantenimiento tbody tr.table-active").removeClass("table-active");
-    }, 1000);
-  }, 100);
-
-  NotificacionToast(
-    "success",
-    `Activo <b>${activo.nombre}</b> agregado al mantenimiento.`
-  );
-
-  // Cerrar modal automáticamente
-  $("#ModalArticulos").modal("hide");
-
-  // Actualizar contador
-  actualizarContadorActivosMantenimiento();
-
-  return true;
-}
-
-function actualizarContadorActivosMantenimiento() {
-  const totalActivos = $("#tblactivosmantenimiento tbody tr").length;
-  $("#TotalActivosMantenimiento").text(totalActivos);
-
-  // Actualizar botón de guardar mantenimiento
-  const $btnGuardar = $("#btnGuardarMantenimiento");
-  
-  if (totalActivos === 0) {
-    $btnGuardar
-      .prop("disabled", true)
-      .removeClass("btn-success")
-      .addClass("btn-secondary")
-      .html('<i class="fa fa-save"></i> Guardar Mantenimiento');
-  } else {
-    $btnGuardar
-      .prop("disabled", false)
-      .removeClass("btn-secondary")
-      .addClass("btn-success")
-      .html(
-        `<i class="fa fa-save"></i> Registrar Mantenimiento (${totalActivos} activo${
-          totalActivos > 1 ? "s" : ""
-        })`
-      );
-  }
-}
-
-// Evento para quitar activo del mantenimiento
-$(document).on("click", ".btnQuitarActivoMant", function () {
-  const $fila = $(this).closest("tr");
-  const nombreActivo = $fila.find("td:eq(2)").text();
-
-  Swal.fire({
-    title: "¿Quitar activo?",
-    text: `¿Está seguro de quitar "${nombreActivo}" del mantenimiento?`,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-    confirmButtonText: "Sí, quitar",
-    cancelButtonText: "Cancelar",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      $fila.fadeOut(300, function () {
-        $(this).remove();
-        actualizarContadorActivosMantenimiento();
-        NotificacionToast(
-          "info",
-          `Activo <b>${nombreActivo}</b> removido del mantenimiento.`
-        );
-      });
-    }
-  });
-});
-
-// Función para guardar el mantenimiento completo
-$("#btnGuardarMantenimiento").on("click", function () {
-  // Verificar si hay activos en la tabla
-  if ($("#tblactivosmantenimiento tbody tr").length === 0) {
-    Swal.fire("Error", "Debe agregar al menos un activo al mantenimiento", "error");
-    return;
-  }
-
-  // Mostrar loading
-  Swal.fire({
-    title: "Procesando Mantenimiento",
-    html: `
-      <div class="text-center">
-        <div class="spinner-border text-primary mb-3" role="status">
-          <span class="sr-only">Creando mantenimiento...</span>
-        </div>
-        <p>Paso 1: Creando registro de mantenimiento...</p>
-      </div>
-    `,
-    allowOutsideClick: false,
-    showConfirmButton: false,
-  });
-
-  // PASO 1: Crear el registro de mantenimiento
-  const formDataMantenimiento = new FormData();
-  formDataMantenimiento.append("idTipoMantenimiento", $("#IdTipoMantenimientoHidden").val());
-  formDataMantenimiento.append("idEstadoMantenimiento", $("#IdEstadoMantenimientoHidden").val());
-  formDataMantenimiento.append("fechaProgramada", $("#FechaProgramada").val() || null);
-  formDataMantenimiento.append("idProveedor", $("#IdProveedorHidden").val() || null);
-  formDataMantenimiento.append("idResponsable", $("#IdResponsableHidden").val() || null);
-  formDataMantenimiento.append("costoEstimado", $("#CostoEstimado").val() || 0);
-  formDataMantenimiento.append("descripcion", $("#DescripcionMantenimiento").val() || "");
-  formDataMantenimiento.append("observaciones", $("#ObservacionesMantenimiento").val() || "");
-
-  $.ajax({
-    url: "../../controllers/GestionarMovimientoController.php?action=RegistrarMantenimiento",
-    type: "POST",
-    data: formDataMantenimiento,
-    contentType: false,
-    processData: false,
-    dataType: "json",
-    success: function (resMantenimiento) {
-      if (resMantenimiento.status) {
-        // PASO 2: Agregar todos los activos al mantenimiento creado
-        Swal.update({
-          html: `
-            <div class="alert alert-success mb-3">
-              <h5><i class="fas fa-check-circle"></i> Mantenimiento Creado</h5>
-              <h4 class="text-primary"><strong>${resMantenimiento.codigoMantenimiento}</strong></h4>
-            </div>
-            <div class="progress mb-3">
-              <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
-                   style="width: 0%" id="progressBarMant">0/${$("#tblactivosmantenimiento tbody tr").length}</div>
-            </div>
-            <div id="progressTextMant">Paso 2: Agregando activos al mantenimiento...</div>
-          `,
-        });
-
-        agregarActivosAlMantenimiento(resMantenimiento.idMantenimiento, resMantenimiento.codigoMantenimiento);
-      } else {
-        Swal.fire({
-          title: "Error al Crear Mantenimiento",
-          html: `
-            <div class="alert alert-danger">
-              <i class="fas fa-exclamation-triangle"></i> ${resMantenimiento.message}
-            </div>
-          `,
-          icon: "error",
-          confirmButtonText: "Intentar de nuevo",
-        });
-      }
-    },
-    error: function (xhr, status, error) {
-      console.error("Error en la petición:", error);
-      Swal.fire({
-        title: "Error de Comunicación",
-        html: `
-          <div class="alert alert-danger">
-            <i class="fas fa-wifi"></i> No se pudo comunicar con el servidor.<br>
-            <small>Error: ${error}</small>
-          </div>
-        `,
-        icon: "error",
-        confirmButtonText: "Reintentar",
-      });
-    },
-  });
-});
-
-// Función para agregar todos los activos al mantenimiento creado
-function agregarActivosAlMantenimiento(idMantenimiento, codigoMantenimiento) {
-  let activosProcesados = 0;
-  let totalActivos = $("#tblactivosmantenimiento tbody tr").length;
-  let errores = [];
-  let activosExitosos = [];
-
-  $("#tblactivosmantenimiento tbody tr").each(function (index) {
-    const fila = $(this);
-    const nombreActivo = fila.find("td:eq(2)").text();
-    const detalleData = new FormData();
-
-    detalleData.append("IdMantenimiento", idMantenimiento);
-    detalleData.append("IdActivo", fila.find("td:eq(0)").text());
-
-    $.ajax({
-      url: "../../controllers/GestionarMovimientoController.php?action=AgregarActivoMantenimiento",
-      type: "POST",
-      data: detalleData,
-      contentType: false,
-      processData: false,
-      dataType: "json",
-      success: function (res) {
-        activosProcesados++;
-
-        // Actualizar progreso
-        const porcentaje = (activosProcesados / totalActivos) * 100;
-        $("#progressBarMant")
-          .css("width", porcentaje + "%")
-          .text(`${activosProcesados}/${totalActivos}`);
-        $("#progressTextMant").text(
-          `Procesando: ${nombreActivo} - ${res.status ? "Éxito" : "Error"}`
-        );
-
-        if (res.status) {
-          activosExitosos.push(nombreActivo);
-        } else {
-          errores.push(`${nombreActivo}: ${res.message}`);
-        }
-
-        // Cuando todos los activos se hayan procesado
-        if (activosProcesados === totalActivos) {
-          setTimeout(() => {
-            if (errores.length === 0) {
-              Swal.fire({
-                title: "¡Mantenimiento Completado Exitosamente!",
-                html: `
-                  <div class="alert alert-success">
-                    <h5><i class="fas fa-check-circle text-success"></i> Código de Mantenimiento</h5>
-                    <h3 class="text-primary"><strong>${codigoMantenimiento}</strong></h3>
-                    <p class="mb-0"><strong>${activosExitosos.length} activos</strong> procesados correctamente</p>
-                  </div>
-                  
-                  <div class="row mt-4">
-                    <div class="col-md-6">
-                      <div class="card border-info">
-                        <div class="card-header bg-info text-white">
-                          <i class="fas fa-info-circle"></i> Información del Mantenimiento
-                        </div>
-                        <div class="card-body">
-                          <p><strong>Código:</strong> ${codigoMantenimiento}</p>
-                          <p><strong>Total de activos:</strong> ${activosExitosos.length}</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                      <div class="card border-success">
-                        <div class="card-header bg-success text-white">
-                          <i class="fas fa-tools"></i> Activos en Mantenimiento
-                        </div>
-                        <div class="card-body" style="max-height: 250px; overflow-y: auto;">
-                          ${activosExitosos
-                            .map(
-                              (nombre) =>
-                                `<div class="d-flex justify-content-between align-items-center border-bottom py-1">
-                              <span><i class="fas fa-wrench text-success"></i> ${nombre}</span>
-                              <span class="badge badge-success">✓</span>
-                            </div>`
-                            )
-                            .join("")}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="mt-3 p-3 bg-light rounded">
-                    <small class="text-muted">
-                      <i class="fas fa-search"></i> Para consultar este mantenimiento, busque por el código: <strong>${codigoMantenimiento}</strong>
-                    </small>
-                  </div>
-                `,
-                icon: "success",
-                width: "900px",
-                confirmButtonText: "Continuar",
-                confirmButtonColor: "#28a745",
-              }).then(() => {
-                limpiarYRecargarMantenimiento();
-              });
-            } else {
-              let mensajeExito =
-                activosExitosos.length > 0
-                  ? `<div class="alert alert-success mb-3">
-                  <h5><i class="fas fa-check-circle"></i> Mantenimiento: <strong>${codigoMantenimiento}</strong></h5>
-                  <strong>Exitosos (${activosExitosos.length}):</strong><br>
-                  ${activosExitosos
-                    .map(
-                      (activo) =>
-                        `• <i class="fas fa-wrench text-success"></i> ${activo}`
-                    )
-                    .join("<br>")}
-                </div>`
-                  : "";
-
-              Swal.fire({
-                title: "Mantenimiento Completado con Advertencias",
-                html: `
-                  ${mensajeExito}
-                  <div class="alert alert-warning">
-                    <strong>Errores (${errores.length}):</strong><br>
-                    ${errores
-                      .map(
-                        (error) =>
-                          `• <i class="fas fa-exclamation-triangle text-warning"></i> ${error}`
-                      )
-                      .join("<br>")}
-                  </div>
-                  <div class="mt-3 text-muted">
-                    <small><i class="fas fa-info-circle"></i> Los activos exitosos están bajo el código: <strong>${codigoMantenimiento}</strong></small>
-                  </div>
-                `,
-                icon: "warning",
-                width: "700px",
-              }).then(() => {
-                limpiarYRecargarMantenimiento();
-              });
-            }
-          }, 500);
-        }
-      },
-      error: function (xhr, status, error) {
-        activosProcesados++;
-
-        // Actualizar progreso
-        const porcentaje = (activosProcesados / totalActivos) * 100;
-        $("#progressBarMant")
-          .css("width", porcentaje + "%")
-          .text(`${activosProcesados}/${totalActivos}`);
-        $("#progressTextMant").text(`Error en: ${nombreActivo}`);
-
-        errores.push(`${nombreActivo}: Error de comunicación - ${error}`);
-
-        if (activosProcesados === totalActivos) {
-          setTimeout(() => {
-            Swal.fire({
-              title: "Error en el Proceso",
-              html: `
-                <div class="alert alert-danger">
-                  <h5>Mantenimiento: <strong>${codigoMantenimiento}</strong></h5>
-                  <strong>Errores encontrados:</strong><br>
-                  ${errores
-                    .map(
-                      (error) =>
-                        `• <i class="fas fa-times text-danger"></i> ${error}`
-                    )
-                    .join("<br>")}
-                </div>
-              `,
-              icon: "error",
-              width: "600px",
-            });
-          }, 500);
-        }
-      },
-    });
-  });
-}
-
-// Función para limpiar y recargar después del mantenimiento
-function limpiarYRecargarMantenimiento() {
-  $("#divregistroMantenimiento").hide();
-  $("#divgenerarmantenimiento").hide();
-  $("#divtblmovimientos").show();
-  $("#divlistadomovimientos").show();
-  $("#tblactivosmantenimiento tbody").empty();
-
-  // Limpiar observaciones y resetear contador
-  $("#ObservacionesMantenimiento").val("");
-  $("#contador-caracteres-mant")
-    .text("0")
-    .removeClass("text-warning text-danger")
-    .addClass("text-muted");
-
-  // Recargar la tabla principal
-  ListarMovimientos();
-}

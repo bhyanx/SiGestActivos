@@ -39,7 +39,7 @@ switch ($action) {
                 $data = [
                     'idTipoMovimiento' => $_POST['idTipoMovimiento'],
                     'idAutorizador' => $_POST['idAutorizador'],
-                    'idReceptor' => $_POST['idReceptor'], 
+                    'idReceptor' => $_POST['idReceptor'],
                     'idEmpresaOrigen' => $_SESSION['cod_empresa'],
                     'idSucursalOrigen' => $_SESSION['cod_UnidadNeg'],
                     'idEmpresaDestino' => $_POST['idEmpresaDestino'],
@@ -188,7 +188,7 @@ switch ($action) {
 
             $receptor = $combo->comboReceptor();
             $combos['receptor'] = '<option value="">Seleccione</option>';
-            foreach  ($receptor as $row) {
+            foreach ($receptor as $row) {
                 $combos['receptor'] .= "<option value='{$row['codTrabajador']}'>{$row['NombreTrabajador']}</option>";
             }
 
@@ -309,28 +309,28 @@ switch ($action) {
         }
         break;
 
-        case 'listarMovimientosRecibidos':
-            try {
-                $filtros = [
-                    'tipo' => $_POST['tipo'] ?? null,
-                    'fecha' => $_POST['fecha'] ?? null,
-                    'idEmpresa' => $_SESSION['cod_empresa'] ?? null,
-                    'idSucursalDestino' => $_SESSION['cod_UnidadNeg'] ?? null,  // corregido aquí
-                    //'idSucursalDestino' => $_POST['cod_UnidadNeg'] ?? null
-                ];
-    
-                $resultado = $movimientos->listarMovimientosRecibidos($filtros);
-                echo json_encode([
-                    'status' => true,
-                    'data' => $resultado
-                ]);
-            } catch (Exception $e) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => $e->getMessage()
-                ]);
-            }
-            break;
+    case 'listarMovimientosRecibidos':
+        try {
+            $filtros = [
+                'tipo' => $_POST['tipo'] ?? null,
+                'fecha' => $_POST['fecha'] ?? null,
+                'idEmpresa' => $_SESSION['cod_empresa'] ?? null,
+                'idSucursalDestino' => $_SESSION['cod_UnidadNeg'] ?? null,  // corregido aquí
+                //'idSucursalDestino' => $_POST['cod_UnidadNeg'] ?? null
+            ];
+
+            $resultado = $movimientos->listarMovimientosRecibidos($filtros);
+            echo json_encode([
+                'status' => true,
+                'data' => $resultado
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
 
 
     case 'obtenerDetallesMovimiento':
@@ -353,108 +353,12 @@ switch ($action) {
         }
         break;
 
-    case 'enviarActivosAMantenimiento':
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            try {
-                // Validar que se recibieron activos
-                $idsActivos = isset($_POST['idsActivos']) ? json_decode($_POST['idsActivos'], true) : [];
-                if (!is_array($idsActivos) || empty($idsActivos)) {
-                    throw new Exception("No se recibieron activos válidos para enviar a mantenimiento");
-                }
 
-                // Preparar datos para el procedimiento almacenado
-                $data = [
-                    'idsActivos' => $idsActivos,
-                    'idTipoMantenimiento' => $_POST['idTipoMantenimiento'],
-                    'fechaProgramada' => !empty($_POST['fechaProgramada']) ? $_POST['fechaProgramada'] : null,
-                    'descripcion' => !empty($_POST['descripcion']) ? $_POST['descripcion'] : null,
-                    'observaciones' => !empty($_POST['observaciones']) ? $_POST['observaciones'] : null,
-                    'costoEstimado' => !empty($_POST['costoEstimado']) ? $_POST['costoEstimado'] : null,
-                    'idProveedor' => !empty($_POST['idProveedor']) ? $_POST['idProveedor'] : null,
-                    'idResponsable' => !empty($_POST['idResponsable']) ? $_POST['idResponsable'] : null,
-                    'idEstadoMantenimiento' => $_POST['idEstadoMantenimiento'] ?? 1, // Por defecto: Programado
-                    'userMod' => $_SESSION['usuario']
-                ];
 
-                $resultado = $movimientos->enviarActivosAMantenimiento($data);
-
-                echo json_encode([
-                    'status' => true,
-                    'message' => 'Activos enviados a mantenimiento correctamente',
-                    'totalActivos' => count($idsActivos)
-                ]);
-            } catch (Exception $e) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => $e->getMessage()
-                ]);
-            }
-        }
-        break;
-
-    case 'obtenerTiposMantenimiento':
-        try {
-            $tipos = $movimientos->obtenerTiposMantenimiento();
-            echo json_encode([
-                'status' => true,
-                'data' => $tipos
-            ]);
-        } catch (Exception $e) {
-            echo json_encode([
-                'status' => false,
-                'message' => $e->getMessage()
-            ]);
-        }
-        break;
-
-    case 'obtenerEstadosMantenimiento':
-        try {
-            $estados = $movimientos->obtenerEstadosMantenimiento();
-            echo json_encode([
-                'status' => true,
-                'data' => $estados
-            ]);
-        } catch (Exception $e) {
-            echo json_encode([
-                'status' => false,
-                'message' => $e->getMessage()
-            ]);
-        }
-        break;
-
-    case 'combosMantenimiento':
-        try {
-            // Obtener tipos de mantenimiento
-            $tiposMantenimiento = $movimientos->obtenerTiposMantenimiento();
-            $combos['tiposMantenimiento'] = '<option value="">Seleccione tipo de mantenimiento</option>';
-            foreach ($tiposMantenimiento as $row) {
-                $combos['tiposMantenimiento'] .= "<option value='{$row['idTipoMantenimiento']}'>{$row['nombre']}</option>";
-            }
-
-            // Obtener estados de mantenimiento
-            $estadosMantenimiento = $movimientos->obtenerEstadosMantenimiento();
-            $combos['estadosMantenimiento'] = '<option value="">Seleccione estado</option>';
-            foreach ($estadosMantenimiento as $row) {
-                $combos['estadosMantenimiento'] .= "<option value='{$row['idEstadoMantenimiento']}'>{$row['nombre']}</option>";
-            }
-
-            // Obtener responsables (reutilizamos el combo existente)
-            $responsables = $combo->comboResponsable();
-            $combos['responsables'] = '<option value="">Seleccione responsable</option>';
-            foreach ($responsables as $row) {
-                $combos['responsables'] .= "<option value='{$row['codTrabajador']}'>{$row['NombreTrabajador']}</option>";
-            }
-
-            echo json_encode([
-                'status' => true,
-                'data' => $combos,
-                'message' => 'Combos de mantenimiento cargados correctamente'
-            ]);
-        } catch (Exception $e) {
-            echo json_encode([
-                'status' => false,
-                'message' => 'Error al cargar combos de mantenimiento: ' . $e->getMessage()
-            ]);
-        }
+    default:
+        echo json_encode([
+            'status' => false,
+            'message' => 'Acción no válida'
+        ]);
         break;
 }

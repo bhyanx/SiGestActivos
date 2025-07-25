@@ -88,7 +88,7 @@ function Dashboard() {
           const element = res[i];
           if (res[i]["Estado"] == "Operativa") {
             $("#lblcantidadoperativos").html(res[i]["Cantidad"]);
-          } else if (res[i]["Estado"] == "Reparacion") {
+          } else if (res[i]["Estado"] == "Reparación") {
             $("#lblcantidadactivosmantenimiento").html(res[i]["Cantidad"]);
           } else if (res[i]["Estado"] == "Baja") {
             $("#lblcantidadactivosbaja").html(res[i]["Cantidad"]);
