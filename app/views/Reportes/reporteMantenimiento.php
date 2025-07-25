@@ -514,10 +514,10 @@ try {
                     <div class="label">Tipo de Mantenimiento: </div>
                     <div class="value"><?php echo $cabecera['tipoMantenimiento'] ?? ''; ?></div>
                 </div>
-                <div class="detail-row">
+                <!-- <div class="detail-row">
                     <div class="label">Estado: </div>
-                    <div class="value"><?php echo $cabecera['estadoMantenimiento'] ?? ''; ?></div>
-                </div>
+                    <div class="value"><?php // echo $cabecera['estadoMantenimiento'] ?? ''; ?></div>
+                </div> -->
             </div>
             <div>
                 <div class="detail-row">
