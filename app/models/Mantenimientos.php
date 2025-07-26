@@ -240,4 +240,59 @@ class Mantenimientos
             throw new Exception("Error al obtener información de la sucursal: " . $e->getMessage());
         }
     }
+
+    public function finalizarMantenimiento($data)
+    {
+        try {
+            // Construir XML para el procedimiento almacenado
+            $xml = '<Mantenimientos>';
+            $xml .= '<Mantenimiento>';
+            $xml .= '<idMantenimiento>' . $data['idMantenimiento'] . '</idMantenimiento>';
+            $xml .= '<fechaRealizada>' . $data['fechaRealizada'] . '</fechaRealizada>';
+            $xml .= '<costoReal>' . ($data['costoReal'] ?? 0) . '</costoReal>';
+            $xml .= '<observaciones>' . htmlspecialchars($data['observaciones'] ?? '') . '</observaciones>';
+            $xml .= '<idEstadoMantenimiento>' . $data['idEstadoMantenimiento'] . '</idEstadoMantenimiento>';
+            $xml .= '</Mantenimiento>';
+            $xml .= '</Mantenimientos>';
+
+            $sql = "EXEC sp_FinalizarMantenimiento @XmlMantenimientos = :xml, @pUserMod = :userMod";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':xml', $xml, PDO::PARAM_STR);
+            $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
+            
+            $stmt->execute();
+            return true;
+        } catch (PDOException $e) {
+            throw new Exception("Error al finalizar mantenimiento: " . $e->getMessage());
+        }
+    }
+
+    public function obtenerMantenimientoParaFinalizar($idMantenimiento)
+    {
+        try {
+            $sql = "SELECT 
+                m.idMantenimiento,
+                m.codigoMantenimiento,
+                m.descripcion,
+                m.fechaProgramada,
+                m.costoEstimado,
+                m.estadoMantenimiento,
+                em.nombre as estadoActual,
+                COUNT(dm.idActivo) as totalActivos
+                FROM tMantenimientos m
+                LEFT JOIN tEstadoMantenimiento em ON m.estadoMantenimiento = em.idEstadoMantenimiento
+                LEFT JOIN tDetalleMantenimiento dm ON m.idMantenimiento = dm.idMantenimiento
+                WHERE m.idMantenimiento = ?
+                GROUP BY m.idMantenimiento, m.codigoMantenimiento, m.descripcion, 
+                         m.fechaProgramada, m.costoEstimado, m.estadoMantenimiento, em.nombre";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idMantenimiento, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Error al obtener datos del mantenimiento: " . $e->getMessage());
+        }
+    }
 }

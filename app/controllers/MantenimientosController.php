@@ -225,6 +225,58 @@ switch ($action) {
         }
         break;
 
+    case 'obtenerMantenimientoParaFinalizar':
+        try {
+            $idMantenimiento = $_POST['idMantenimiento'] ?? null;
+            if (!$idMantenimiento) {
+                throw new Exception("ID de mantenimiento no proporcionado");
+            }
+
+            $mantenimiento = $mantenimientos->obtenerMantenimientoParaFinalizar($idMantenimiento);
+            $estados = $mantenimientos->obtenerEstadosMantenimiento();
+            
+            echo json_encode([
+                'status' => true,
+                'data' => [
+                    'mantenimiento' => $mantenimiento,
+                    'estados' => $estados
+                ]
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'FinalizarMantenimiento':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $data = [
+                    'idMantenimiento' => $_POST['idMantenimiento'],
+                    'fechaRealizada' => $_POST['fechaRealizada'],
+                    'costoReal' => $_POST['costoReal'] ?? null,
+                    'observaciones' => $_POST['observaciones'] ?? null,
+                    'idEstadoMantenimiento' => $_POST['idEstadoMantenimiento'],
+                    'userMod' => $_SESSION['usuario']
+                ];
+
+                $mantenimientos->finalizarMantenimiento($data);
+
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Mantenimiento finalizado correctamente'
+                ]);
+            } catch (Exception $e) {
+                echo json_encode([
+                    'status' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
+        }
+        break;
+
     default:
         echo json_encode([
             'status' => false,

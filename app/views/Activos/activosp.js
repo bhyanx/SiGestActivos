@@ -1997,7 +1997,7 @@ function init() {
                   eventosHtml += `
                     <div class="col-12">
                       <div class="d-flex align-items-center p-2 rounded-3" style="background: #f0fdf4; border-left: 3px solid #22c55e;">
-                        <div class="me-4 ml-4 p-2">
+                        <div class="me-2 ml-2 p-2">
                           <i class="fas fa-exchange-alt text-green-600"></i>
                         </div>
                         <div class="flex-grow-1">
@@ -2015,7 +2015,7 @@ function init() {
                   eventosHtml += `
                     <div class="col-12">
                       <div class="d-flex align-items-center p-2 rounded-3" style="background: #fef3c7; border-left: 3px solid #f59e0b;">
-                        <div class="me-4 ml-4 p-2">
+                        <div class="me-2 ml-2 p-2">
                           <i class="fas fa-hand-holding text-amber-600"></i>
                         </div>
                         <div class="flex-grow-1">
@@ -2033,7 +2033,7 @@ function init() {
                   eventosHtml += `
                     <div class="col-12">
                       <div class="d-flex align-items-center p-2 rounded-3" style="background: #e0f2fe; border-left: 3px solid #06b6d4;">
-                        <div class="me-4 ml-4 p-2">
+                        <div class="me-2 ml-2 p-2">
                           <i class="fas fa-undo text-cyan-600"></i>
                         </div>
                         <div class="flex-grow-1">
@@ -2051,7 +2051,7 @@ function init() {
                   eventosHtml += `
                     <div class="col-12">
                       <div class="d-flex align-items-center p-2 rounded-3" style="background: #f3e8ff; border-left: 3px solid #8b5cf6;">
-                        <div class="me-4 ml-4 p-2">
+                        <div class="me-2 ml-2 p-2">
                           <i class="fas fa-truck text-purple-600"></i>
                         </div>
                         <div class="flex-grow-1">
@@ -2095,7 +2095,7 @@ function init() {
                   eventosHtml += `
                     <div class="col-12">
                       <div class="d-flex align-items-center p-2 rounded-3" style="background: #fef2f2; border-left: 3px solid #ef4444;">
-                        <div class="me-4 ml-4 p-2">
+                        <div class="me-2 ml-2 p-2">
                           <i class="fas fa-tools text-red-600"></i>
                         </div>
                         <div class="flex-grow-1">

@@ -473,8 +473,8 @@ class GestionarActivos
     public function obtenerUltimosEventosActivo($idActivo)
     {
         try {
-            error_log("=== DEBUGGING MODELO EVENTOS ===", 3, __DIR__ . '/../../logs/debug.log');
-            error_log("Consultando eventos para activo ID: " . $idActivo, 3, __DIR__ . '/../../logs/debug.log');
+            /*error_log("=== DEBUGGING MODELO EVENTOS ===", 3, __DIR__ . '/../../logs/debug.log');
+            error_log("Consultando eventos para activo ID: " . $idActivo, 3, __DIR__ . '/../../logs/debug.log');*/
             
             // Primero verificar si la vista existe
             $checkView = $this->db->prepare("SELECT COUNT(*) as existe FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vUltimosEventosActivo'");

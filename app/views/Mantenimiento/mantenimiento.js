@@ -964,6 +964,10 @@ function ListarMantenimientos() {
                                     <a class="dropdown-item" href="#" onclick="imprimirReporteMantenimiento(${row.idMantenimiento})">
                                         <i class="fas fa-print"></i> Imprimir Reporte
                                     </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#" onclick="finalizarMantenimiento(${row.idMantenimiento})">
+                                        <i class="fas fa-check-circle text-success"></i> Finalizar Mantenimiento
+                                    </a>
                                 </div>
                             </div>`;
         },
@@ -1147,4 +1151,238 @@ function imprimirReporteMantenimiento(idMantenimiento) {
     `../../views/Reportes/reporteMantenimiento.php?id=${idMantenimiento}`,
     "_blank"
   );
+}
+
+function finalizarMantenimiento(idMantenimiento) {
+  // Primero obtener los datos del mantenimiento
+  $.ajax({
+    url: "../../controllers/MantenimientosController.php?action=obtenerMantenimientoParaFinalizar",
+    type: "POST",
+    data: { idMantenimiento: idMantenimiento },
+    dataType: "json",
+    success: function (res) {
+      if (res.status) {
+        const mantenimiento = res.data.mantenimiento;
+        const estados = res.data.estados;
+        
+        // Crear opciones para el select de estados
+        let estadosOptions = '';
+        estados.forEach(estado => {
+          const selected = estado.idEstadoMantenimiento == 3 ? 'selected' : ''; // Asumiendo que 3 es "Finalizado"
+          estadosOptions += `<option value="${estado.idEstadoMantenimiento}" ${selected}>${estado.nombre}</option>`;
+        });
+
+        // Mostrar modal de finalización
+        Swal.fire({
+          title: 'Finalizar Mantenimiento',
+          html: `
+            <div class="container-fluid">
+              <div class="row mb-3">
+                <div class="col-12">
+                  <div class="alert alert-info">
+                    <h5><i class="fas fa-tools"></i> ${mantenimiento.codigoMantenimiento}</h5>
+                    <p class="mb-1"><strong>Descripción:</strong> ${mantenimiento.descripcion || 'Sin descripción'}</p>
+                    <p class="mb-1"><strong>Fecha Programada:</strong> ${mantenimiento.fechaProgramada ? moment(mantenimiento.fechaProgramada).format('DD/MM/YYYY') : 'No programada'}</p>
+                    <p class="mb-1"><strong>Costo Estimado:</strong> S/. ${mantenimiento.costoEstimado || '0.00'}</p>
+                    <p class="mb-0"><strong>Total de Activos:</strong> ${mantenimiento.totalActivos}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <form id="formFinalizarMantenimiento">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="fechaRealizada" class="form-label"><strong>Fecha de Realización *</strong></label>
+                    <input type="date" class="form-control" id="fechaRealizada" name="fechaRealizada" 
+                           value="${moment().format('YYYY-MM-DD')}" required>
+                  </div>
+                  
+                  <div class="col-md-6 mb-3">
+                    <label for="costoReal" class="form-label"><strong>Costo Real</strong></label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">S/.</span>
+                      </div>
+                      <input type="number" class="form-control" id="costoReal" name="costoReal" 
+                             step="0.01" min="0" placeholder="0.00">
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-12 mb-3">
+                    <label for="estadoFinal" class="form-label"><strong>Estado Final *</strong></label>
+                    <select class="form-control" id="estadoFinal" name="estadoFinal" required>
+                      ${estadosOptions}
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-12 mb-3">
+                    <label for="observacionesFinales" class="form-label"><strong>Observaciones Finales</strong></label>
+                    <textarea class="form-control" id="observacionesFinales" name="observacionesFinales" 
+                              rows="4" maxlength="500" placeholder="Ingrese observaciones sobre la finalización del mantenimiento..."></textarea>
+                    <small class="form-text text-muted">
+                      <span id="contadorObservaciones">0</span>/500 caracteres
+                    </small>
+                  </div>
+                </div>
+              </form>
+            </div>
+          `,
+          width: '800px',
+          showCancelButton: true,
+          confirmButtonText: '<i class="fas fa-check-circle"></i> Finalizar Mantenimiento',
+          cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
+          confirmButtonColor: '#28a745',
+          cancelButtonColor: '#6c757d',
+          preConfirm: () => {
+            const fechaRealizada = document.getElementById('fechaRealizada').value;
+            const estadoFinal = document.getElementById('estadoFinal').value;
+            
+            if (!fechaRealizada) {
+              Swal.showValidationMessage('La fecha de realización es obligatoria');
+              return false;
+            }
+            
+            if (!estadoFinal) {
+              Swal.showValidationMessage('Debe seleccionar un estado final');
+              return false;
+            }
+            
+            return {
+              fechaRealizada: fechaRealizada,
+              costoReal: document.getElementById('costoReal').value || null,
+              estadoFinal: estadoFinal,
+              observaciones: document.getElementById('observacionesFinales').value || null
+            };
+          }
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Procesar la finalización
+            procesarFinalizacionMantenimiento(idMantenimiento, result.value);
+          }
+        });
+
+        // Contador de caracteres para observaciones
+        $(document).on('input', '#observacionesFinales', function() {
+          const currentLength = $(this).val().length;
+          $('#contadorObservaciones').text(currentLength);
+          
+          if (currentLength > 450) {
+            $('#contadorObservaciones').removeClass('text-muted').addClass('text-danger');
+          } else if (currentLength > 350) {
+            $('#contadorObservaciones').removeClass('text-muted text-danger').addClass('text-warning');
+          } else {
+            $('#contadorObservaciones').removeClass('text-warning text-danger').addClass('text-muted');
+          }
+        });
+
+      } else {
+        NotificacionToast("error", res.message || "Error al cargar los datos del mantenimiento");
+      }
+    },
+    error: function() {
+      NotificacionToast("error", "Error al comunicarse con el servidor");
+    }
+  });
+}
+
+function procesarFinalizacionMantenimiento(idMantenimiento, datos) {
+  // Mostrar loading
+  Swal.fire({
+    title: 'Finalizando Mantenimiento',
+    html: `
+      <div class="text-center">
+        <div class="spinner-border text-success mb-3" role="status">
+          <span class="sr-only">Procesando...</span>
+        </div>
+        <p>Finalizando mantenimiento y actualizando estados de activos...</p>
+      </div>
+    `,
+    allowOutsideClick: false,
+    showConfirmButton: false
+  });
+
+  // Enviar datos al servidor
+  const formData = new FormData();
+  formData.append('idMantenimiento', idMantenimiento);
+  formData.append('fechaRealizada', datos.fechaRealizada);
+  formData.append('costoReal', datos.costoReal);
+  formData.append('observaciones', datos.observaciones);
+  formData.append('idEstadoMantenimiento', datos.estadoFinal);
+
+  $.ajax({
+    url: "../../controllers/MantenimientosController.php?action=FinalizarMantenimiento",
+    type: "POST",
+    data: formData,
+    contentType: false,
+    processData: false,
+    dataType: "json",
+    success: function(res) {
+      if (res.status) {
+        Swal.fire({
+          title: '¡Mantenimiento Finalizado!',
+          html: `
+            <div class="alert alert-success">
+              <h5><i class="fas fa-check-circle text-success"></i> Proceso Completado</h5>
+              <p class="mb-2">El mantenimiento ha sido finalizado correctamente.</p>
+              <hr>
+              <div class="row text-left">
+                <div class="col-6"><strong>Fecha de Realización:</strong></div>
+                <div class="col-6">${moment(datos.fechaRealizada).format('DD/MM/YYYY')}</div>
+                
+                <div class="col-6"><strong>Costo Real:</strong></div>
+                <div class="col-6">S/. ${datos.costoReal || '0.00'}</div>
+                
+                <div class="col-6"><strong>Estado Final:</strong></div>
+                <div class="col-6">${$('#estadoFinal option:selected').text()}</div>
+              </div>
+            </div>
+            
+            <div class="mt-3 p-3 bg-light rounded">
+              <small class="text-muted">
+                <i class="fas fa-info-circle"></i> Los activos han sido actualizados automáticamente a estado operativo.
+              </small>
+            </div>
+          `,
+          icon: 'success',
+          width: '600px',
+          confirmButtonText: 'Continuar',
+          confirmButtonColor: '#28a745'
+        }).then(() => {
+          // Recargar la tabla de mantenimientos
+          if ($.fn.DataTable.isDataTable("#tblMovimientos")) {
+            $("#tblMovimientos").DataTable().ajax.reload(null, false);
+          }
+        });
+      } else {
+        Swal.fire({
+          title: 'Error al Finalizar',
+          html: `
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-triangle"></i> ${res.message}
+            </div>
+          `,
+          icon: 'error',
+          confirmButtonText: 'Intentar de nuevo'
+        });
+      }
+    },
+    error: function(xhr, status, error) {
+      console.error("Error en la petición:", error);
+      Swal.fire({
+        title: 'Error de Comunicación',
+        html: `
+          <div class="alert alert-danger">
+            <i class="fas fa-wifi"></i> No se pudo comunicar con el servidor.<br>
+            <small>Error: ${error}</small>
+          </div>
+        `,
+        icon: 'error',
+        confirmButtonText: 'Reintentar'
+      });
+    }
+  });
 }
