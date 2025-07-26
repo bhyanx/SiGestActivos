@@ -274,42 +274,15 @@ function init() {
     // Mostrar loading
     Swal.fire({
       title: "Procesando",
-      text: "Guardando el movimiento...",
+      text: "Moviendo componentes...",
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
       }
     });
 
-    // Obtener los datos del formulario principal
-    const formData = new FormData();
-    formData.append("IdTipo", 8); // Tipo 8 = Movimiento entre activos
-    formData.append("autorizador", $("#IdAutorizador").val());
-    formData.append("sucursal_destino", $("#IdSucursalDestino").val());
-    formData.append("observacion", "");
-
-    // Primero guardar el movimiento principal
-    $.ajax({
-      url: "../../controllers/GestionarMovimientoController.php?action=RegistrarMovimientoSolo",
-      type: "POST",
-      data: formData,
-      contentType: false,
-      processData: false,
-      dataType: "json",
-      success: function (res) {
-        if (res.status) {
-          // Si se guardó el movimiento principal, proceder a guardar los detalles
-          guardarDetallesMovimiento(res.idMovimiento);
-        } else {
-          Swal.close();
-          NotificacionToast("error", res.message || "Error al registrar el movimiento");
-        }
-      },
-      error: function () {
-        Swal.close();
-        NotificacionToast("error", "Error al comunicarse con el servidor");
-      },
-    });
+    // Proceder directamente a mover los componentes
+    guardarDetallesMovimiento();
   });
 
   // Agregar evento para actualizar activos padres cuando cambie la sucursal destino
@@ -360,8 +333,7 @@ function init() {
         type: "POST",
         data: {
           IdActivoPadre: idPadre,
-          IdActivoComponente: idComponente,
-          Observaciones: observacion
+          IdActivoComponente: idComponente
         },
         dataType: "json",
         success: function (res) {
@@ -582,7 +554,7 @@ function cargarComponentesActivo(idActivoPadre) {
   });
 }
 
-function guardarDetallesMovimiento(idMovimiento) {
+function guardarDetallesMovimiento() {
   let detallesGuardados = 0;
   let totalDetalles = $("#tbldetallecomponentes tbody tr:not(.componente-deshabilitado)").length;
   let errores = [];
@@ -598,14 +570,10 @@ function guardarDetallesMovimiento(idMovimiento) {
     const fila = $(this);
     const detalleData = new FormData();
 
-    detalleData.append("IdMovimiento", idMovimiento);
     detalleData.append("IdActivoComponente", fila.data("id"));
     detalleData.append("IdActivoPadreNuevo", $("#IdActivoPadreDestino").val());
-    detalleData.append("IdTipo_Movimiento", 8); // Tipo 8 = Movimiento entre activos
-    detalleData.append("IdAutorizador", $("#IdAutorizador").val());
-    detalleData.append("Observaciones", fila.find('.componente-observacion').val() || $("#txtObservaciones").val());
 
-    // Guardar cada detalle
+    // Mover cada componente
     $.ajax({
       url: "../../controllers/GestionarMovimientosComponentesController.php?action=MoverComponenteEntreActivos",
       type: "POST",
@@ -629,7 +597,7 @@ function guardarDetallesMovimiento(idMovimiento) {
           if (errores.length === 0) {
             Swal.fire({
               title: "Éxito",
-              text: "Movimiento registrado correctamente",
+              text: "Componentes movidos correctamente",
               icon: "success"
             }).then(() => {
               // Limpiar y recargar
@@ -639,12 +607,24 @@ function guardarDetallesMovimiento(idMovimiento) {
               listarMovimientos();
             });
           } else {
-            NotificacionToast("warning", "El movimiento se registró pero hubo errores en algunos detalles");
-            // Limpiar y recargar
-            $("#divregistroMovimiento").hide();
-            $("#divtblmovimientos").show();
-            $("#divlistadomovimientos").show();
-            listarMovimientos();
+            Swal.fire({
+              title: "Movimiento Parcial",
+              html: `
+                <div class="alert alert-warning">
+                  <p>Algunos componentes se movieron correctamente, pero hubo errores:</p>
+                  <ul class="text-left">
+                    ${errores.map(error => `<li>${error}</li>`).join('')}
+                  </ul>
+                </div>
+              `,
+              icon: "warning"
+            }).then(() => {
+              // Limpiar y recargar
+              $("#divregistroMovimiento").hide();
+              $("#divtblmovimientos").show();
+              $("#divlistadomovimientos").show();
+              listarMovimientos();
+            });
           }
         }
       },
@@ -658,7 +638,18 @@ function guardarDetallesMovimiento(idMovimiento) {
 
         if (detallesGuardados === totalDetalles) {
           Swal.close();
-          NotificacionToast("error", "Hubo errores al guardar los detalles");
+          Swal.fire({
+            title: "Error",
+            html: `
+              <div class="alert alert-danger">
+                <p>Hubo errores al mover los componentes:</p>
+                <ul class="text-left">
+                  ${errores.map(error => `<li>${error}</li>`).join('')}
+                </ul>
+              </div>
+            `,
+            icon: "error"
+          });
         }
       },
     });
@@ -811,18 +802,14 @@ function listarMovimientos() {
       },
       { data: "IdDetalleMovimiento", visible: false, searchable: false },
       { data: "IdComponente" },
-      { data: "CodigoComponente", },
+      { data: "CodigoComponente" },
       { data: "NombreComponente" },
       { data: "TipoMovimiento" },
       { data: "ActivoPadreOrigen" },
       { data: "ActivoPadreDestino" },
-      //{ data: "SucursalOrigen", visible: false, searchable: false },
       { data: "Sucursal" },
-      //{ data: "AmbienteOrigen" },
       { data: "Ambiente" },
-      //{ data: "Autorizador" },
-      { data: "Responsable" },
-      //{ data: "ResponsableDestino" },
+      { data: "Autorizador" },
       {
         data: "FechaMovimiento",
         render: function (data) {
@@ -860,21 +847,61 @@ $(document).on("click", ".btnVerDetalle", function () {
   }
 
   Swal.fire({
-    title: "Detalle del Movimiento",
+    title: "Detalle del Movimiento de Componente",
     html: `
-      <div class="text-left">
-        <p><strong>ID Componente:</strong> ${datos.IdComponente}</p>
-        <p><strong>Nombre Componente:</strong> ${datos.NombreComponente}</p>
-        <p><strong>Activo Padre Origen:</strong> ${datos.ActivoPadreOrigen}</p>
-        <p><strong>Activo Padre Destino:</strong> ${datos.ActivoPadreDestino}</p>
-        <p><strong>Sucursal:</strong> ${datos.Sucursal}</p>
-        <p><strong>Ambiente:</strong> ${datos.Ambiente}</p>
-        <p><strong>Autorizador:</strong> ${datos.Autorizador}</p>
-        <p><strong>Responsable:</strong> ${datos.Responsable}</p>
-        <p><strong>Fecha:</strong> ${datos.FechaMovimiento}</p>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-cogs"></i> Información del Componente</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <p><strong>ID Componente:</strong> ${datos.IdComponente}</p>
+                    <p><strong>Código:</strong> ${datos.CodigoComponente}</p>
+                    <p><strong>Nombre:</strong> ${datos.NombreComponente}</p>
+                    <p><strong>Tipo Movimiento:</strong> ${datos.TipoMovimiento}</p>
+                  </div>
+                  <div class="col-md-6">
+                    <p><strong>Sucursal:</strong> ${datos.Sucursal}</p>
+                    <p><strong>Ambiente:</strong> ${datos.Ambiente}</p>
+                    <p><strong>Usuario:</strong> ${datos.Autorizador}</p>
+                    <p><strong>Fecha:</strong> ${moment(datos.FechaMovimiento).format("DD/MM/YYYY HH:mm")}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card mt-3">
+              <div class="card-header bg-success text-white">
+                <h5><i class="fas fa-exchange-alt"></i> Movimiento Realizado</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="alert alert-warning">
+                      <h6><i class="fas fa-arrow-left"></i> Activo Padre Anterior</h6>
+                      <p class="mb-0">${datos.ActivoPadreOrigen}</p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="alert alert-success">
+                      <h6><i class="fas fa-arrow-right"></i> Activo Padre Actual</h6>
+                      <p class="mb-0">${datos.ActivoPadreDestino}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     `,
-    width: "600px",
+    width: "800px",
+    showCloseButton: true,
+    showConfirmButton: false
   });
 });
 

@@ -15,24 +15,24 @@ class GestionarMovimientosComponentes
             $sql = "
             SELECT 
                 a.IdActivo,
-                a.CodigoActivo,
-                ISNULL(a.NombreActivoVisible, '') as NombreArticulo,
+                a.codigo as CodigoActivo,
+                ISNULL(a.NombreActivo, '') as NombreArticulo,
                 ISNULL(a.Marca, '') as MarcaArticulo,
                 ISNULL(s.Nombre_local, '') AS Sucursal,
                 ISNULL(amb.nombre, '') AS Ambiente,
-                ISNULL(a.NumeroSerie, '') as NumeroSerie
+                ISNULL(a.Serie, '') as NumeroSerie
             FROM vActivos a
             INNER JOIN vUnidadesdeNegocio s ON a.IdSucursal = s.cod_UnidadNeg
             INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
             WHERE a.IdEmpresa = 1 
             AND a.idEstado = 1
-            AND a.EsPadre = 1";
+            AND a.esPadre = 1";
 
             if ($sucursal) {
                 $sql .= " AND a.IdSucursal = :sucursal";
             }
 
-            $sql .= " ORDER BY a.NombreActivoVisible";
+            $sql .= " ORDER BY a.NombreActivo";
 
 
             $stmt = $this->db->prepare($sql);
@@ -55,10 +55,10 @@ class GestionarMovimientosComponentes
             $sql = "
             SELECT 
                 a.IdActivo,
-                a.CodigoActivo,
-                ISNULL(a.NombreActivoVisible, '') as NombreArticulo,
+                a.codigo as CodigoActivo,
+                ISNULL(a.NombreActivo, '') as NombreArticulo,
                 ISNULL(a.Marca, '') as MarcaArticulo,
-                ISNULL(a.NumeroSerie, '') as NumeroSerie,
+                ISNULL(a.Serie, '') as NumeroSerie,
                 ISNULL(s.Nombre_local, '') AS Sucursal,
                 ISNULL(amb.nombre, '') AS Ambiente
             FROM vActivos a
@@ -66,7 +66,7 @@ class GestionarMovimientosComponentes
             INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
             WHERE a.idActivoPadre = ?
             AND a.idEstado = 1
-            ORDER BY a.NombreActivoVisible";
+            ORDER BY a.NombreActivo";
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idActivoPadre, PDO::PARAM_INT);
@@ -83,21 +83,15 @@ class GestionarMovimientosComponentes
         try {
             $this->db->beginTransaction();
 
-            $sql = "EXEC sp_MoverComponenteEntreActivos 
-                @IdMovimiento = ?, 
-                @IdActivoComponente = ?, 
-                @IdActivoPadreNuevo = ?, 
-                @IdTipo_Movimiento = ?, 
-                @IdAutorizador = ?,
-                @Observaciones = ?";
+            $sql = "EXEC sp_MoverComponenteActivo 
+                @pIdActivoComponente = ?, 
+                @pNuevoPadre = ?, 
+                @pUserMod = ?";
 
             $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(1, $data['IdMovimiento'], PDO::PARAM_INT);
-            $stmt->bindParam(2, $data['IdActivoComponente'], PDO::PARAM_INT);
-            $stmt->bindParam(3, $data['IdActivoPadreNuevo'], PDO::PARAM_INT);
-            $stmt->bindParam(4, $data['IdTipo_Movimiento'], PDO::PARAM_INT);
-            $stmt->bindParam(5, $data['IdAutorizador'], PDO::PARAM_INT);
-            $stmt->bindParam(6, $data['Observaciones'], PDO::PARAM_STR);
+            $stmt->bindParam(1, $data['IdActivoComponente'], PDO::PARAM_INT);
+            $stmt->bindParam(2, $data['IdActivoPadreNuevo'], PDO::PARAM_INT);
+            $stmt->bindParam(3, $data['UserMod'], PDO::PARAM_STR);
             $stmt->execute();
 
             $this->db->commit();
@@ -114,29 +108,25 @@ class GestionarMovimientosComponentes
         try {
             $sql = "
             SELECT 
-    dm.IdDetalleMovimiento,
+    hc.idHistorialComponente as IdDetalleMovimiento,
     c.IdActivo AS IdComponente,
-    c.CodigoActivo AS CodigoComponente,
-    ISNULL(c.NombreActivoVisible, '') AS NombreComponente,
-	tm.nombre AS TipoMovimiento,
-    ISNULL(ap_origen.CodigoActivo + ' - ' + ap_origen.NombreActivoVisible, '') AS ActivoPadreOrigen,
-    ISNULL(ap_destino.CodigoActivo + ' - ' + ap_destino.NombreActivoVisible, '') AS ActivoPadreDestino,
+    c.codigo AS CodigoComponente,
+    ISNULL(c.NombreActivo, '') AS NombreComponente,
+    'Movimiento de Componente' AS TipoMovimiento,
+    ISNULL(ap_origen.codigo + ' - ' + ap_origen.NombreActivo, 'Sin padre anterior') AS ActivoPadreOrigen,
+    ISNULL(ap_destino.codigo + ' - ' + ap_destino.NombreActivo, '') AS ActivoPadreDestino,
     ISNULL(s.Nombre_local, '') AS Sucursal,
     ISNULL(amb.nombre, '') AS Ambiente,
-    ISNULL(t.NombreTrabajador, ' ') AS Autorizador,
-    ISNULL(r.NombreTrabajador, ' ') AS Responsable,
-    m.FechaMovimiento
-FROM tDetalleMovimiento dm
-INNER JOIN tMovimientos m ON dm.IdMovimiento = m.IdMovimiento
-INNER JOIN vActivos c ON dm.IdActivo = c.IdActivo
-LEFT JOIN tTipoMovimiento tm ON dm.IdTipo_Movimiento = tm.idTipoMovimiento
-LEFT JOIN vActivos ap_origen ON dm.IdActivoPadre_Anterior = ap_origen.IdActivo
-LEFT JOIN vActivos ap_destino ON dm.IdActivoPadre_Nuevo = ap_destino.IdActivo
-LEFT JOIN vUnidadesdeNegocio s ON m.IdSucursalDestino = s.cod_UnidadNeg
-LEFT JOIN tAmbiente amb ON dm.IdAmbiente_Nuevo = amb.idAmbiente
-LEFT JOIN vEmpleados t ON m.IdAutorizador = t.codTrabajador
-LEFT JOIN vEmpleados r ON dm.IdResponsable_Nuevo = r.codTrabajador
-WHERE m.idTipoMovimiento = 8";
+    ISNULL(hc.userMod, '') AS Autorizador,
+    ISNULL(hc.userMod, '') AS Responsable,
+    hc.fechaCambio as FechaMovimiento
+FROM tHistorialComponente hc
+INNER JOIN vActivos c ON hc.idActivoComponente = c.IdActivo
+LEFT JOIN vActivos ap_origen ON hc.idPadreAnterior = ap_origen.IdActivo
+LEFT JOIN vActivos ap_destino ON hc.idPadreNuevo = ap_destino.IdActivo
+LEFT JOIN vUnidadesdeNegocio s ON ap_destino.IdSucursal = s.cod_UnidadNeg
+LEFT JOIN tAmbiente amb ON ap_destino.IdAmbiente = amb.idAmbiente
+WHERE 1=1";
 
             $params = [];
 
@@ -146,11 +136,11 @@ WHERE m.idTipoMovimiento = 8";
             }
 
             if (!empty($filtros['fecha'])) {
-                $sql .= " AND CONVERT(date, m.FechaMovimiento) = ?";
+                $sql .= " AND CONVERT(date, hc.fechaCambio) = ?";
                 $params[] = $filtros['fecha'];
             }
 
-            $sql .= " ORDER BY m.FechaMovimiento DESC";
+            $sql .= " ORDER BY hc.fechaCambio DESC";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -163,12 +153,10 @@ WHERE m.idTipoMovimiento = 8";
     public function asignarComponenteActivo($data)
     {
         try {
-            $stmt = $this->db->prepare('EXEC sp_AsignarComponenteActivo @pIdActivoPadre = ?, @pIdActivoComponente = ?, @pObservaciones = ?, @pFechaAsignacion = ?, @pUserMod = ?');
-            $stmt->bindParam(1, $data['IdActivoPadre'], \PDO::PARAM_INT);
-            $stmt->bindParam(2, $data['IdActivoComponente'], \PDO::PARAM_INT);
-            $stmt->bindParam(3, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(4, $data['FechaAsignacion'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(5, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt = $this->db->prepare('EXEC sp_AsignarComponenteActivo @pIdActivoComponente = ?, @pIdActivoPadre = ?, @pUserMod = ?');
+            $stmt->bindParam(1, $data['IdActivoComponente'], \PDO::PARAM_INT);
+            $stmt->bindParam(2, $data['IdActivoPadre'], \PDO::PARAM_INT);
+            $stmt->bindParam(3, $data['UserMod'], \PDO::PARAM_STR);
             $stmt->execute();
             return true;
         } catch (\PDOException $e) {

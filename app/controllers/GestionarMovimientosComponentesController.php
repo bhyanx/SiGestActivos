@@ -76,12 +76,9 @@ switch ($action) {
             }
 
             $data = [
-                'IdMovimiento' => $_POST['IdMovimiento'],
                 'IdActivoComponente' => $_POST['IdActivoComponente'],
-                'IdTipo_Movimiento' => $_POST['IdTipo_Movimiento'],
                 'IdActivoPadreNuevo' => $_POST['IdActivoPadreNuevo'],
-                'IdAutorizador' => $_POST['IdAutorizador'],
-                'Observaciones' => $_POST['Observaciones'] ?? null
+                'UserMod' => $_SESSION['usuario'] ?? 'usuario_default'
             ];
 
             $resultado = $movimientosComponentes->moverComponenteEntreActivos($data);
@@ -127,8 +124,6 @@ switch ($action) {
             $data = [
                 'IdActivoPadre' => $_POST['IdActivoPadre'] ?? null,
                 'IdActivoComponente' => $_POST['IdActivoComponente'] ?? null,
-                'Observaciones' => $_POST['Observaciones'] ?? null,
-                'FechaAsignacion' => date('Y-m-d H:i:s'),
                 'UserMod' => $_SESSION['usuario'] ?? 'usuario_default'
             ];
 
