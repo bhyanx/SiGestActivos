@@ -97,12 +97,12 @@ session_start();
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-2">
+                                            <!-- <div class="col-md-2">
                                                 <div class="form-group">
                                                     <label for="filtroSucursal">Sucursal:</label>
                                                     <select class="form-control" name="filtroSucursal" id="filtroSucursal"></select>
                                                 </div>
-                                            </div>
+                                            </div> -->
                                             <!-- <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="filtroAmbiente">Ambiente Destino:</label>
@@ -115,7 +115,7 @@ session_start();
                                                     <input type="date" class="form-control" name="filtroFecha" id="filtroFecha" value="<?php echo date('Y-m-d'); ?>">
                                                 </div>
                                             </div>
-                                            <div class="col-md-2 offset-md-2">
+                                            <div class="col-md-2 offset-md-6">
                                                 <div class="form-group mb-0">
                                                     <label for="">&nbsp;</label>
                                                     <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">

@@ -29,6 +29,15 @@ class Combos
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+    public function comboTipoMovimientov1()
+    {
+        $sql = "SELECT idTipoMovimiento, nombre FROM tTipoMovimiento 
+        WHERE idTipoMovimiento NOT IN ( 5, 7, 8)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
     public function comboEstadoActivo()
     {
         $sql = "SELECT idEstadoActivo, nombre FROM tEstadoActivo WHERE idEstadoActivo NOT IN(3,2,4)";
@@ -109,7 +118,8 @@ class Combos
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public function comboAccionesAuditoria(){
+    public function comboAccionesAuditoria()
+    {
         $sql = "SELECT DISTINCT accion FROM tLogAuditoria";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
@@ -129,7 +139,8 @@ class Combos
         }
     }
 
-    public function comboProveedores(){
+    public function comboProveedores()
+    {
         try {
             $sql = "SELECT TOP (50) Documento, RazonSocial FROM vEntidadExternaGeneralProveedor ORDER BY RazonSocial";
             $stmt = $this->db->prepare($sql);

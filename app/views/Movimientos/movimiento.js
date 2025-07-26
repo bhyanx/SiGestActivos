@@ -1303,7 +1303,7 @@ function ListarCombosMov() {
       if (res.status) {
         // Cargar tipo de movimiento
         $("#IdTipoMovimientoMov")
-          .html(res.data.tipoMovimiento)
+          .html(res.data.tipoMovimientov1)
           .trigger("change");
 
         // Cargar autorizador

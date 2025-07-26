@@ -272,6 +272,28 @@ switch ($action) {
         }
         break;
 
+    case 'obtenerUltimosEventos':
+        try {
+            $idActivo = $_POST['idActivo'];
+            error_log("=== DEBUGGING ÚLTIMOS EVENTOS ===", 3, __DIR__ . '/../../logs/debug.log');
+            error_log("ID Activo: " . $idActivo, 3, __DIR__ . '/../../logs/debug.log');
+            
+            $eventos = $activos->obtenerUltimosEventosActivo($idActivo);
+            error_log("Eventos obtenidos: " . print_r($eventos, true), 3, __DIR__ . '/../../logs/debug.log');
+            
+            echo json_encode([
+                'status' => true,
+                'data' => $eventos
+            ]);
+        } catch (Exception $e) {
+            error_log("Error en obtenerUltimosEventos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/debug.log');
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+
     case 'get_activo':
         try {
             $filtros = [

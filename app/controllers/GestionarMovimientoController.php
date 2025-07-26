@@ -153,6 +153,12 @@ switch ($action) {
                 $combos['tipoMovimiento'] .= "<option value='{$row['idTipoMovimiento']}'>{$row['nombre']}</option>";
             }
 
+            $tipoMovimientov1 = $combo->comboTipoMovimientov1();
+            $combos['tipoMovimientov1'] = '<option value="">Seleccione</option>';
+            foreach ($tipoMovimientov1 as $row) {
+                $combos['tipoMovimientov1'] .= "<option value='{$row['idTipoMovimiento']}'>{$row['nombre']}</option>";
+            }
+
             // Obtener empresas
             $empresas = $combo->comboEmpresa();
             $combos['empresas'] = '<option value="">Seleccione</option>';

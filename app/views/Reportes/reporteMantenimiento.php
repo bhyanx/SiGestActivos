@@ -545,7 +545,7 @@ try {
 
         <!-- Equipment Table -->
         <div class="equipment-section">
-            <div class="equipment-section-title">EQUIPOS A MANTENER</div>
+            <div class="equipment-section-title">EQUIPOS ENVIADOS</div>
             <table class="equipment-table">
                 <thead>
                     <tr>

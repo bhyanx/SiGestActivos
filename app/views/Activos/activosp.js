@@ -1707,31 +1707,56 @@ function init() {
                             </div>
                         </div>
                         
-                        <!-- Columna Derecha - Componentes -->
+                        <!-- Columna Derecha - Componentes y Eventos -->
                         <div class="col-lg-6">
-                            <div class="card h-100 border-0 shadow-sm" style="border-radius: 16px;">
-                                <div class="card-header border-0 py-4" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 16px 16px 0 0;">
+                            <!-- Últimos Eventos del Activo -->
+                            <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+                                <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 16px 16px 0 0;">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3 p-2 rounded-circle" style="background: rgba(245, 158, 11, 0.1);">
+                                            <i class="fas fa-history text-amber-600"></i>
+                                        </div>
+                                        <h6 class="mb-0 fw-bold text-amber-700">Últimos Eventos</h6>
+                                    </div>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div id="ultimosEventosActivo">
+                                        <div class="d-flex align-items-center justify-content-center py-3">
+                                            <div class="text-center">
+                                                <div class="spinner-border text-amber-500 mb-2" role="status" style="width: 2rem; height: 2rem;">
+                                                    <span class="visually-hidden">Cargando...</span>
+                                                </div>
+                                                <p class="text-dark mb-0 fw-semibold small">Cargando eventos...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Componentes del Activo -->
+                            <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                                <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 16px 16px 0 0;">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <div class="d-flex align-items-center">
                                             <div class="me-3 p-2 rounded-circle" style="background: rgba(6, 182, 212, 0.1);">
                                                 <i class="fas fa-puzzle-piece text-cyan-600"></i>
                                             </div>
-                                            <h6 class="mb-0 fw-bold text-cyan-700">Componentes del Activo</h6>
+                                            <h6 class="mb-0 fw-bold text-cyan-700">Componentes</h6>
                                         </div>
-                                        <span class="badge bg-cyan-500 text-white px-3 py-2 rounded-pill">
+                                        <span class="badge bg-cyan-500 text-white px-2 py-1 rounded-pill small">
                                             <i class="fas fa-cogs me-1"></i>
                                             Activo
                                         </span>
                                     </div>
                                 </div>
                                 <div class="card-body p-0">
-                                    <div id="componentesActivo" class="p-4">
-                                        <div class="d-flex align-items-center justify-content-center py-5">
+                                    <div id="componentesActivo" class="p-3">
+                                        <div class="d-flex align-items-center justify-content-center py-3">
                                             <div class="text-center">
-                                                <div class="spinner-border text-cyan-500 mb-3" role="status" style="width: 3rem; height: 3rem;">
+                                                <div class="spinner-border text-cyan-500 mb-2" role="status" style="width: 2rem; height: 2rem;">
                                                     <span class="visually-hidden">Cargando...</span>
                                                 </div>
-                                                <p class="text-dark mb-0 fw-semibold">Cargando componentes...</p>
+                                                <p class="text-dark mb-0 fw-semibold small">Cargando componentes...</p>
                                             </div>
                                         </div>
                                     </div>
@@ -1776,6 +1801,9 @@ function init() {
 .text-cyan-500 { color: #06b6d4 !important; }
 .text-cyan-600 { color: #0891b2 !important; }
 .text-cyan-700 { color: #0e7490 !important; }
+.text-amber-500 { color: #f59e0b !important; }
+.text-amber-600 { color: #d97706 !important; }
+.text-amber-700 { color: #b45309 !important; }
 .text-teal-500 { color: #14b8a6 !important; }
 .text-dark { color: #64748b !important; }
 .text-slate-600 { color: #475569 !important; }
@@ -1783,6 +1811,7 @@ function init() {
 
 .bg-emerald-500 { background-color: #10b981 !important; }
 .bg-cyan-500 { background-color: #06b6d4 !important; }
+.bg-amber-500 { background-color: #f59e0b !important; }
 
 /* Animaciones suaves */
 .info-card {
@@ -1847,6 +1876,15 @@ function init() {
     border-color: #a7f3d0;
     border-right-color: #06b6d4;
 }
+
+.text-amber-500.spinner-border {
+    border-color: #fde68a;
+    border-right-color: #f59e0b;
+}
+
+.text-green-600 { color: #16a34a !important; }
+.text-purple-600 { color: #9333ea !important; }
+.text-red-600 { color: #dc2626 !important; }
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -1922,6 +1960,193 @@ function init() {
             },
           });
 
+          // Cargar últimos eventos del activo
+          $.ajax({
+            url: "../../controllers/GestionarActivosController.php?action=obtenerUltimosEventos",
+            type: "POST",
+            data: { idActivo: datos.idActivo },
+            dataType: "json",
+            success: function (eventosRes) {
+              console.log("=== DEBUGGING ÚLTIMOS EVENTOS ===");
+              console.log("Respuesta completa:", eventosRes);
+              console.log("¿Tiene status?", eventosRes.status);
+              console.log("¿Tiene data?", eventosRes.data);
+              if (eventosRes.data) {
+                console.log("Datos de eventos:", eventosRes.data);
+                console.log("Todas las propiedades del objeto eventos:");
+                Object.keys(eventosRes.data).forEach((key) => {
+                  console.log(
+                    `  ${key}:`,
+                    eventosRes.data[key],
+                    `(tipo: ${typeof eventosRes.data[key]})`
+                  );
+                });
+                console.log(
+                  "fechaUltimoMantenimiento específicamente:",
+                  eventosRes.data.fechaUltimoMantenimiento
+                );
+              }
+
+              if (eventosRes.status && eventosRes.data) {
+                let eventos = eventosRes.data;
+                let eventosHtml = `
+                  <div class="row g-2">`;
+
+                // Último Movimiento
+                if (eventos.fechaUltimoMovimiento) {
+                  eventosHtml += `
+                    <div class="col-12">
+                      <div class="d-flex align-items-center p-2 rounded-3" style="background: #f0fdf4; border-left: 3px solid #22c55e;">
+                        <div class="me-4 ml-4 p-2">
+                          <i class="fas fa-exchange-alt text-green-600"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                          <div class="fw-semibold small">Último Movimiento</div>
+                          <div class="text-muted small">${moment(
+                            eventos.fechaUltimoMovimiento
+                          ).format("DD/MM/YYYY HH:mm")}</div>
+                        </div>
+                      </div>
+                    </div>`;
+                }
+
+                // Último Préstamo
+                if (eventos.fechaUltimoPrestamo) {
+                  eventosHtml += `
+                    <div class="col-12">
+                      <div class="d-flex align-items-center p-2 rounded-3" style="background: #fef3c7; border-left: 3px solid #f59e0b;">
+                        <div class="me-4 ml-4 p-2">
+                          <i class="fas fa-hand-holding text-amber-600"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                          <div class="fw-semibold small">Último Préstamo</div>
+                          <div class="text-muted small">${moment(
+                            eventos.fechaUltimoPrestamo
+                          ).format("DD/MM/YYYY HH:mm")}</div>
+                        </div>
+                      </div>
+                    </div>`;
+                }
+
+                // Última Devolución
+                if (eventos.fechaUltimaDevolucion) {
+                  eventosHtml += `
+                    <div class="col-12">
+                      <div class="d-flex align-items-center p-2 rounded-3" style="background: #e0f2fe; border-left: 3px solid #06b6d4;">
+                        <div class="me-4 ml-4 p-2">
+                          <i class="fas fa-undo text-cyan-600"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                          <div class="fw-semibold small">Última Devolución</div>
+                          <div class="text-muted small">${moment(
+                            eventos.fechaUltimaDevolucion
+                          ).format("DD/MM/YYYY HH:mm")}</div>
+                        </div>
+                      </div>
+                    </div>`;
+                }
+
+                // Último Traslado
+                if (eventos.fechaUltimoTraslado) {
+                  eventosHtml += `
+                    <div class="col-12">
+                      <div class="d-flex align-items-center p-2 rounded-3" style="background: #f3e8ff; border-left: 3px solid #8b5cf6;">
+                        <div class="me-4 ml-4 p-2">
+                          <i class="fas fa-truck text-purple-600"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                          <div class="fw-semibold small">Último Traslado</div>
+                          <div class="text-muted small">${moment(
+                            eventos.fechaUltimoTraslado
+                          ).format("DD/MM/YYYY HH:mm")}</div>
+                        </div>
+                      </div>
+                    </div>`;
+                }
+
+                // Último Mantenimiento
+                console.log(
+                  "Verificando último mantenimiento:",
+                  eventos.fechaUltimoMantenimiento
+                );
+                console.log(
+                  "Tipo de dato:",
+                  typeof eventos.fechaUltimoMantenimiento
+                );
+                console.log(
+                  "¿Es null?",
+                  eventos.fechaUltimoMantenimiento === null
+                );
+                console.log(
+                  "¿Es undefined?",
+                  eventos.fechaUltimoMantenimiento === undefined
+                );
+                console.log(
+                  "¿Es string vacío?",
+                  eventos.fechaUltimoMantenimiento === ""
+                );
+
+                if (
+                  eventos.fechaUltimoMantenimiento &&
+                  eventos.fechaUltimoMantenimiento !== null &&
+                  eventos.fechaUltimoMantenimiento !== ""
+                ) {
+                  console.log("Agregando último mantenimiento al HTML");
+                  eventosHtml += `
+                    <div class="col-12">
+                      <div class="d-flex align-items-center p-2 rounded-3" style="background: #fef2f2; border-left: 3px solid #ef4444;">
+                        <div class="me-4 ml-4 p-2">
+                          <i class="fas fa-tools text-red-600"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                          <div class="fw-semibold small">Último Mantenimiento</div>
+                          <div class="text-muted small">${moment(
+                            eventos.fechaUltimoMantenimiento
+                          ).format("DD/MM/YYYY HH:mm")}</div>
+                        </div>
+                      </div>
+                    </div>`;
+                } else {
+                  console.log(
+                    "No se agregó último mantenimiento - valor:",
+                    eventos.fechaUltimoMantenimiento
+                  );
+                }
+
+                eventosHtml += `</div>`;
+
+                if (
+                  !eventos.fechaUltimoMovimiento &&
+                  !eventos.fechaUltimoPrestamo &&
+                  !eventos.fechaUltimaDevolucion &&
+                  !eventos.fechaUltimoTraslado &&
+                  !eventos.fechaUltimoMantenimiento
+                ) {
+                  eventosHtml = `
+                    <div class="text-center py-3">
+                      <i class="fas fa-info-circle text-muted mb-2" style="font-size: 2rem;"></i>
+                      <p class="text-muted mb-0 small">No se encontraron eventos recientes para este activo.</p>
+                    </div>`;
+                }
+
+                $("#ultimosEventosActivo").html(eventosHtml);
+              } else {
+                $("#ultimosEventosActivo").html(`
+                  <div class="text-center py-3">
+                    <i class="fas fa-exclamation-triangle text-warning mb-2" style="font-size: 2rem;"></i>
+                    <p class="text-muted mb-0 small">Error al cargar los eventos del activo.</p>
+                  </div>`);
+              }
+            },
+            error: function () {
+              $("#ultimosEventosActivo").html(`
+                <div class="text-center py-3">
+                  <i class="fas fa-exclamation-triangle text-danger mb-2" style="font-size: 2rem;"></i>
+                  <p class="text-muted mb-0 small">Error al cargar los eventos del activo.</p>
+                </div>`);
+            },
+          });
+
           // Cargar componentes del activo dinámicamente desde el servidor
           $.ajax({
             url: "../../controllers/GestionarActivosController.php?action=obtenerComponentes",
@@ -1932,12 +2157,12 @@ function init() {
               if (componentesRes.status && componentesRes.data.length > 0) {
                 let componentesHtml = `
                   <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover mb-0 table-sm">
                       <thead class="table-light">
                         <tr>
-                          <th class="border-0 py-3">Código</th>
-                          <th class="border-0 py-3">Componente</th>
-                          <th class="border-0 py-3">Estado</th>
+                          <th class="border-0 py-2 small">Código</th>
+                          <th class="border-0 py-2 small">Componente</th>
+                          <th class="border-0 py-2 small">Estado</th>
                         </tr>
                       </thead>
                       <tbody>`;
@@ -1945,19 +2170,21 @@ function init() {
                 componentesRes.data.forEach((item) => {
                   componentesHtml += `
                     <tr>
-                      <td class="py-3">
-                        <code class="text-primary">${
+                      <td class="py-2">
+                        <code class="text-primary small">${
                           item.CodigoComponente
                         }</code>
                       </td>
-                      <td class="py-3">
-                        <div class="fw-semibold">${item.NombreComponente}</div>
+                      <td class="py-2">
+                        <div class="fw-semibold small">${
+                          item.NombreComponente
+                        }</div>
                         <small class="text-muted">${
                           item.Descripcion || "-"
                         }</small>
                       </td>
-                      <td class="py-3">
-                        <span class="badge bg-success-subtle text-success">${
+                      <td class="py-2">
+                        <span class="badge bg-success-subtle text-success small">${
                           item.Estado || "Activo"
                         }</span>
                       </td>
@@ -1970,15 +2197,19 @@ function init() {
                   </div>`;
                 $("#componentesActivo").html(componentesHtml);
               } else {
-                $("#componentesActivo").html(
-                  "<p>No se encontraron componentes para este activo.</p>"
-                );
+                $("#componentesActivo").html(`
+                  <div class="text-center py-3">
+                    <i class="fas fa-puzzle-piece text-muted mb-2" style="font-size: 2rem;"></i>
+                    <p class="text-muted mb-0 small">No se encontraron componentes para este activo.</p>
+                  </div>`);
               }
             },
             error: function () {
-              $("#componentesActivo").html(
-                "<p>Error al cargar los componentes del activo.</p>"
-              );
+              $("#componentesActivo").html(`
+                <div class="text-center py-3">
+                  <i class="fas fa-exclamation-triangle text-danger mb-2" style="font-size: 2rem;"></i>
+                  <p class="text-muted mb-0 small">Error al cargar los componentes del activo.</p>
+                </div>`);
             },
           });
 

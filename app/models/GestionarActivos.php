@@ -469,4 +469,112 @@ class GestionarActivos
             throw $e;
         }
     }
+
+    public function obtenerUltimosEventosActivo($idActivo)
+    {
+        try {
+            error_log("=== DEBUGGING MODELO EVENTOS ===", 3, __DIR__ . '/../../logs/debug.log');
+            error_log("Consultando eventos para activo ID: " . $idActivo, 3, __DIR__ . '/../../logs/debug.log');
+            
+            // Primero verificar si la vista existe
+            $checkView = $this->db->prepare("SELECT COUNT(*) as existe FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vUltimosEventosActivo'");
+            $checkView->execute();
+            $vistaExiste = $checkView->fetch(PDO::FETCH_ASSOC);
+            error_log("¿Vista existe? " . print_r($vistaExiste, true), 3, __DIR__ . '/../../logs/debug.log');
+            
+            if ($vistaExiste['existe'] == 0) {
+                error_log("La vista vUltimosEventosActivo no existe", 3, __DIR__ . '/../../logs/debug.log');
+                // Crear consulta alternativa
+                $stmt = $this->db->prepare("SELECT 
+                    a.idActivo,
+                    a.codigo,
+                    a.NombreActivo AS nombreActivo,
+                    -- Último Movimiento (cualquier tipo)
+                    (SELECT TOP 1 dm.fecha
+                     FROM tDetalleMovimiento dm
+                     WHERE dm.idActivo = a.idActivo
+                     ORDER BY dm.fecha DESC) AS fechaUltimoMovimiento,
+                    -- Último Préstamo
+                    (SELECT TOP 1 dm.fecha
+                     FROM tDetalleMovimiento dm
+                     WHERE dm.idActivo = a.idActivo AND dm.idTipoMovimiento = 2
+                     ORDER BY dm.fecha DESC) AS fechaUltimoPrestamo,
+                    -- Última Devolución
+                    (SELECT TOP 1 dm.fecha
+                     FROM tDetalleMovimiento dm
+                     WHERE dm.idActivo = a.idActivo AND dm.idTipoMovimiento = 3
+                     ORDER BY dm.fecha DESC) AS fechaUltimaDevolucion,
+                    -- Último Traslado
+                    (SELECT TOP 1 dm.fecha
+                     FROM tDetalleMovimiento dm
+                     WHERE dm.idActivo = a.idActivo AND dm.idTipoMovimiento = 1
+                     ORDER BY dm.fecha DESC) AS fechaUltimoTraslado,
+                    -- Último mantenimiento
+                    (SELECT TOP 1 ISNULL(m.fechaRealizada, m.fechaProgramada)
+                     FROM tDetalleMantenimiento dm
+                     INNER JOIN tMantenimientos m ON m.idMantenimiento = dm.idMantenimiento
+                     WHERE dm.idActivo = a.idActivo
+                     ORDER BY ISNULL(m.fechaRealizada, m.fechaProgramada) DESC) AS fechaUltimoMantenimiento
+                    FROM vActivos a
+                    WHERE a.idActivo = ?");
+            } else {
+                $stmt = $this->db->prepare("SELECT 
+                    idActivo,
+                    codigo,
+                    nombreActivo,
+                    fechaUltimoMovimiento,
+                    fechaUltimoPrestamo,
+                    fechaUltimaDevolucion,
+                    fechaUltimoTraslado,
+                    fechaUltimoMantenimiento
+                    FROM vUltimosEventosActivo 
+                    WHERE idActivo = ?");
+            }
+            
+            $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
+            $stmt->execute();
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            error_log("Resultado de la consulta: " . print_r($resultado, true), 3, __DIR__ . '/../../logs/debug.log');
+            
+            // Verificar si existen registros de mantenimiento para este activo
+            $checkMant = $this->db->prepare("SELECT COUNT(*) as total FROM tDetalleMantenimiento WHERE idActivo = ?");
+            $checkMant->bindParam(1, $idActivo, PDO::PARAM_INT);
+            $checkMant->execute();
+            $totalMant = $checkMant->fetch(PDO::FETCH_ASSOC);
+            error_log("Total registros de mantenimiento para activo $idActivo: " . $totalMant['total'], 3, __DIR__ . '/../../logs/debug.log');
+            
+            if ($totalMant['total'] > 0) {
+                // Obtener el último mantenimiento directamente
+                $lastMant = $this->db->prepare("
+                    SELECT TOP 1 
+                        dm.idActivo,
+                        dm.idMantenimiento,
+                        m.fechaProgramada,
+                        m.fechaRealizada,
+                        ISNULL(m.fechaRealizada, m.fechaProgramada) as fechaUltimoMantenimiento
+                    FROM tDetalleMantenimiento dm
+                    INNER JOIN tMantenimientos m ON m.idMantenimiento = dm.idMantenimiento
+                    WHERE dm.idActivo = ?
+                    ORDER BY ISNULL(m.fechaRealizada, m.fechaProgramada) DESC
+                ");
+                $lastMant->bindParam(1, $idActivo, PDO::PARAM_INT);
+                $lastMant->execute();
+                $ultimoMant = $lastMant->fetch(PDO::FETCH_ASSOC);
+                error_log("Último mantenimiento directo: " . print_r($ultimoMant, true), 3, __DIR__ . '/../../logs/debug.log');
+                
+                // Si la consulta principal no devolvió el mantenimiento pero existe, agregarlo manualmente
+                if ($resultado && !$resultado['fechaUltimoMantenimiento'] && $ultimoMant) {
+                    $resultado['fechaUltimoMantenimiento'] = $ultimoMant['fechaUltimoMantenimiento'];
+                    error_log("Mantenimiento agregado manualmente al resultado", 3, __DIR__ . '/../../logs/debug.log');
+                }
+            }
+            
+            return $resultado;
+        } catch (\PDOException $e) {
+            error_log("Error in obtenerUltimosEventosActivo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/debug.log');
+            error_log("SQL Error: " . $e->getTraceAsString(), 3, __DIR__ . '/../../logs/debug.log');
+            throw $e;
+        }
+    }
 }
