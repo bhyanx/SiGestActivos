@@ -92,7 +92,7 @@ session_start();
                         </div>
                         <div class="col-12" id="divformularioasignacion">
                             <div class="alert alert-info alert-dismissible">
-                                <span id="lblSucursal"><?php echo $_SESSION['NombreSucursal'] ?></span>
+                                <span id="lblSucursal"><?php echo $_SESSION['Nombre_local'] ?></span>
                                 <button type="button" class="close btn" id="btnVolver">
                                     <i class="fas fa-undo-alt"></i>
                                 </button>
