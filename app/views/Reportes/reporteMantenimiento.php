@@ -511,19 +511,19 @@ try {
                     <div class="value"><?php echo $cabecera['fechaProgramada'] ? date('d/m/Y', strtotime($cabecera['fechaProgramada'])) : 'No programada'; ?></div>
                 </div>
                 <div class="detail-row">
-                    <div class="label">Tipo de Mantenimiento: </div>
-                    <div class="value"><?php echo $cabecera['tipoMantenimiento'] ?? ''; ?></div>
+                    <div class="label">Responsable: </div>
+                    <div class="value"><?php echo $cabecera['Proveedor'] ?? ''; ?></div>
                 </div>
+                <!-- <div class="detail-row">
+                    <div class="label">Tipo de Mantenimiento: </div>
+                    <div class="value"><?php //echo $detalle['tipoMantenimiento'] ?? ''; ?> </div>
+                </div> -->
                 <!-- <div class="detail-row">
                     <div class="label">Estado: </div>
                     <div class="value"><?php // echo $cabecera['estadoMantenimiento'] ?? ''; ?></div>
                 </div> -->
             </div>
             <div>
-                <div class="detail-row">
-                    <div class="label">Responsable: </div>
-                    <div class="value"><?php echo $cabecera['Proveedor'] ?? ''; ?></div>
-                </div>
                 <div class="detail-row">
                     <div class="label">Costo Estimado: </div>
                     <div class="value">S/ <?php echo $cabecera['costoEstimado'] ? number_format($cabecera['costoEstimado'], 2) : '0.00'; ?></div>

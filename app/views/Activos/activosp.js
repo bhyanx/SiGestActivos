@@ -1771,20 +1771,20 @@ function init() {
             <!-- Footer del Modal -->
             <div class="modal-footer border-0 p-4" style="background: #f8fafc; border-radius: 0 0 20px 20px;">
                 <div class="d-flex flex-wrap gap-3 w-100 justify-content-center">
-                    <button type="button" class="btn btn-outline-cyan btnEditarDesdeModal px-4 py-2 rounded-pill shadow-sm" data-id-activo="${activo.idActivo}" style="min-width: 120px; border-color: #06b6d4; color: #0891b2;">
-                        <i class="fas fa-edit me-2"></i>Editar
+                    <button type="button" class="btn btn-outline-cyan btnEditarDesdeModal px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${activo.idActivo}" style="min-width: 120px; border-color: #06b6d4; color: #0891b2;">
+                        <i class="fas fa-edit m-2"></i>Editar
                     </button>
-                    <button type="button" class="btn btn-outline-emerald btnImprimirDesdeModal px-4 py-2 rounded-pill shadow-sm" data-id-activo="${activo.idActivo}" style="min-width: 120px; border-color: #10b981; color: #059669;">
-                        <i class="fas fa-print me-2"></i>Imprimir
+                    <button type="button" class="btn btn-outline-emerald btnImprimirDesdeModal px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${activo.idActivo}" style="min-width: 120px; border-color: #10b981; color: #059669;">
+                        <i class="fas fa-print m-2"></i>Imprimir
                     </button>
-                    <button type="button" class="btn btn-cyan btnAsignarResponsable px-4 py-2 rounded-pill shadow-sm" data-id-activo="${activo.idActivo}" style="min-width: 140px; background-color: #06b6d4; border-color: #06b6d4; color: white;">
-                        <i class="fas fa-user-edit me-2"></i>Asignar
+                    <button type="button" class="btn btn-cyan btnAsignarResponsable px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${activo.idActivo}" style="min-width: 140px; background-color: #06b6d4; border-color: #06b6d4; color: white;">
+                        <i class="fas fa-user-edit m-2"></i>Asignar
                     </button>
-                    <button type="button" class="btn btn-outline-slate btnDarBajaDesdeModal px-4 py-2 rounded-pill shadow-sm" data-id-activo="${activo.idActivo}" style="min-width: 120px; border-color: #64748b; color: #475569;">
-                        <i class="fas fa-trash-alt me-2"></i>Dar de Baja
+                    <button type="button" class="btn btn-outline-slate btnDarBajaDesdeModal px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${activo.idActivo}" style="min-width: 120px; border-color: #64748b; color: #475569;">
+                        <i class="fas fa-trash-alt m-2"></i>Dar de Baja
                     </button>
-                    <button type="button" class="btn btn-outline-slate px-4 py-2 rounded-pill shadow-sm" data-bs-dismiss="modal" style="min-width: 100px; border-color: #64748b; color: #475569;">
-                        <i class="fas fa-times me-2"></i>Cerrar
+                    <button type="button" class="btn btn-outline-slate px-4 py-2 rounded-pill shadow-sm m-1 btnCerrarModal" style="min-width: 100px; border-color: #64748b; color: #475569;">
+                        <i class="fas fa-times m-2"></i>Cerrar
                     </button>
                 </div>
             </div>
@@ -2215,6 +2215,13 @@ function init() {
 
           // Mostrar el modal
           $("#modalDetallesActivo").modal("show");
+
+          // Agregar event handler para el botón cerrar
+          $(document)
+            .off("click", ".btnCerrarModal")
+            .on("click", ".btnCerrarModal", function () {
+              $("#modalDetallesActivo").modal("hide");
+            });
         } else {
           Swal.fire(
             "Detalles del Activo",

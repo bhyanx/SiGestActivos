@@ -952,27 +952,56 @@ function ListarMantenimientos() {
       {
         data: null,
         render: function (data, type, row) {
+          // Determinar el estado del mantenimiento para mostrar botones apropiados
+          const estado = row.estadoMant ? row.estadoMant.toLowerCase() : "";
+          const esFinalizado =
+            estado.includes("finalizado") ||
+            estado.includes("completado") ||
+            estado.includes("terminado");
+          const esCancelado =
+            estado.includes("cancelado") || estado.includes("anulado");
+
+          // Botones base que siempre se muestran
+          let dropdownItems = `
+            <a class="dropdown-item" href="#" onclick="verDetallesMantenimiento(${row.idMantenimiento})">
+              <i class="fas fa-list"></i> Ver Detalles
+            </a>
+            <a class="dropdown-item" href="#" onclick="imprimirReporteMantenimiento(${row.idMantenimiento})">
+              <i class="fas fa-print"></i> Imprimir Reporte
+            </a>`;
+
+          // Solo agregar botones de acción si no está finalizado ni cancelado
+          if (!esFinalizado && !esCancelado) {
+            dropdownItems += `
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="#" onclick="finalizarMantenimiento(${row.idMantenimiento})">
+                <i class="fas fa-check-circle text-success"></i> Finalizar Mantenimiento
+              </a>
+              <a class="dropdown-item" href="#" onclick="cancelarMantenimiento(${row.idMantenimiento})">
+                <i class="fas fa-times-circle text-danger"></i> Cancelar Mantenimiento
+              </a>`;
+          } else {
+            // Mostrar estado actual si está finalizado o cancelado
+            const estadoIcon = esFinalizado
+              ? "fas fa-check-circle text-success"
+              : "fas fa-times-circle text-danger";
+            const estadoTexto = esFinalizado ? "Finalizado" : "Cancelado";
+            dropdownItems += `
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item disabled" href="#" style="cursor: not-allowed; opacity: 0.6;">
+                <i class="${estadoIcon}"></i> ${estadoTexto}
+              </a>`;
+          }
+
           return `
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-cogs"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="#" onclick="verDetallesMantenimiento(${row.idMantenimiento})">
-                                        <i class="fas fa-list"></i> Ver Detalles
-                                    </a>
-                                    <a class="dropdown-item" href="#" onclick="imprimirReporteMantenimiento(${row.idMantenimiento})">
-                                        <i class="fas fa-print"></i> Imprimir Reporte
-                                    </a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="#" onclick="finalizarMantenimiento(${row.idMantenimiento})">
-                                        <i class="fas fa-check-circle text-success"></i> Finalizar Mantenimiento
-                                    </a>
-                                    <a class="dropdown-item" href="#" onclick="cancelarMantenimiento(${row.idMantenimiento})">
-                                        <i class="fas fa-times-circle text-danger"></i> Cancelar Mantenimiento
-                                    </a>
-                                </div>
-                            </div>`;
+            <div class="btn-group">
+              <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-cogs"></i>
+              </button>
+              <div class="dropdown-menu">
+                ${dropdownItems}
+              </div>
+            </div>`;
         },
       },
       {
