@@ -460,7 +460,7 @@ class GestionarActivos
             INNER JOIN tActivoDetalle detalleH ON hijo.idActivo = detalleH.idActivo
             INNER JOIN tActivos padre ON hijo.idActivoPadre = padre.idActivo
             INNER JOIN tActivoDetalle detalleP ON padre.idActivo = detalleP.idActivo
-            WHERE hijo.idActivoPadre = 1");
+            WHERE hijo.idActivoPadre = ?");
             $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

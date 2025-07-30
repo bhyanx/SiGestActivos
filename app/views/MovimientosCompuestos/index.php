@@ -114,18 +114,18 @@ session_start();
                                         </div>
                                         <div class="card-body">
                                             <div class="row">
-                                                <div class="col-md-6">
+                                                <div class="col-md-9">
                                                     <div class="form-group">
                                                         <label for="IdAsignacionPadre">Seleccionar Activo Padre:</label>
                                                         <select class="form-control" name="IdAsignacionPadre" id="IdAsignacionPadre" required></select>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <!-- <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="SerieActivo">Serie Activo Padre:</label>
                                                         <input type="text" class="form-control" name="SerieActivo" id="SerieActivo" placeholder="Serie Activo Padre" required>
                                                     </div>
-                                                </div>
+                                                </div> -->
                                             </div>
                                         </div>
                                     </div>
@@ -486,7 +486,7 @@ session_start();
                                             <th>ID</th>
                                             <th>Código</th>
                                             <th>Nombre</th>
-                                            <th>Marca</th>
+                                            <th>Estado</th>
                                             <th>Serie</th>
                                             <th>Acción</th>
                                         </tr>
