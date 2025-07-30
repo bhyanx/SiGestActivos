@@ -61,7 +61,8 @@ class Mantenimientos
                     @idMantenimiento = :idMantenimiento,
                     @idActivo = :idActivo,
                     @tipoMantenimiento = :tipoMantenimiento,
-                    @observaciones = :observaciones";
+                    @observaciones = :observaciones,
+                    @userMod = :userMod";
 
             $stmt = $this->db->prepare($sql);
 
@@ -69,6 +70,7 @@ class Mantenimientos
             $stmt->bindParam(':idActivo', $data['idActivo'], PDO::PARAM_INT);
             $stmt->bindParam(':tipoMantenimiento', $data['tipoMantenimiento'], PDO::PARAM_INT);
             $stmt->bindValue(':observaciones', $data['observaciones'], $data['observaciones'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
 
             $stmt->execute();
             return true;
@@ -256,11 +258,11 @@ class Mantenimientos
             $xml .= '</Mantenimientos>';
 
             $sql = "EXEC sp_FinalizarMantenimiento @XmlMantenimientos = :xml, @pUserMod = :userMod";
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':xml', $xml, PDO::PARAM_STR);
             $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
-            
+
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
@@ -284,6 +286,60 @@ class Mantenimientos
                 LEFT JOIN tEstadoMantenimiento em ON m.estadoMantenimiento = em.idEstadoMantenimiento
                 LEFT JOIN tDetalleMantenimiento dm ON m.idMantenimiento = dm.idMantenimiento
                 WHERE m.idMantenimiento = ?
+                GROUP BY m.idMantenimiento, m.codigoMantenimiento, m.descripcion, 
+                         m.fechaProgramada, m.costoEstimado, m.estadoMantenimiento, em.nombre";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idMantenimiento, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Error al obtener datos del mantenimiento: " . $e->getMessage());
+        }
+    }
+
+    public function cancelarMantenimiento($data)
+    {
+        try {
+            // Construir XML para el procedimiento almacenado
+            $xml = '<Mantenimientos>';
+            $xml .= '<Mantenimiento>';
+            $xml .= '<idMantenimiento>' . $data['idMantenimiento'] . '</idMantenimiento>';
+            $xml .= '<motivo>' . htmlspecialchars($data['motivo'] ?? '') . '</motivo>';
+            $xml .= '<idEstadoMantenimiento>' . $data['idEstadoMantenimiento'] . '</idEstadoMantenimiento>';
+            $xml .= '</Mantenimiento>';
+            $xml .= '</Mantenimientos>';
+
+            $sql = "EXEC sp_CancelarMantenimiento @XmlMantenimientos = :xml, @pUserMod = :userMod";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':xml', $xml, PDO::PARAM_STR);
+            $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
+            
+            $stmt->execute();
+            return true;
+        } catch (PDOException $e) {
+            throw new Exception("Error al cancelar mantenimiento: " . $e->getMessage());
+        }
+    }
+
+    public function obtenerMantenimientoParaCancelar($idMantenimiento)
+    {
+        try {
+            $sql = "SELECT 
+                m.idMantenimiento,
+                m.codigoMantenimiento,
+                m.descripcion,
+                m.fechaProgramada,
+                m.costoEstimado,
+                m.estadoMantenimiento,
+                em.nombre as estadoActual,
+                COUNT(dm.idActivo) as totalActivos
+                FROM tMantenimientos m
+                LEFT JOIN tEstadoMantenimiento em ON m.estadoMantenimiento = em.idEstadoMantenimiento
+                LEFT JOIN tDetalleMantenimiento dm ON m.idMantenimiento = dm.idMantenimiento
+                WHERE m.idMantenimiento = ?
+                AND m.estadoMantenimiento NOT IN (3, 4) -- No finalizado ni cancelado
                 GROUP BY m.idMantenimiento, m.codigoMantenimiento, m.descripcion, 
                          m.fechaProgramada, m.costoEstimado, m.estadoMantenimiento, em.nombre";
 

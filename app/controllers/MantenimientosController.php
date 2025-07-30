@@ -81,7 +81,8 @@ switch ($action) {
                     'idMantenimiento' => $_POST['idMantenimiento'],
                     'idActivo' => $_POST['idActivo'],
                     'tipoMantenimiento' => $_POST['tipoMantenimiento'],
-                    'observaciones' => $_POST['observaciones'] ?? null
+                    'observaciones' => $_POST['observaciones'] ?? null,
+                    'userMod' => $_SESSION['usuario'] ?? null,
                 ];
 
                 $mantenimientos->crearDetalleMantenimiento($data);
@@ -267,6 +268,60 @@ switch ($action) {
                 echo json_encode([
                     'status' => true,
                     'message' => 'Mantenimiento finalizado correctamente'
+                ]);
+            } catch (Exception $e) {
+                echo json_encode([
+                    'status' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
+        }
+        break;
+
+    case 'obtenerMantenimientoParaCancelar':
+        try {
+            $idMantenimiento = $_POST['idMantenimiento'] ?? null;
+            if (!$idMantenimiento) {
+                throw new Exception("ID de mantenimiento no proporcionado");
+            }
+
+            $mantenimiento = $mantenimientos->obtenerMantenimientoParaCancelar($idMantenimiento);
+            if (!$mantenimiento) {
+                throw new Exception("El mantenimiento no se puede cancelar o no existe");
+            }
+
+            $estados = $mantenimientos->obtenerEstadosMantenimiento();
+            
+            echo json_encode([
+                'status' => true,
+                'data' => [
+                    'mantenimiento' => $mantenimiento,
+                    'estados' => $estados
+                ]
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'CancelarMantenimiento':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $data = [
+                    'idMantenimiento' => $_POST['idMantenimiento'],
+                    'motivo' => $_POST['motivo'] ?? '',
+                    'idEstadoMantenimiento' => $_POST['idEstadoMantenimiento'] ?? 4, // Asumiendo que 4 es "Cancelado"
+                    'userMod' => $_SESSION['usuario']
+                ];
+
+                $mantenimientos->cancelarMantenimiento($data);
+
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Mantenimiento cancelado correctamente'
                 ]);
             } catch (Exception $e) {
                 echo json_encode([
