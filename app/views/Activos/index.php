@@ -181,15 +181,24 @@ if (isset($_SESSION["IdRol"])) {
                                                 <div class="col-md-12">
                                                     <!-- ...existing code... -->
                                                     <div class="row mb-2">
+                                                        <div class="col-md-3">
+                                                            <div class="form-group">
+                                                                <label for="tipoDocumento">Tipo de Documento:</label>
+                                                                <select class="form-control" id="tipoDocumento">
+                                                                    <option value="ingreso">Doc. Ingreso Almacén</option>
+                                                                    <option value="venta">Doc. Venta</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
                                                         <div class="col-md-5 col-lg-4 col-xl-4">
                                                             <div class="form-group">
-                                                                <label for="inputDocIngresoAlm">
+                                                                <label for="inputDocumento" id="labelDocumento">
                                                                     Doc. Ingreso Almacén:&nbsp;
                                                                 </label>
                                                                 <div class="input-group">
-                                                                    <input type="text" id="inputDocIngresoAlm" placeholder="ID de Doc. Ingreso" class="form-control">
+                                                                    <input type="text" id="inputDocumento" placeholder="ID de Documento" class="form-control">
                                                                     <div class="input-group-append">
-                                                                        <button class="btn btn-primary" type="button" id="btnBuscarDocIngreso"><i class="fa fa-search"></i> Buscar</button>
+                                                                        <button class="btn btn-primary" type="button" id="btnBuscarDocumento"><i class="fa fa-search"></i> Buscar</button>
                                                                     </div>
                                                                 </div>
                                                             </div>

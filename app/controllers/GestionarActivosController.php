@@ -327,11 +327,11 @@ switch ($action) {
             }
 
             // Documentos de venta
-            // $stmt = $db->query("SELECT idDocumentoVta AS IdDocVenta FROM vListadoDeArticulosPorDocumentoDeVenta GROUP BY idDocumentoVta");
-            // $combos['docVenta'] = '<option value="">Seleccione</option>';
-            // foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            //     $combos['docVenta'] .= "<option value='{$row['IdDocVenta']}'>{$row['IdDocVenta']}</option>";
-            // }
+            $stmt = $db->query("SELECT idDocumentoVta AS IdDocVenta FROM bdGestionLubriseng.dbo.vmListadoDeArticulosPorDocumentoDeVenta GROUP BY idDocumentoVta");
+            $combos['docVenta'] = '<option value="">Seleccione</option>';
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $combos['docVenta'] .= "<option value='{$row['IdDocVenta']}'>{$row['IdDocVenta']}</option>";
+            }
 
             // Proveedores
             $stmt = $db->query("SELECT Documento, RazonSocial FROM vEntidadExternaGeneralProveedor ORDER BY RazonSocial");
@@ -397,7 +397,7 @@ switch ($action) {
         }
         break;
 
-    /*case 'articulos_por_doc_venta':
+    case 'articulos_por_doc_venta':
         try {
             $db = (new Conectar())->ConexionBdPracticante();
 
@@ -406,17 +406,15 @@ switch ($action) {
                 throw new Exception("IdDocVenta no proporcionado.");
             }
 
-            $stmt = $db->prepare("
-            SELECT ing.idDocumentoVta AS IdDocVenta, ing.idArtServDetDocVta AS IdArticulo, a.Descripcion_articulo AS Nombre,
-	   a.DescripcionMarca AS Marca, e.Razon_empresa AS Empresa, ing.cod_UnidadNeg AS IdUnidadNegocio,
-	   ing.Nombre_local AS NombreLocal,
-	   ing.Cantidad AS Cantidad
-FROM vListadoDeArticulosPorDocumentoDeVenta ing
-INNER JOIN vArticulos a ON ing.idArtServDetDocVta = a.IdArticulo
-LEFT JOIN vEmpresas e ON ing.Cod_Empresa = e.cod_empresa 
-WHERE  ing.IdTipoComp = 9 AND ing.idDocumentoVta = ? 
-ORDER BY a.Descripcion_articulo;
-");
+            $stmt = $db->prepare("SELECT ing.idDocumentoVta AS IdDocVenta, ing.idArtServDetDocVta AS IdArticulo, 
+            a.Descripcion_articulo AS Nombre, a.DescripcionMarca AS Marca, e.Razon_empresa AS Empresa,
+            ing.cod_UnidadNeg AS IdUnidadNegocio, ing.Nombre_local AS NombreLocal, ing.CantidadSalidaEquivalente AS Cantidad
+            FROM vListadoDeArticulosPorDocumentoDeVenta ing
+            INNER JOIN vArticulos a ON ing.idArtServDetDocVta = a.IdArticulo
+            LEFT JOIN vEmpresas e ON ing.Cod_Empresa = e.cod_empresa 
+            WHERE ing.idDocumentoVta = ?
+            ORDER BY a.Descripcion_articulo
+            ");
             $stmt->execute([$IdDocVenta]);
             $articulos = [];
             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
@@ -427,16 +425,17 @@ ORDER BY a.Descripcion_articulo;
                     'Empresa'  => $row['Empresa'] ?? '',
                     'IdUnidadNegocio' => $row['IdUnidadNegocio'],
                     'NombreLocal' => $row['NombreLocal'],
+                    'Cantidad' => $row['Cantidad'],
                 ];
             }
 
-            error_log("Artículos por doc: IdDocVenta=$IdDocVenta, Resultados=" . json_encode($articulos), 3, __DIR__ . '/../../logs/debug.log');
+            error_log("Artículos por doc venta: IdDocVenta=$IdDocVenta, Resultados=" . json_encode($articulos), 3, __DIR__ . '/../../logs/debug.log');
             echo json_encode(['status' => true, 'data' => $articulos, 'message' => 'Artículos cargados correctamente.']);
         } catch (Exception $e) {
             error_log("Error articulos_por_doc_venta: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             echo json_encode(['status' => false, 'message' => 'Error al cargar artículos: ' . $e->getMessage()]);
         }
-        break;*/
+        break;
 
     //Case para el modal y agregar 
     case 'articulos_por_doc':
@@ -485,6 +484,55 @@ ORDER BY a.Descripcion_articulo;
         }
         break;
 
+    case 'GuardarActivosDesdeDocumentoVenta':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                // Obtener los datos del array de activos
+                $activosArray = json_decode($_POST['activos'], true);
+                if (!$activosArray) {
+                    throw new Exception("No se recibieron datos de activos válidos");
+                }
+
+                $resultados = [];
+                foreach ($activosArray as $activo) {
+                    // Formatear fechas
+                    $fechaAdquisicion = !empty($activo['FechaAdquisicion']) ? date('Y-m-d', strtotime($activo['FechaAdquisicion'])) : date('Y-m-d');
+
+                    $data = [
+                        'IdDocumentoVta' => $activo['IdDocumentoVta'],
+                        'IdArticulo' => $activo['IdArticulo'],
+                        'IdEstado' => $activo['IdEstado'],
+                        'IdAmbiente' => $activo['IdAmbiente'],
+                        'IdCategoria' => $activo['IdCategoria'],
+                        'VidaUtil' => $activo['VidaUtil'] ?? 3,
+                        'Observaciones' => $activo['Observaciones'] ?? '',
+                        'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
+                        'FechaAdquisicion' => $fechaAdquisicion,
+                        'UserMod' => $_SESSION['CodEmpleado']
+                    ];
+
+                    $activos->GuardarActivosDesdeDocumentoVenta($data);
+                    $resultados[] = [
+                        'status' => true,
+                        'message' => 'Activo registrado correctamente'
+                    ];
+                }
+
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Activos registrados con éxito.',
+                    'data' => $resultados
+                ]);
+            } catch (Exception $e) {
+                error_log("Error GuardarActivosDesdeDocumentoVenta: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al registrar activos: ' . $e->getMessage()
+                ]);
+            }
+        }
+        break;
+
     case 'verificarArticuloExistente':
         try {
             $idDocIngresoAlm = $_POST['IdDocIngresoAlm'] ?? null;
@@ -504,6 +552,32 @@ ORDER BY a.Descripcion_articulo;
             ]);
         } catch (Exception $e) {
             error_log("Error verificarArticuloExistente: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al verificar artículo: ' . $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'verificarArticuloExistenteDocVenta':
+        try {
+            $idDocumentoVta = $_POST['IdDocumentoVta'] ?? null;
+            $idArticulo = $_POST['IdArticulo'] ?? null;
+            $idEmpresa = $_SESSION['cod_empresa'] ?? null;
+            $idSucursal = $_SESSION['cod_UnidadNeg'] ?? null;
+
+            if (!$idDocumentoVta || !$idArticulo) {
+                throw new Exception("Se requiere el documento de venta y el artículo");
+            }
+
+            $existe = $activos->verificarArticuloExistenteDocVenta($idDocumentoVta, $idArticulo, $idEmpresa, $idSucursal);
+            echo json_encode([
+                'status' => true,
+                'existe' => $existe,
+                'message' => $existe ? 'El artículo ya ha sido registrado con este documento de venta' : 'El artículo no ha sido registrado'
+            ]);
+        } catch (Exception $e) {
+            error_log("Error verificarArticuloExistenteDocVenta: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             echo json_encode([
                 'status' => false,
                 'message' => 'Error al verificar artículo: ' . $e->getMessage()

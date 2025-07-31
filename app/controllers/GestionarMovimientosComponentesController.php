@@ -126,7 +126,7 @@ switch ($action) {
             $data = [
                 'IdActivoComponente' => $idComponente,
                 'IdActivoPadreNuevo' => $idPadreNuevo,
-                'UserMod' => $_SESSION['usuario'] ?? 'usuario_default'
+                'UserMod' => $_SESSION['CodEmpleado'] ?? 'usuario_default'
             ];
 
             $resultado = $movimientosComponentes->moverComponenteEntreActivos($data);
@@ -185,7 +185,7 @@ switch ($action) {
             $data = [
                 'IdActivoPadre' => $idPadre,
                 'IdActivoComponente' => $idComponente,
-                'UserMod' => $_SESSION['usuario'] ?? 'usuario_default'
+                'UserMod' => $_SESSION['CodEmpleado'] ?? 'usuario_default'
             ];
 
             $resultado = $movimientosComponentes->asignarComponenteActivo($data);

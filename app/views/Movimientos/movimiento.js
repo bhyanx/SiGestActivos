@@ -69,11 +69,18 @@ function init() {
 
   $(document).on("click", "#btnBuscarIdItem, .btnagregardet", function () {
     console.log("Abriendo modal para movimientos");
+
+    // Asegurar que el modal esté limpio antes de abrirlo
     $("#ModalArticulos").modal("show");
-    listarActivosModal();
+
+    // Esperar a que el modal se abra completamente antes de inicializar la tabla
+    $("#ModalArticulos").on("shown.bs.modal.listarActivos", function () {
+      console.log("Modal completamente abierto, inicializando tabla");
+      listarActivosModal();
+      // Remover el evento para evitar múltiples inicializaciones
+      $(this).off("shown.bs.modal.listarActivos");
+    });
   });
-
-
 
   $("#btnchangedatasucmovimiento")
     .off("click")
@@ -142,8 +149,6 @@ function init() {
         .addClass("text-muted");
     }
   });
-
-
 
   // Botón para abrir el panel de generación de movimiento
   $("#btnnuevo")
@@ -272,8 +277,6 @@ function init() {
       $("#divlistadomovimientos").show(); // Muestra el formulario de búsqueda
     });
 
-
-
   // Botón cancelar en registro de movimiento
   $("#btnCancelarMovimiento")
     .off("click")
@@ -337,9 +340,12 @@ function init() {
   // Debug para el modal de artículos
   $("#ModalArticulos").on("show.bs.modal", function () {
     console.log("Modal de artículos se está abriendo");
-    
+
     // Si estamos en mantenimiento, asegurar que el modal esté visible
-    if ($("#divgenerarmantenimiento").is(":visible") || $("#divregistroMantenimiento").is(":visible")) {
+    if (
+      $("#divgenerarmantenimiento").is(":visible") ||
+      $("#divregistroMantenimiento").is(":visible")
+    ) {
       console.log("Abriendo desde mantenimiento - ajustando z-index");
       $(this).css("z-index", "9999");
       $(".modal-backdrop").css("z-index", "9998");
@@ -352,6 +358,32 @@ function init() {
 
   $("#ModalArticulos").on("hide.bs.modal", function () {
     console.log("Modal de artículos se está cerrando");
+  });
+
+  // Manejar el cierre del modal con el botón X
+  $(document).on("click", "#ModalArticulos .close", function () {
+    console.log("Cerrando modal con botón X");
+    $("#ModalArticulos").modal("hide");
+  });
+
+  // Manejar el cierre del modal con Escape
+  $(document).on("keydown", function (e) {
+    if (e.key === "Escape" && $("#ModalArticulos").hasClass("show")) {
+      console.log("Cerrando modal con Escape");
+      $("#ModalArticulos").modal("hide");
+    }
+  });
+
+  // Evento adicional para asegurar el cierre del modal
+  $("#ModalArticulos").on("hidden.bs.modal", function () {
+    console.log("Modal cerrado completamente");
+    // Limpiar cualquier tabla DataTable si existe
+    if ($.fn.DataTable.isDataTable("#tbllistarActivos")) {
+      $("#tbllistarActivos").DataTable().destroy();
+    }
+    // Remover cualquier backdrop residual
+    $(".modal-backdrop").remove();
+    $("body").removeClass("modal-open");
   });
 
   // Al seleccionar un activo, autocompleta los datos de ese activo
@@ -475,8 +507,64 @@ function init() {
     });
   });
 
+  // Función para verificar componentes y agregar activo
+  function verificarComponentesYAgregar(activo) {
+    $.ajax({
+      url: "../../controllers/GestionarMovimientoController.php?action=verificarComponentesActivo",
+      type: "POST",
+      data: { idActivo: activo.id },
+      dataType: "json",
+      success: function (res) {
+        if (res.status && res.data.tieneComponentes) {
+          // Mostrar alerta con información de componentes
+          Swal.fire({
+            title: "¡Activo con Componentes Detectado!",
+            html: `
+              <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle"></i> ${activo.nombre}</h5>
+                <p><strong>Este activo tiene ${res.data.totalComponentes} componente(s) anidado(s):</strong></p>
+                <div class="text-left" style="max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                  <small>${res.data.listaComponentes}</small>
+                </div>
+                <div class="alert alert-warning mt-3 mb-3">
+                  <h6><i class="fas fa-exclamation-triangle"></i> Comportamiento Automático:</h6>
+                  <ul class="mb-0 text-left">
+                    <li><strong>Mismo destino:</strong> Los componentes se moverán junto con el activo principal</li>
+                    <li><strong>Destino diferente:</strong> Los componentes se separarán automáticamente del activo principal</li>
+                  </ul>
+                </div>
+                <p class="mb-0"><strong>¿Desea continuar con el movimiento?</strong></p>
+              </div>
+            `,
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText:
+              '<i class="fas fa-arrow-right"></i> Continuar con el Movimiento',
+            cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
+            confirmButtonColor: "#28a745",
+            cancelButtonColor: "#6c757d",
+            width: "650px",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // El SP maneja automáticamente la lógica de separación
+              agregarActivoAlDetalle(activo, true);
+            }
+          });
+        } else {
+          // No tiene componentes, agregar normalmente
+          agregarActivoAlDetalle(activo, true);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("Error al verificar componentes:", error);
+        // En caso de error, agregar el activo normalmente
+        agregarActivoAlDetalle(activo, true);
+      },
+    });
+  }
+
   // Función para agregar activo al detalle
-  function agregarActivoAlDetalle(activo) {
+  function agregarActivoAlDetalle(activo, incluirComponentes = true) {
     if ($(`#tbldetalleactivomov tbody tr[data-id='${activo.id}']`).length > 0) {
       NotificacionToast(
         "error",
@@ -638,7 +726,8 @@ function init() {
       Ambiente: fila.find("td:eq(4)").text(),
     };
 
-    agregarActivoAlDetalle(activo);
+    // Verificar si el activo tiene componentes anidados
+    verificarComponentesYAgregar(activo);
   });
 
   $(document).on("click", ".btnQuitarActivo", function () {
@@ -1613,6 +1702,8 @@ function verDetallesMovimiento(idMovimiento) {
 }
 
 function listarActivosModal() {
+  console.log("Inicializando tabla de activos en modal");
+
   // Destruir la instancia existente si existe
   if ($.fn.DataTable.isDataTable("#tbllistarActivos")) {
     $("#tbllistarActivos").DataTable().destroy();
@@ -1621,11 +1712,13 @@ function listarActivosModal() {
   $("#tbllistarActivos").DataTable({
     dom: "Bfrtip",
     responsive: false,
+    processing: true,
     ajax: {
       url: "../../controllers/GestionarMovimientoController.php?action=ListarParaMovimiento",
       type: "POST",
       dataType: "json",
       dataSrc: function (json) {
+        console.log("Datos recibidos para modal:", json);
         if (!json.status) {
           NotificacionToast("error", json.message);
           return [];
@@ -1633,41 +1726,42 @@ function listarActivosModal() {
         return json.data || [];
       },
       error: function (xhr, status, error) {
+        console.error("Error al cargar activos:", error);
         NotificacionToast("error", "Error al cargar los activos: " + error);
         return [];
       },
     },
     columns: [
-      { data: "IdActivo" },
-      { data: "codigo" },
-      { data: "NombreActivo" },
-      //{ data: "Marca" },
-      { data: "Sucursal" },
-      { data: "Ambiente" },
+      { data: "IdActivo", title: "ID" },
+      { data: "codigo", title: "Código" },
+      { data: "NombreActivo", title: "Nombre" },
+      { data: "Sucursal", title: "Sucursal" },
+      { data: "Ambiente", title: "Ambiente" },
       {
         data: null,
+        title: "Acción",
+        orderable: false,
         render: function (data, type, row) {
-          return (
-            '<button class="btn btn-success btn-sm btnSeleccionarActivo" data-id="' +
-            row.IdActivo +
-            '"><i class="fa fa-check"></i></button>'
-          );
+          return `<button class="btn btn-success btn-sm btnSeleccionarActivo" data-id="${row.IdActivo}" title="Seleccionar activo">
+                    <i class="fa fa-check"></i> Seleccionar
+                  </button>`;
         },
       },
     ],
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
     },
-    order: [[2, "asc"]], // Ordenar por NombreArticulo
+    order: [[2, "asc"]], // Ordenar por NombreActivo
     pageLength: 10,
     lengthMenu: [
       [10, 25, 50, -1],
       [10, 25, 50, "Todos"],
     ],
+    drawCallback: function () {
+      console.log("Tabla de activos renderizada correctamente");
+    },
   });
 }
-
-
 
 // Agregar los manejadores de eventos para los nuevos botones
 // $(document).on("click", ".btnAnularMovimiento", function () {
@@ -1789,4 +1883,3 @@ function imprimirReporte(idMovimiento) {
     "_blank"
   );
 }
-

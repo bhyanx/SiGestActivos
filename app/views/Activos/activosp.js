@@ -31,20 +31,41 @@ function init() {
     }
   );
 
-  $(document).on("click", "#btnBuscarDocIngreso", function () {
-    let docIngreso = $("#inputDocIngresoAlm").val().trim();
-    console.log("Data enviada a listarActivo:", docIngreso);
+  // Manejar cambio de tipo de documento
+  $(document).on("change", "#tipoDocumento", function () {
+    const tipoDoc = $(this).val();
+    const labelDocumento = $("#labelDocumento");
+    const inputDocumento = $("#inputDocumento");
+    
+    if (tipoDoc === "ingreso") {
+      labelDocumento.text("Doc. Ingreso Almacén:");
+      inputDocumento.attr("placeholder", "ID de Doc. Ingreso");
+    } else if (tipoDoc === "venta") {
+      labelDocumento.text("Doc. Venta:");
+      inputDocumento.attr("placeholder", "ID de Doc. Venta");
+    }
+    
+    // Limpiar el input cuando cambie el tipo
+    inputDocumento.val("");
+  });
 
-    if (!docIngreso) {
+  $(document).on("click", "#btnBuscarDocumento", function () {
+    let documento = $("#inputDocumento").val().trim();
+    let tipoDoc = $("#tipoDocumento").val();
+    
+    console.log("Data enviada a listarActivo:", documento, "Tipo:", tipoDoc);
+
+    if (!documento) {
+      const tipoTexto = tipoDoc === "ingreso" ? "Doc. Ingreso Almacén" : "Doc. Venta";
       mostrarNotificacionModalActivos(
-        "Ingrese el Doc. Ingreso Almacén",
+        `Ingrese el ${tipoTexto}`,
         "danger"
       );
       return;
     }
 
     $("#ModalArticulos").modal("show");
-    listarActivosModal(docIngreso);
+    listarActivosModal(documento, tipoDoc);
   });
 
   $("#btnvolverprincipal")
@@ -2667,25 +2688,27 @@ function init() {
 
 // ? FIN CODIGO PARA GUARDAR MANUAL SIN UTILIZAR.
 
-function listarActivosModal(docIngresoAlm) {
+function listarActivosModal(documento, tipoDoc = "ingreso") {
   if ($.fn.DataTable.isDataTable("#tbllistarActivos")) {
     $("#tbllistarActivos").DataTable().clear().destroy();
   }
-  $("#tbllistarActivos").DataTable({
-    dom: "Bfrtip",
-    responsive: false,
-    destroy: true,
-    ajax: {
+  
+  let ajaxConfig = {};
+  let columns = [];
+  
+  if (tipoDoc === "ingreso") {
+    ajaxConfig = {
       url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc",
       type: "POST",
       dataType: "json",
-      data: { IdDocIngresoAlm: docIngresoAlm },
+      data: { IdDocIngresoAlm: documento },
       dataSrc: function (json) {
-        console.log("Respuesta del backend: ", json);
+        console.log("Respuesta del backend (ingreso): ", json);
         return json.data || [];
       },
-    },
-    columns: [
+    };
+    
+    columns = [
       { data: "IdArticulo" },
       { data: "Nombre" },
       { data: "Marca" },
@@ -2695,12 +2718,48 @@ function listarActivosModal(docIngresoAlm) {
         render: function (data, type, row) {
           return (
             '<button class="btn btn-success align-self-center btn-sm btnSeleccionarActivo" data-id="' +
-            row.idArticulo +
-            '"><i class="fa fa-check"></i></button>'
+            row.IdArticulo +
+            '" data-tipo="ingreso"><i class="fa fa-check"></i></button>'
           );
         },
       },
-    ],
+    ];
+  } else if (tipoDoc === "venta") {
+    ajaxConfig = {
+      url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc_venta",
+      type: "POST",
+      dataType: "json",
+      data: { IdDocVenta: documento },
+      dataSrc: function (json) {
+        console.log("Respuesta del backend (venta): ", json);
+        return json.data || [];
+      },
+    };
+    
+    columns = [
+      { data: "IdArticulo" },
+      { data: "Nombre" },
+      { data: "Marca" },
+      { data: "Cantidad", title: "Cantidad" },
+      {
+        data: null,
+        render: function (data, type, row) {
+          return (
+            '<button class="btn btn-success align-self-center btn-sm btnSeleccionarActivo" data-id="' +
+            row.IdArticulo +
+            '" data-tipo="venta"><i class="fa fa-check"></i></button>'
+          );
+        },
+      },
+    ];
+  }
+  
+  $("#tbllistarActivos").DataTable({
+    dom: "Bfrtip",
+    responsive: false,
+    destroy: true,
+    ajax: ajaxConfig,
+    columns: columns,
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
     },
@@ -2715,23 +2774,47 @@ function setSucursalOrigenDestino() {
 }
 
 function agregarActivoAlDetalle(activo) {
+  const tipoDoc = $("#tipoDocumento").val();
+  const documento = $("#inputDocumento").val();
+  
+  // Configurar la verificación según el tipo de documento
+  let verificacionConfig = {};
+  if (tipoDoc === "ingreso") {
+    verificacionConfig = {
+      url: "../../controllers/GestionarActivosController.php?action=verificarArticuloExistente",
+      data: {
+        IdDocIngresoAlm: documento,
+        IdArticulo: activo.id,
+        IdEmpresa: activo.empresa,
+        IdSucursal: activo.sucursal,
+      },
+      mensajeError: "documento de ingreso"
+    };
+  } else if (tipoDoc === "venta") {
+    verificacionConfig = {
+      url: "../../controllers/GestionarActivosController.php?action=verificarArticuloExistenteDocVenta",
+      data: {
+        IdDocumentoVta: documento,
+        IdArticulo: activo.id,
+        IdEmpresa: activo.empresa,
+        IdSucursal: activo.sucursal,
+      },
+      mensajeError: "documento de venta"
+    };
+  }
+
   // Primero verificar si el artículo ya existe
   $.ajax({
-    url: "../../controllers/GestionarActivosController.php?action=verificarArticuloExistente",
+    url: verificacionConfig.url,
     type: "POST",
-    data: {
-      IdDocIngresoAlm: $("#inputDocIngresoAlm").val(),
-      IdArticulo: activo.id,
-      IdEmpresa: activo.empresa,
-      IdSucursal: activo.sucursal,
-    },
+    data: verificacionConfig.data,
     dataType: "json",
     success: function (res) {
       if (res.status) {
         if (res.existe) {
           NotificacionToast(
             "error",
-            `El artículo <b>${activo.nombre}</b> ya ha sido registrado con este documento de ingreso.`
+            `El artículo <b>${activo.nombre}</b> ya ha sido registrado con este ${verificacionConfig.mensajeError}.`
           );
           return false;
         }
@@ -2751,10 +2834,21 @@ function agregarActivoAlDetalle(activo) {
         var selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
         var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
         var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
-        var inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" data-activo-id="${activo.id}">`;
-        var btnProcesar = `<button type="button" class="btn btn-warning btn-sm btnProcesarCantidad me-1" data-activo-id="${activo.id}" title="Procesar cantidad múltiple"><i class="fa fa-cogs"></i> Procesar</button>`;
+        
+        // Para documentos de venta, usar la cantidad del documento y deshabilitar el procesamiento
+        let inputCantidad, btnProcesar;
+        if (tipoDoc === "venta" && activo.cantidad) {
+          inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="${activo.cantidad}" min="1" readonly data-activo-id="${activo.id}">`;
+          btnProcesar = `<span class="badge badge-info">Cantidad: ${activo.cantidad}</span>`;
+        } else {
+          inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" data-activo-id="${activo.id}">`;
+          btnProcesar = `<button type="button" class="btn btn-warning btn-sm btnProcesarCantidad me-1" data-activo-id="${activo.id}" title="Procesar cantidad múltiple"><i class="fa fa-cogs"></i> Procesar</button>`;
+        }
 
-        var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp activo-principal' data-activo-nombre="${activo.nombre}" data-activo-marca="${activo.marca}">
+        // Para documentos de venta, prellenar el valor si está disponible
+        const valorPrellenado = (tipoDoc === "venta" && activo.valorUnitario) ? activo.valorUnitario : "";
+
+        var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp activo-principal' data-activo-nombre="${activo.nombre}" data-activo-marca="${activo.marca}" data-tipo-doc="${tipoDoc}">
                     <td>${activo.id}</td>
                     <td>${activo.nombre}</td>
                     <td>${activo.marca}</td>
@@ -2763,7 +2857,7 @@ function agregarActivoAlDetalle(activo) {
                     <td>${inputEstadoActivo}</td>
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
-                    <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor"></td>
+                    <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valorPrellenado}"></td>
                     <td>${inputCantidad}</td>
                     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea></td>
                     <td>

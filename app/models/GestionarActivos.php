@@ -251,6 +251,49 @@ class GestionarActivos
         }
     }
 
+    public function GuardarActivosDesdeDocumentoVenta($data)
+    {
+        try {
+            // Formatear fechas al formato SQL Server
+            $fechaAdquisicion = !empty($data['FechaAdquisicion']) ? date('Y-m-d', strtotime($data['FechaAdquisicion'])) : date('Y-m-d');
+            $empresa = $_SESSION['cod_empresa'] ??  null;
+            $sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
+
+            $stmt = $this->db->prepare('EXEC sp_RegistrarActivoDesdeDocumentoVenta 
+                @pIdDocumentoVta = ?,
+                @pIdArticulo = ?,
+                @pIdEstado = ?,
+                @pIdEmpresa = ?,
+                @pIdSucursal = ?,
+                @pIdAmbiente = ?,
+                @pIdCategoria = ?,
+                @pVidaUtil = ?,
+                @pObservaciones = ?,
+                @pValorAdquisicion = ?,
+                @pFechaAdquisicion = ?,
+                @pUserMod = ?');
+
+            $stmt->bindParam(1, $data['IdDocumentoVta'], \PDO::PARAM_INT);
+            $stmt->bindParam(2, $data['IdArticulo'], \PDO::PARAM_INT);
+            $stmt->bindParam(3, $data['IdEstado'], \PDO::PARAM_INT);
+            $stmt->bindParam(4, $empresa, \PDO::PARAM_INT);
+            $stmt->bindParam(5, $sucursal, \PDO::PARAM_INT);
+            $stmt->bindParam(6, $data['IdAmbiente'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(7, $data['IdCategoria'], \PDO::PARAM_INT);
+            $stmt->bindParam(8, $data['VidaUtil'], \PDO::PARAM_INT);
+            $stmt->bindParam(9, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(10, $data['ValorAdquisicion'], \PDO::PARAM_STR);
+            $stmt->bindParam(11, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(12, $data['UserMod'], \PDO::PARAM_STR);
+
+            $stmt->execute();
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error in GuardarActivosDesdeDocumentoVenta: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
     public function GuardarActivosManual($data)
     {
         try {
@@ -394,6 +437,33 @@ class GestionarActivos
         }
     }
 
+    public function verificarArticuloExistenteDocVenta($idDocumentoVta, $idArticulo)
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT CAST(CASE WHEN EXISTS (
+                SELECT 1 
+                FROM tOrigenActivo oa
+                INNER JOIN tUbicacionActivo ua ON oa.idActivo = ua.idActivo
+                WHERE oa.idDocumentoVenta = ?
+                AND oa.idArticulo = ?
+                AND ua.idEmpresa = ?
+                AND ua.idSucursal = ?
+            ) THEN 1 ELSE 0 END AS BIT) as existe
+            ");
+            $stmt->bindParam(1, $idDocumentoVta, PDO::PARAM_INT);
+            $stmt->bindParam(2, $idArticulo, PDO::PARAM_INT);
+            $stmt->bindParam(3, $_SESSION['cod_empresa'], PDO::PARAM_INT);
+            $stmt->bindParam(4, $_SESSION['cod_UnidadNeg'], PDO::PARAM_INT);
+            $stmt->execute();
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $resultado['existe'] == 1;
+        } catch (\PDOException $e) {
+            error_log("Error in verificarArticuloExistenteDocVenta: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
     public function verificarResponsableExistente($idActivo)
     {
         try {
@@ -454,11 +524,11 @@ class GestionarActivos
         try {
             $stmt = $this->db->prepare("SELECT hijo.idActivo AS IdActivoComponente,
             hijo.codigo AS CodigoComponente,
-            detalleH.nombre AS NombreComponente, padre.idActivo AS IdActivoPadre,
-            padre.codigo AS CodigoPadre, detalleP.nombre AS NombrePadre
-            FROM tActivos hijo
+            hijo.NombreActivo AS NombreComponente, padre.idActivo AS IdActivoPadre,
+            padre.codigo AS CodigoPadre, padre.NombreActivo AS NombrePadre
+            FROM vActivos hijo
             INNER JOIN tActivoDetalle detalleH ON hijo.idActivo = detalleH.idActivo
-            INNER JOIN tActivos padre ON hijo.idActivoPadre = padre.idActivo
+            INNER JOIN vActivos padre ON hijo.idActivoPadre = padre.idActivo
             INNER JOIN tActivoDetalle detalleP ON padre.idActivo = detalleP.idActivo
             WHERE hijo.idActivoPadre = ?");
             $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);

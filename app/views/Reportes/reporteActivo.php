@@ -368,7 +368,7 @@ try {
             <div class="document-info">
                 <div class="ruc"></div>
                 <div class="ficha-title">FICHA TÉCNICA DE ACTIVO</div>
-                <div class="ficha-number">N° <?php echo $detalleActivo['CodigoActivo'] ?? ''; ?></div>
+                <div class="ficha-number">N° <?php echo $detalleActivo['codigo'] ?? ''; ?></div>
             </div>
         </div>
         <!-- Activo Details -->
@@ -376,11 +376,11 @@ try {
             <div>
                 <div class="detail-row">
                     <div class="label">Código:</div>
-                    <div class="value"><?php echo $detalleActivo['CodigoActivo'] ?? ''; ?></div>
+                    <div class="value"><?php echo $detalleActivo['codigo'] ?? ''; ?></div>
                 </div>
                 <div class="detail-row">
                     <div class="label">Nombre:</div>
-                    <div class="value"><?php echo $detalleActivo['NombreActivoVisible'] ?? ''; ?></div>
+                    <div class="value"><?php echo $detalleActivo['NombreActivo'] ?? ''; ?></div>
                 </div>
                 <div class="detail-row">
                     <div class="label">Categoría:</div>
@@ -416,7 +416,7 @@ try {
                     </tr>
                     <tr>
                         <th>Número de Serie:</th>
-                        <td><?php echo $detalleActivo['NumeroSerie'] ?? ''; ?></td>
+                        <td><?php echo $detalleActivo['Serie'] ?? ''; ?></td>
                     </tr>
                     <tr>
                         <th>Valor de Adquisición:</th>
@@ -431,7 +431,7 @@ try {
             <div class="aditional-title">INFORMACIÓN ADICIONAL</div>
             <div class="detail-row">
                 <div class="label">Proveedor:</div>
-                <div class="value"><?php echo $detalleActivo['Proveedor'] ?? ''; ?></div>
+                <div class="value"><?php echo $detalleActivo['RazonSocial'] ?? ''; ?></div>
             </div>
             <!-- <div class="detail-row">
                 <div class="label">Garantía (meses):</div>

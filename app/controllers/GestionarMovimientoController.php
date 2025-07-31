@@ -359,6 +359,26 @@ switch ($action) {
         }
         break;
 
+    case 'verificarComponentesActivo':
+        try {
+            $idActivo = $_POST['idActivo'] ?? null;
+            if (!$idActivo) {
+                throw new Exception("ID de activo no proporcionado");
+            }
+
+            $resultado = $movimientos->verificarActivoConComponentes($idActivo);
+            echo json_encode([
+                'status' => true,
+                'data' => $resultado
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+
 
 
     default:

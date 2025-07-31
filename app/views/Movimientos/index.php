@@ -14,7 +14,7 @@ session_start();
     <title>Movimientos - Sistema Gestion de activos</title>
     <style>
         .swal2-container {
-            z-index: 9999 !important;
+            z-index: 10000 !important;
         }
 
         .dropdown-menu .show {
@@ -32,6 +32,28 @@ session_start();
 
         .modal-backdrop.show {
             z-index: 9998 !important;
+        }
+
+        /* Mejorar la apariencia del botón de cerrar */
+        #ModalArticulos .close {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #000;
+            text-shadow: 0 1px 0 #fff;
+            opacity: .5;
+            cursor: pointer;
+        }
+
+        #ModalArticulos .close:hover {
+            opacity: .75;
+        }
+
+        /* Asegurar que los botones del modal sean clickeables */
+        #ModalArticulos .modal-header .close,
+        #ModalArticulos .modal-footer .btn {
+            z-index: 10001;
+            position: relative;
         }
     </style>
 </head>
@@ -514,13 +536,13 @@ session_start();
 
 
                         <!-- Modal Articulos -->
-                        <div class="modal fade" id="ModalArticulos" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalArticulosTitle" style="z-index: 9999 !important;"
+                        <div class="modal fade" id="ModalArticulos" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalArticulosTitle" style="z-index: 9999 !important;">
                             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
                             <div class="modal-content">
                                 <div class="modal-header dragable_touch">
                                     <h5 class="modal-title" id="ModalArticulosTitulo"><i class="fas fa-box"></i> Lista de artículos</h5>
-                                    <button class="close" data-dismiss="modal" aria-label="Close">
-                                        <span>&times;</span>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                                 <div class="modal-body">
@@ -558,6 +580,11 @@ session_start();
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                        <i class="fas fa-times"></i> Cerrar
+                                    </button>
                                 </div>
                             </div>
                         </div>

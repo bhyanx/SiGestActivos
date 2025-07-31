@@ -276,7 +276,7 @@ class GestionarMovimientos
 
             // Consulta SQL
             $sql = "DECLARE @nuevoCodMovimiento VARCHAR(20);
-                EXEC sp_RegistrarMovimientoActivo
+                EXEC sp_RegistrarMovimientoActivov2
                     @pXmlActivos = :xmlActivos,
                     @pIdAmbienteDestino = :idAmbienteDestino,
                     @pIdResponsableDestino = :idResponsableDestino,
@@ -582,5 +582,27 @@ class GestionarMovimientos
         }
     }
 
+    public function verificarActivoConComponentes($idActivo)
+    {
+        try {
+            $sql = "SELECT 
+                        COUNT(*) as totalComponentes,
+                        STRING_AGG(CONCAT(codigo, ' - ', NombreActivo), ', ') as listaComponentes
+                    FROM vActivos 
+                    WHERE idActivoPadre = ? AND idEstado <> 3";
 
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
+            $stmt->execute();
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return [
+                'tieneComponentes' => $resultado['totalComponentes'] > 0,
+                'totalComponentes' => $resultado['totalComponentes'],
+                'listaComponentes' => $resultado['listaComponentes'] ?? ''
+            ];
+        } catch (PDOException $e) {
+            throw new Exception("Error al verificar componentes del activo: " . $e->getMessage());
+        }
+    }
 }
