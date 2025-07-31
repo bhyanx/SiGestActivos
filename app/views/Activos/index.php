@@ -839,6 +839,21 @@ if (isset($_SESSION["IdRol"])) {
                                                 </div>
                                             </div>
 
+                                            <!-- Campo de proveedor para documentos de venta -->
+                                            <div class="row" id="modalProveedorContainer" style="display: none;">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="modalProveedor">
+                                                            <i class="fas fa-building"></i> Proveedor: <span class="text-danger">*</span>
+                                                        </label>
+                                                        <select class="form-control" id="modalProveedor">
+                                                            <option value="">Seleccione un proveedor...</option>
+                                                        </select>
+                                                        <small class="form-text text-muted">Obligatorio para documentos de venta</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <div class="row">
                                                 <div class="col-md-12">
                                                     <div class="form-group">

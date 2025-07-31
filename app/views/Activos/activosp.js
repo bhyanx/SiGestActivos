@@ -400,6 +400,7 @@ function init() {
     // Validar que los campos principales estén llenos
     const ambienteId = filaActual.find("select.ambiente").val();
     const categoriaId = filaActual.find("select.categoria").val();
+    const proveedorId = filaActual.find("select.proveedor").val();
 
     if (!ambienteId || !categoriaId) {
       NotificacionToast(
@@ -431,6 +432,61 @@ function init() {
           <small>Cantidad definida por el documento: ${cantidad} unidades</small>
         </div>
       `);
+
+      // Mostrar campo de proveedor para documentos de venta
+      $("#modalProveedorContainer").show();
+
+      // Inicializar Select2 para el proveedor en el modal si no está inicializado
+      if (!$("#modalProveedor").hasClass("select2-hidden-accessible")) {
+        $("#modalProveedor").select2({
+          dropdownParent: $("#modalProcesarCantidad"),
+          minimumInputLength: 2,
+          theme: "bootstrap4",
+          width: "100%",
+          language: {
+            inputTooShort: function (args) {
+              return "Ingresar más de 2 caracteres para buscar...";
+            },
+            noResults: function () {
+              return "No se encontraron proveedores.";
+            },
+            searching: function () {
+              return "Buscando proveedores...";
+            },
+          },
+          ajax: {
+            url: "../../controllers/GestionarActivosController.php?action=comboProveedor",
+            type: "GET",
+            dataType: "json",
+            delay: 250,
+            data: function (params) {
+              return {
+                filtro: params.term,
+              };
+            },
+            processResults: function (data) {
+              return {
+                results: data || [],
+              };
+            },
+            cache: true,
+          },
+          placeholder: "🔍 Buscar y Seleccionar Proveedor",
+          allowClear: false,
+        });
+      }
+
+      // Cargar el proveedor actual si existe
+      if (proveedorId) {
+        // Para Select2 con AJAX, necesitamos crear la opción manualmente
+        const proveedorTexto = filaActual
+          .find("select.proveedor option:selected")
+          .text();
+        if (proveedorTexto && proveedorTexto !== "") {
+          const newOption = new Option(proveedorTexto, proveedorId, true, true);
+          $("#modalProveedor").append(newOption).trigger("change");
+        }
+      }
     } else {
       $("#modalTipoDocumento").html(`
         <div class="alert alert-success">
@@ -438,6 +494,9 @@ function init() {
           <small>Cantidad personalizable</small>
         </div>
       `);
+
+      // Ocultar campo de proveedor para documentos de ingreso
+      $("#modalProveedorContainer").hide();
     }
 
     // Guardar referencia a la fila actual en el modal
@@ -457,20 +516,42 @@ function init() {
     $("#modalProcesarCantidad").modal("show");
   });
 
+  // Limpiar el modal cuando se cierre
+  $("#modalProcesarCantidad").on("hidden.bs.modal", function () {
+    // Limpiar el select de proveedor
+    $("#modalProveedor").val(null).trigger("change");
+    // Limpiar otros campos
+    $("#modalSerieBase").val("");
+    $("#modalObservacionesBase").val("");
+    $("#modalCantidadTotal").val("");
+    $("#cantidadACrear").text("0");
+  });
+
   // Manejador para el botón "Confirmar Procesar" del modal
   $(document).on("click", "#btnConfirmarProcesar", function () {
     const filaActual = $("#modalProcesarCantidad").data("filaActual");
     const activoId = $("#modalProcesarCantidad").data("activoId");
     const activoNombre = $("#modalProcesarCantidad").data("activoNombre");
     const activoMarca = $("#modalProcesarCantidad").data("activoMarca");
+    const tipoDoc = filaActual.data("tipo-doc") || "ingreso";
 
     const cantidad = parseInt($("#modalCantidadTotal").val()) || 1;
     const serieBase = $("#modalSerieBase").val().trim();
     const observacionesBase = $("#modalObservacionesBase").val().trim();
+    const proveedorModal = $("#modalProveedor").val();
 
     // Validar serie base
     if (!serieBase) {
       NotificacionToast("error", "Debe ingresar una serie base.");
+      return;
+    }
+
+    // Validar proveedor para documentos de venta
+    if (tipoDoc === "venta" && !proveedorModal) {
+      NotificacionToast(
+        "error",
+        "Debe seleccionar un proveedor para documentos de venta."
+      );
       return;
     }
 
@@ -506,7 +587,11 @@ function init() {
     const valor = filaActual.find("input[name='valor[]']").val();
     const ambienteId = filaActual.find("select.ambiente").val();
     const categoriaId = filaActual.find("select.categoria").val();
-    const tipoDoc = filaActual.data("tipo-doc") || "ingreso"; // Por defecto ingreso si no está definido
+    // Para documentos de venta, usar el proveedor del modal; para ingreso, usar el de la fila
+    const proveedorId =
+      tipoDoc === "venta"
+        ? proveedorModal
+        : filaActual.find("select.proveedor").val();
 
     // Cerrar el modal
     $("#modalProcesarCantidad").modal("hide");
@@ -548,6 +633,16 @@ function init() {
     // Actualizar la serie de la fila original y agregar distintivo visual
     filaActual.find("input[name='serie[]']").val(serieBase + "-1");
     filaActual.find("textarea[name='observaciones[]']").val(observacionesBase);
+
+    // Actualizar el proveedor en la fila original si es documento de venta
+    if (tipoDoc === "venta" && proveedorModal) {
+      // Mantener el select visible pero deshabilitarlo para evitar cambios
+      filaActual
+        .find("select.proveedor")
+        .val(proveedorModal)
+        .prop("disabled", true)
+        .trigger("change");
+    }
 
     // Agregar distintivo visual a la fila principal
     const distintivoPrincipal = `<span class="badge badge-primary grupo-badge">👑 Principal</span>`;
@@ -603,11 +698,16 @@ function init() {
       const numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
       const selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
       const selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
-      const selectProveedor = `<select class='form-control form-control-sm proveedor' name='proveedor[]' id="comboProveedor${numeroFilas}" ${
-        tipoDoc === "venta" ? "required" : ""
-      } data-tipo-doc="${tipoDoc}"></select>`;
       const inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
       const inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" disabled>`;
+
+      // Para activos procesados, mostrar el proveedor pero deshabilitado
+      const proveedorTexto =
+        filaActual.find("select.proveedor option:selected").text() ||
+        "No asignado";
+      const proveedorDisplay = `<input type="hidden" name="proveedor[]" value="${
+        proveedorId || ""
+      }"><span class="text-muted small">${proveedorTexto}</span>`;
 
       const distintivo = `<span class="badge badge-info grupo-badge">📦 ${
         i + 1
@@ -618,7 +718,6 @@ function init() {
                     <td>${activoId}</td>
                     <td>${indentacion} ${activoNombre} ${distintivo}</td>
                     <td>${activoMarca}</td>
-                    
                     <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie ${
                       i + 1
                     }" value="${serieBase}-${i + 1}"></td>
@@ -627,7 +726,7 @@ function init() {
                     <td>${selectCategoria}</td>
                     <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}"></td>
                     <td>${inputCantidad}</td>
-                    <td>${selectProveedor}</td>
+                    <td>${proveedorDisplay}</td>
                     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea></td>
                     <td>
                       <button type='button' class='btn btn-danger btn-sm btnQuitarActivo' title="Eliminar solo esta unidad">
@@ -643,13 +742,9 @@ function init() {
       // Efecto visual de aparición
       ultimaFilaInsertada.hide().fadeIn(300);
 
-      // Cargar combos para la nueva fila
+      // Cargar combos para la nueva fila (solo ambiente y categoría para filas procesadas)
       ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
       ListarCombosCategoria(`comboCategoria${numeroFilas}`);
-      ListarCombosProveedor(
-        `comboProveedor${numeroFilas}`,
-        tipoDoc === "venta"
-      );
 
       // Establecer los valores seleccionados en los combos
       setTimeout(() => {
@@ -819,6 +914,7 @@ function init() {
       .val();
     const ambienteId = filaPrincipal.find("select.ambiente").val();
     const categoriaId = filaPrincipal.find("select.categoria").val();
+    const proveedorId = filaPrincipal.find("select.proveedor").val();
 
     // Calcular el siguiente número de serie
     const cantidadActual = filasGrupo.length;
@@ -839,6 +935,13 @@ function init() {
         const numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
         const selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
         const selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
+        // Para unidades adicionales del grupo, mostrar el proveedor heredado
+        const proveedorTexto =
+          filaPrincipal.find("select.proveedor option:selected").text() ||
+          "No asignado";
+        const proveedorDisplay = `<input type="hidden" name="proveedor[]" value="${
+          proveedorId || ""
+        }"><span class="text-muted small">${proveedorTexto}</span>`;
         const inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
         const inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" disabled>`;
 
@@ -849,13 +952,13 @@ function init() {
                       <td>${activoId}</td>
                       <td>${indentacion} ${activoNombre} ${distintivo}</td>
                       <td>${activoMarca}</td>
-                      
                       <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie ${siguienteNumero}" value="${serieBase}-${siguienteNumero}"></td>
                       <td>${inputEstadoActivo}</td>
                       <td>${selectAmbiente}</td>
                       <td>${selectCategoria}</td>
                       <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}"></td>
                       <td>${inputCantidad}</td>
+                      <td>${proveedorDisplay}</td>
                       <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea></td>
                       <td>
                         <button type='button' class='btn btn-danger btn-sm btnQuitarActivo' title="Eliminar solo esta unidad">
@@ -868,7 +971,7 @@ function init() {
         const ultimaFilaGrupo = $(`tr[data-grupo-id='${grupoId}']`).last();
         ultimaFilaGrupo.after(nuevaFila);
 
-        // Cargar combos para la nueva fila
+        // Cargar combos para la nueva fila (solo ambiente y categoría)
         ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
         ListarCombosCategoria(`comboCategoria${numeroFilas}`);
 
@@ -1016,7 +1119,21 @@ function init() {
       let row = $(this);
       let cantidad = parseInt(row.find("input.cantidad").val()) || 1;
       let tipoDocFila = row.data("tipo-doc");
-      let proveedor = row.find("select.proveedor").val();
+      // Obtener proveedor del select o del campo hidden (para filas procesadas)
+      let proveedor =
+        row.find("select.proveedor").val() ||
+        row.find("input[name='proveedor[]']").val();
+
+      // Debug: log para verificar los datos
+      console.log("Fila:", {
+        id: row.find("td:eq(0)").text(),
+        nombre: row.find("td:eq(1)").text(),
+        cantidad: cantidad,
+        tipoDoc: tipoDocFila,
+        proveedor: proveedor,
+        ambiente: row.find("select.ambiente").val(),
+        categoria: row.find("select.categoria").val(),
+      });
 
       // Validar proveedor obligatorio para documentos de venta
       if (
@@ -1033,32 +1150,41 @@ function init() {
         return false;
       }
 
-      // Para documentos de venta, enviar la cantidad al SP y dejar que maneje la creación múltiple
+      // Para documentos de venta, crear múltiples activos individuales según la cantidad
       // Para documentos de ingreso, crear múltiples activos individuales como antes
       if (tipoDocFila === "venta" || tipoDocumento === "venta") {
-        // Para documentos de venta: enviar una sola entrada con la cantidad
-        let activo = {
-          IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
-          Serie: row.find("input[name='serie[]']").val() || null,
-          IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
-          IdCategoria: parseInt(row.find("select.categoria").val()) || null,
-          ValorAdquisicion:
-            parseFloat(row.find("input[name='valor[]']").val()) || 0,
-          IdProveedor: proveedor || null,
-          Observaciones:
-            row.find("textarea[name='observaciones[]']").val() || "",
-          IdEstado: 1, // Estado por defecto: Operativo
-          Garantia: 0, // Por defecto sin garantía
-          UserMod: userMod,
-          Accion: 1, // 1 = Insertar
-          VidaUtil: 3, // Vida útil por defecto
-          FechaAdquisicion: new Date().toISOString().split("T")[0], // Fecha actual
-          Cantidad: cantidad, // Enviar la cantidad al SP
-          IdDocVenta: parseInt(documento) || null,
-          IdDocIngresoAlm: null,
-        };
+        // Para documentos de venta: crear múltiples activos individuales
+        for (let i = 0; i < cantidad; i++) {
+          let serieActual = row.find("input[name='serie[]']").val() || null;
 
-        activos.push(activo);
+          // Si hay cantidad > 1, agregar sufijo a la serie
+          if (cantidad > 1 && serieActual) {
+            serieActual = serieActual + "-" + (i + 1);
+          }
+
+          let activo = {
+            IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
+            Serie: serieActual,
+            IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
+            IdCategoria: parseInt(row.find("select.categoria").val()) || null,
+            ValorAdquisicion:
+              parseFloat(row.find("input[name='valor[]']").val()) || 0,
+            IdProveedor: proveedor || null,
+            Observaciones:
+              row.find("textarea[name='observaciones[]']").val() || "",
+            IdEstado: 1, // Estado por defecto: Operativo
+            Garantia: 0, // Por defecto sin garantía
+            UserMod: userMod,
+            Accion: 1, // 1 = Insertar
+            VidaUtil: 3, // Vida útil por defecto
+            FechaAdquisicion: new Date().toISOString().split("T")[0], // Fecha actual
+            Cantidad: 1, // Cada iteración es 1 activo individual
+            IdDocVenta: parseInt(documento) || null,
+            IdDocIngresoAlm: null,
+          };
+
+          activos.push(activo);
+        }
       } else {
         // Para documentos de ingreso: crear múltiples activos individuales
         for (let i = 0; i < cantidad; i++) {
@@ -1099,7 +1225,10 @@ function init() {
     let activosValidos = activos.every((activo) => {
       // Validación básica
       const validacionBasica =
-        activo.IdArticulo && activo.IdAmbiente && activo.IdCategoria && activo.Cantidad > 0;
+        activo.IdArticulo &&
+        activo.IdAmbiente &&
+        activo.IdCategoria &&
+        activo.Cantidad > 0;
 
       // Validación de documento (debe tener uno u otro)
       const tieneDocumento = activo.IdDocIngresoAlm || activo.IdDocVenta;
@@ -1149,8 +1278,11 @@ function init() {
 
     // Determinar qué función usar según el tipo de documento
     const tipoDocActual = $("#tipoDocumento").val();
-    const action = tipoDocActual === "venta" ? "GuardarActivosDesdeDocumentoVenta" : "GuardarActivosDesdeDocumentoIngreso";
-    
+    const action =
+      tipoDocActual === "venta"
+        ? "GuardarActivosDesdeDocumentoVenta"
+        : "GuardarActivosDesdeDocumentoIngreso";
+
     $.ajax({
       url: "../../controllers/GestionarActivosController.php?action=" + action,
       type: "POST",
@@ -2976,10 +3108,8 @@ function agregarActivoAlDetalle(activo) {
             ? activo.valorUnitario
             : "";
 
-        // Crear select de proveedor dinámico
-        const selectProveedor = `<select class='form-control form-control-sm proveedor' name='proveedor[]' id="comboProveedor${numeroFilas}" ${
-          tipoDoc === "venta" ? "required" : ""
-        } data-tipo-doc="${tipoDoc}"></select>`;
+        // Crear select de proveedor
+        var selectProveedor = `<select class='form-control form-control-sm proveedor' name='proveedor[]' id="comboProveedor${numeroFilas}"></select>`;
 
         var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp activo-principal' data-activo-nombre="${activo.nombre}" data-activo-marca="${activo.marca}" data-tipo-doc="${tipoDoc}">
                     <td>${activo.id}</td>
@@ -2988,14 +3118,12 @@ function agregarActivoAlDetalle(activo) {
                     <td>
                       <input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie">
                     </td>
-                    <td>
-                      ${selectProveedor}
-                    </td>
                     <td>${inputEstadoActivo}</td>
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
                     <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valorPrellenado}"></td>
                     <td>${inputCantidad}</td>
+                    <td>${selectProveedor}</td>
                     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea></td>
                     <td>
                       <div class="btn-group">
@@ -3009,10 +3137,11 @@ function agregarActivoAlDetalle(activo) {
         ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
         ListarCombosCategoria(`comboCategoria${numeroFilas}`);
 
-        // Inicializar select2 para proveedor con búsqueda dinámica
+        // Determinar si el proveedor es obligatorio según el tipo de documento
+        const esProveedorObligatorio = tipoDoc === "venta";
         ListarCombosProveedor(
           `comboProveedor${numeroFilas}`,
-          tipoDoc === "venta"
+          esProveedorObligatorio
         );
 
         setTimeout(function () {
@@ -3177,29 +3306,6 @@ function ListarCombosProveedor(elemento, esObligatorio = false) {
       : "🔍 Buscar Proveedor (Opcional)",
     allowClear: !esObligatorio,
   });
-
-  // Si es obligatorio, agregar validación visual y mensaje
-  if (esObligatorio) {
-    // Agregar indicador visual de campo obligatorio
-    $(`#${elemento}`)
-      .closest("td")
-      .prepend(
-        '<small class="text-danger"><i class="fas fa-asterisk"></i> Obligatorio</small>'
-      );
-
-    $(`#${elemento}`).on("change", function () {
-      if (!$(this).val()) {
-        $(this).addClass("is-invalid");
-        $(this).next(".invalid-feedback").remove();
-        $(this).after(
-          '<div class="invalid-feedback">Debe seleccionar un proveedor</div>'
-        );
-      } else {
-        $(this).removeClass("is-invalid");
-        $(this).next(".invalid-feedback").remove();
-      }
-    });
-  }
 }
 
 function NotificacionToast(tipo, mensaje) {
