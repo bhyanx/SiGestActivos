@@ -113,64 +113,7 @@ switch ($action) {
         }
         break;
 
-        case 'GuardarActivos':
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                try {
-                    // Obtener los datos del array de activos
-                    $activosArray = json_decode($_POST['activos'], true);
-                    if (!$activosArray) {
-                        throw new Exception("No se recibieron datos de activos válidos");
-                    }
-    
-                    $resultados = [];
-                    foreach ($activosArray as $activo) {
-                        // Formatear fechas
-                        $fechaFinGarantia = !empty($activo['FechaFinGarantia']) ? date('Y-m-d', strtotime($activo['FechaFinGarantia'])) : null;
-                        $fechaAdquisicion = !empty($activo['FechaAdquisicion']) ? date('Y-m-d', strtotime($activo['FechaAdquisicion'])) : date('Y-m-d');
-                        
-    
-                        $data = [
-                            //'IdActivo' => null,
-                            'IdDocIngresoAlm' => $activo['IdDocIngresoAlm'],
-                            'IdArticulo' => $activo['IdArticulo'],
-                            //'Codigo' => null, // El SP generará el código automáticamente
-                            'IdEstado' => $activo['IdEstado'],
-                            'Garantia' => isset($activo['Garantia']) ? (int)$activo['Garantia'] : 0,
-                            'FechaFinGarantia' => $fechaFinGarantia,
-                            'IdProveedor' => $activo['IdProveedor'],
-                            'IdEmpresa' => $_SESSION['IdEmpresa'] ?? '',
-                            'IdSucursal' => $_SESSION['IdSucursal'],
-                            'IdAmbiente' => $activo['IdAmbiente'],
-                            'IdCategoria' => $activo['IdCategoria'] ?? 2,
-                            'VidaUtil' => $activo['VidaUtil'] ?? 3,
-                            'Serie' => $activo['Serie'],
-                            'Observaciones' => $activo['Observaciones'] ?? '',
-                            'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
-                            'FechaAdquisicion' => $fechaAdquisicion,
-                            'UserMod' => $_SESSION['CodEmpleado']
-                        ];
-    
-                        $activos->GuardarActivos($data);
-                        $resultados[] = [
-                            'status' => true,
-                            'message' => 'Activo registrado correctamente'
-                        ];
-                    }
-    
-                    echo json_encode([
-                        'status' => true,
-                        'message' => 'Activos registrados con éxito.',
-                        'data' => $resultados
-                    ]);
-                } catch (Exception $e) {
-                    error_log("Error Registrar: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
-                    echo json_encode([
-                        'status' => false,
-                        'message' => 'Error al registrar activos: ' . $e->getMessage()
-                    ]);
-                }
-            }
-            break;
+
 
     case 'Actualizar':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -277,10 +220,10 @@ switch ($action) {
             $idActivo = $_POST['idActivo'];
             error_log("=== DEBUGGING ÚLTIMOS EVENTOS ===", 3, __DIR__ . '/../../logs/debug.log');
             error_log("ID Activo: " . $idActivo, 3, __DIR__ . '/../../logs/debug.log');
-            
+
             $eventos = $activos->obtenerUltimosEventosActivo($idActivo);
             error_log("Eventos obtenidos: " . print_r($eventos, true), 3, __DIR__ . '/../../logs/debug.log');
-            
+
             echo json_encode([
                 'status' => true,
                 'data' => $eventos
@@ -484,6 +427,67 @@ switch ($action) {
         }
         break;
 
+    case 'GuardarActivosDesdeDocumentoIngreso':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                // Obtener los datos del array de activos
+                $activosArray = json_decode($_POST['activos'], true);
+                if (!$activosArray) {
+                    throw new Exception("No se recibieron datos de activos válidos");
+                }
+
+                // Debug: Log de los datos recibidos
+                error_log("=== GUARDANDO ACTIVOS DESDE DOCUMENTO INGRESO ===", 3, __DIR__ . '/../../logs/debug.log');
+                error_log("Total activos a guardar: " . count($activosArray), 3, __DIR__ . '/../../logs/debug.log');
+                error_log("Datos recibidos: " . print_r($activosArray, true), 3, __DIR__ . '/../../logs/debug.log');
+
+                $resultados = [];
+                foreach ($activosArray as $index => $activo) {
+                    // Formatear fechas
+                    $fechaFinGarantia = !empty($activo['FechaFinGarantia']) ? date('Y-m-d', strtotime($activo['FechaFinGarantia'])) : null;
+                    $fechaAdquisicion = !empty($activo['FechaAdquisicion']) ? date('Y-m-d', strtotime($activo['FechaAdquisicion'])) : date('Y-m-d');
+
+                    $data = [
+                        'IdArticulo' => $activo['IdArticulo'],
+                        'IdEstado' => $activo['IdEstado'],
+                        'Garantia' => isset($activo['Garantia']) ? (int)$activo['Garantia'] : 0,
+                        'FechaFinGarantia' => $fechaFinGarantia,
+                        'IdProveedor' => $activo['IdProveedor'] ?? null,
+                        'IdEmpresa' => $_SESSION['cod_empresa'] ?? null,
+                        'IdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
+                        'IdAmbiente' => $activo['IdAmbiente'],
+                        'IdCategoria' => $activo['IdCategoria'] ?? 2,
+                        'VidaUtil' => $activo['VidaUtil'] ?? 3,
+                        'Serie' => $activo['Serie'],
+                        'Observaciones' => $activo['Observaciones'] ?? '',
+                        'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
+                        'FechaAdquisicion' => $fechaAdquisicion,
+                        'UserMod' => $_SESSION['CodEmpleado'],
+                        'IdDocIngresoAlm' => $activo['IdDocIngresoAlm'] ?? null
+                    ];
+
+                    $activos->GuardarActivosDesdeDocumentoIngreso($data);
+                    $resultados[] = [
+                        'status' => true,
+                        'message' => 'Activo registrado correctamente'
+                    ];
+                }
+
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Activos registrados con éxito.',
+                    'data' => $resultados
+                ]);
+            } catch (Exception $e) {
+                error_log("Error GuardarActivosDesdeDocumentoIngreso: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al registrar activos: ' . $e->getMessage()
+                ]);
+            }
+        }
+        break;
+
     case 'GuardarActivosDesdeDocumentoVenta':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
@@ -493,22 +497,32 @@ switch ($action) {
                     throw new Exception("No se recibieron datos de activos válidos");
                 }
 
+                // Debug: Log de los datos recibidos
+                error_log("=== GUARDANDO ACTIVOS DESDE DOCUMENTO VENTA ===", 3, __DIR__ . '/../../logs/debug.log');
+                error_log("Total activos a guardar: " . count($activosArray), 3, __DIR__ . '/../../logs/debug.log');
+                error_log("Datos recibidos: " . print_r($activosArray, true), 3, __DIR__ . '/../../logs/debug.log');
+
                 $resultados = [];
-                foreach ($activosArray as $activo) {
+                foreach ($activosArray as $index => $activo) {
                     // Formatear fechas
                     $fechaAdquisicion = !empty($activo['FechaAdquisicion']) ? date('Y-m-d', strtotime($activo['FechaAdquisicion'])) : date('Y-m-d');
 
                     $data = [
-                        'IdDocumentoVta' => $activo['IdDocumentoVta'],
                         'IdArticulo' => $activo['IdArticulo'],
                         'IdEstado' => $activo['IdEstado'],
+                        'IdProveedor' => $activo['IdProveedor'] ?? null,
+                        'IdEmpresa' => $_SESSION['cod_empresa'] ?? null,
+                        'IdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
                         'IdAmbiente' => $activo['IdAmbiente'],
-                        'IdCategoria' => $activo['IdCategoria'],
+                        'IdCategoria' => $activo['IdCategoria'] ?? 2,
                         'VidaUtil' => $activo['VidaUtil'] ?? 3,
+                        'Serie' => $activo['Serie'],
                         'Observaciones' => $activo['Observaciones'] ?? '',
                         'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
                         'FechaAdquisicion' => $fechaAdquisicion,
-                        'UserMod' => $_SESSION['CodEmpleado']
+                        'UserMod' => $_SESSION['CodEmpleado'],
+                        'Cantidad' => isset($activo['Cantidad']) ? (int)$activo['Cantidad'] : 1,
+                        'IdDocVenta' => $activo['IdDocVenta'] ?? null
                     ];
 
                     $activos->GuardarActivosDesdeDocumentoVenta($data);
@@ -561,16 +575,16 @@ switch ($action) {
 
     case 'verificarArticuloExistenteDocVenta':
         try {
-            $idDocumentoVta = $_POST['IdDocumentoVta'] ?? null;
+            $IdDocVenta = $_POST['IdDocVenta'] ?? null;
             $idArticulo = $_POST['IdArticulo'] ?? null;
             $idEmpresa = $_SESSION['cod_empresa'] ?? null;
             $idSucursal = $_SESSION['cod_UnidadNeg'] ?? null;
 
-            if (!$idDocumentoVta || !$idArticulo) {
+            if (!$IdDocVenta || !$idArticulo) {
                 throw new Exception("Se requiere el documento de venta y el artículo");
             }
 
-            $existe = $activos->verificarArticuloExistenteDocVenta($idDocumentoVta, $idArticulo, $idEmpresa, $idSucursal);
+            $existe = $activos->verificarArticuloExistenteDocVenta($IdDocVenta, $idArticulo, $idEmpresa, $idSucursal);
             echo json_encode([
                 'status' => true,
                 'existe' => $existe,

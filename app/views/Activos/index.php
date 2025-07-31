@@ -226,8 +226,8 @@ if (isset($_SESSION["IdRol"])) {
                                                                     <th>Ambiente</th>
                                                                     <th>Categoría</th>
                                                                     <th>Valor Unitario</th>
-                                                                    <!--<th>Proveedor</th>-->
                                                                     <th>Cantidad</th>
+                                                                    <th>Proveedor</th>
                                                                     <th>Observaciones</th>
                                                                     <th>Acciones</th>
                                                                 </tr>
@@ -236,7 +236,7 @@ if (isset($_SESSION["IdRol"])) {
                                                             </tbody>
                                                             <tfoot>
                                                                 <tr>
-                                                                    <th colspan="10" style="text-align: right;" class="">TOTAL DETALLE &nbsp;&nbsp;</th>
+                                                                    <th colspan="11" style="text-align: right;" class="">TOTAL DETALLE &nbsp;&nbsp;</th>
                                                                     <!-- <th style="text-align: right;"></th> -->
                                                                     <th class="text-center">
                                                                         <span id="CantRegistros">0</span>

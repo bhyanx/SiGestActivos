@@ -36,7 +36,7 @@ function init() {
     const tipoDoc = $(this).val();
     const labelDocumento = $("#labelDocumento");
     const inputDocumento = $("#inputDocumento");
-    
+
     if (tipoDoc === "ingreso") {
       labelDocumento.text("Doc. Ingreso Almacén:");
       inputDocumento.attr("placeholder", "ID de Doc. Ingreso");
@@ -44,7 +44,7 @@ function init() {
       labelDocumento.text("Doc. Venta:");
       inputDocumento.attr("placeholder", "ID de Doc. Venta");
     }
-    
+
     // Limpiar el input cuando cambie el tipo
     inputDocumento.val("");
   });
@@ -52,15 +52,13 @@ function init() {
   $(document).on("click", "#btnBuscarDocumento", function () {
     let documento = $("#inputDocumento").val().trim();
     let tipoDoc = $("#tipoDocumento").val();
-    
+
     console.log("Data enviada a listarActivo:", documento, "Tipo:", tipoDoc);
 
     if (!documento) {
-      const tipoTexto = tipoDoc === "ingreso" ? "Doc. Ingreso Almacén" : "Doc. Venta";
-      mostrarNotificacionModalActivos(
-        `Ingrese el ${tipoTexto}`,
-        "danger"
-      );
+      const tipoTexto =
+        tipoDoc === "ingreso" ? "Doc. Ingreso Almacén" : "Doc. Venta";
+      mostrarNotificacionModalActivos(`Ingrese el ${tipoTexto}`, "danger");
       return;
     }
 
@@ -294,6 +292,8 @@ function init() {
 
   $(document).on("click", ".btnSeleccionarActivo", function () {
     var fila = $(this).closest("tr");
+    var tipoDoc = $(this).data("tipo");
+
     var activo = {
       id: fila.find("td:eq(0)").text(),
       nombre: fila.find("td:eq(1)").text(),
@@ -302,6 +302,13 @@ function init() {
       unidadNegocio: fila.find("td:eq(4)").text(),
       nombreLocal: fila.find("td:eq(5)").text(),
     };
+
+    // Para documentos de venta, agregar la cantidad
+    if (tipoDoc === "venta") {
+      activo.cantidad = parseInt(fila.find("td:eq(3)").text()) || 1; // La cantidad está en la columna 3 para doc venta
+      activo.valorUnitario = parseFloat(fila.find("td:eq(4)").text()) || 0; // Si hay valor unitario
+    }
+
     agregarActivoAlDetalle(activo);
   });
 
@@ -366,6 +373,7 @@ function init() {
     const activoId = filaActual.data("id");
     const activoNombre = filaActual.data("activo-nombre");
     const activoMarca = filaActual.data("activo-marca");
+    const tipoDoc = filaActual.data("tipo-doc");
     const cantidad = parseInt(filaActual.find("input.cantidad").val()) || 1;
 
     if (cantidad <= 1) {
@@ -415,11 +423,35 @@ function init() {
     $("#modalObservacionesBase").val(observaciones);
     $("#cantidadACrear").text(cantidad);
 
+    // Mostrar información adicional si es documento de venta
+    if (tipoDoc === "venta") {
+      $("#modalTipoDocumento").html(`
+        <div class="alert alert-info">
+          <i class="fas fa-file-invoice"></i> <strong>Documento de Venta</strong><br>
+          <small>Cantidad definida por el documento: ${cantidad} unidades</small>
+        </div>
+      `);
+    } else {
+      $("#modalTipoDocumento").html(`
+        <div class="alert alert-success">
+          <i class="fas fa-file-import"></i> <strong>Documento de Ingreso</strong><br>
+          <small>Cantidad personalizable</small>
+        </div>
+      `);
+    }
+
     // Guardar referencia a la fila actual en el modal
     $("#modalProcesarCantidad").data("filaActual", filaActual);
     $("#modalProcesarCantidad").data("activoId", activoId);
     $("#modalProcesarCantidad").data("activoNombre", activoNombre);
     $("#modalProcesarCantidad").data("activoMarca", activoMarca);
+
+    // Agregar contenedor para tipo de documento si no existe
+    if ($("#modalTipoDocumento").length === 0) {
+      $("#modalProcesarCantidad .modal-body").prepend(
+        '<div id="modalTipoDocumento"></div>'
+      );
+    }
 
     // Mostrar el modal
     $("#modalProcesarCantidad").modal("show");
@@ -474,6 +506,7 @@ function init() {
     const valor = filaActual.find("input[name='valor[]']").val();
     const ambienteId = filaActual.find("select.ambiente").val();
     const categoriaId = filaActual.find("select.categoria").val();
+    const tipoDoc = filaActual.data("tipo-doc") || "ingreso"; // Por defecto ingreso si no está definido
 
     // Cerrar el modal
     $("#modalProcesarCantidad").modal("hide");
@@ -570,6 +603,9 @@ function init() {
       const numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
       const selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
       const selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
+      const selectProveedor = `<select class='form-control form-control-sm proveedor' name='proveedor[]' id="comboProveedor${numeroFilas}" ${
+        tipoDoc === "venta" ? "required" : ""
+      } data-tipo-doc="${tipoDoc}"></select>`;
       const inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
       const inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" disabled>`;
 
@@ -578,7 +614,7 @@ function init() {
       }/${cantidad}</span>`;
       const indentacion = `<span class="grupo-indent">└─</span>`;
 
-      const nuevaFila = `<tr data-id='${activoId}' class='table-info activo-procesado activo-grupo-hijo' data-procesado='true' data-grupo-id='${grupoId}' data-activo-nombre="${activoNombre}" data-activo-marca="${activoMarca}">
+      const nuevaFila = `<tr data-id='${activoId}' class='table-info activo-procesado activo-grupo-hijo' data-procesado='true' data-grupo-id='${grupoId}' data-activo-nombre="${activoNombre}" data-activo-marca="${activoMarca}" data-tipo-doc="${tipoDoc}">
                     <td>${activoId}</td>
                     <td>${indentacion} ${activoNombre} ${distintivo}</td>
                     <td>${activoMarca}</td>
@@ -591,6 +627,7 @@ function init() {
                     <td>${selectCategoria}</td>
                     <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}"></td>
                     <td>${inputCantidad}</td>
+                    <td>${selectProveedor}</td>
                     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea></td>
                     <td>
                       <button type='button' class='btn btn-danger btn-sm btnQuitarActivo' title="Eliminar solo esta unidad">
@@ -609,6 +646,10 @@ function init() {
       // Cargar combos para la nueva fila
       ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
       ListarCombosCategoria(`comboCategoria${numeroFilas}`);
+      ListarCombosProveedor(
+        `comboProveedor${numeroFilas}`,
+        tipoDoc === "venta"
+      );
 
       // Establecer los valores seleccionados en los combos
       setTimeout(() => {
@@ -968,61 +1009,131 @@ function init() {
     }
 
     let activos = [];
+    const tipoDocumento = $("#tipoDocumento").val();
+    const documento = $("#inputDocumento").val();
+
     $("#tbldetalleactivoreg tbody tr").each(function () {
       let row = $(this);
-      /*activos.push({
-        IdDocIngresoAlm: parseInt($("#inputDocIngresoAlm").val()) || null,
-        IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
-        Serie: row.find("input[name='serie[]']").val() || null,
-        IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
-        IdCategoria: parseInt(row.find("select.categoria").val()) || null,
-        Observaciones: row.find("textarea[name='observaciones[]']").val() || "",
-        IdEstado: 1, // Estado por defecto: Operativo
-        Garantia: 0, // Por defecto sin garantía
-        IdSucursal: null, // Se obtiene de la sesión en el backend
-        UserMod: userMod,
-        Accion: 1, // 1 = Insertar
-      });*/
-
       let cantidad = parseInt(row.find("input.cantidad").val()) || 1;
+      let tipoDocFila = row.data("tipo-doc");
+      let proveedor = row.find("select.proveedor").val();
 
-      for (let i = 0; i < cantidad; i++) {
-        activos.push({
-          IdDocIngresoAlm: parseInt($("#inputDocIngresoAlm").val()) || null,
+      // Validar proveedor obligatorio para documentos de venta
+      if (
+        (tipoDocFila === "venta" || tipoDocumento === "venta") &&
+        !proveedor
+      ) {
+        Swal.fire({
+          icon: "error",
+          title: "Proveedor Requerido",
+          text: `El proveedor es obligatorio para documentos de venta. Fila: ${row
+            .find("td:eq(1)")
+            .text()}`,
+        });
+        return false;
+      }
+
+      // Para documentos de venta, enviar la cantidad al SP y dejar que maneje la creación múltiple
+      // Para documentos de ingreso, crear múltiples activos individuales como antes
+      if (tipoDocFila === "venta" || tipoDocumento === "venta") {
+        // Para documentos de venta: enviar una sola entrada con la cantidad
+        let activo = {
           IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
           Serie: row.find("input[name='serie[]']").val() || null,
           IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
           IdCategoria: parseInt(row.find("select.categoria").val()) || null,
           ValorAdquisicion:
             parseFloat(row.find("input[name='valor[]']").val()) || 0,
+          IdProveedor: proveedor || null,
           Observaciones:
             row.find("textarea[name='observaciones[]']").val() || "",
           IdEstado: 1, // Estado por defecto: Operativo
           Garantia: 0, // Por defecto sin garantía
-          Proveedor: row.find("input[name='proveedor[]']").val() || "",
-          //IdSucursal: null, // Se obtiene de la sesión en el backend
           UserMod: userMod,
           Accion: 1, // 1 = Insertar
-          Cantidad: 1, // Agregar la cantidad al objeto
-        });
+          VidaUtil: 3, // Vida útil por defecto
+          FechaAdquisicion: new Date().toISOString().split("T")[0], // Fecha actual
+          Cantidad: cantidad, // Enviar la cantidad al SP
+          IdDocVenta: parseInt(documento) || null,
+          IdDocIngresoAlm: null,
+        };
+
+        activos.push(activo);
+      } else {
+        // Para documentos de ingreso: crear múltiples activos individuales
+        for (let i = 0; i < cantidad; i++) {
+          let serieActual = row.find("input[name='serie[]']").val() || null;
+
+          // Si hay cantidad > 1, agregar sufijo a la serie
+          if (cantidad > 1 && serieActual) {
+            serieActual = serieActual + "-" + (i + 1);
+          }
+
+          let activo = {
+            IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
+            Serie: serieActual,
+            IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
+            IdCategoria: parseInt(row.find("select.categoria").val()) || null,
+            ValorAdquisicion:
+              parseFloat(row.find("input[name='valor[]']").val()) || 0,
+            IdProveedor: proveedor || null,
+            Observaciones:
+              row.find("textarea[name='observaciones[]']").val() || "",
+            IdEstado: 1, // Estado por defecto: Operativo
+            Garantia: 0, // Por defecto sin garantía
+            UserMod: userMod,
+            Accion: 1, // 1 = Insertar
+            VidaUtil: 3, // Vida útil por defecto
+            FechaAdquisicion: new Date().toISOString().split("T")[0], // Fecha actual
+            Cantidad: 1, // Cada iteración es 1 activo
+            IdDocIngresoAlm: parseInt(documento) || null,
+            IdDocVenta: null,
+          };
+
+          activos.push(activo);
+        }
       }
     });
 
     // Validar que todos los campos requeridos estén presentes
     let activosValidos = activos.every((activo) => {
-      return (
-        activo.IdDocIngresoAlm &&
-        activo.IdArticulo &&
-        activo.IdAmbiente &&
-        activo.IdCategoria
-      );
+      // Validación básica
+      const validacionBasica =
+        activo.IdArticulo && activo.IdAmbiente && activo.IdCategoria && activo.Cantidad > 0;
+
+      // Validación de documento (debe tener uno u otro)
+      const tieneDocumento = activo.IdDocIngresoAlm || activo.IdDocVenta;
+
+      // Validación de proveedor para documentos de venta
+      const proveedorValido = activo.IdDocVenta ? activo.IdProveedor : true;
+
+      return validacionBasica && tieneDocumento && proveedorValido;
     });
 
     if (!activosValidos) {
+      // Identificar qué campos faltan
+      let errores = [];
+      activos.forEach((activo, index) => {
+        if (!activo.IdArticulo)
+          errores.push(`Fila ${index + 1}: Falta artículo`);
+        if (!activo.IdAmbiente)
+          errores.push(`Fila ${index + 1}: Falta ambiente`);
+        if (!activo.IdCategoria)
+          errores.push(`Fila ${index + 1}: Falta categoría`);
+        if (!activo.IdDocIngresoAlm && !activo.IdDocVenta)
+          errores.push(`Fila ${index + 1}: Falta documento`);
+        if (activo.IdDocVenta && !activo.IdProveedor)
+          errores.push(
+            `Fila ${index + 1}: Falta proveedor (obligatorio para doc. venta)`
+          );
+      });
+
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: "Todos los campos son requeridos para cada activo",
+        title: "Campos Requeridos",
+        html:
+          "Se encontraron los siguientes errores:<br><br>" +
+          errores.join("<br>"),
       });
       return;
     }
@@ -1036,11 +1147,15 @@ function init() {
       },
     });
 
+    // Determinar qué función usar según el tipo de documento
+    const tipoDocActual = $("#tipoDocumento").val();
+    const action = tipoDocActual === "venta" ? "GuardarActivosDesdeDocumentoVenta" : "GuardarActivosDesdeDocumentoIngreso";
+    
     $.ajax({
-      url: "../../controllers/GestionarActivosController.php?action=GuardarActivos",
+      url: "../../controllers/GestionarActivosController.php?action=" + action,
       type: "POST",
       data: {
-        action: "GuardarActivos",
+        action: action,
         activos: JSON.stringify(activos),
       },
       dataType: "json",
@@ -2692,10 +2807,10 @@ function listarActivosModal(documento, tipoDoc = "ingreso") {
   if ($.fn.DataTable.isDataTable("#tbllistarActivos")) {
     $("#tbllistarActivos").DataTable().clear().destroy();
   }
-  
+
   let ajaxConfig = {};
   let columns = [];
-  
+
   if (tipoDoc === "ingreso") {
     ajaxConfig = {
       url: "../../controllers/GestionarActivosController.php?action=articulos_por_doc",
@@ -2707,7 +2822,7 @@ function listarActivosModal(documento, tipoDoc = "ingreso") {
         return json.data || [];
       },
     };
-    
+
     columns = [
       { data: "IdArticulo" },
       { data: "Nombre" },
@@ -2735,7 +2850,7 @@ function listarActivosModal(documento, tipoDoc = "ingreso") {
         return json.data || [];
       },
     };
-    
+
     columns = [
       { data: "IdArticulo" },
       { data: "Nombre" },
@@ -2747,13 +2862,15 @@ function listarActivosModal(documento, tipoDoc = "ingreso") {
           return (
             '<button class="btn btn-success align-self-center btn-sm btnSeleccionarActivo" data-id="' +
             row.IdArticulo +
-            '" data-tipo="venta"><i class="fa fa-check"></i></button>'
+            '" data-tipo="venta" title="Seleccionar (Cantidad: ' +
+            row.Cantidad +
+            ')"><i class="fa fa-check"></i> Seleccionar</button>'
           );
         },
       },
     ];
   }
-  
+
   $("#tbllistarActivos").DataTable({
     dom: "Bfrtip",
     responsive: false,
@@ -2776,7 +2893,7 @@ function setSucursalOrigenDestino() {
 function agregarActivoAlDetalle(activo) {
   const tipoDoc = $("#tipoDocumento").val();
   const documento = $("#inputDocumento").val();
-  
+
   // Configurar la verificación según el tipo de documento
   let verificacionConfig = {};
   if (tipoDoc === "ingreso") {
@@ -2788,18 +2905,18 @@ function agregarActivoAlDetalle(activo) {
         IdEmpresa: activo.empresa,
         IdSucursal: activo.sucursal,
       },
-      mensajeError: "documento de ingreso"
+      mensajeError: "documento de ingreso",
     };
   } else if (tipoDoc === "venta") {
     verificacionConfig = {
       url: "../../controllers/GestionarActivosController.php?action=verificarArticuloExistenteDocVenta",
       data: {
-        IdDocumentoVta: documento,
+        IdDocVenta: documento,
         IdArticulo: activo.id,
         IdEmpresa: activo.empresa,
         IdSucursal: activo.sucursal,
       },
-      mensajeError: "documento de venta"
+      mensajeError: "documento de venta",
     };
   }
 
@@ -2834,26 +2951,46 @@ function agregarActivoAlDetalle(activo) {
         var selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
         var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
         var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
-        
-        // Para documentos de venta, usar la cantidad del documento y deshabilitar el procesamiento
+
+        // Manejar la cantidad según el tipo de documento
         let inputCantidad, btnProcesar;
-        if (tipoDoc === "venta" && activo.cantidad) {
-          inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="${activo.cantidad}" min="1" readonly data-activo-id="${activo.id}">`;
-          btnProcesar = `<span class="badge badge-info">Cantidad: ${activo.cantidad}</span>`;
+        const cantidadInicial = activo.cantidad || 1;
+
+        if (tipoDoc === "venta" && activo.cantidad && activo.cantidad > 1) {
+          // Para documentos de venta con cantidad > 1, permitir procesamiento
+          inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="${cantidadInicial}" min="1" data-activo-id="${activo.id}">`;
+          btnProcesar = `<button type="button" class="btn btn-warning btn-sm btnProcesarCantidad me-1" data-activo-id="${activo.id}" title="Procesar cantidad múltiple"><i class="fa fa-cogs"></i> Procesar (${cantidadInicial})</button>`;
+        } else if (tipoDoc === "venta" && activo.cantidad === 1) {
+          // Para documentos de venta con cantidad = 1, solo mostrar info
+          inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" readonly data-activo-id="${activo.id}">`;
+          btnProcesar = `<span class="badge badge-success">Cantidad: 1</span>`;
         } else {
+          // Para documentos de ingreso (comportamiento normal)
           inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" data-activo-id="${activo.id}">`;
           btnProcesar = `<button type="button" class="btn btn-warning btn-sm btnProcesarCantidad me-1" data-activo-id="${activo.id}" title="Procesar cantidad múltiple"><i class="fa fa-cogs"></i> Procesar</button>`;
         }
 
         // Para documentos de venta, prellenar el valor si está disponible
-        const valorPrellenado = (tipoDoc === "venta" && activo.valorUnitario) ? activo.valorUnitario : "";
+        const valorPrellenado =
+          tipoDoc === "venta" && activo.valorUnitario
+            ? activo.valorUnitario
+            : "";
+
+        // Crear select de proveedor dinámico
+        const selectProveedor = `<select class='form-control form-control-sm proveedor' name='proveedor[]' id="comboProveedor${numeroFilas}" ${
+          tipoDoc === "venta" ? "required" : ""
+        } data-tipo-doc="${tipoDoc}"></select>`;
 
         var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp activo-principal' data-activo-nombre="${activo.nombre}" data-activo-marca="${activo.marca}" data-tipo-doc="${tipoDoc}">
                     <td>${activo.id}</td>
                     <td>${activo.nombre}</td>
                     <td>${activo.marca}</td>
-                    
-                    <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie"></td>
+                    <td>
+                      <input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie">
+                    </td>
+                    <td>
+                      ${selectProveedor}
+                    </td>
                     <td>${inputEstadoActivo}</td>
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
@@ -2871,6 +3008,12 @@ function agregarActivoAlDetalle(activo) {
 
         ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
         ListarCombosCategoria(`comboCategoria${numeroFilas}`);
+
+        // Inicializar select2 para proveedor con búsqueda dinámica
+        ListarCombosProveedor(
+          `comboProveedor${numeroFilas}`,
+          tipoDoc === "venta"
+        );
 
         setTimeout(function () {
           $("#tbldetalleactivoreg tbody tr.agregado-temp").removeClass(
@@ -2991,6 +3134,72 @@ function ListarCombosAmbiente(elemento) {
       );
     },
   });
+}
+
+function ListarCombosProveedor(elemento, esObligatorio = false) {
+  // Inicializar Select2 con AJAX para búsqueda dinámica
+  $(`#${elemento}`).select2({
+    dropdownParent: $(`#${elemento}`).closest("tr"),
+    minimumInputLength: 2,
+    theme: "bootstrap4",
+    width: "100%",
+    language: {
+      inputTooShort: function (args) {
+        return "Ingresar más de 2 caracteres para buscar...";
+      },
+      noResults: function () {
+        return "No se encontraron proveedores.";
+      },
+      searching: function () {
+        return "Buscando proveedores...";
+      },
+    },
+    ajax: {
+      url: "../../controllers/GestionarActivosController.php?action=comboProveedor",
+      type: "GET",
+      dataType: "json",
+      delay: 250,
+      data: function (params) {
+        return {
+          filtro: params.term, // término de búsqueda
+        };
+      },
+      processResults: function (data) {
+        // data ya debe ser un array de objetos {id, text}
+        return {
+          results: data || [],
+        };
+      },
+      cache: true,
+    },
+    placeholder: esObligatorio
+      ? "🔍 Buscar y Seleccionar Proveedor (OBLIGATORIO)"
+      : "🔍 Buscar Proveedor (Opcional)",
+    allowClear: !esObligatorio,
+  });
+
+  // Si es obligatorio, agregar validación visual y mensaje
+  if (esObligatorio) {
+    // Agregar indicador visual de campo obligatorio
+    $(`#${elemento}`)
+      .closest("td")
+      .prepend(
+        '<small class="text-danger"><i class="fas fa-asterisk"></i> Obligatorio</small>'
+      );
+
+    $(`#${elemento}`).on("change", function () {
+      if (!$(this).val()) {
+        $(this).addClass("is-invalid");
+        $(this).next(".invalid-feedback").remove();
+        $(this).after(
+          '<div class="invalid-feedback">Debe seleccionar un proveedor</div>'
+        );
+      } else {
+        $(this).removeClass("is-invalid");
+        $(this).next(".invalid-feedback").remove();
+      }
+    });
+  }
 }
 
 function NotificacionToast(tipo, mensaje) {

@@ -196,15 +196,14 @@ class GestionarActivos
         }
     }
 
-    public function GuardarActivos($data)
+    public function GuardarActivosDesdeDocumentoIngreso($data)
     {
         try {
             // Formatear fechas al formato SQL Server
             $fechaFinGarantia = !empty($data['FechaFinGarantia']) ? date('Y-m-d', strtotime($data['FechaFinGarantia'])) : null;
-            $fechaAdquisicion = !empty($data['FechaAdquisicion']) ? date('Y-m-d', strtotime($data['FechaAdquisicion'])) : null;
+            $fechaAdquisicion = !empty($data['FechaAdquisicion']) ? date('Y-m-d', strtotime($data['FechaAdquisicion'])) : date('Y-m-d');
             $empresa = $_SESSION['cod_empresa'] ??  null;
             $sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
-
 
             $stmt = $this->db->prepare('EXEC sp_RegistrarActivoDesdeDocumento 
                 @pIdDocIngresoAlm = ?,
@@ -224,10 +223,8 @@ class GestionarActivos
                 @pFechaAdquisicion = ?,
                 @pUserMod = ?');
 
-            //$stmt->bindParam(1, $data['IdActivo'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
-            $stmt->bindParam(1, $data['IdDocIngresoAlm'], \PDO::PARAM_INT);
+            $stmt->bindParam(1, $data['IdDocIngresoAlm'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
             $stmt->bindParam(2, $data['IdArticulo'], \PDO::PARAM_INT);
-            //$stmt->bindParam(4, $data['Codigo'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
             $stmt->bindParam(3, $data['IdEstado'], \PDO::PARAM_INT);
             $stmt->bindParam(4, $data['Garantia'], \PDO::PARAM_INT);
             $stmt->bindParam(5, $fechaFinGarantia, \PDO::PARAM_STR | \PDO::PARAM_NULL);
@@ -246,7 +243,7 @@ class GestionarActivos
             $stmt->execute();
             return true;
         } catch (\PDOException $e) {
-            error_log("Error in registrarActivos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            error_log("Error in GuardarActivosDesdeDocumentoIngreso: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }
@@ -259,10 +256,13 @@ class GestionarActivos
             $empresa = $_SESSION['cod_empresa'] ??  null;
             $sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
 
-            $stmt = $this->db->prepare('EXEC sp_RegistrarActivoDesdeDocumentoVenta 
+            $stmt = $this->db->prepare('EXEC sp_RegistrarActivoDesdeDocumentoVenta
                 @pIdDocumentoVta = ?,
                 @pIdArticulo = ?,
                 @pIdEstado = ?,
+                @pCantidad = ?,
+                @pIdProveedor = ?,
+                @pSerie = ?,
                 @pIdEmpresa = ?,
                 @pIdSucursal = ?,
                 @pIdAmbiente = ?,
@@ -273,18 +273,21 @@ class GestionarActivos
                 @pFechaAdquisicion = ?,
                 @pUserMod = ?');
 
-            $stmt->bindParam(1, $data['IdDocumentoVta'], \PDO::PARAM_INT);
+            $stmt->bindParam(1, $data['IdDocVenta'], \PDO::PARAM_INT);
             $stmt->bindParam(2, $data['IdArticulo'], \PDO::PARAM_INT);
             $stmt->bindParam(3, $data['IdEstado'], \PDO::PARAM_INT);
-            $stmt->bindParam(4, $empresa, \PDO::PARAM_INT);
-            $stmt->bindParam(5, $sucursal, \PDO::PARAM_INT);
-            $stmt->bindParam(6, $data['IdAmbiente'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
-            $stmt->bindParam(7, $data['IdCategoria'], \PDO::PARAM_INT);
-            $stmt->bindParam(8, $data['VidaUtil'], \PDO::PARAM_INT);
-            $stmt->bindParam(9, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(10, $data['ValorAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(11, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(12, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(4, $data['Cantidad'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(5, $data['IdProveedor'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(6, $data['Serie'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(7, $empresa, \PDO::PARAM_INT);
+            $stmt->bindParam(8, $sucursal, \PDO::PARAM_INT);
+            $stmt->bindParam(9, $data['IdAmbiente'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(10, $data['IdCategoria'], \PDO::PARAM_INT);
+            $stmt->bindParam(11, $data['VidaUtil'], \PDO::PARAM_INT);
+            $stmt->bindParam(12, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(13, $data['ValorAdquisicion'], \PDO::PARAM_STR);
+            $stmt->bindParam(14, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(15, $data['UserMod'], \PDO::PARAM_STR);
 
             $stmt->execute();
             return true;
@@ -440,18 +443,19 @@ class GestionarActivos
     public function verificarArticuloExistenteDocVenta($idDocumentoVta, $idArticulo)
     {
         try {
+            // Verificar si el artículo ya existe para este documento de venta
             $stmt = $this->db->prepare("
                 SELECT CAST(CASE WHEN EXISTS (
                 SELECT 1 
                 FROM tOrigenActivo oa
                 INNER JOIN tUbicacionActivo ua ON oa.idActivo = ua.idActivo
-                WHERE oa.idDocumentoVenta = ?
+                WHERE oa.IdDocumentoVenta = ?
                 AND oa.idArticulo = ?
                 AND ua.idEmpresa = ?
                 AND ua.idSucursal = ?
             ) THEN 1 ELSE 0 END AS BIT) as existe
             ");
-            $stmt->bindParam(1, $idDocumentoVta, PDO::PARAM_INT);
+            $stmt->bindParam(1, $IdDocVenta, PDO::PARAM_INT);
             $stmt->bindParam(2, $idArticulo, PDO::PARAM_INT);
             $stmt->bindParam(3, $_SESSION['cod_empresa'], PDO::PARAM_INT);
             $stmt->bindParam(4, $_SESSION['cod_UnidadNeg'], PDO::PARAM_INT);
