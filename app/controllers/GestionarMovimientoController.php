@@ -45,7 +45,7 @@ switch ($action) {
                     'idEmpresaDestino' => $_POST['idEmpresaDestino'],
                     'idSucursalDestino' => $_POST['idSucursalDestino'],
                     'observaciones' => $_POST['observaciones'] ?? '',
-                    'userMod' => $_SESSION['usuario']
+                    'userMod' => $_SESSION['CodEmpleado']
                 ];
 
                 $resultado = $movimientos->crearMovimientoConCodigo($data);
@@ -67,23 +67,21 @@ switch ($action) {
     case 'AgregarDetalle':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
-                // Recibe los datos de un solo activo
                 $data = [
                     'idMovimiento' => $_POST['IdMovimiento'],
                     'idActivo' => $_POST['IdActivo'],
                     'idTipoMovimiento' => $_POST['IdTipo_Movimiento'],
                     'idAmbienteNuevo' => $_POST['IdAmbiente_Nueva'] ?? null,
                     'idResponsableNuevo' => $_POST['IdResponsable_Nueva'] ?? null,
-                    'idSucursalDestino' => $_POST['idSucursalDestino'],
-                    'idEmpresaDestino' => $_POST['idEmpresaDestino'],
-                    'idAutorizador' => $_POST['IdAutorizador'],
-                    'idReceptor' => $_POST['IdReceptor'],
-                    'userMod' => $_SESSION['usuario']
+                    'userMod' => $_SESSION['CodEmpleado']
                 ];
 
-                $movimientos->crearDetalleMovimiento($data);
+                $resultado = $movimientos->crearDetalleMovimiento($data);
 
-                echo json_encode(['status' => true]);
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Detalle agregado correctamente'
+                ]);
             } catch (Exception $e) {
                 echo json_encode(['status' => false, 'message' => $e->getMessage()]);
             }
@@ -379,7 +377,142 @@ switch ($action) {
         }
         break;
 
+    case 'aprobarMovimiento':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $idMovimiento = $_POST['idMovimiento'] ?? null;
+                if (!$idMovimiento) {
+                    throw new Exception("ID de movimiento no proporcionado");
+                }
 
+                $userMod = $_SESSION['CodEmpleado'];
+                $resultado = $movimientos->aprobarMovimiento($idMovimiento, $userMod);
+
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Movimiento aprobado correctamente'
+                ]);
+            } catch (Exception $e) {
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al aprobar el movimiento: ' . $e->getMessage()
+                ]);
+            }
+        }
+        break;
+
+    case 'rechazarMovimiento':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $idMovimiento = $_POST['idMovimiento'] ?? null;
+                if (!$idMovimiento) {
+                    throw new Exception("ID de movimiento no proporcionado");
+                }
+
+                $userMod = $_SESSION['CodEmpleado'];
+                $resultado = $movimientos->rechazarMovimiento($idMovimiento, $userMod);
+
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Movimiento rechazado correctamente'
+                ]);
+            } catch (Exception $e) {
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al rechazar el movimiento: ' . $e->getMessage()
+                ]);
+            }
+        }
+        break;
+
+    case 'aceptarMovimiento':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $idMovimiento = $_POST['idMovimiento'] ?? null;
+                if (!$idMovimiento) {
+                    throw new Exception("ID de movimiento no proporcionado");
+                }
+
+                $userMod = $_SESSION['CodEmpleado'];
+                $resultado = $movimientos->aceptarMovimiento($idMovimiento, $userMod);
+
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Movimiento aceptado y ejecutado correctamente'
+                ]);
+            } catch (Exception $e) {
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al aceptar el movimiento: ' . $e->getMessage()
+                ]);
+            }
+        }
+        break;
+
+    case 'obtenerHistorialEstadoMovimiento':
+        try {
+            $idMovimiento = $_POST['idMovimiento'] ?? null;
+            if (!$idMovimiento) {
+                throw new Exception("ID de movimiento no proporcionado");
+            }
+
+            $historial = $movimientos->obtenerHistorialEstadoMovimiento($idMovimiento);
+            echo json_encode([
+                'status' => true,
+                'data' => $historial
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'obtenerEstadosMovimiento':
+        try {
+            $estados = $movimientos->obtenerEstadosMovimiento();
+            echo json_encode([
+                'status' => true,
+                'data' => $estados
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'inicializarEstados':
+        try {
+            // Verificar si existen los estados básicos
+            $sql = "IF NOT EXISTS (SELECT 1 FROM tEstadoMovimiento WHERE idEstadoMovimiento = 1)
+                    INSERT INTO tEstadoMovimiento (idEstadoMovimiento, nombre, descripcion) VALUES (1, 'Pendiente', 'Movimiento creado, esperando aprobación');
+                    
+                    IF NOT EXISTS (SELECT 1 FROM tEstadoMovimiento WHERE idEstadoMovimiento = 2)
+                    INSERT INTO tEstadoMovimiento (idEstadoMovimiento, nombre, descripcion) VALUES (2, 'Aprobado', 'Movimiento aprobado, listo para ser aceptado');
+                    
+                    IF NOT EXISTS (SELECT 1 FROM tEstadoMovimiento WHERE idEstadoMovimiento = 3)
+                    INSERT INTO tEstadoMovimiento (idEstadoMovimiento, nombre, descripcion) VALUES (3, 'Rechazado', 'Movimiento rechazado');
+                    
+                    IF NOT EXISTS (SELECT 1 FROM tEstadoMovimiento WHERE idEstadoMovimiento = 4)
+                    INSERT INTO tEstadoMovimiento (idEstadoMovimiento, nombre, descripcion) VALUES (4, 'Aceptado', 'Movimiento ejecutado físicamente');";
+
+            $stmt = $movimientos->db->prepare($sql);
+            $stmt->execute();
+
+            echo json_encode([
+                'status' => true,
+                'message' => 'Estados inicializados correctamente'
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
 
     default:
         echo json_encode([

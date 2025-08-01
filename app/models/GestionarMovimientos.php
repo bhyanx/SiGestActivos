@@ -3,7 +3,7 @@
 class GestionarMovimientos
 {
 
-    private $db;
+    public $db;
     public function __construct()
     {
         $this->db = (new Conectar())->ConexionBdPracticante();
@@ -56,22 +56,52 @@ class GestionarMovimientos
     public function crearDetalleMovimiento($data)
     {
         try {
-            $sql = "EXEC sp_RegistrarMovimientoActivo 
-                    @idMovimiento = :idMovimiento,
-                    @idActivo = :idActivo,
-                    @idTipoMovimiento = :idTipoMovimiento,
-                    @idAmbienteNuevo = :idAmbienteNuevo,
-                    @idResponsableNuevo = :idResponsableNuevo,
-                    @userMod = :userMod";
+            // Obtener datos del movimiento y del activo para completar la información
+            $sqlMovimiento = "SELECT idEmpresaDestino, idSucursalDestino FROM tMovimientos WHERE idMovimiento = ?";
+            $stmtMov = $this->db->prepare($sqlMovimiento);
+            $stmtMov->bindParam(1, $data['idMovimiento'], PDO::PARAM_INT);
+            $stmtMov->execute();
+            $movimiento = $stmtMov->fetch(PDO::FETCH_ASSOC);
+
+            $sqlActivo = "SELECT ua.idAmbiente as idAmbienteAnterior, ua.idResponsable as idResponsableAnterior,
+                                 ua.idEmpresa as idEmpresaOrigen, ua.idSucursal as idSucursalOrigen
+                          FROM tUbicacionActivo ua 
+                          WHERE ua.idActivo = ? AND ua.esActual = 1";
+            $stmtActivo = $this->db->prepare($sqlActivo);
+            $stmtActivo->bindParam(1, $data['idActivo'], PDO::PARAM_INT);
+            $stmtActivo->execute();
+            $activo = $stmtActivo->fetch(PDO::FETCH_ASSOC);
+
+            if (!$activo) {
+                throw new Exception("No se encontró la ubicación actual del activo");
+            }
+
+            // Insertar detalle del movimiento (solo registro, sin ejecución física)
+            // Esto es necesario porque el SP sp_RegistrarMovimientoActivov2 ejecuta inmediatamente
+            // y en el nuevo flujo necesitamos separar el registro de la ejecución
+            $sql = "INSERT INTO tDetalleMovimiento 
+                    (idMovimiento, idActivo, idTipoMovimiento, idAmbienteAnterior, idAmbienteNuevo, 
+                     idResponsableAnterior, idResponsableNuevo, fecha, userMod, 
+                     idEmpresaDestino, idSucursalDestino, idEmpresaOrigen, idSucursalOrigen)
+                    VALUES 
+                    (:idMovimiento, :idActivo, :idTipoMovimiento, :idAmbienteAnterior, :idAmbienteNuevo,
+                     :idResponsableAnterior, :idResponsableNuevo, GETDATE(), :userMod,
+                     :idEmpresaDestino, :idSucursalDestino, :idEmpresaOrigen, :idSucursalOrigen)";
 
             $stmt = $this->db->prepare($sql);
 
             $stmt->bindParam(':idMovimiento', $data['idMovimiento'], PDO::PARAM_INT);
             $stmt->bindParam(':idActivo', $data['idActivo'], PDO::PARAM_INT);
             $stmt->bindParam(':idTipoMovimiento', $data['idTipoMovimiento'], PDO::PARAM_INT);
+            $stmt->bindValue(':idAmbienteAnterior', $activo['idAmbienteAnterior'], PDO::PARAM_INT);
             $stmt->bindValue(':idAmbienteNuevo', $data['idAmbienteNuevo'], $data['idAmbienteNuevo'] !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+            $stmt->bindValue(':idResponsableAnterior', $activo['idResponsableAnterior'], PDO::PARAM_STR);
             $stmt->bindValue(':idResponsableNuevo', $data['idResponsableNuevo'], $data['idResponsableNuevo'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
             $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
+            $stmt->bindValue(':idEmpresaDestino', $movimiento['idEmpresaDestino'], PDO::PARAM_INT);
+            $stmt->bindValue(':idSucursalDestino', $movimiento['idSucursalDestino'], PDO::PARAM_INT);
+            $stmt->bindValue(':idEmpresaOrigen', $activo['idEmpresaOrigen'], PDO::PARAM_INT);
+            $stmt->bindValue(':idSucursalOrigen', $activo['idSucursalOrigen'], PDO::PARAM_INT);
 
             $stmt->execute();
             return true;
@@ -180,8 +210,8 @@ class GestionarMovimientos
     public function anularMovimiento($idMovimiento)
     {
         try {
-            // Primero verificamos si el movimiento existe y no está anulado
-            $sql = "SELECT estado FROM tMovimientos WHERE idMovimiento = ?";
+            // Verificar si el movimiento existe y su estado actual
+            $sql = "SELECT idEstadoMovimiento FROM tMovimientos WHERE idMovimiento = ?";
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idMovimiento, PDO::PARAM_INT);
             $stmt->execute();
@@ -191,31 +221,17 @@ class GestionarMovimientos
                 throw new Exception("El movimiento no existe");
             }
 
-            if ($movimiento['estado'] === 'A') {
-                throw new Exception("El movimiento ya está anulado");
+            if ($movimiento['idEstadoMovimiento'] == 4) {
+                throw new Exception("No se puede anular un movimiento que ya ha sido aceptado y ejecutado");
             }
 
-            // Iniciamos la transacción
-            $this->db->beginTransaction();
+            if ($movimiento['idEstadoMovimiento'] == 3) {
+                throw new Exception("El movimiento ya está rechazado");
+            }
 
-            // Actualizamos el estado del movimiento a anulado
-            $sql = "UPDATE tMovimientos SET estado = 'A', fechaAnulacion = GETDATE() WHERE idMovimiento = ?";
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(1, $idMovimiento, PDO::PARAM_INT);
-            $stmt->execute();
-
-            // Actualizamos el estado de los detalles del movimiento
-            $sql = "UPDATE tDetalleMovimiento SET estado = 'A' WHERE idMovimiento = ?";
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(1, $idMovimiento, PDO::PARAM_INT);
-            $stmt->execute();
-
-            // Confirmamos la transacción
-            $this->db->commit();
-            return true;
-        } catch (\PDOException $e) {
-            // Si hay error, revertimos la transacción
-            $this->db->rollBack();
+            // Para anular, usamos el método rechazar
+            return $this->rechazarMovimiento($idMovimiento, $_SESSION['usuario'] ?? 'SYSTEM');
+        } catch (Exception $e) {
             error_log("Error in anularMovimiento: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
@@ -264,47 +280,7 @@ class GestionarMovimientos
         }
     }
 
-    public function registrarMovimientoActivos($idsActivos, $idAmbienteDestino, $idResponsableDestino, $motivo, $userMod, $idEmpresaDestino, $idSucursalDestino)
-    {
-        try {
-            // Construir el XML de activos
-            $xml = "<Activos>";
-            foreach ($idsActivos as $id) {
-                $xml .= "<Id>$id</Id>";
-            }
-            $xml .= "</Activos>";
 
-            // Consulta SQL
-            $sql = "DECLARE @nuevoCodMovimiento VARCHAR(20);
-                EXEC sp_RegistrarMovimientoActivov2
-                    @pXmlActivos = :xmlActivos,
-                    @pIdAmbienteDestino = :idAmbienteDestino,
-                    @pIdResponsableDestino = :idResponsableDestino,
-                    @pMotivo = :motivo,
-                    @pUserMod = :userMod,
-                    @pIdEmpresaDestino = :idEmpresaDestino,
-                    @pIdSucursalDestino = :idSucursalDestino,
-                    @nuevoCodMovimiento = @nuevoCodMovimiento OUTPUT;
-                SELECT @nuevoCodMovimiento AS codMovimiento;";
-
-            $stmt = $this->db->prepare($sql);
-
-            $stmt->bindParam(':xmlActivos', $xml, PDO::PARAM_STR);
-            $stmt->bindParam(':idAmbienteDestino', $idAmbienteDestino, PDO::PARAM_INT);
-            $stmt->bindParam(':idResponsableDestino', $idResponsableDestino, PDO::PARAM_STR);
-            $stmt->bindParam(':motivo', $motivo, PDO::PARAM_STR);
-            $stmt->bindParam(':userMod', $userMod, PDO::PARAM_STR);
-            $stmt->bindParam(':idEmpresaDestino', $idEmpresaDestino, PDO::PARAM_INT);
-            $stmt->bindParam(':idSucursalDestino', $idSucursalDestino, PDO::PARAM_INT);
-
-            $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            return $result['codMovimiento'];
-        } catch (PDOException $e) {
-            throw new Exception("Error al registrar movimiento de activos: " . $e->getMessage());
-        }
-    }
 
 
 
@@ -320,11 +296,13 @@ class GestionarMovimientos
             so.Nombre_local AS sucursalOrigen,
             ed.Razon_empresa AS empresaDestino,
             sd.Nombre_local AS sucursalDestino,
-            u.NombreTrabajador AS autorizador
+            u.NombreTrabajador AS autorizador,
+            em.nombre AS estadoMovimiento,
+            m.idEstadoMovimiento
 
             FROM tMovimientos m
             INNER JOIN tTipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento
-            INNER JOIN tDetalleMovimiento dm ON dm.idMovimiento = m.idMovimiento
+            LEFT JOIN tEstadoMovimiento em ON m.idEstadoMovimiento = em.idEstadoMovimiento
 
             -- Origen
             LEFT JOIN vEmpresas eo ON m.idEmpresaOrigen = eo.cod_empresa
@@ -363,20 +341,7 @@ class GestionarMovimientos
                 $params[] = $fecha;
             }
 
-            $sql .= " 
-        GROUP BY 
-            m.idMovimiento,
-            m.codigoMovimiento,
-            tm.nombre,
-            m.fechaMovimiento,
-            m.userMod,
-            eo.Razon_empresa,
-            so.Nombre_local,
-            ed.Razon_empresa,
-            sd.Nombre_local,
-            u.NombreTrabajador
-
-        ORDER BY m.fechaMovimiento DESC;";
+            $sql .= " ORDER BY m.fechaMovimiento DESC;";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -398,11 +363,13 @@ class GestionarMovimientos
             so.Nombre_local AS sucursalOrigen,
             ed.Razon_empresa AS empresaDestino,
             sd.Nombre_local AS sucursalDestino,
-            u.NombreTrabajador AS autorizador
+            u.NombreTrabajador AS autorizador,
+            em.nombre AS estadoMovimiento,
+            m.idEstadoMovimiento
 
             FROM tMovimientos m
             INNER JOIN tTipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento
-            INNER JOIN tDetalleMovimiento dm ON dm.idMovimiento = m.idMovimiento
+            LEFT JOIN tEstadoMovimiento em ON m.idEstadoMovimiento = em.idEstadoMovimiento
 
             -- Origen
             LEFT JOIN vEmpresas eo ON m.idEmpresaOrigen = eo.cod_empresa
@@ -441,20 +408,7 @@ class GestionarMovimientos
                 $params[] = $fecha;
             }
 
-            $sql .= " 
-        GROUP BY 
-            m.idMovimiento,
-            m.codigoMovimiento,
-            tm.nombre,
-            m.fechaMovimiento,
-            m.userMod,
-            eo.Razon_empresa,
-            so.Nombre_local,
-            ed.Razon_empresa,
-            sd.Nombre_local,
-            u.NombreTrabajador
-
-        ORDER BY m.fechaMovimiento DESC;";
+            $sql .= " ORDER BY m.fechaMovimiento DESC;";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -603,6 +557,99 @@ class GestionarMovimientos
             ];
         } catch (PDOException $e) {
             throw new Exception("Error al verificar componentes del activo: " . $e->getMessage());
+        }
+    }
+
+    public function aprobarMovimiento($idMovimiento, $userMod)
+    {
+        try {
+            $sql = "EXEC sp_AprobarMovimiento 
+                    @idMovimiento = :idMovimiento,
+                    @userMod = :userMod";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':idMovimiento', $idMovimiento, PDO::PARAM_INT);
+            $stmt->bindParam(':userMod', $userMod, PDO::PARAM_STR);
+            $stmt->execute();
+
+            return true;
+        } catch (PDOException $e) {
+            throw new Exception("Error al aprobar movimiento: " . $e->getMessage());
+        }
+    }
+
+    public function rechazarMovimiento($idMovimiento, $userMod)
+    {
+        try {
+            $sql = "EXEC sp_RechazarMovimiento 
+                    @idMovimiento = :idMovimiento,
+                    @userMod = :userMod";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':idMovimiento', $idMovimiento, PDO::PARAM_INT);
+            $stmt->bindParam(':userMod', $userMod, PDO::PARAM_STR);
+            $stmt->execute();
+
+            return true;
+        } catch (PDOException $e) {
+            throw new Exception("Error al rechazar movimiento: " . $e->getMessage());
+        }
+    }
+
+    public function aceptarMovimiento($idMovimiento, $userMod)
+    {
+        try {
+            $sql = "EXEC sp_AceptarMovimiento 
+                    @idMovimiento = :idMovimiento,
+                    @userMod = :userMod";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':idMovimiento', $idMovimiento, PDO::PARAM_INT);
+            $stmt->bindParam(':userMod', $userMod, PDO::PARAM_STR);
+            $stmt->execute();
+
+            return true;
+        } catch (PDOException $e) {
+            throw new Exception("Error al aceptar movimiento: " . $e->getMessage());
+        }
+    }
+
+    public function obtenerHistorialEstadoMovimiento($idMovimiento)
+    {
+        try {
+            $sql = "SELECT 
+                        h.idHistorialEstadoMovimiento,
+                        h.idMovimiento,
+                        ea.nombre AS estadoAnterior,
+                        en.nombre AS estadoNuevo,
+                        h.fechaCambio,
+                        h.userMod,
+                        e.NombreTrabajador AS nombreUsuario
+                    FROM tHistorialEstadoMovimiento h
+                    LEFT JOIN tEstadoMovimiento ea ON h.idEstadoAnterior = ea.idEstadoMovimiento
+                    INNER JOIN tEstadoMovimiento en ON h.idEstadoNuevo = en.idEstadoMovimiento
+                    LEFT JOIN vEmpleados e ON h.userMod = e.codTrabajador
+                    WHERE h.idMovimiento = ?
+                    ORDER BY h.fechaCambio DESC";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idMovimiento, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Error al obtener historial de estados: " . $e->getMessage());
+        }
+    }
+
+    public function obtenerEstadosMovimiento()
+    {
+        try {
+            $sql = "SELECT idEstadoMovimiento, nombre, descripcion FROM tEstadoMovimiento ORDER BY idEstadoMovimiento";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Error al obtener estados de movimiento: " . $e->getMessage());
         }
     }
 }

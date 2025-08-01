@@ -139,6 +139,7 @@ session_start();
                                                     </button>
                                                 </div>
                                             </div>
+
                                             <!-- <div class="col-md-2">
                                                 <div class="form-group mb-0">
                                                     <lable>&nbsp;</lable>
@@ -169,6 +170,7 @@ session_start();
                                                         <th>Sucursal Destino</th>
                                                         <th>Empresa Destino</th>
                                                         <th>Autorizador</th>
+                                                        <th>Estado</th>
                                                         <th>Fecha Movimiento</th>
                                                     </tr>
                                                 </thead>
@@ -181,6 +183,7 @@ session_start();
                                                         <th>Sucursal Destino</th>
                                                         <th>Empresa Destino</th>
                                                         <th>Autorizador</th>
+                                                        <th>Estado</th>
                                                         <th>Fecha Movimiento</th>
                                                     </tr>
                                                 </tfoot>

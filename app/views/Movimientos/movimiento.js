@@ -3,6 +3,9 @@ $(document).ready(function () {
 });
 
 function init() {
+  // Verificar e inicializar estados automáticamente
+  verificarEInicializarEstados();
+  
   // Inicializar la tabla una sola vez
   if (!$.fn.DataTable.isDataTable("#tblMovimientos")) {
     ListarMovimientos();
@@ -1500,7 +1503,7 @@ function ListarMovimientosEnviados() {
     //responsive: true,
     bInfo: true,
     iDisplayLength: 10,
-    order: [[7, "desc"]], // Ordenar por fecha descendente
+    order: [[7, "desc"]], // Ordenar por fecha descendente (columna 7 = fecha)
     ajax: {
       url: "../../controllers/GestionarMovimientoController.php?action=listarMovimientosEnviados",
       type: "POST",
@@ -1512,7 +1515,6 @@ function ListarMovimientosEnviados() {
         };
       },
       dataSrc: function (json) {
-        console.log("Datos recibidos:", json);
         if (!json.status) {
           NotificacionToast(
             "error",
@@ -1532,28 +1534,64 @@ function ListarMovimientosEnviados() {
       {
         data: null,
         render: function (data, type, row) {
-          return `
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-cogs"></i>
-                            </button>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="#" onclick="verDetallesMovimiento(${row.idMovimiento})">
-                                    <i class="fas fa-list"></i> Ver Detalles
-                                </a>
-                                <a class="dropdown-item" href="#" onclick="imprimirReporte(${row.idMovimiento})">
-                                    <i class="fas fa-print"></i> Imprimir Reporte
-                                </a>
-                            </div>
-                        </div>`;
+          let acciones = `
+            <div class="btn-group">
+              <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-cogs"></i>
+              </button>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#" onclick="verDetallesMovimiento(${row.idMovimiento})">
+                  <i class="fas fa-list"></i> Ver Detalles
+                </a>
+                <a class="dropdown-item" href="#" onclick="verHistorialEstados(${row.idMovimiento})">
+                  <i class="fas fa-history"></i> Historial Estados
+                </a>
+                <a class="dropdown-item" href="#" onclick="imprimirReporte(${row.idMovimiento})">
+                  <i class="fas fa-print"></i> Imprimir Reporte
+                </a>`;
+
+          // Agregar acciones según el estado
+
+          if (row.idEstadoMovimiento == 1 || row.idEstadoMovimiento === '1') {
+            // Pendiente
+
+            acciones += `
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item text-success" href="#" onclick="aprobarMovimiento(${row.idMovimiento})">
+                <i class="fas fa-check"></i> Aprobar
+              </a>
+              <a class="dropdown-item text-danger" href="#" onclick="rechazarMovimiento(${row.idMovimiento})">
+                <i class="fas fa-times"></i> Rechazar
+              </a>`;
+          }
+
+          acciones += `
+              </div>
+            </div>`;
+
+          return acciones;
         },
       },
       { data: "codigoMovimiento" },
       { data: "tipoMovimiento" },
-      //{ data: "sucursalOrigen" },
       { data: "sucursalDestino" },
       { data: "empresaDestino" },
       { data: "autorizador" },
+      {
+        data: "estadoMovimiento",
+        render: function (data, type, row) {
+          const estados = {
+            1: '<span class="badge badge-warning">Pendiente</span>',
+            2: '<span class="badge badge-info">Aprobado</span>',
+            3: '<span class="badge badge-danger">Rechazado</span>',
+            4: '<span class="badge badge-success">Aceptado</span>',
+          };
+          return (
+            estados[row.idEstadoMovimiento] ||
+            '<span class="badge badge-secondary">Sin estado</span>'
+          );
+        },
+      },
       {
         data: "fechaMovimiento",
         render: function (data) {
@@ -1584,7 +1622,7 @@ function ListarMovimientosRecibidos() {
     //responsive: true,
     bInfo: true,
     iDisplayLength: 10,
-    order: [[7, "desc"]], // Ordenar por fecha descendente
+    order: [[7, "desc"]], // Ordenar por fecha descendente (columna 7 = fecha)
     ajax: {
       url: "../../controllers/GestionarMovimientoController.php?action=listarMovimientosRecibidos",
       type: "POST",
@@ -1596,7 +1634,6 @@ function ListarMovimientosRecibidos() {
         };
       },
       dataSrc: function (json) {
-        console.log("Datos recibidos:", json);
         if (!json.status) {
           NotificacionToast(
             "error",
@@ -1616,28 +1653,60 @@ function ListarMovimientosRecibidos() {
       {
         data: null,
         render: function (data, type, row) {
-          return `
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-cogs"></i>
-                            </button>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="#" onclick="verDetallesMovimiento(${row.idMovimiento})">
-                                    <i class="fas fa-list"></i> Ver Detalles
-                                </a>
-                                <a class="dropdown-item" href="#" onclick="imprimirReporte(${row.idMovimiento})">
-                                    <i class="fas fa-print"></i> Imprimir Reporte
-                                </a>
-                            </div>
-                        </div>`;
+          let acciones = `
+            <div class="btn-group">
+              <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-cogs"></i>
+              </button>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#" onclick="verDetallesMovimiento(${row.idMovimiento})">
+                  <i class="fas fa-list"></i> Ver Detalles
+                </a>
+                <a class="dropdown-item" href="#" onclick="verHistorialEstados(${row.idMovimiento})">
+                  <i class="fas fa-history"></i> Historial Estados
+                </a>
+                <a class="dropdown-item" href="#" onclick="imprimirReporte(${row.idMovimiento})">
+                  <i class="fas fa-print"></i> Imprimir Reporte
+                </a>`;
+
+          // Agregar acciones según el estado para movimientos recibidos
+
+          if (row.idEstadoMovimiento == 2 || row.idEstadoMovimiento === '2') {
+            // Aprobado - puede ser aceptado
+            acciones += `
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item text-success" href="#" onclick="aceptarMovimiento(${row.idMovimiento})">
+                <i class="fas fa-check-double"></i> Aceptar Movimiento
+              </a>`;
+          }
+
+          acciones += `
+              </div>
+            </div>`;
+
+          return acciones;
         },
       },
       { data: "codigoMovimiento" },
       { data: "tipoMovimiento" },
-      //{ data: "sucursalOrigen" },
       { data: "sucursalDestino" },
       { data: "empresaDestino" },
       { data: "autorizador" },
+      {
+        data: "estadoMovimiento",
+        render: function (data, type, row) {
+          const estados = {
+            1: '<span class="badge badge-warning">Pendiente</span>',
+            2: '<span class="badge badge-info">Aprobado</span>',
+            3: '<span class="badge badge-danger">Rechazado</span>',
+            4: '<span class="badge badge-success">Aceptado</span>',
+          };
+          return (
+            estados[row.idEstadoMovimiento] ||
+            '<span class="badge badge-secondary">Sin estado</span>'
+          );
+        },
+      },
       {
         data: "fechaMovimiento",
         render: function (data) {
@@ -1882,4 +1951,330 @@ function imprimirReporte(idMovimiento) {
     `../../views/Reportes/reporteMovimiento.php?id=${idMovimiento}`,
     "_blank"
   );
+}
+
+// Función para verificar e inicializar estados automáticamente
+function verificarEInicializarEstados() {
+  $.ajax({
+    url: "../../controllers/GestionarMovimientoController.php?action=obtenerEstadosMovimiento",
+    type: "POST",
+    dataType: "json",
+    success: function (res) {
+      if (res.status && res.data && res.data.length >= 4) {
+        // Estados ya existen, no hacer nada
+        console.log("✅ Estados de movimiento ya configurados");
+      } else {
+        // Estados no existen o están incompletos, inicializar automáticamente
+        console.log("⚠️ Estados incompletos, inicializando automáticamente...");
+        inicializarEstadosAutomatico();
+      }
+    },
+    error: function (xhr, status, error) {
+      console.log("⚠️ Error al verificar estados, inicializando automáticamente...");
+      inicializarEstadosAutomatico();
+    },
+  });
+}
+
+// Función para inicializar estados automáticamente (sin notificaciones)
+function inicializarEstadosAutomatico() {
+  $.ajax({
+    url: "../../controllers/GestionarMovimientoController.php?action=inicializarEstados",
+    type: "POST",
+    dataType: "json",
+    success: function (res) {
+      if (res.status) {
+        console.log("✅ Estados inicializados automáticamente");
+      } else {
+        console.error("❌ Error al inicializar estados:", res.message);
+      }
+    },
+    error: function (xhr, status, error) {
+      console.error("❌ Error de comunicación al inicializar estados:", error);
+    },
+  });
+}
+
+// Función para verificar que los estados existen (solo para debug)
+function verificarEstadosMovimiento() {
+  $.ajax({
+    url: "../../controllers/GestionarMovimientoController.php?action=obtenerEstadosMovimiento",
+    type: "POST",
+    dataType: "json",
+    success: function (res) {
+      if (res.status) {
+        console.log("✅ Estados disponibles:", res.data);
+        console.table(res.data);
+      } else {
+        console.error("❌ Error al verificar estados:", res.message);
+      }
+    },
+    error: function (xhr, status, error) {
+      console.error("❌ Error al verificar estados:", error);
+    },
+  });
+}
+
+// Función de diagnóstico completo del sistema (para debug)
+function diagnosticoSistemaMovimientos() {
+  console.log("🔍 INICIANDO DIAGNÓSTICO DEL SISTEMA DE MOVIMIENTOS");
+  console.log("================================================");
+  
+  // 1. Verificar estados
+  console.log("1️⃣ Verificando estados...");
+  verificarEstadosMovimiento();
+  
+  // 2. Verificar datos de sesión
+  console.log("2️⃣ Datos de sesión disponibles:");
+  console.log("- Empresa:", window.idempresaDestino || "No definida");
+  console.log("- Sucursal:", window.idsucursalDestino || "No definida");
+  
+  // 3. Verificar funciones críticas
+  console.log("3️⃣ Verificando funciones críticas:");
+  const funcionesCriticas = [
+    'aprobarMovimiento',
+    'rechazarMovimiento', 
+    'aceptarMovimiento',
+    'verHistorialEstados',
+    'ListarMovimientosEnviados',
+    'ListarMovimientosRecibidos'
+  ];
+  
+  funcionesCriticas.forEach(func => {
+    if (typeof window[func] === 'function') {
+      console.log(`✅ ${func} - OK`);
+    } else {
+      console.log(`❌ ${func} - NO ENCONTRADA`);
+    }
+  });
+  
+  console.log("================================================");
+  console.log("🏁 DIAGNÓSTICO COMPLETADO - Revisa la consola");
+}
+
+// Función para aprobar movimiento
+function aprobarMovimiento(idMovimiento) {
+  Swal.fire({
+    title: "¿Aprobar Movimiento?",
+    text: "¿Está seguro de aprobar este movimiento?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#28a745",
+    cancelButtonColor: "#6c757d",
+    confirmButtonText: "Sí, aprobar",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      $.ajax({
+        url: "../../controllers/GestionarMovimientoController.php?action=aprobarMovimiento",
+        type: "POST",
+        data: { idMovimiento: idMovimiento },
+        dataType: "json",
+        success: function (res) {
+          if (res.status) {
+            Swal.fire({
+              title: "¡Aprobado!",
+              text: res.message,
+              icon: "success",
+            }).then(() => {
+              // Recargar la tabla
+              $("#tblMovimientos").DataTable().ajax.reload();
+            });
+          } else {
+            Swal.fire("Error", res.message, "error");
+          }
+        },
+        error: function (xhr, status, error) {
+          Swal.fire(
+            "Error",
+            "Error al procesar la solicitud: " + error,
+            "error"
+          );
+        },
+      });
+    }
+  });
+}
+
+// Función para rechazar movimiento
+function rechazarMovimiento(idMovimiento) {
+  Swal.fire({
+    title: "¿Rechazar Movimiento?",
+    text: "¿Está seguro de rechazar este movimiento?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#dc3545",
+    cancelButtonColor: "#6c757d",
+    confirmButtonText: "Sí, rechazar",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      $.ajax({
+        url: "../../controllers/GestionarMovimientoController.php?action=rechazarMovimiento",
+        type: "POST",
+        data: { idMovimiento: idMovimiento },
+        dataType: "json",
+        success: function (res) {
+          if (res.status) {
+            Swal.fire({
+              title: "¡Rechazado!",
+              text: res.message,
+              icon: "success",
+            }).then(() => {
+              // Recargar la tabla
+              $("#tblMovimientos").DataTable().ajax.reload();
+            });
+          } else {
+            Swal.fire("Error", res.message, "error");
+          }
+        },
+        error: function (xhr, status, error) {
+          Swal.fire(
+            "Error",
+            "Error al procesar la solicitud: " + error,
+            "error"
+          );
+        },
+      });
+    }
+  });
+}
+
+// Función para aceptar movimiento (ejecutar físicamente)
+function aceptarMovimiento(idMovimiento) {
+  Swal.fire({
+    title: "¿Aceptar y Ejecutar Movimiento?",
+    html: `
+      <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> 
+        <strong>¡Atención!</strong> Esta acción ejecutará físicamente el movimiento de activos.
+        <br><br>
+        Los activos serán movidos a sus nuevas ubicaciones y responsables.
+        <br><br>
+        <strong>Esta acción no se puede deshacer.</strong>
+      </div>
+    `,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#28a745",
+    cancelButtonColor: "#6c757d",
+    confirmButtonText: "Sí, ejecutar movimiento",
+    cancelButtonText: "Cancelar",
+    width: "600px",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Mostrar loading
+      Swal.fire({
+        title: "Ejecutando Movimiento",
+        html: `
+          <div class="text-center">
+            <div class="spinner-border text-primary mb-3" role="status">
+              <span class="sr-only">Ejecutando...</span>
+            </div>
+            <p>Procesando el movimiento físico de activos...</p>
+          </div>
+        `,
+        allowOutsideClick: false,
+        showConfirmButton: false,
+      });
+
+      $.ajax({
+        url: "../../controllers/GestionarMovimientoController.php?action=aceptarMovimiento",
+        type: "POST",
+        data: { idMovimiento: idMovimiento },
+        dataType: "json",
+        success: function (res) {
+          if (res.status) {
+            Swal.fire({
+              title: "¡Movimiento Ejecutado!",
+              html: `
+                <div class="alert alert-success">
+                  <i class="fas fa-check-circle"></i> 
+                  ${res.message}
+                </div>
+                <p>Los activos han sido movidos exitosamente a sus nuevas ubicaciones.</p>
+              `,
+              icon: "success",
+              width: "500px",
+            }).then(() => {
+              // Recargar la tabla
+              $("#tblMovimientos").DataTable().ajax.reload();
+            });
+          } else {
+            Swal.fire("Error", res.message, "error");
+          }
+        },
+        error: function (xhr, status, error) {
+          Swal.fire(
+            "Error",
+            "Error al procesar la solicitud: " + error,
+            "error"
+          );
+        },
+      });
+    }
+  });
+}
+
+// Función para ver historial de estados
+function verHistorialEstados(idMovimiento) {
+  $.ajax({
+    url: "../../controllers/GestionarMovimientoController.php?action=obtenerHistorialEstadoMovimiento",
+    type: "POST",
+    data: { idMovimiento: idMovimiento },
+    dataType: "json",
+    success: function (res) {
+      if (res.status) {
+        let historialHtml = `
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead class="thead-dark">
+                <tr>
+                  <th>Estado Anterior</th>
+                  <th>Estado Nuevo</th>
+                  <th>Fecha Cambio</th>
+                  <th>Usuario</th>
+                </tr>
+              </thead>
+              <tbody>`;
+
+        res.data.forEach(function (item) {
+          const estadoAnterior =
+            item.estadoAnterior || '<span class="text-muted">Inicial</span>';
+          const estadoNuevo = item.estadoNuevo;
+          const fecha = moment(item.fechaCambio).format("DD/MM/YYYY HH:mm:ss");
+          const usuario = item.nombreUsuario || item.userMod;
+
+          historialHtml += `
+            <tr>
+              <td>${estadoAnterior}</td>
+              <td><strong>${estadoNuevo}</strong></td>
+              <td>${fecha}</td>
+              <td>${usuario}</td>
+            </tr>`;
+        });
+
+        historialHtml += `
+              </tbody>
+            </table>
+          </div>`;
+
+        Swal.fire({
+          title: "Historial de Estados del Movimiento",
+          html: historialHtml,
+          width: "80%",
+          showCloseButton: true,
+          showConfirmButton: false,
+        });
+      } else {
+        NotificacionToast(
+          "error",
+          res.message || "Error al cargar el historial"
+        );
+      }
+    },
+    error: function () {
+      NotificacionToast("error", "Error al comunicarse con el servidor");
+    },
+  });
 }
