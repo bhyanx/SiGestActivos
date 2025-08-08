@@ -401,6 +401,7 @@ function init() {
     const ambienteId = filaActual.find("select.ambiente").val();
     const categoriaId = filaActual.find("select.categoria").val();
     const proveedorId = filaActual.find("select.proveedor").val();
+    const marcaId = filaActual.find("select.marca").val();
 
     if (!ambienteId || !categoriaId) {
       NotificacionToast(

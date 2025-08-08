@@ -142,7 +142,7 @@ class Combos
     public function comboProveedores()
     {
         try {
-            $sql = "SELECT TOP (50) Documento, RazonSocial FROM vEntidadExternaGeneralProveedor ORDER BY RazonSocial";
+            $sql = "SELECT Documento, RazonSocial FROM vEntidadExternaGeneralProveedor ORDER BY RazonSocial";
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -151,6 +151,20 @@ class Combos
             throw $e;
         }
     }
+
+    public function comboMarcas()
+    {
+        try{
+            $sql = "SELECT codMarca, DescripcionMarca FROM vMarcas";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch(PDOException $e) {
+            error_log("Error in comboMarca: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
 
     // Nueva función get_Proveedor para búsqueda dinámica con filtro
     public function get_Proveedor($filtro)

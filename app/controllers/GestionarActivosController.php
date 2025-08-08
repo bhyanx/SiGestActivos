@@ -307,6 +307,12 @@ switch ($action) {
                 $combos['responsable'] .= "<option value='{$row['codTrabajador']}'>{$row['NombreTrabajador']}</option>";
             }
 
+            $marca = $combo->comboMarcas();
+            $combos['responsable'] = '<option value="">Seleccione</option>';
+            foreach ($marca as $row) {
+                $combos['DescripcionMarca'] .= "<option value='{$row['codMarca']}'>{$row['DescripcionMarca']}</option>";
+            }
+
             $categorias = $combo->comboCategoria();
             $combos['categorias'] = '<option value="">Seleccione</option>';
             foreach ($categorias as $row) {

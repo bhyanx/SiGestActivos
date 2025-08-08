@@ -401,6 +401,12 @@ if (isset($_SESSION["IdRol"])) {
                                                         <select name="Proveedor[]" class="form-control select-2"></select>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label></label>
+                                                        <select name="" id=""></select>
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label> Cantidad: </label>
