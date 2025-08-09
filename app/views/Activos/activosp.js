@@ -586,6 +586,7 @@ function init() {
 
     // Obtener los valores de la fila principal
     const valor = filaActual.find("input[name='valor[]']").val();
+    const aplicaIgvPrincipal = filaActual.find("input[name='aplicaIgv[]']").is(":checked");
     const ambienteId = filaActual.find("select.ambiente").val();
     const categoriaId = filaActual.find("select.categoria").val();
     // Para documentos de venta, usar el proveedor del modal; para ingreso, usar el de la fila
@@ -634,6 +635,8 @@ function init() {
     // Actualizar la serie de la fila original y agregar distintivo visual
     filaActual.find("input[name='serie[]']").val(serieBase + "-1");
     filaActual.find("textarea[name='observaciones[]']").val(observacionesBase);
+    // Mantener el estado del IGV de la fila principal
+    filaActual.find("input[name='aplicaIgv[]']").prop("checked", aplicaIgvPrincipal);
 
     // Actualizar el proveedor en la fila original si es documento de venta
     if (tipoDoc === "venta" && proveedorModal) {
@@ -725,7 +728,15 @@ function init() {
                     <td>${inputEstadoActivo}</td>
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
-                    <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}"></td>
+                    <td>
+                      <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}">
+                      <div class="form-check form-check-sm mt-1">
+                        <input class="form-check-input" type="checkbox" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${aplicaIgvPrincipal ? 'checked' : ''}>
+                        <label class="form-check-label small" for="aplicaIgv${numeroFilas}">
+                          Incluye IGV
+                        </label>
+                      </div>
+                    </td>
                     <td>${inputCantidad}</td>
                     <td>${proveedorDisplay}</td>
                     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea></td>
@@ -910,6 +921,7 @@ function init() {
       .val()
       .replace("-1", "");
     const valor = filaPrincipal.find("input[name='valor[]']").val();
+    const aplicaIgv = filaPrincipal.find("input[name='aplicaIgv[]']").is(":checked");
     const observacionesBase = filaPrincipal
       .find("textarea[name='observaciones[]']")
       .val();
@@ -957,7 +969,15 @@ function init() {
                       <td>${inputEstadoActivo}</td>
                       <td>${selectAmbiente}</td>
                       <td>${selectCategoria}</td>
-                      <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}"></td>
+                      <td>
+                        <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}">
+                        <div class="form-check form-check-sm mt-1">
+                          <input class="form-check-input" type="checkbox" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${aplicaIgv ? 'checked' : ''}>
+                          <label class="form-check-label small" for="aplicaIgv${numeroFilas}">
+                            Incluye IGV
+                          </label>
+                        </div>
+                      </td>
                       <td>${inputCantidad}</td>
                       <td>${proveedorDisplay}</td>
                       <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea></td>
@@ -1170,6 +1190,7 @@ function init() {
             IdCategoria: parseInt(row.find("select.categoria").val()) || null,
             ValorAdquisicion:
               parseFloat(row.find("input[name='valor[]']").val()) || 0,
+            AplicaIGV: row.find("input[name='aplicaIgv[]']").is(":checked") ? 1 : 0,
             IdProveedor: proveedor || null,
             Observaciones:
               row.find("textarea[name='observaciones[]']").val() || "",
@@ -1203,6 +1224,7 @@ function init() {
             IdCategoria: parseInt(row.find("select.categoria").val()) || null,
             ValorAdquisicion:
               parseFloat(row.find("input[name='valor[]']").val()) || 0,
+            AplicaIGV: row.find("input[name='aplicaIgv[]']").is(":checked") ? 1 : 0,
             IdProveedor: proveedor || null,
             Observaciones:
               row.find("textarea[name='observaciones[]']").val() || "",
@@ -1355,6 +1377,7 @@ function init() {
           ValorAdquisicion: parseFloat(
             form.find("input[name='ValorAdquisicion[]']").val()
           ),
+          AplicaIGV: form.find("input[name='AplicaIGV[]']").is(":checked") ? 1 : 0,
           FechaAdquisicion: form.find("input[name='fechaAdquisicion[]']").val(),
           Cantidad: 1, // Cada fila de preview es 1 activo individual
         };
@@ -1391,6 +1414,7 @@ function init() {
             ValorAdquisicion: parseFloat(
               form.find("input[name='ValorAdquisicion[]']").val()
             ),
+            AplicaIGV: form.find("input[name='AplicaIGV[]']").is(":checked") ? 1 : 0,
             FechaAdquisicion: form
               .find("input[name='fechaAdquisicion[]']")
               .val(),
@@ -3122,7 +3146,15 @@ function agregarActivoAlDetalle(activo) {
                     <td>${inputEstadoActivo}</td>
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
-                    <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valorPrellenado}"></td>
+                    <td>
+                      <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valorPrellenado}">
+                      <div class="form-check form-check-sm mt-1">
+                        <input class="form-check-input" type="checkbox" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1">
+                        <label class="form-check-label small" for="aplicaIgv${numeroFilas}">
+                          Incluye IGV
+                        </label>
+                      </div>
+                    </td>
                     <td>${inputCantidad}</td>
                     <td>${selectProveedor}</td>
                     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea></td>
@@ -3675,13 +3707,24 @@ function addActivoManualForm(combos) {
                 <input type="number" name="Cantidad[]" id="Cantidad_${activoFormCount}" class="form-control" placeholder="Ej. 1" value="1" min="1" required>
               </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
               <div class="form-group">
                 <label for="ValorAdquisicion_${activoFormCount}">Valor Adquisición:</label>
                 <input type="number" step="0.01" name="ValorAdquisicion[]" id="ValorAdquisicion_${activoFormCount}" class="form-control" placeholder="Ej. 10.00" required>
               </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
+              <div class="form-group">
+                <label>&nbsp;</label>
+                <div class="form-check mt-2">
+                  <input class="form-check-input" type="checkbox" name="AplicaIGV[]" id="AplicaIGV_${activoFormCount}" value="1">
+                  <label class="form-check-label" for="AplicaIGV_${activoFormCount}">
+                    Incluye IGV
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
               <div class="form-group">
                 <label for="fechaAdquisicion_${activoFormCount}">Fecha Adquisición: </label>
                 <input type="date" name="fechaAdquisicion[]" id="fechaAdquisicion_${activoFormCount}" class="form-control" value="${new Date()
