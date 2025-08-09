@@ -10,6 +10,13 @@ function init() {
   ListarCombosMov();
   ListarCombosFiltros();
   // ListarCombosModalActualizarActivo();
+  
+  // Establecer documento de venta como opción por defecto
+  setTimeout(() => {
+    if ($("#tipoDocumento").length > 0) {
+      $("#tipoDocumento").val("venta").trigger("change");
+    }
+  }, 100);
 
   // ? INICIO: SE COMENTO EL CODIGO PARA INICIALIZAR EL MODAL DE REGISTRO MANUAL
   $("#divModalActualizarActivo").on("shown.bs.modal", function () {
@@ -31,18 +38,24 @@ function init() {
     }
   );
 
+  // Establecer documento de venta como opción por defecto al cargar la página
+  $(document).ready(function() {
+    // Establecer "venta" como valor por defecto
+    $("#tipoDocumento").val("venta").trigger("change");
+  });
+
   // Manejar cambio de tipo de documento
   $(document).on("change", "#tipoDocumento", function () {
     const tipoDoc = $(this).val();
     const labelDocumento = $("#labelDocumento");
     const inputDocumento = $("#inputDocumento");
 
-    if (tipoDoc === "ingreso") {
-      labelDocumento.text("Doc. Ingreso Almacén:");
-      inputDocumento.attr("placeholder", "ID de Doc. Ingreso");
-    } else if (tipoDoc === "venta") {
+    if (tipoDoc === "venta") {
       labelDocumento.text("Doc. Venta:");
       inputDocumento.attr("placeholder", "ID de Doc. Venta");
+    } else if (tipoDoc === "ingreso") {
+      labelDocumento.text("Doc. Ingreso Almacén:");
+      inputDocumento.attr("placeholder", "ID de Doc. Ingreso");
     }
 
     // Limpiar el input cuando cambie el tipo
@@ -730,10 +743,10 @@ function init() {
                     <td>${selectCategoria}</td>
                     <td>
                       <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}">
-                      <div class="form-check form-check-sm mt-1">
-                        <input class="form-check-input" type="checkbox" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${aplicaIgvPrincipal ? 'checked' : ''}>
-                        <label class="form-check-label small" for="aplicaIgv${numeroFilas}">
-                          Incluye IGV
+                      <div class="custom-control custom-switch custom-switch-sm mt-2">
+                        <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${aplicaIgvPrincipal ? 'checked' : ''}>
+                        <label class="custom-control-label small text-success font-weight-bold" for="aplicaIgv${numeroFilas}">
+                          <i class="fas fa-percentage mr-1"></i>IGV
                         </label>
                       </div>
                     </td>
@@ -971,10 +984,10 @@ function init() {
                       <td>${selectCategoria}</td>
                       <td>
                         <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}">
-                        <div class="form-check form-check-sm mt-1">
-                          <input class="form-check-input" type="checkbox" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${aplicaIgv ? 'checked' : ''}>
-                          <label class="form-check-label small" for="aplicaIgv${numeroFilas}">
-                            Incluye IGV
+                        <div class="custom-control custom-switch custom-switch-sm mt-2">
+                          <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${aplicaIgv ? 'checked' : ''}>
+                          <label class="custom-control-label small text-success font-weight-bold" for="aplicaIgv${numeroFilas}">
+                            <i class="fas fa-percentage mr-1"></i>IGV
                           </label>
                         </div>
                       </td>
@@ -3148,10 +3161,10 @@ function agregarActivoAlDetalle(activo) {
                     <td>${selectCategoria}</td>
                     <td>
                       <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valorPrellenado}">
-                      <div class="form-check form-check-sm mt-1">
-                        <input class="form-check-input" type="checkbox" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1">
-                        <label class="form-check-label small" for="aplicaIgv${numeroFilas}">
-                          Incluye IGV
+                      <div class="custom-control custom-switch custom-switch-sm mt-2">
+                        <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1">
+                        <label class="custom-control-label small text-success font-weight-bold" for="aplicaIgv${numeroFilas}">
+                          <i class="fas fa-percentage mr-1"></i>IGV
                         </label>
                       </div>
                     </td>
@@ -3715,11 +3728,11 @@ function addActivoManualForm(combos) {
             </div>
             <div class="col-md-2">
               <div class="form-group">
-                <label>&nbsp;</label>
-                <div class="form-check mt-2">
-                  <input class="form-check-input" type="checkbox" name="AplicaIGV[]" id="AplicaIGV_${activoFormCount}" value="1">
-                  <label class="form-check-label" for="AplicaIGV_${activoFormCount}">
-                    Incluye IGV
+                <label class="text-muted small">IGV</label>
+                <div class="custom-control custom-switch mt-1">
+                  <input type="checkbox" class="custom-control-input" name="AplicaIGV[]" id="AplicaIGV_${activoFormCount}" value="1">
+                  <label class="custom-control-label text-success font-weight-bold" for="AplicaIGV_${activoFormCount}">
+                    <i class="fas fa-percentage mr-1"></i>Incluye IGV
                   </label>
                 </div>
               </div>
@@ -4557,4 +4570,111 @@ $(document).on("click", ".btnResetActivoManual", function () {
       NotificacionToast("success", "Formulario reseteado correctamente.");
     }
   });
+});
+
+// Agregar estilos CSS personalizados para los switches de IGV
+$(document).ready(function() {
+  const igvStyles = `
+    <style>
+      /* Estilos personalizados para switches de IGV */
+      .custom-switch-sm .custom-control-label::before {
+        width: 1.5rem;
+        height: 0.875rem;
+        border-radius: 0.875rem;
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+      }
+      
+      .custom-switch-sm .custom-control-label::after {
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 50%;
+        background-color: #fff;
+        transition: all 0.3s ease;
+        top: 0.0625rem;
+        left: 0.0625rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      .custom-switch-sm .custom-control-input:checked ~ .custom-control-label::before {
+        background-color: #28a745;
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+      }
+      
+      .custom-switch-sm .custom-control-input:checked ~ .custom-control-label::after {
+        transform: translateX(0.625rem);
+        background-color: #fff;
+      }
+      
+      .custom-switch-sm .custom-control-input:focus ~ .custom-control-label::before {
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+      }
+      
+      .custom-switch-sm .custom-control-label {
+        padding-left: 2rem;
+        font-size: 0.75rem;
+        line-height: 1.2;
+      }
+      
+      /* Animación hover para el switch */
+      .custom-switch-sm:hover .custom-control-label::before {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.1rem rgba(40, 167, 69, 0.15);
+      }
+      
+      /* Estilo para el texto del IGV */
+      .custom-switch-sm .custom-control-label.text-success {
+        color: #28a745 !important;
+        font-weight: 600;
+      }
+      
+      .custom-switch-sm .custom-control-input:checked ~ .custom-control-label.text-success {
+        color: #155724 !important;
+      }
+      
+      /* Efecto de brillo cuando está activado */
+      .custom-switch-sm .custom-control-input:checked ~ .custom-control-label::before {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        animation: igvGlow 2s ease-in-out infinite alternate;
+      }
+      
+      @keyframes igvGlow {
+        0% { box-shadow: 0 0 5px rgba(40, 167, 69, 0.3); }
+        100% { box-shadow: 0 0 10px rgba(40, 167, 69, 0.5); }
+      }
+      
+      /* Estilo para el icono de porcentaje */
+      .custom-switch-sm .fa-percentage {
+        color: #28a745;
+        font-size: 0.7rem;
+        margin-right: 0.25rem;
+      }
+      
+      .custom-switch-sm .custom-control-input:checked ~ .custom-control-label .fa-percentage {
+        color: #155724;
+        animation: bounce 0.6s ease-in-out;
+      }
+      
+      @keyframes bounce {
+        0%, 20%, 60%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-3px); }
+        80% { transform: translateY(-1px); }
+      }
+      
+      /* Responsive para móviles */
+      @media (max-width: 768px) {
+        .custom-switch-sm .custom-control-label {
+          font-size: 0.7rem;
+        }
+        
+        .custom-switch-sm .fa-percentage {
+          font-size: 0.6rem;
+        }
+      }
+    </style>
+  `;
+  
+  // Agregar los estilos al head de
 });
