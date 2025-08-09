@@ -174,9 +174,9 @@ class Combos
             $filtro = (string) $filtro;
 
             $sql = "SELECT TOP 20 p.Documento, p.RazonSocial 
-FROM vEntidadExternaGeneralProveedor  p
-WHERE (p.RazonSocial LIKE ? OR p.Documento LIKE ?) 
-ORDER BY p.RazonSocial ";
+            FROM vEntidadExternaGeneralProveedor  p
+            WHERE (p.RazonSocial LIKE ? OR p.Documento LIKE ?) 
+            ORDER BY p.RazonSocial ";
 
             $stmt = $this->db->prepare($sql);
             $filtroParam = "%" . $filtro . "%";
@@ -184,6 +184,27 @@ ORDER BY p.RazonSocial ";
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Error in get_Proveedor: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+    
+    public function get_Marca($filtro)
+    {
+        try {
+            // Asegurarse de que el filtro siempre sea una cadena
+            $filtro = (string) $filtro;
+
+            $sql = "SELECT TOP 20 m.codMarca, m.DescripcionMarca
+            FROM vMarcas m
+            WHERE (m.DescripcionMarca LIKE ? OR m.codMarca LIKE ?)
+            ORDER BY m.DescripcionMarca ";
+
+            $stmt = $this->db->prepare($sql);
+            $filtroParam = "%" . $filtro . "%";
+            $stmt->execute([$filtroParam, $filtroParam]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error in get_Marca: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }

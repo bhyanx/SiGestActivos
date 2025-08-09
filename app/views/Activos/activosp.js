@@ -3605,38 +3605,50 @@ function addActivoManualForm(combos) {
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
-                <label for="nombre_${activoFormCount}">Nombre</label>
+                <label for="nombre_${activoFormCount}">Nombre: </label>
                 <input type="text" name="nombre[]" id="nombre_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech" required>
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
-                <label for="serie_${activoFormCount}">Serie</label>
+                <label for="serie_${activoFormCount}">Serie: </label>
                 <input type="text" name="serie[]" id="serie_${activoFormCount}" class="form-control" placeholder="Ej. ML-123" required>
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
-                <label for="Estado_${activoFormCount}">Estado</label>
+                <label for="Estado_${activoFormCount}">Estado: </label>
                 <select name="Estado[]" id="Estado_${activoFormCount}" class="form-control select-2" required></select>
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
-                <label for="Categoria_${activoFormCount}">Categoria</label>
+                <label for="Categoria_${activoFormCount}">Categoria: </label>
                 <select name="Categoria[]" id="Categoria_${activoFormCount}" class="form-control select-2" required></select>
               </div>
             </div>
              <div class="col-md-4">
               <div class="form-group">
-                <label for="Responsable_${activoFormCount}">Responsable</label>
+                <label for="Responsable_${activoFormCount}">Responsable: </label>
                 <select name="Responsable[]" id="Responsable_${activoFormCount}" class="form-control select-2" required></select>
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
-                <label for="Proveedor_${activoFormCount}">Proveedor</label>
+                <label for="Proveedor_${activoFormCount}">Proveedor: </label>
                 <select name="Proveedor[]" id="Proveedor_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Ambiente_${activoFormCount}">Ambiente:</label>
+                <select name="Ambiente[]" id="Ambiente_${activoFormCount}" class="form-control select-2"></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Marca_${activoFormCount}">Marca:</label>
+                <select name="Marca[]" id="Marca_${activoFormCount}" class="form-control select-2"></select>
               </div>
             </div>
             <div class="col-md-12">
@@ -3655,12 +3667,6 @@ function addActivoManualForm(combos) {
               <div class="form-group">
                 <label for="unidadNegocio_${activoFormCount}">Unidad de Negocio</label>
                 <input type="text" class="form-control" name="unidadNegocio[]" id="unidadNegocio_${activoFormCount}" disabled>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="Ambiente_${activoFormCount}">Ambiente:</label>
-                <select name="Ambiente[]" id="Ambiente_${activoFormCount}" class="form-control select-2"></select>
               </div>
             </div>
             <div class="col-md-3">
@@ -3799,6 +3805,42 @@ function addActivoManualForm(combos) {
       cache: true,
     },
     placeholder: "Ingresar/Seleccionar Proveedor",
+    allowClear: true,
+  });
+
+  newForm.find(`[name='Marca[]']`).select2({
+    dropdownParent: newForm,
+    minimumInputLength: 2,
+    theme: "bootstrap4",
+    language: {
+      inputTooShort: function (args) {
+        return "Ingresar Marca.";
+      },
+      noResults: function () {
+        return "Datos no encontrados.";
+      },
+      searching: function () {
+        return "Buscando...";
+      }, 
+    },
+    ajax: {
+      url: "../../controllers/GestionarActivosController.php?action=comboMarcas",
+      type: "GET",
+      dataType: "json",
+      delay: 250,
+      data: function (params) {
+        return {
+          filtro: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data || [],
+        };
+      },
+      cache: true,
+    },
+    placeholder: "Ingresar/Seleccionar Marca",
     allowClear: true,
   });
 

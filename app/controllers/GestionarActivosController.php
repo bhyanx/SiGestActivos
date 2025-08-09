@@ -800,6 +800,32 @@ switch ($action) {
         }
         break;
 
+        case 'comboMarcas':
+            try {
+                // Asegúrate de que $combo esté instanciado (viene de Combos.php)
+                if (empty($combo) || !($combo instanceof Combos)) {
+                    $combo = new Combos();
+                }
+    
+                $filtro = $_GET['filtro'] ?? null;
+                $datos = $combo->get_Marca($filtro);
+                $arrayMarca = [];
+    
+                if (is_array($datos) && count($datos) > 0) {
+                    foreach ($datos as $row) {
+                        $arrayMarca[] = [
+                            'id' => $row['codMarca'], // Asumiendo que Documento es el ID
+                            'text' => $row['DescripcionMarca'] . " - " . $row['codMarca'] // O el formato que necesites
+                        ];
+                    }
+                }
+                echo json_encode($arrayMarca);
+            } catch (Exception $e) {
+                error_log("Error en comboMarca: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+                echo json_encode(['results' => [], 'error' => $e->getMessage()]);
+            }
+            break;
+
     default:
         echo json_encode(['status' => false, 'message' => 'Acción no válida.']);
         break;

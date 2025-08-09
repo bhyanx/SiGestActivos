@@ -71,7 +71,7 @@ if (isset($_SESSION["IdRol"])) {
                                                     <div class="form-group mb-0">
                                                         <label>&nbsp;</label>
                                                         <button type="button" class="btn btn-success btn-sm btn-block" id="btnnuevo">
-                                                            <i class="fa fa-plus"></i> Nuevo
+                                                            <i class="fa fa-file-import" style="margin-right: 5px;"></i> Registar con Doc.
                                                         </button>
                                                     </div>
                                                 </div>
@@ -79,7 +79,7 @@ if (isset($_SESSION["IdRol"])) {
                                                     <div class="form-group mb-0">
                                                         <label>&nbsp;</label>
                                                         <button type="button" class="btn btn-info btn-sm btn-block" id="btnCrearActivo">
-                                                            <i class="fa fa-plus"></i> Crear Activo
+                                                            <i class="fas fa-plus" style="margin-right: 5px;"></i> Registrar Manual
                                                         </button>
                                                     </div>
                                                 </div>
@@ -343,68 +343,68 @@ if (isset($_SESSION["IdRol"])) {
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <label>Nombre</label>
+                                                        <label>Nombre: </label>
                                                         <input type="text" name="nombre[]" class="form-control" placeholder="Ej. Mouse Logitech" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <label>Serie</label>
+                                                        <label>Serie: </label>
                                                         <input type="text" name="serie[]" class="form-control" placeholder="Ej. ML-123" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <label>Estado</label>
+                                                        <label>Estado: </label>
                                                         <select name="Estado[]" class="form-control select-2" required></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12">
                                                     <div class="form-group">
-                                                        <label>Descripción</label>
+                                                        <label>Descripción: </label>
                                                         <textarea name="Descripcion[]" class="form-control" placeholder="Ej. Mouse Logitech color negro"></textarea>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label>Empresa</label>
-                                                        <input type="text" class="form-control" name="empresa[]" disabled>
+                                                        <label>Empresa: </label>
+                                                        <input type="text" class="form-control" name="Empresa[]" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label>Unidad de Negocio</label>
-                                                        <input type="text" class="form-control" name="unidadNegocio[]" disabled>
+                                                        <label>Unidad de Negocio: </label>
+                                                        <input type="text" class="form-control" name="UnidadNegocio[]" disabled>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label>Responsable</label>
+                                                        <label>Responsable de activo: </label>
                                                         <select name="Responsable[]" class="form-control select-2" required></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-8">
                                                     <div class="form-group">
-                                                        <label>Categoria</label>
+                                                        <label>Categoria: </label>
                                                         <select name="Categoria[]" class="form-control select-2" required></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-8">
                                                     <div class="form-group">
-                                                        <label>Ambiente:</label>
+                                                        <label>Ambiente: </label>
                                                         <select name="Ambiente[]" class="form-control select-2"></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-8">
                                                     <div class="form-group">
-                                                        <label>Proveedor</label>
+                                                        <label>Proveedor: </label>
                                                         <select name="Proveedor[]" class="form-control select-2"></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-8">
                                                     <div class="form-group">
-                                                        <label></label>
-                                                        <select name="" id=""></select>
+                                                        <label>Marca: </label>
+                                                        <select name="Marcas[]" class="form-control select-2"></select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
