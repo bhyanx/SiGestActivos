@@ -3635,17 +3635,17 @@ function addActivoManualForm(combos) {
             </div>
             <div class="col-md-4">
               <div class="form-group">
-                <label for="Proveedor_${activoFormCount}">Proveedor: </label>
-                <select name="Proveedor[]" id="Proveedor_${activoFormCount}" class="form-control select-2" required></select>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
                 <label for="Ambiente_${activoFormCount}">Ambiente:</label>
                 <select name="Ambiente[]" id="Ambiente_${activoFormCount}" class="form-control select-2"></select>
               </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="Proveedor_${activoFormCount}">Proveedor: </label>
+                <select name="Proveedor[]" id="Proveedor_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-6">
               <div class="form-group">
                 <label for="Marca_${activoFormCount}">Marca:</label>
                 <select name="Marca[]" id="Marca_${activoFormCount}" class="form-control select-2"></select>
@@ -3697,7 +3697,11 @@ function addActivoManualForm(combos) {
             </div>
             <div class="col-md-12">
               <div class="form-group text-center">
-                <button type="button" class="btn btn-info btnProcesarActivoManual" data-form-id="${activoFormCount}">
+                <div class="alert alert-info procesar-info" style="display: none;">
+                  <i class="fas fa-info-circle"></i>
+                  <strong>Procesar Activo:</strong> Cuando la cantidad sea mayor a 1, use este botón para generar múltiples activos individuales con series únicas automáticamente.
+                </div>
+                <button type="button" class="btn btn-info btnProcesarActivoManual" data-form-id="${activoFormCount}" style="display: none;">
                   <i class="fas fa-cogs"></i> Procesar Activo
                 </button>
               </div>
@@ -3861,6 +3865,22 @@ function addActivoManualForm(combos) {
       .trigger("change");
     // No cargar combos.proveedores aquí
   }
+  
+  // Event listener para mostrar/ocultar botón de procesar según la cantidad
+  newForm.find('input[name="Cantidad[]"]').on('input change', function() {
+    const cantidad = parseInt($(this).val()) || 1;
+    const btnProcesar = newForm.find('.btnProcesarActivoManual');
+    const alertInfo = newForm.find('.procesar-info');
+    
+    if (cantidad > 1) {
+      btnProcesar.show().find('i').next().text(` Procesar Activo (${cantidad} unidades)`);
+      alertInfo.show();
+    } else {
+      btnProcesar.hide();
+      alertInfo.hide();
+    }
+  });
+  
   if (typeof $.fn.CardWidget === "function") {
     newForm.CardWidget();
   }
@@ -4066,6 +4086,26 @@ $(document).ready(function () {
         padding: 6px 12px;
       }
       
+      /* Estilos para el aviso de procesar */
+      .procesar-info {
+        border-radius: 8px;
+        border: 1px solid #bee5eb;
+        margin-bottom: 15px;
+        font-size: 0.9em;
+        animation: fadeInUp 0.3s ease-out;
+      }
+      
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
       /* Estilos para el loader de procesamiento */
       .procesamiento-popup {
         border-radius: 15px;
@@ -4151,7 +4191,7 @@ $(document).on("click", ".btnProcesarActivoManual", function () {
   }
 
   if (cantidad <= 1) {
-    NotificacionToast("info", "La cantidad debe ser mayor a 1 para procesar");
+    NotificacionToast("warning", "Para procesar un activo, la cantidad debe ser mayor a 1. Con cantidad = 1, el activo se guardará directamente.");
     return;
   }
 

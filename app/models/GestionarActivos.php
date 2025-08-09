@@ -220,6 +220,7 @@ class GestionarActivos
                 @pSerie = ?,
                 @pObservaciones = ?,
                 @pValorAdquisicion = ?,
+                @pAplicaIGV = ?,
                 @pFechaAdquisicion = ?,
                 @pUserMod = ?');
 
@@ -237,8 +238,9 @@ class GestionarActivos
             $stmt->bindParam(12, $data['Serie'], \PDO::PARAM_STR);
             $stmt->bindParam(13, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
             $stmt->bindParam(14, $data['ValorAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(15, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(16, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(15, $data['AplicaIGV'], \PDO::PARAM_INT);
+            $stmt->bindParam(16, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(17, $data['UserMod'], \PDO::PARAM_STR);
 
             $stmt->execute();
             return true;
@@ -270,6 +272,7 @@ class GestionarActivos
                 @pVidaUtil = ?,
                 @pObservaciones = ?,
                 @pValorAdquisicion = ?,
+                @pAplicaIGV = ?,
                 @pFechaAdquisicion = ?,
                 @pUserMod = ?');
 
@@ -286,8 +289,9 @@ class GestionarActivos
             $stmt->bindParam(11, $data['VidaUtil'], \PDO::PARAM_INT);
             $stmt->bindParam(12, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
             $stmt->bindParam(13, $data['ValorAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(14, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(15, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(14, $data['AplicaIGV'], \PDO::PARAM_INT);
+            $stmt->bindParam(15, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(16, $data['UserMod'], \PDO::PARAM_STR);
 
             $stmt->execute();
             return true;
@@ -322,6 +326,7 @@ class GestionarActivos
                 @pSerie = ?,
                 @pObservaciones = ?,
                 @pValorAdquisicion = ?,
+                @pAplicaIGV = ?,
                 @pFechaAdquisicion = ?,
                 @pUserMod = ?,
                 @pCantidad = ?');
@@ -343,10 +348,11 @@ class GestionarActivos
             $stmt->bindParam(13, $data['Serie'], \PDO::PARAM_STR);
             $stmt->bindParam(14, $data['Observaciones'], \PDO::PARAM_STR);
             $stmt->bindParam(15, $data['ValorAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(16, $data['FechaAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(17, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(16, $data['AplicaIGV'], \PDO::PARAM_INT);
+            $stmt->bindParam(17, $data['FechaAdquisicion'], \PDO::PARAM_STR);
+            $stmt->bindParam(18, $data['UserMod'], \PDO::PARAM_STR);
             //$stmt->bindParam(22, $data['MotivoBaja'], \PDO::PARAM_STR);
-            $stmt->bindParam(18, $data['Cantidad'], \PDO::PARAM_INT);
+            $stmt->bindParam(19, $data['Cantidad'], \PDO::PARAM_INT);
 
             $stmt->execute();
             return true;

@@ -461,6 +461,7 @@ switch ($action) {
                         'Serie' => $activo['Serie'],
                         'Observaciones' => $activo['Observaciones'] ?? '',
                         'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
+                        'AplicaIGV' => $activo['AplicaIGV'] ?? 0,
                         'FechaAdquisicion' => $fechaAdquisicion,
                         'UserMod' => $_SESSION['CodEmpleado'],
                         'IdDocIngresoAlm' => $activo['IdDocIngresoAlm'] ?? null
@@ -519,6 +520,7 @@ switch ($action) {
                         'Serie' => $activo['Serie'],
                         'Observaciones' => $activo['Observaciones'] ?? '',
                         'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
+                        'AplicaIGV' => $activo['AplicaIGV'] ?? 0,
                         'FechaAdquisicion' => $fechaAdquisicion,
                         'UserMod' => $_SESSION['CodEmpleado'],
                         'Cantidad' => isset($activo['Cantidad']) ? (int)$activo['Cantidad'] : 1,
@@ -743,6 +745,7 @@ switch ($action) {
                         'Serie' => $activo['Serie'] ?? null,
                         'Observaciones' => $activo['Observaciones'] ?? null,
                         'ValorAdquisicion' => $activo['ValorAdquisicion'] ?? 0,
+                        'AplicaIGV' => $activo['AplicaIGV'] ?? 0,
                         'FechaAdquisicion' => $activo['FechaAdquisicion'] ?? date('Y-m-d'),
                         'UserMod' => $_SESSION['CodEmpleado'] ?? 'SYSTEM',
                         //'Codigo' => $activo['Codigo'] ?? null,
