@@ -3821,7 +3821,7 @@ function addActivoManualForm(combos) {
       },
       searching: function () {
         return "Buscando...";
-      }, 
+      },
     },
     ajax: {
       url: "../../controllers/GestionarActivosController.php?action=comboMarcas",
