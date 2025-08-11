@@ -24,6 +24,21 @@ class Conectar
         }
     }
 
+    public function ConexionBdProgSistemas()
+    {
+        try {
+            $conexion = new PDO("sqlsrv:Server=192.168.1.52;Database=bdGestionLubriseng", "MastLub", "123");
+            //$conexion = new PDO("sqlsrv:Server=192.168.1.37;Database=bdActivos", "","");
+            //$conexion = new PDO("sqlsrv:Server=BHYANX;Database=bdActivos", "", "");
+            //$conexion = new PDO("sqlsrv:Server=localhost;Database=bdActivos", "sa", "Bryan260904");
+            $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            return $conexion;
+        } catch (PDOException $e) {
+            error_log("Error de conexión a bdActivos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
     // public function ConexionBdLocal(){
     //    $conexion = new PDO("sqlsrv:Server=BHYANX;Database=bdActivos", "", ""); 
     // }

@@ -10,7 +10,7 @@ function init() {
   ListarCombosMov();
   ListarCombosFiltros();
   // ListarCombosModalActualizarActivo();
-  
+
   // Establecer documento de venta como opción por defecto
   setTimeout(() => {
     if ($("#tipoDocumento").length > 0) {
@@ -39,7 +39,7 @@ function init() {
   );
 
   // Establecer documento de venta como opción por defecto al cargar la página
-  $(document).ready(function() {
+  $(document).ready(function () {
     // Establecer "venta" como valor por defecto
     $("#tipoDocumento").val("venta").trigger("change");
   });
@@ -599,7 +599,9 @@ function init() {
 
     // Obtener los valores de la fila principal
     const valor = filaActual.find("input[name='valor[]']").val();
-    const aplicaIgvPrincipal = filaActual.find("input[name='aplicaIgv[]']").is(":checked");
+    const aplicaIgvPrincipal = filaActual
+      .find("input[name='aplicaIgv[]']")
+      .is(":checked");
     const ambienteId = filaActual.find("select.ambiente").val();
     const categoriaId = filaActual.find("select.categoria").val();
     // Para documentos de venta, usar el proveedor del modal; para ingreso, usar el de la fila
@@ -649,7 +651,9 @@ function init() {
     filaActual.find("input[name='serie[]']").val(serieBase + "-1");
     filaActual.find("textarea[name='observaciones[]']").val(observacionesBase);
     // Mantener el estado del IGV de la fila principal
-    filaActual.find("input[name='aplicaIgv[]']").prop("checked", aplicaIgvPrincipal);
+    filaActual
+      .find("input[name='aplicaIgv[]']")
+      .prop("checked", aplicaIgvPrincipal);
 
     // Actualizar el proveedor en la fila original si es documento de venta
     if (tipoDoc === "venta" && proveedorModal) {
@@ -744,7 +748,9 @@ function init() {
                     <td>
                       <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}">
                       <div class="custom-control custom-switch custom-switch-sm mt-2">
-                        <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${aplicaIgvPrincipal ? 'checked' : ''}>
+                        <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${
+        aplicaIgvPrincipal ? "checked" : ""
+      }>
                         <label class="custom-control-label small text-success font-weight-bold" for="aplicaIgv${numeroFilas}">
                           <i class="fas fa-percentage mr-1"></i>IGV
                         </label>
@@ -934,7 +940,9 @@ function init() {
       .val()
       .replace("-1", "");
     const valor = filaPrincipal.find("input[name='valor[]']").val();
-    const aplicaIgv = filaPrincipal.find("input[name='aplicaIgv[]']").is(":checked");
+    const aplicaIgv = filaPrincipal
+      .find("input[name='aplicaIgv[]']")
+      .is(":checked");
     const observacionesBase = filaPrincipal
       .find("textarea[name='observaciones[]']")
       .val();
@@ -985,7 +993,9 @@ function init() {
                       <td>
                         <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}">
                         <div class="custom-control custom-switch custom-switch-sm mt-2">
-                          <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${aplicaIgv ? 'checked' : ''}>
+                          <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${
+          aplicaIgv ? "checked" : ""
+        }>
                           <label class="custom-control-label small text-success font-weight-bold" for="aplicaIgv${numeroFilas}">
                             <i class="fas fa-percentage mr-1"></i>IGV
                           </label>
@@ -1203,7 +1213,9 @@ function init() {
             IdCategoria: parseInt(row.find("select.categoria").val()) || null,
             ValorAdquisicion:
               parseFloat(row.find("input[name='valor[]']").val()) || 0,
-            AplicaIGV: row.find("input[name='aplicaIgv[]']").is(":checked") ? 1 : 0,
+            AplicaIGV: row.find("input[name='aplicaIgv[]']").is(":checked")
+              ? 1
+              : 0,
             IdProveedor: proveedor || null,
             Observaciones:
               row.find("textarea[name='observaciones[]']").val() || "",
@@ -1237,7 +1249,9 @@ function init() {
             IdCategoria: parseInt(row.find("select.categoria").val()) || null,
             ValorAdquisicion:
               parseFloat(row.find("input[name='valor[]']").val()) || 0,
-            AplicaIGV: row.find("input[name='aplicaIgv[]']").is(":checked") ? 1 : 0,
+            AplicaIGV: row.find("input[name='aplicaIgv[]']").is(":checked")
+              ? 1
+              : 0,
             IdProveedor: proveedor || null,
             Observaciones:
               row.find("textarea[name='observaciones[]']").val() || "",
@@ -1381,8 +1395,8 @@ function init() {
           Garantia: 0,
           IdResponsable: form.find("select[name='Responsable[]']").val(),
           IdProveedor: form.find("select[name='Proveedor[]']").val(),
-          IdEmpresa: null,
-          IdSucursal: null,
+          IdEmpresa: form.find("select[name='Empresa[]']").val(),
+          IdSucursal: form.find("select[name='UnidadNegocio[]']").val(),
           IdAmbiente: form.find("select[name='Ambiente[]']").val(),
           IdCategoria: form.find("select[name='Categoria[]']").val(),
           Serie: fila.find(".serie-manual").val(), // Serie única de la tabla
@@ -1390,7 +1404,9 @@ function init() {
           ValorAdquisicion: parseFloat(
             form.find("input[name='ValorAdquisicion[]']").val()
           ),
-          AplicaIGV: form.find("input[name='AplicaIGV[]']").is(":checked") ? 1 : 0,
+          AplicaIGV: form.find("input[name='AplicaIGV[]']").is(":checked")
+            ? 1
+            : 0,
           FechaAdquisicion: form.find("input[name='fechaAdquisicion[]']").val(),
           Cantidad: 1, // Cada fila de preview es 1 activo individual
         };
@@ -1418,8 +1434,8 @@ function init() {
             Garantia: 0,
             IdResponsable: form.find("select[name='Responsable[]']").val(),
             IdProveedor: form.find("select[name='Proveedor[]']").val(),
-            IdEmpresa: null,
-            IdSucursal: null,
+            IdEmpresa: form.find("select[name='Empresa[]']").val(),
+            IdSucursal: form.find("select[name='UnidadNegocio[]']").val(),
             IdAmbiente: form.find("select[name='Ambiente[]']").val(),
             IdCategoria: form.find("select[name='Categoria[]']").val(),
             Serie: form.find("input[name='serie[]']").val(),
@@ -1427,7 +1443,9 @@ function init() {
             ValorAdquisicion: parseFloat(
               form.find("input[name='ValorAdquisicion[]']").val()
             ),
-            AplicaIGV: form.find("input[name='AplicaIGV[]']").is(":checked") ? 1 : 0,
+            AplicaIGV: form.find("input[name='AplicaIGV[]']").is(":checked")
+              ? 1
+              : 0,
             FechaAdquisicion: form
               .find("input[name='fechaAdquisicion[]']")
               .val(),
@@ -1461,6 +1479,8 @@ function init() {
         activo.IdEstado &&
         activo.IdCategoria &&
         activo.IdResponsable &&
+        activo.IdEmpresa &&
+        activo.IdSucursal &&
         activo.ValorAdquisicion > 0
       );
     });
@@ -1469,7 +1489,7 @@ function init() {
       Swal.fire({
         icon: "error",
         title: "Datos Incompletos",
-        text: "Todos los activos deben tener nombre, serie, estado, categoría, responsable y valor de adquisición.",
+        text: "Todos los activos deben tener nombre, serie, estado, categoría, responsable, empresa, unidad de negocio y valor de adquisición.",
       });
       return;
     }
@@ -3625,178 +3645,6 @@ function obtenerCombosActivos(callback) {
       Swal.fire("Error", "Error al cargar combos: " + error, "error");
     },
   });
-}
-
-function addActivoManualForm(combos) {
-  activoFormCount++;
-  const formHtml = `
-    <div class="card card-success activo-manual-form" data-form-number="${activoFormCount}">
-      <div class="card-header">
-        <h3 class="card-title"><i class="fas fa-plus-circle"></i> Activo Nuevo <span class="activo-num">#${activoFormCount}</span></h3>
-        <div class="card-tools">
-            <button type="button" class="btn btn-tool" data-card-widget="maximize">
-                <i class="fas fa-expand"></i>
-            </button>
-            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                <i class="fas fa-minus"></i>
-            </button>
-            <button type="button" class="btn btn-tool btn-remove-activo" style="display:none;">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-      </div>
-      <div class="card-body">
-        <form class="frmmantenimientoManual">
-          <div class="row">
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="nombre_${activoFormCount}">Nombre: </label>
-                <input type="text" name="nombre[]" id="nombre_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech" required>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="serie_${activoFormCount}">Serie: </label>
-                <input type="text" name="serie[]" id="serie_${activoFormCount}" class="form-control" placeholder="Ej. ML-123" required>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="Estado_${activoFormCount}">Estado: </label>
-                <select name="Estado[]" id="Estado_${activoFormCount}" class="form-control select-2" required></select>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="Categoria_${activoFormCount}">Categoria: </label>
-                <select name="Categoria[]" id="Categoria_${activoFormCount}" class="form-control select-2" required></select>
-              </div>
-            </div>
-             <div class="col-md-4">
-              <div class="form-group">
-                <label for="Responsable_${activoFormCount}">Responsable: </label>
-                <select name="Responsable[]" id="Responsable_${activoFormCount}" class="form-control select-2" required></select>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="Ambiente_${activoFormCount}">Ambiente:</label>
-                <select name="Ambiente[]" id="Ambiente_${activoFormCount}" class="form-control select-2"></select>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="Proveedor_${activoFormCount}">Proveedor: </label>
-                <select name="Proveedor[]" id="Proveedor_${activoFormCount}" class="form-control select-2" required></select>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="Marca_${activoFormCount}">Marca:</label>
-                <select name="Marca[]" id="Marca_${activoFormCount}" class="form-control select-2"></select>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <label for="descripcion_${activoFormCount}">Descripción</label>
-                <textarea name="Descripcion[]" id="descripcion_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech color negro"></textarea>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="empresa_${activoFormCount}">Empresa</label>
-                <input type="text" class="form-control" name="empresa[]" id="empresa_${activoFormCount}" disabled>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="unidadNegocio_${activoFormCount}">Unidad de Negocio</label>
-                <input type="text" class="form-control" name="unidadNegocio[]" id="unidadNegocio_${activoFormCount}" disabled>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="form-group">
-                <label for="Cantidad_${activoFormCount}"> Cantidad: </label>
-                <input type="number" name="Cantidad[]" id="Cantidad_${activoFormCount}" class="form-control" placeholder="Ej. 1" value="1" min="1" required>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="form-group">
-                <label for="ValorAdquisicion_${activoFormCount}">Valor Adquisición:</label>
-                <input type="number" step="0.01" name="ValorAdquisicion[]" id="ValorAdquisicion_${activoFormCount}" class="form-control" placeholder="Ej. 10.00" required>
-              </div>
-            </div>
-            <div class="col-md-2">
-              <div class="form-group">
-                <label class="text-muted small">IGV</label>
-                <div class="custom-control custom-switch mt-1">
-                  <input type="checkbox" class="custom-control-input" name="AplicaIGV[]" id="AplicaIGV_${activoFormCount}" value="1">
-                  <label class="custom-control-label text-success font-weight-bold" for="AplicaIGV_${activoFormCount}">
-                    <i class="fas fa-percentage mr-1"></i>Incluye IGV
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="form-group">
-                <label for="fechaAdquisicion_${activoFormCount}">Fecha Adquisición: </label>
-                <input type="date" name="fechaAdquisicion[]" id="fechaAdquisicion_${activoFormCount}" class="form-control" value="${new Date()
-    .toISOString()
-    .slice(0, 10)}" required>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <label for="Observaciones_${activoFormCount}">Observaciones: </label>
-                <textarea name="Observaciones[]" id="Observaciones_${activoFormCount}" class="form-control" rows="3" placeholder="Ingrese las observaciones según el activo..."></textarea>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group text-center">
-                <div class="alert alert-info procesar-info" style="display: none;">
-                  <i class="fas fa-info-circle"></i>
-                  <strong>Procesar Activo:</strong> Cuando la cantidad sea mayor a 1, use este botón para generar múltiples activos individuales con series únicas automáticamente.
-                </div>
-                <button type="button" class="btn btn-info btnProcesarActivoManual" data-form-id="${activoFormCount}" style="display: none;">
-                  <i class="fas fa-cogs"></i> Procesar Activo
-                </button>
-              </div>
-            </div>
-          </div>
-        </form>
-        
-        <!-- Tabla de previsualización de activos procesados -->
-        <div class="tabla-preview-activos" id="tablaPreview_${activoFormCount}" style="display: none;">
-          <hr>
-          <h6><i class="fas fa-eye"></i> Previsualización de Activos a Crear</h6>
-          <div class="table-responsive">
-            <table class="table table-sm table-bordered" id="tblPreviewActivos_${activoFormCount}">
-              <thead class="table-info">
-                <tr>
-                  <th>Serie</th>
-                  <th>Nombre</th>
-                  <th>Estado</th>
-                  <th>Categoría</th>
-                  <th>Responsable</th>
-                  <th>Ambiente</th>
-                  <th>Valor</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-              <tfoot>
-                <tr>
-                  <th colspan="7" class="text-right">Total Activos:</th>
-                  <th class="text-center"><span class="badge badge-info total-activos-preview">0</span></th>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-  $("#activosContainer").append(formHtml);
 
   // Solo actualiza el número y atributos del nuevo formulario
   const newForm = $(`[data-form-number='${activoFormCount}']`);
@@ -3828,6 +3676,18 @@ function addActivoManualForm(combos) {
     width: "100%",
     placeholder: "Seleccionar Ambiente",
     allowClear: true,
+  });
+  newForm.find(`[name='Empresa[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Empresa",
+  });
+  newForm.find(`[name='UnidadNegocio[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Unidad de Negocio",
   });
 
   // Proveedor: inicializar Select2 con AJAX para búsqueda dinámica
@@ -3919,24 +3779,67 @@ function addActivoManualForm(combos) {
       .find(`[name='Ambiente[]']`)
       .html(combos.ambientes)
       .trigger("change");
+    newForm.find(`[name='Empresa[]']`).html(combos.empresas).trigger("change");
+    newForm
+      .find(`[name='UnidadNegocio[]']`)
+      .html(combos.unidadesNegocio)
+      .trigger("change");
     // No cargar combos.proveedores aquí
   }
-  
+
+  // Event listener para cambio de empresa
+  newForm.find(`[name='Empresa[]']`).on("change", function () {
+    const codEmpresa = $(this).val();
+    const unidadNegocioSelect = newForm.find(`[name='UnidadNegocio[]']`);
+
+    if (codEmpresa) {
+      // Cargar unidades de negocio para la empresa seleccionada
+      $.ajax({
+        url: "../../controllers/GestionarActivosController.php?action=comboUnidadNegocio",
+        type: "POST",
+        data: { codEmpresa: codEmpresa },
+        dataType: "json",
+        success: function (res) {
+          if (res.status) {
+            unidadNegocioSelect.html(res.data).trigger("change");
+          } else {
+            unidadNegocioSelect.html(
+              '<option value="">Error al cargar</option>'
+            );
+            NotificacionToast("error", res.message);
+          }
+        },
+        error: function () {
+          unidadNegocioSelect.html('<option value="">Error al cargar</option>');
+          NotificacionToast("error", "Error al cargar unidades de negocio");
+        },
+      });
+    } else {
+      unidadNegocioSelect.html(
+        '<option value="">Seleccione Empresa primero</option>'
+      );
+    }
+  });
+
   // Event listener para mostrar/ocultar botón de procesar según la cantidad
-  newForm.find('input[name="Cantidad[]"]').on('input change', function() {
+  newForm.find('input[name="Cantidad[]"]').on("input change", function () {
     const cantidad = parseInt($(this).val()) || 1;
-    const btnProcesar = newForm.find('.btnProcesarActivoManual');
-    const alertInfo = newForm.find('.procesar-info');
-    
+    const btnProcesar = newForm.find(".btnProcesarActivoManual");
+    const alertInfo = newForm.find(".procesar-info");
+
     if (cantidad > 1) {
-      btnProcesar.show().find('i').next().text(` Procesar Activo (${cantidad} unidades)`);
+      btnProcesar
+        .show()
+        .find("i")
+        .next()
+        .text(` Procesar Activo (${cantidad} unidades)`);
       alertInfo.show();
     } else {
       btnProcesar.hide();
       alertInfo.hide();
     }
   });
-  
+
   if (typeof $.fn.CardWidget === "function") {
     newForm.CardWidget();
   }
@@ -4228,6 +4131,8 @@ $(document).on("click", ".btnProcesarActivoManual", function () {
   const categoria = form.find("select[name='Categoria[]']").val();
   const responsable = form.find("select[name='Responsable[]']").val();
   const ambiente = form.find("select[name='Ambiente[]']").val();
+  const empresa = form.find("select[name='Empresa[]']").val();
+  const unidadNegocio = form.find("select[name='UnidadNegocio[]']").val();
   const valor =
     parseFloat(form.find("input[name='ValorAdquisicion[]']").val()) || 0;
   const observaciones = form
@@ -4247,7 +4152,10 @@ $(document).on("click", ".btnProcesarActivoManual", function () {
   }
 
   if (cantidad <= 1) {
-    NotificacionToast("warning", "Para procesar un activo, la cantidad debe ser mayor a 1. Con cantidad = 1, el activo se guardará directamente.");
+    NotificacionToast(
+      "warning",
+      "Para procesar un activo, la cantidad debe ser mayor a 1. Con cantidad = 1, el activo se guardará directamente."
+    );
     return;
   }
 
@@ -4256,6 +4164,11 @@ $(document).on("click", ".btnProcesarActivoManual", function () {
       "error",
       "Estado, categoría y responsable son requeridos"
     );
+    return;
+  }
+
+  if (!empresa || !unidadNegocio) {
+    NotificacionToast("error", "Empresa y unidad de negocio son requeridos");
     return;
   }
 
@@ -4321,6 +4234,8 @@ $(document).on("click", ".btnProcesarActivoManual", function () {
         categoria,
         responsable,
         ambiente,
+        empresa,
+        unidadNegocio,
         valor,
         observaciones,
       });
@@ -4382,6 +4297,12 @@ function procesarActivoManual(formId, datos) {
   const ambienteTexto = form
     .find("select[name='Ambiente[]'] option:selected")
     .text();
+  const empresaTexto = form
+    .find("select[name='Empresa[]'] option:selected")
+    .text();
+  const unidadNegocioTexto = form
+    .find("select[name='UnidadNegocio[]'] option:selected")
+    .text();
 
   // Crear filas progresivamente
   let activosCreados = 0;
@@ -4410,6 +4331,8 @@ function procesarActivoManual(formId, datos) {
         <td>${estadoTexto}</td>
         <td>${categoriaTexto}</td>
         <td>${responsableTexto}</td>
+        <td>${empresaTexto}</td>
+        <td>${unidadNegocioTexto}</td>
         <td>${ambienteTexto || "No asignado"}</td>
         <td>S/.${datos.valor.toFixed(2)}</td>
         <td>
@@ -4573,7 +4496,7 @@ $(document).on("click", ".btnResetActivoManual", function () {
 });
 
 // Agregar estilos CSS personalizados para los switches de IGV
-$(document).ready(function() {
+$(document).ready(function () {
   const igvStyles = `
     <style>
       /* Estilos personalizados para switches de IGV */
@@ -4675,6 +4598,759 @@ $(document).ready(function() {
       }
     </style>
   `;
-  
+
   // Agregar los estilos al head de
+});
+// Función para obtener combos de activos
+function obtenerCombosActivos(callback) {
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    success: function (res) {
+      if (res.status) {
+        callback(res.data);
+      } else {
+        Swal.fire(
+          "Error",
+          "No se pudieron cargar los combos: " + res.message,
+          "error"
+        );
+      }
+    },
+    error: function (xhr, status, error) {
+      Swal.fire("Error", "Error al cargar combos: " + error, "error");
+    },
+  });
+}
+
+// Función para agregar formulario manual de activo
+function addActivoManualForm(combos) {
+  activoFormCount++;
+  const formHtml = `
+    <div class="card card-success activo-manual-form" data-form-number="${activoFormCount}">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-plus-circle"></i> Activo Nuevo <span class="activo-num">#${activoFormCount}</span></h3>
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                <i class="fas fa-expand"></i>
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-tool btn-remove-activo" style="display:none;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <form class="frmmantenimientoManual">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="nombre_${activoFormCount}">Nombre: </label>
+                <input type="text" name="nombre[]" id="nombre_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech" required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="serie_${activoFormCount}">Serie: </label>
+                <input type="text" name="serie[]" id="serie_${activoFormCount}" class="form-control" placeholder="Ej. ML-123" required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Estado_${activoFormCount}">Estado: </label>
+                <select name="Estado[]" id="Estado_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Categoria_${activoFormCount}">Categoria: </label>
+                <select name="Categoria[]" id="Categoria_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+             <div class="col-md-4">
+              <div class="form-group">
+                <label for="Responsable_${activoFormCount}">Responsable de activo: </label>
+                <select name="Responsable[]" id="Responsable_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Marca_${activoFormCount}">Marca:</label>
+                <select name="Marca[]" id="Marca_${activoFormCount}" class="form-control select-2"></select>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <label for="Proveedor_${activoFormCount}">Proveedor: </label>
+                <select name="Proveedor[]" id="Proveedor_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="descripcion_${activoFormCount}">Descripción</label>
+                <textarea name="Descripcion[]" id="descripcion_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech color negro"></textarea>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="empresa_${activoFormCount}">Empresa: </label>
+                <select name="Empresa[]" id="empresa_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="unidadNegocio_${activoFormCount}">Unidad de Negocio: </label>
+                <select name="UnidadNegocio[]" id="unidadNegocio_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Ambiente_${activoFormCount}">Ambiente:</label>
+                <select name="Ambiente[]" id="Ambiente_${activoFormCount}" class="form-control select-2"></select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="Cantidad_${activoFormCount}"> Cantidad: </label>
+                <input type="number" name="Cantidad[]" id="Cantidad_${activoFormCount}" class="form-control" placeholder="Ej. 1" value="1" min="1" required>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="ValorAdquisicion_${activoFormCount}">Valor Adquisición:</label>
+                <input type="number" step="0.01" name="ValorAdquisicion[]" id="ValorAdquisicion_${activoFormCount}" class="form-control" placeholder="Ej. 10.00" required>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <label class="text-muted small">IGV</label>
+                <div class="custom-control custom-switch mt-1">
+                  <input type="checkbox" class="custom-control-input" name="AplicaIGV[]" id="AplicaIGV_${activoFormCount}" value="1">
+                  <label class="custom-control-label text-success font-weight-bold" for="AplicaIGV_${activoFormCount}">
+                    <i class="fas fa-percentage mr-1"></i>Incluye IGV
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="fechaAdquisicion_${activoFormCount}">Fecha Adquisición: </label>
+                <input type="date" name="fechaAdquisicion[]" id="fechaAdquisicion_${activoFormCount}" class="form-control" value="${new Date()
+    .toISOString()
+    .slice(0, 10)}" required>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="Observaciones_${activoFormCount}">Observaciones: </label>
+                <textarea name="Observaciones[]" id="Observaciones_${activoFormCount}" class="form-control" rows="3" placeholder="Ingrese las observaciones según el activo..."></textarea>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group text-center">
+                <div class="alert alert-info procesar-info" style="display: none;">
+                  <i class="fas fa-info-circle"></i>
+                  <strong>Procesar Activo:</strong> Cuando la cantidad sea mayor a 1, use este botón para generar múltiples activos individuales con series únicas automáticamente.
+                </div>
+                <button type="button" class="btn btn-info btnProcesarActivoManual" data-form-id="${activoFormCount}" style="display: none;">
+                  <i class="fas fa-cogs"></i> Procesar Activo
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+        
+        <!-- Tabla de previsualización de activos procesados -->
+        <div class="tabla-preview-activos" id="tablaPreview_${activoFormCount}" style="display: none;">
+          <hr>
+          <h6><i class="fas fa-eye"></i> Previsualización de Activos a Crear</h6>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered" id="tblPreviewActivos_${activoFormCount}">
+              <thead class="table-info">
+                <tr>
+                  <th>Serie</th>
+                  <th>Nombre</th>
+                  <th>Estado</th>
+                  <th>Categoría</th>
+                  <th>Responsable</th>
+                  <th>Empresa</th>
+                  <th>Unidad Negocio</th>
+                  <th>Ambiente</th>
+                  <th>Valor</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+              <tfoot>
+                <tr>
+                  <th colspan="9" class="text-right">Total Activos:</th>
+                  <th class="text-center"><span class="badge badge-info total-activos-preview">0</span></th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  $("#activosContainer").append(formHtml);
+
+  // Solo actualiza el número y atributos del nuevo formulario
+  const newForm = $(`[data-form-number='${activoFormCount}']`);
+  newForm.find(".activo-num").text(`#${activoFormCount}`);
+
+  // Initialize Select2 for static combos after they are populated
+  newForm.find(`[name='Responsable[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Responsable",
+  });
+  newForm.find(`[name='Estado[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Estado",
+  });
+  newForm.find(`[name='Categoria[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Categoria",
+  });
+  newForm.find(`[name='Ambiente[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Ambiente",
+    allowClear: true,
+  });
+  newForm.find(`[name='Empresa[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Empresa",
+  });
+  newForm.find(`[name='UnidadNegocio[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Unidad de Negocio",
+  });
+
+  // Proveedor: inicializar Select2 con AJAX para búsqueda dinámica
+  newForm.find('[name="Proveedor[]"]').select2({
+    dropdownParent: newForm,
+    minimumInputLength: 2,
+    theme: "bootstrap4",
+    language: {
+      inputTooShort: function (args) {
+        return "Ingresar mas de 2 caracteres.";
+      },
+      noResults: function () {
+        return "Datos no encontrados.";
+      },
+      searching: function () {
+        return "Buscando...";
+      },
+    },
+    ajax: {
+      url: "../../controllers/GestionarActivosController.php?action=comboProveedor",
+      type: "GET",
+      dataType: "json",
+      delay: 250,
+      data: function (params) {
+        return {
+          filtro: params.term, // término de búsqueda
+        };
+      },
+      processResults: function (data) {
+        // data ya debe ser un array de objetos {id, text}
+        return {
+          results: data || [],
+        };
+      },
+      cache: true,
+    },
+    placeholder: "Ingresar/Seleccionar Proveedor",
+    allowClear: true,
+  });
+
+  newForm.find(`[name='Marca[]']`).select2({
+    dropdownParent: newForm,
+    minimumInputLength: 2,
+    theme: "bootstrap4",
+    language: {
+      inputTooShort: function (args) {
+        return "Ingresar Marca.";
+      },
+      noResults: function () {
+        return "Datos no encontrados.";
+      },
+      searching: function () {
+        return "Buscando...";
+      },
+    },
+    ajax: {
+      url: "../../controllers/GestionarActivosController.php?action=comboMarcas",
+      type: "GET",
+      dataType: "json",
+      delay: 250,
+      data: function (params) {
+        return {
+          filtro: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data || [],
+        };
+      },
+      cache: true,
+    },
+    placeholder: "Ingresar/Seleccionar Marca",
+    allowClear: true,
+  });
+
+  // Cargar combos normales
+  if (combos) {
+    newForm
+      .find(`[name='Responsable[]']`)
+      .html(combos.responsable)
+      .trigger("change");
+    newForm.find(`[name='Estado[]']`).html(combos.estado).trigger("change");
+    newForm
+      .find(`[name='Categoria[]']`)
+      .html(combos.categorias)
+      .trigger("change");
+    newForm
+      .find(`[name='Ambiente[]']`)
+      .html(combos.ambientes)
+      .trigger("change");
+    newForm.find(`[name='Empresa[]']`).html(combos.empresas).trigger("change");
+    newForm
+      .find(`[name='UnidadNegocio[]']`)
+      .html(combos.unidadesNegocio)
+      .trigger("change");
+  }
+
+  // Event listener para cambio de empresa
+  newForm.find(`[name='Empresa[]']`).on("change", function () {
+    const codEmpresa = $(this).val();
+    const unidadNegocioSelect = newForm.find(`[name='UnidadNegocio[]']`);
+    const ambienteSelect = newForm.find(`[name='Ambiente[]']`);
+
+    if (codEmpresa) {
+      // Cargar unidades de negocio para la empresa seleccionada
+      $.ajax({
+        url: "../../controllers/GestionarActivosController.php?action=comboUnidadNegocio",
+        type: "POST",
+        data: { codEmpresa: codEmpresa },
+        dataType: "json",
+        success: function (res) {
+          if (res.status) {
+            unidadNegocioSelect.html(res.data).trigger("change");
+          } else {
+            unidadNegocioSelect.html(
+              '<option value="">Error al cargar</option>'
+            );
+            NotificacionToast("error", res.message);
+          }
+        },
+        error: function () {
+          unidadNegocioSelect.html('<option value="">Error al cargar</option>');
+          NotificacionToast("error", "Error al cargar unidades de negocio");
+        },
+      });
+    } else {
+      unidadNegocioSelect.html(
+        '<option value="">Seleccione Empresa primero</option>'
+      );
+    }
+
+    // Limpiar ambientes cuando cambie la empresa
+    ambienteSelect.html(
+      '<option value="">Seleccione Empresa y Unidad de Negocio primero</option>'
+    );
+  });
+
+  // Event listener para cambio de unidad de negocio
+  newForm.find(`[name='UnidadNegocio[]']`).on("change", function () {
+    const codEmpresa = newForm.find(`[name='Empresa[]']`).val();
+    const codUnidadNegocio = $(this).val();
+    const ambienteSelect = newForm.find(`[name='Ambiente[]']`);
+
+    if (codEmpresa && codUnidadNegocio) {
+      // Cargar ambientes para la empresa y unidad de negocio seleccionadas
+      $.ajax({
+        url: "../../controllers/GestionarActivosController.php?action=comboAmbiente",
+        type: "POST",
+        data: {
+          idEmpresa: codEmpresa,
+          idSucursal: codUnidadNegocio,
+        },
+        dataType: "json",
+        success: function (res) {
+          if (res.status) {
+            ambienteSelect.html(res.data).trigger("change");
+          } else {
+            ambienteSelect.html(
+              '<option value="">Error al cargar ambientes</option>'
+            );
+            NotificacionToast("error", res.message);
+          }
+        },
+        error: function () {
+          ambienteSelect.html(
+            '<option value="">Error al cargar ambientes</option>'
+          );
+          NotificacionToast("error", "Error al cargar ambientes");
+        },
+      });
+    } else {
+      ambienteSelect.html(
+        '<option value="">Seleccione Empresa y Unidad de Negocio primero</option>'
+      );
+    }
+  });
+
+  // Event listener para mostrar/ocultar botón de procesar según la cantidad
+  newForm.find('input[name="Cantidad[]"]').on("input change", function () {
+    const cantidad = parseInt($(this).val()) || 1;
+    const btnProcesar = newForm.find(".btnProcesarActivoManual");
+    const alertInfo = newForm.find(".procesar-info");
+
+    if (cantidad > 1) {
+      btnProcesar
+        .show()
+        .find("i")
+        .next()
+        .text(` Procesar Activo (${cantidad} unidades)`);
+      alertInfo.show();
+    } else {
+      btnProcesar.hide();
+      alertInfo.hide();
+    }
+  });
+
+  if (typeof $.fn.CardWidget === "function") {
+    newForm.CardWidget();
+  }
+  // Mostrar/ocultar botón de eliminar solo en el nuevo formulario
+  if ($("#activosContainer .activo-manual-form").length > 1) {
+    $(".btn-remove-activo").show();
+  } else {
+    $(".btn-remove-activo").hide();
+  }
+}
+
+// Función para actualizar números de formularios
+function updateActivoFormNumbers() {
+  $("#activosContainer .activo-manual-form").each(function (index) {
+    $(this)
+      .find(".activo-num")
+      .text(`#${index + 1}`);
+    $(this).attr("data-form-number", index + 1);
+  });
+  activoFormCount = $("#activosContainer .activo-manual-form").length;
+  if (activoFormCount > 1) {
+    $(".btn-remove-activo").show();
+  } else {
+    $(".btn-remove-activo").hide();
+  }
+}
+
+// Función para notificaciones toast
+function NotificacionToast(tipo, mensaje) {
+  toastr.options = {
+    closeButton: false,
+    debug: false,
+    newestOnTop: true,
+    progressBar: true,
+    positionClass: "toast-bottom-left",
+    preventDuplicates: true,
+    onclick: null,
+    showDuration: "300",
+    hideDuration: "1000",
+    timeOut: "3000",
+    extendedTimeOut: "1000",
+    showEasing: "swing",
+    hideEasing: "linear",
+    showMethod: "fadeIn",
+    hideMethod: "fadeOut",
+  };
+  toastr[tipo](mensaje);
+} // Event handlers para formularios manuales
+
+$(document).ready(function () {
+  // Manejador para el botón "Crear Activo"
+  $("#btnCrearActivo")
+    .off("click")
+    .on("click", function () {
+      $("#divRegistroManualActivoMultiple").show();
+      $("#divlistadoactivos").hide();
+      $("#tblRegistros").hide();
+      $("#divtblRegistros").hide();
+      $("#divtblactivos").hide();
+      $("#divregistroActivo").hide();
+      $("#activosContainer").empty();
+      activoFormCount = 0;
+      if (!combosActivos) {
+        obtenerCombosActivos(function (data) {
+          combosActivos = data;
+          addActivoManualForm(combosActivos);
+        });
+      } else {
+        addActivoManualForm(combosActivos);
+      }
+    });
+
+  // Manejador para agregar otro activo
+  $("#btnAgregarOtroActivo").on("click", function () {
+    if (combosActivos) {
+      addActivoManualForm(combosActivos);
+    }
+  });
+
+  // Manejador para eliminar formulario de activo
+  $(document).on("click", ".btn-remove-activo", function () {
+    const formToRemove = $(this).closest(".activo-manual-form");
+    if ($("#activosContainer .activo-manual-form").length > 1) {
+      Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Se eliminará este formulario de activo.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonColor: "#d33",
+        cancelButtonText: "Cancelar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          formToRemove.remove();
+          updateActivoFormNumbers();
+        }
+      });
+    } else {
+      Swal.fire({
+        icon: "warning",
+        title: "Advertencia",
+        text: "No puedes eliminar el último formulario de activo.",
+      });
+    }
+  });
+
+  // Manejador para guardar activos manuales
+  $("#btnGuardarActivosManuales").on("click", function (e) {
+    e.preventDefault();
+
+    const activos = [];
+    let totalActivosPreview = 0;
+
+    // Primero, recopilar activos de las tablas de preview (activos procesados)
+    $("[id^='tblPreviewActivos_'] tbody tr").each(function () {
+      const fila = $(this);
+      const formId = fila.data("form-id");
+      const form = $(`[data-form-number='${formId}']`);
+
+      if (form.length > 0) {
+        const activo = {
+          Nombre: form.find("input[name='nombre[]']").val(),
+          Descripcion: form.find("textarea[name='Descripcion[]']").val(),
+          IdEstado: form.find("select[name='Estado[]']").val(),
+          Garantia: 0,
+          IdResponsable: form.find("select[name='Responsable[]']").val(),
+          IdProveedor: form.find("select[name='Proveedor[]']").val(),
+          IdMarca: form.find("select[name='Marca[]']").val(),
+          IdEmpresa: form.find("select[name='Empresa[]']").val(),
+          IdSucursal: form.find("select[name='UnidadNegocio[]']").val(),
+          IdAmbiente: form.find("select[name='Ambiente[]']").val(),
+          IdCategoria: form.find("select[name='Categoria[]']").val(),
+          Serie: fila.find(".serie-manual").val(), // Serie única de la tabla
+          Observaciones: form.find("textarea[name='Observaciones[]']").val(),
+          ValorAdquisicion: parseFloat(
+            form.find("input[name='ValorAdquisicion[]']").val()
+          ),
+          AplicaIGV: form.find("input[name='AplicaIGV[]']").is(":checked")
+            ? 1
+            : 0,
+          FechaAdquisicion: form.find("input[name='fechaAdquisicion[]']").val(),
+          Cantidad: 1, // Cada fila de preview es 1 activo individual
+        };
+        activos.push(activo);
+        totalActivosPreview++;
+      }
+    });
+
+    // Luego, recopilar activos de formularios no procesados (cantidad = 1)
+    $("#activosContainer .activo-manual-form").each(function () {
+      const form = $(this);
+      const formId = form.data("form-number");
+      const tablaPreview = $(`#tblPreviewActivos_${formId} tbody tr`);
+
+      // Solo agregar si no tiene tabla de preview (no fue procesado)
+      if (tablaPreview.length === 0) {
+        const cantidad =
+          parseInt(form.find("input[name='Cantidad[]']").val()) || 1;
+
+        if (cantidad === 1) {
+          const activo = {
+            Nombre: form.find("input[name='nombre[]']").val(),
+            Descripcion: form.find("textarea[name='Descripcion[]']").val(),
+            IdEstado: form.find("select[name='Estado[]']").val(),
+            Garantia: 0,
+            IdResponsable: form.find("select[name='Responsable[]']").val(),
+            IdProveedor: form.find("select[name='Proveedor[]']").val(),
+            IdMarca: form.find("select[name='Marca[]']").val(),
+            IdEmpresa: form.find("select[name='Empresa[]']").val(),
+            IdSucursal: form.find("select[name='UnidadNegocio[]']").val(),
+            IdAmbiente: form.find("select[name='Ambiente[]']").val(),
+            IdCategoria: form.find("select[name='Categoria[]']").val(),
+            Serie: form.find("input[name='serie[]']").val(),
+            Observaciones: form.find("textarea[name='Observaciones[]']").val(),
+            ValorAdquisicion: parseFloat(
+              form.find("input[name='ValorAdquisicion[]']").val()
+            ),
+            AplicaIGV: form.find("input[name='AplicaIGV[]']").is(":checked")
+              ? 1
+              : 0,
+            FechaAdquisicion: form
+              .find("input[name='fechaAdquisicion[]']")
+              .val(),
+            Cantidad: 1,
+          };
+          activos.push(activo);
+        } else {
+          NotificacionToast(
+            "warning",
+            `El formulario #${formId} tiene cantidad > 1. Use "Procesar Activo" primero.`
+          );
+          return false;
+        }
+      }
+    });
+
+    if (activos.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Sin Activos",
+        text: "No hay activos para guardar. Agregue al menos un activo o procese los formularios con cantidad > 1.",
+      });
+      return;
+    }
+
+    // Validar que todos los activos tengan los campos requeridos
+    const activosValidos = activos.every((activo) => {
+      return (
+        activo.Nombre &&
+        activo.Serie &&
+        activo.IdEstado &&
+        activo.IdCategoria &&
+        activo.IdResponsable &&
+        activo.IdEmpresa &&
+        activo.IdSucursal &&
+        activo.ValorAdquisicion > 0
+      );
+    });
+
+    if (!activosValidos) {
+      Swal.fire({
+        icon: "error",
+        title: "Datos Incompletos",
+        text: "Todos los activos deben tener nombre, serie, estado, categoría, responsable, empresa, unidad de negocio y valor de adquisición.",
+      });
+      return;
+    }
+
+    // Mostrar confirmación con resumen
+    Swal.fire({
+      title: "Confirmar Guardado",
+      html: `
+        <div class="text-left">
+          <p><strong>Total de activos a guardar:</strong> ${activos.length}</p>
+          <p><strong>Activos procesados:</strong> ${totalActivosPreview}</p>
+          <p><strong>Activos simples:</strong> ${
+            activos.length - totalActivosPreview
+          }</p>
+          <hr>
+          <p class="text-info"><i class="fas fa-info-circle"></i> ¿Desea proceder con el guardado?</p>
+        </div>
+      `,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      confirmButtonText: "Sí, guardar",
+      cancelButtonColor: "#6c757d",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        guardarActivosManuales(activos);
+      }
+    });
+  });
+
+  // Función separada para guardar activos manuales
+  function guardarActivosManuales(activos) {
+    Swal.fire({
+      title: "Procesando",
+      text: "Registrando activos...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=GuardarActivosManual",
+      type: "POST",
+      data: JSON.stringify({ activos: activos }),
+      contentType: "application/json",
+      dataType: "json",
+      success: function (res) {
+        if (res.status) {
+          Swal.fire({
+            icon: "success",
+            title: "Éxito",
+            text: res.message,
+            timer: 2000,
+          }).then(() => {
+            // Limpiar todo
+            $("#activosContainer").empty();
+            activoFormCount = 0;
+
+            // Volver a la vista principal
+            $("#divRegistroManualActivoMultiple").hide();
+            $("#divlistadoactivos").show();
+            $("#divtblactivos").show();
+            $("#tblRegistros").show();
+
+            // Recargar tabla principal
+            listarActivosTable();
+
+            NotificacionToast(
+              "success",
+              "Activos guardados correctamente. Regresando a la lista principal."
+            );
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: res.message,
+          });
+        }
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.error("Error en la petición:", jqXHR.responseText);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error al registrar los activos: " + errorThrown,
+        });
+      },
+    });
+  }
 });

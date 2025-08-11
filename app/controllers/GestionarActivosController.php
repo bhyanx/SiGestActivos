@@ -283,6 +283,17 @@ switch ($action) {
                 $combos['proveedores'] .= "<option value='{$row['Documento']}'>{$row['RazonSocial']}</option>";
             }
 
+            // Empresas
+            $empresas = $combo->comboEmpresa();
+            $combos['empresas'] = '<option value="">Seleccione Empresa</option>';
+            foreach ($empresas as $row) {
+                $selected = ($row['cod_empresa'] == ($_SESSION['cod_empresa'] ?? '')) ? 'selected' : '';
+                $combos['empresas'] .= "<option value='{$row['cod_empresa']}' {$selected}>{$row['Razon_empresa']}</option>";
+            }
+
+            // Unidades de Negocio (inicialmente vacío, se carga dinámicamente)
+            $combos['unidadesNegocio'] = '<option value="">Seleccione Empresa primero</option>';
+
             $tipoMovimiento = $combo->comboTipoMovimiento();
             $combos['tipoMovimiento'] = '<option value="">Seleccione</option>';
             foreach ($tipoMovimiento as $row) {
@@ -313,19 +324,8 @@ switch ($action) {
                 $combos['categorias'] .= "<option value='{$row['IdCategoria']}'>{$row['Nombre']}</option>";
             }
 
-            // Obtener ambientes filtrados por empresa y sucursal
-            $idEmpresa = $_SESSION['cod_empresa'] ?? null;
-            $idSucursal = $_SESSION['cod_UnidadNeg'] ?? null;
-
-            if ($idEmpresa && $idSucursal) {
-                $ambientes = $activos->obtenerAmbientesPorEmpresaSucursal($idEmpresa, $idSucursal);
-                $combos['ambientes'] = '<option value="">Seleccione</option>';
-                foreach ($ambientes as $row) {
-                    $combos['ambientes'] .= "<option value='{$row['idAmbiente']}'>{$row['nombre']}</option>";
-                }
-            } else {
-                $combos['ambientes'] = '<option value="">No hay ambientes disponibles</option>';
-            }
+            // Ambientes (inicialmente vacío, se carga dinámicamente)
+            $combos['ambientes'] = '<option value="">Seleccione Empresa y Unidad de Negocio primero</option>';
 
             $estadoActivo = $combo->comboEstadoActivo();
             $combos['estado'] = '<option value="">Seleccione</option>';
@@ -342,20 +342,20 @@ switch ($action) {
 
     case 'articulos_por_doc_venta':
         try {
-            $db = (new Conectar())->ConexionBdPracticante();
+            $dbv = (new Conectar())->ConexionBdProgSistemas();
 
             $IdDocVenta = $_POST['IdDocVenta'] ?? null;
             if (!$IdDocVenta) {
                 throw new Exception("IdDocVenta no proporcionado.");
             }
 
-            $stmt = $db->prepare("SELECT ing.idDocumentoVta AS IdDocVenta, ing.idArtServDetDocVta AS IdArticulo, 
+            $stmt = $dbv->prepare("SELECT ing.idDocumentoVta AS IdDocVenta, ing.idArtServDetDocVta AS IdArticulo, 
             a.Descripcion_articulo AS Nombre, a.DescripcionMarca AS Marca, e.Razon_empresa AS Empresa,
             ing.cod_UnidadNeg AS IdUnidadNegocio, ing.Nombre_local AS NombreLocal, ing.CantidadSalidaEquivalente AS Cantidad
-            FROM vListadoDeArticulosPorDocumentoDeVenta ing
-            INNER JOIN vArticulos a ON ing.idArtServDetDocVta = a.IdArticulo
+            FROM vmListadoDeArticulosPorDocumentoDeVenta ing
+            INNER JOIN vArticulosMaestro a ON ing.idArtServDetDocVta = a.IdArticulo
             LEFT JOIN vEmpresas e ON ing.Cod_Empresa = e.cod_empresa 
-            WHERE ing.idDocumentoVta = ?
+            WHERE ing.idDocumentoVta = ? AND a.idLineaProd = 11
             ORDER BY a.Descripcion_articulo
             ");
             $stmt->execute([$IdDocVenta]);
@@ -383,13 +383,13 @@ switch ($action) {
     //Case para el modal y agregar 
     case 'articulos_por_doc':
         try {
-            $db = (new Conectar())->ConexionBdPracticante(); // Usar bdActivos
+            $dbi = (new Conectar())->ConexionBdProgSistemas(); // Usar bdActivos
             $IdDocIngresoAlm = $_POST['IdDocIngresoAlm'] ?? null;
             if (!$IdDocIngresoAlm) {
                 throw new Exception("IdDocIngresoAlm no proporcionado.");
             }
 
-            $stmt = $db->prepare("
+            $stmt = $dbi->prepare("
             SELECT ing.idDocIngAlmacen AS IdDocIngresoAlm,
             ing.idarticulo AS IdArticulo, 
             a.Descripcion_articulo AS Nombre,
@@ -398,7 +398,7 @@ switch ($action) {
             ing.cod_UnidadNeg AS IdUnidadNegocio,
             ing.Nombre_local AS NombreLocal,
             p.RazonSocial AS Proveedor
-            FROM vListadoDeArticulosPorDocIngresoAlmacen ing
+            FROM vmListadoDeArticulosPorDocumentoDeIngresoAAlmacen ing
             INNER JOIN vArticulos a ON ing.IdArticulo = a.IdArticulo
             LEFT JOIN vEmpresas e ON ing.Cod_Empresa = e.cod_empresa 
             LEFT JOIN vEntidadExternaGeneralProveedor p ON p.Documento = ing.Documento
@@ -737,8 +737,9 @@ switch ($action) {
                         'IdResponsable' => $activo['IdResponsable'] ?? null,
                         'FechaFinGarantia' => $activo['FechaFinGarantia'] ?? null,
                         'IdProveedor' => $activo['IdProveedor'] ?? null,
-                        'IdEmpresa' => $_SESSION['cod_empresa'] ?? null,
-                        'IdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
+                        'IdMarca' => $activo['IdMarca'] ?? null,
+                        'IdEmpresa' => $activo['IdEmpresa'] ?? $_SESSION['cod_empresa'] ?? null,
+                        'IdSucursal' => $activo['IdSucursal'] ?? $_SESSION['cod_UnidadNeg'] ?? null,
                         'IdAmbiente' => $activo['IdAmbiente'] ?? null,
                         'IdCategoria' => $activo['IdCategoria'] ?? null,
                         'VidaUtil' => $activo['VidaUtil'] ?? 3,
@@ -820,6 +821,63 @@ switch ($action) {
         } catch (Exception $e) {
             error_log("Error en comboMarca: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             echo json_encode(['results' => [], 'error' => $e->getMessage()]);
+        }
+        break;
+
+    case 'comboUnidadNegocio':
+        try {
+            $codEmpresa = $_POST['codEmpresa'] ?? null;
+            if (!$codEmpresa) {
+                throw new Exception("Código de empresa no proporcionado");
+            }
+
+            $unidadesNegocio = $combo->comboUnidadNegocio($codEmpresa);
+            $html = '<option value="">Seleccione Unidad de Negocio</option>';
+            foreach ($unidadesNegocio as $row) {
+                $selected = ($row['cod_UnidadNeg'] == ($_SESSION['cod_UnidadNeg'] ?? '')) ? 'selected' : '';
+                $html .= "<option value='{$row['cod_UnidadNeg']}' {$selected}>{$row['Nombre_local']}</option>";
+            }
+
+            echo json_encode([
+                'status' => true,
+                'data' => $html,
+                'message' => 'Unidades de negocio cargadas correctamente'
+            ]);
+        } catch (Exception $e) {
+            error_log("Error comboUnidadNegocio: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al cargar unidades de negocio: ' . $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'comboAmbiente':
+        try {
+            $idEmpresa = $_POST['idEmpresa'] ?? null;
+            $idSucursal = $_POST['idSucursal'] ?? null;
+            
+            if (!$idEmpresa || !$idSucursal) {
+                throw new Exception("Se requiere empresa y unidad de negocio");
+            }
+
+            $ambientes = $activos->obtenerAmbientesPorEmpresaSucursal($idEmpresa, $idSucursal);
+            $html = '<option value="">Seleccione Ambiente</option>';
+            foreach ($ambientes as $row) {
+                $html .= "<option value='{$row['idAmbiente']}'>{$row['nombre']}</option>";
+            }
+
+            echo json_encode([
+                'status' => true,
+                'data' => $html,
+                'message' => 'Ambientes cargados correctamente'
+            ]);
+        } catch (Exception $e) {
+            error_log("Error comboAmbiente: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al cargar ambientes: ' . $e->getMessage()
+            ]);
         }
         break;
 

@@ -318,6 +318,7 @@ class GestionarActivos
                 @pIdResponsable = ?,
                 @pFechaFinGarantia = ?,
                 @pIdProveedor = ?,
+                @pIdMarca = ?,
                 @pIdEmpresa = ?,
                 @pIdSucursal = ?,
                 @pIdAmbiente = ?,
@@ -339,20 +340,21 @@ class GestionarActivos
             $stmt->bindParam(5, $data['IdResponsable'], \PDO::PARAM_STR);
             $stmt->bindParam(6, $data['FechaFinGarantia'], \PDO::PARAM_STR);
             $stmt->bindParam(7, $data['IdProveedor'], \PDO::PARAM_STR);
+            $stmt->bindParam(8, $data['IdMarca'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
             //$stmt->bindParam(6, $data['Codigo'], \PDO::PARAM_STR);
-            $stmt->bindParam(8, $data['IdEmpresa'], \PDO::PARAM_INT);
-            $stmt->bindParam(9, $data['IdSucursal'], \PDO::PARAM_INT);
-            $stmt->bindParam(10, $data['IdAmbiente'], \PDO::PARAM_INT);
-            $stmt->bindParam(11, $data['IdCategoria'], \PDO::PARAM_INT);
-            $stmt->bindParam(12, $data['VidaUtil'], \PDO::PARAM_INT);
-            $stmt->bindParam(13, $data['Serie'], \PDO::PARAM_STR);
-            $stmt->bindParam(14, $data['Observaciones'], \PDO::PARAM_STR);
-            $stmt->bindParam(15, $data['ValorAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(16, $data['AplicaIGV'], \PDO::PARAM_INT);
-            $stmt->bindParam(17, $data['FechaAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(18, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(9, $data['IdEmpresa'], \PDO::PARAM_INT);
+            $stmt->bindParam(10, $data['IdSucursal'], \PDO::PARAM_INT);
+            $stmt->bindParam(11, $data['IdAmbiente'], \PDO::PARAM_INT);
+            $stmt->bindParam(12, $data['IdCategoria'], \PDO::PARAM_INT);
+            $stmt->bindParam(13, $data['VidaUtil'], \PDO::PARAM_INT);
+            $stmt->bindParam(14, $data['Serie'], \PDO::PARAM_STR);
+            $stmt->bindParam(15, $data['Observaciones'], \PDO::PARAM_STR);
+            $stmt->bindParam(16, $data['ValorAdquisicion'], \PDO::PARAM_STR);
+            $stmt->bindParam(17, $data['AplicaIGV'], \PDO::PARAM_INT);
+            $stmt->bindParam(18, $data['FechaAdquisicion'], \PDO::PARAM_STR);
+            $stmt->bindParam(19, $data['UserMod'], \PDO::PARAM_STR);
             //$stmt->bindParam(22, $data['MotivoBaja'], \PDO::PARAM_STR);
-            $stmt->bindParam(19, $data['Cantidad'], \PDO::PARAM_INT);
+            $stmt->bindParam(20, $data['Cantidad'], \PDO::PARAM_INT);
 
             $stmt->execute();
             return true;
@@ -450,6 +452,7 @@ class GestionarActivos
     {
         try {
             // Verificar si el artículo ya existe para este documento de venta
+            
             $stmt = $this->db->prepare("
                 SELECT CAST(CASE WHEN EXISTS (
                 SELECT 1 
