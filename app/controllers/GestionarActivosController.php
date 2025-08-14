@@ -18,11 +18,22 @@ switch ($action) {
 
     case 'ConsultarActivos':
         try {
+            // Procesar filtros especiales: convertir "TODOS" a null para no aplicar filtro
+            $filtroSucursal = $_POST['filtroSucursal'] ?? $_SESSION['cod_UnidadNeg'] ?? null;
+            $filtroAmbiente = $_POST['filtroAmbiente'] ?? null;
+            $filtroCategoria = $_POST['filtroCategoria'] ?? null;
+            
+            // Si el valor es "TODOS", convertir a null para mostrar todos los registros
+            if ($filtroSucursal === 'TODOS') $filtroSucursal = null;
+            if ($filtroAmbiente === 'TODOS') $filtroAmbiente = null;
+            if ($filtroCategoria === 'TODOS') $filtroCategoria = null;
+            
             $filtros = [
                 'pCodigo' => $_POST['pCodigo'] ?? null,
-                'pIdEmpresa' => $_SESSION['cod_empresa'] ?? null,
-                'pIdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
-                'pIdCategoria' => $_POST['pIdCategoria'] ?? null,
+                'pIdEmpresa' => $_POST['filtroEmpresa'] ?? $_SESSION['cod_empresa'] ?? null,
+                'pIdSucursal' => $filtroSucursal,
+                'pIdAmbiente' => $filtroAmbiente,
+                'pIdCategoria' => $filtroCategoria,
                 'pIdEstado' => $_POST['pIdEstado'] ?? null
             ];
             $resultados = $activos->consultarActivosModal($filtros);
@@ -241,7 +252,9 @@ switch ($action) {
         try {
             $filtros = [
                 'pCodigo' => null,
+                'pIdEmpresa' => null,
                 'pIdSucursal' => null,
+                'pIdAmbiente' => null,
                 'pIdCategoria' => null,
                 'pIdEstado' => null
             ];

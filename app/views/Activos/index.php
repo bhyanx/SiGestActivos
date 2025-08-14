@@ -43,17 +43,29 @@ if (isset($_SESSION["IdRol"])) {
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <div class="form-group">
+                                                        <label for="filtroEmpresa">Empresa:</label>
+                                                        <select class="form-control" name="filtroEmpresa" id="filtroEmpresa"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="filtroSucursal">Unidad de Neg. :</label>
+                                                        <select name="filtroSucursal" id="filtroSucursal" class="form-control"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
                                                         <label for="filtroAmbiente">Ambiente:</label>
                                                         <select class="form-control" name="filtroAmbiente" id="filtroAmbiente"></select>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
                                                     <div class="form-group">
                                                         <label for="filtroCategoria">Categoria de Activo:</label>
                                                         <select class="form-control" name="filtroCategoria" id="filtroCategoria"></select>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
                                                     <div class="form-group">
                                                         <label for="filtroFecha">Fecha Registro:</label>
                                                         <input type="date" class="form-control" name="filtroFecha" id="filtroFecha" value="<?php echo date('Y-m-d'); ?>">
@@ -904,6 +916,8 @@ if (isset($_SESSION["IdRol"])) {
             <?php require_once("../Layouts/Footer.php"); ?>
             <script>
                 var userMod = "<?php echo isset($_SESSION['CodEmpleado']) ? $_SESSION['CodEmpleado'] : ''; ?>";
+                var empresaSesion = "<?php echo isset($_SESSION['cod_empresa']) ? $_SESSION['cod_empresa'] : ''; ?>";
+                var sucursalSesion = "<?php echo isset($_SESSION['cod_UnidadNeg']) ? $_SESSION['cod_UnidadNeg'] : ''; ?>";
             </script>
             <script src="activosp.js"></script>
         </div>

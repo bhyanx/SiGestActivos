@@ -220,6 +220,19 @@ function init() {
 
   $("#frmbusqueda").on("submit", function (e) {
     e.preventDefault();
+    
+    // Validar que se haya seleccionado una empresa
+    const empresaSeleccionada = $("#filtroEmpresa").val();
+    if (!empresaSeleccionada || empresaSeleccionada === "") {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Empresa Requerida',
+        text: 'Debe seleccionar una empresa para realizar la búsqueda.',
+        confirmButtonText: 'Entendido'
+      });
+      return;
+    }
+    
     $("#divtblactivos").show();
     $("#divregistroActivo").hide();
     $("#divlistadoactivos").show();
@@ -3416,20 +3429,19 @@ function mostrarNotificacionModalActivos(mensaje, tipo = "success") {
 }
 
 function ListarCombosFiltros() {
+  // Mostrar loading en los combos
+  $("#filtroEmpresa, #filtroSucursal, #filtroAmbiente, #filtroCategoria").html(
+    '<option value="">Cargando...</option>'
+  );
+
   $.ajax({
     url: "../../controllers/GestionarActivosController.php?action=combos",
     type: "POST",
     dataType: "json",
     success: (res) => {
       if (res.status) {
-        $("#filtroCategoria").html(res.data.categorias).trigger("change");
-        //$("#filtroSucursal").html(res.data.sucursales).trigger("change");
-        $("#filtroAmbiente").html(res.data.ambientes).trigger("change");
-        $("#filtroCategoria, #filtroAmbiente").select2({
-          theme: "bootstrap4",
-          dropdownParent: $("#divtblRegistros .modal-body"),
-          width: "100%",
-        });
+        // Cargar todos los combos de una vez
+        cargarTodosLosCombosOptimizado(res.data);
       } else {
         Swal.fire(
           "Filtro de movimientos",
@@ -3446,6 +3458,185 @@ function ListarCombosFiltros() {
       );
     },
   });
+}
+
+function cargarTodosLosCombosOptimizado(data) {
+  // 1. Cargar categorías
+  $("#filtroCategoria").html(
+    '<option value="">Seleccionar Categoría</option><option value="TODOS">Todas las Categorías</option>' + data.categorias
+  );
+
+  // 2. Cargar empresas (sin opción "Todos" - filtro obligatorio)
+  $("#filtroEmpresa").html(
+    '<option value="">Seleccionar Empresa</option>' + data.empresas
+  );
+
+  // 3. Cargar todas las sucursales inicialmente
+  $("#filtroSucursal").html(
+    '<option value="">Seleccionar Sucursal</option>' + data.unidadesNegocio
+  );
+
+  // 4. Cargar ambientes
+  $("#filtroAmbiente").html(
+    '<option value="">Seleccionar Ambiente</option><option value="TODOS">Todos los Ambientes</option>' + data.ambientes
+  );
+
+  // 5. Inicializar todos los Select2 de una vez
+  $(
+    "#filtroCategoria, #filtroEmpresa, #filtroSucursal, #filtroAmbiente"
+  ).select2({
+    theme: "bootstrap4",
+    width: "100%",
+    allowClear: true,
+  });
+
+  // 6. Establecer placeholders específicos
+  $("#filtroCategoria").select2("destroy").select2({
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Filtrar por Categoría",
+    allowClear: true,
+  });
+
+  $("#filtroEmpresa").select2("destroy").select2({
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Empresa (Obligatorio)",
+    allowClear: false, // Empresa es obligatoria
+  });
+
+  $("#filtroSucursal").select2("destroy").select2({
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Filtrar por Sucursal",
+    allowClear: true,
+  });
+
+  $("#filtroAmbiente").select2("destroy").select2({
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Filtrar por Ambiente",
+    allowClear: true,
+  });
+
+  // 7. Establecer valores por defecto de sesión
+  if (
+    typeof empresaSesion !== "undefined" &&
+    empresaSesion &&
+    empresaSesion !== ""
+  ) {
+    $("#filtroEmpresa").val(empresaSesion).trigger("change.select2");
+  }
+
+  if (
+    typeof sucursalSesion !== "undefined" &&
+    sucursalSesion &&
+    sucursalSesion !== ""
+  ) {
+    $("#filtroSucursal").val(sucursalSesion).trigger("change.select2");
+  }
+
+  // 8. Configurar event listeners optimizados
+  configurarEventListenersFiltros();
+}
+
+function configurarEventListenersFiltros() {
+  // Event listener para empresa (copiado exacto del registro manual)
+  $("#filtroEmpresa")
+    .off("change.filtros")
+    .on("change.filtros", function () {
+      const codEmpresa = $(this).val();
+      const unidadNegocioSelect = $("#filtroSucursal");
+      const ambienteSelect = $("#filtroAmbiente");
+
+      if (codEmpresa) {
+        // Cargar unidades de negocio para la empresa seleccionada
+        $.ajax({
+          url: "../../controllers/GestionarActivosController.php?action=comboUnidadNegocio",
+          type: "POST",
+          data: { codEmpresa: codEmpresa },
+          dataType: "json",
+          success: function (res) {
+            if (res.status) {
+              unidadNegocioSelect
+                .html(
+                  '<option value="">Seleccionar Sucursal</option>' + res.data
+                )
+                .trigger("change");
+
+              // Mantener la selección de sucursal de sesión si corresponde a la empresa
+              if (
+                typeof sucursalSesion !== "undefined" &&
+                sucursalSesion &&
+                sucursalSesion !== ""
+              ) {
+                unidadNegocioSelect.val(sucursalSesion).trigger("change");
+              }
+            } else {
+              unidadNegocioSelect.html(
+                '<option value="">Error al cargar</option>'
+              );
+              NotificacionToast("error", res.message);
+            }
+          },
+          error: function () {
+            unidadNegocioSelect.html(
+              '<option value="">Error al cargar</option>'
+            );
+            NotificacionToast("error", "Error al cargar unidades de negocio");
+          },
+        });
+      } else {
+        unidadNegocioSelect.html(
+          '<option value="">Seleccionar Sucursal</option>'
+        );
+        ambienteSelect.html('<option value="">Seleccionar Ambiente</option><option value="TODOS">🌍 Todos los Ambientes</option>');
+      }
+    });
+
+  // Event listener para sucursal (copiado exacto del registro manual)
+  $("#filtroSucursal")
+    .off("change.filtros")
+    .on("change.filtros", function () {
+      const codEmpresa = $("#filtroEmpresa").val();
+      const codUnidadNegocio = $(this).val();
+      const ambienteSelect = $("#filtroAmbiente");
+
+      if (codEmpresa && codUnidadNegocio) {
+        // Cargar ambientes para la empresa y unidad de negocio seleccionadas
+        $.ajax({
+          url: "../../controllers/GestionarActivosController.php?action=comboAmbiente",
+          type: "POST",
+          data: {
+            idEmpresa: codEmpresa,
+            idSucursal: codUnidadNegocio,
+          },
+          dataType: "json",
+          success: function (res) {
+            if (res.status) {
+              ambienteSelect
+                .html(
+                  '<option value="">Seleccionar Ambiente</option><option value="TODOS">🌍 Todos los Ambientes</option>' + res.data
+                )
+                .trigger("change");
+            } else {
+              ambienteSelect.html(
+                '<option value="">Error al cargar ambientes</option>'
+              );
+              NotificacionToast("error", res.message);
+            }
+          },
+          error: function () {
+            ambienteSelect.html(
+              '<option value="">Error al cargar ambientes</option>'
+            );
+            NotificacionToast("error", "Error al cargar ambientes");
+          },
+        });
+      } else {
+        ambienteSelect.html('<option value="">Seleccionar Ambiente</option><option value="TODOS">🌍 Todos los Ambientes</option>');
+      }
+    });
 }
 
 function ListarCombosMov() {
@@ -3518,9 +3709,16 @@ function listarActivosTable() {
     ajax: {
       url: "../../controllers/GestionarActivosController.php?action=ConsultarActivos",
       type: "POST",
-      data: {
-        IdArticulo: "",
-        IdActivo: "",
+      data: function (d) {
+        // Obtener valores de los filtros
+        return {
+          filtroEmpresa: $("#filtroEmpresa").val() || null,
+          filtroSucursal: $("#filtroSucursal").val() || null,
+          filtroAmbiente: $("#filtroAmbiente").val() || null,
+          filtroCategoria: $("#filtroCategoria").val() || null,
+          pIdEstado: null, // Estado si se implementa
+          filtroFecha: $("#filtroFecha").val() || null,
+        };
       },
       dataType: "json",
       dataSrc: function (json) {
@@ -4215,7 +4413,7 @@ $(document).on("click", ".btnProcesarActivoManual", function () {
         <p><strong>Cantidad:</strong> ${cantidad} unidades</p>
         <p><strong>Valor Unitario:</strong> S/${valor}</p>
         <hr>
-        <p class="text-info"><i class="fas fa-info-circle"></i> Se crearán S/{cantidad} activos individuales con series únicas.</p>
+        <p class="text-info"><i class="fas fa-info-circle"></i> Se crearán ${cantidad} activos individuales con series únicas.</p>
       </div>
     `,
     icon: "question",
@@ -5011,9 +5209,7 @@ function addActivoManualForm(combos) {
         },
       });
     } else {
-      ambienteSelect.html(
-        '<option value="">Seleccione Empresa y Unidad de Negocio primero</option>'
-      );
+      ambienteSelect.html('<option value="">Seleccionar Ambiente</option>');
     }
   });
 
