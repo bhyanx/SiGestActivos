@@ -220,19 +220,19 @@ function init() {
 
   $("#frmbusqueda").on("submit", function (e) {
     e.preventDefault();
-    
+
     // Validar que se haya seleccionado una empresa
     const empresaSeleccionada = $("#filtroEmpresa").val();
     if (!empresaSeleccionada || empresaSeleccionada === "") {
       Swal.fire({
-        icon: 'warning',
-        title: 'Empresa Requerida',
-        text: 'Debe seleccionar una empresa para realizar la búsqueda.',
-        confirmButtonText: 'Entendido'
+        icon: "warning",
+        title: "Empresa Requerida",
+        text: "Debe seleccionar una empresa para realizar la búsqueda.",
+        confirmButtonText: "Entendido",
       });
       return;
     }
-    
+
     $("#divtblactivos").show();
     $("#divregistroActivo").hide();
     $("#divlistadoactivos").show();
@@ -287,6 +287,16 @@ function init() {
     if (combosActivos) {
       addActivoManualForm(combosActivos);
     }
+  });
+
+  // Event handler para capturar cambios en el campo correlativo
+  $(document).on("input change", ".correlativo-manual", function () {
+    const valor = $(this).val();
+    const formId = $(this).closest(".activo-manual-form").data("form-number");
+    console.log(`Correlativo changed in form ${formId}: ${valor}`);
+    
+    // Almacenar el valor en un atributo data para asegurar que se mantenga
+    $(this).attr("data-correlativo-value", valor);
   });
 
   $(document).on("click", ".btn-remove-activo", function () {
@@ -1422,6 +1432,42 @@ function init() {
             : 0,
           FechaAdquisicion: form.find("input[name='fechaAdquisicion[]']").val(),
           Cantidad: 1, // Cada fila de preview es 1 activo individual
+          Correlativo: (function () {
+            // Buscar el input de correlativo de manera más específica
+            let correlativoInput = form.find(`#correlativoManual_${formId}`);
+            
+            // Si no encuentra por ID, buscar por name
+            if (correlativoInput.length === 0) {
+              correlativoInput = form.find("input[name='correlativo[]']");
+            }
+            
+            // Si aún no encuentra, buscar por clase
+            if (correlativoInput.length === 0) {
+              correlativoInput = form.find(".correlativo-manual");
+            }
+
+            // Obtener el valor directamente del DOM
+            let correlativoValue = '';
+            if (correlativoInput.length > 0) {
+              // Usar tanto .val() como .prop('value') y el atributo data para asegurar que obtenemos el valor
+              correlativoValue = correlativoInput.val() || 
+                                correlativoInput.prop('value') || 
+                                correlativoInput.attr('data-correlativo-value') || 
+                                correlativoInput[0].value || '';
+            }
+
+            console.log(`Form ${formId} - Correlativo input found:`, correlativoInput.length);
+            console.log(`Form ${formId} - Correlativo value:`, correlativoValue);
+            console.log(`Form ${formId} - Input element:`, correlativoInput[0]);
+
+            // Debug adicional: mostrar todos los inputs del formulario
+            console.log(`Form ${formId} - All inputs in form:`, form.find("input").length);
+            form.find("input").each(function (i, input) {
+              console.log(`Form ${formId} - Input ${i}:`, input.name, input.id, input.value);
+            });
+
+            return correlativoValue || null;
+          })(),
         };
         activos.push(activo);
         totalActivosPreview++;
@@ -1463,6 +1509,44 @@ function init() {
               .find("input[name='fechaAdquisicion[]']")
               .val(),
             Cantidad: 1,
+            Correlativo: (function () {
+              const formNumber = form.data("form-number");
+              
+              // Buscar el input de correlativo de manera más específica
+              let correlativoInput = form.find(`#correlativoManual_${formNumber}`);
+              
+              // Si no encuentra por ID, buscar por name
+              if (correlativoInput.length === 0) {
+                correlativoInput = form.find("input[name='correlativo[]']");
+              }
+              
+              // Si aún no encuentra, buscar por clase
+              if (correlativoInput.length === 0) {
+                correlativoInput = form.find(".correlativo-manual");
+              }
+
+              // Obtener el valor directamente del DOM
+              let correlativoValue = '';
+              if (correlativoInput.length > 0) {
+                // Usar tanto .val() como .prop('value') y el atributo data para asegurar que obtenemos el valor
+                correlativoValue = correlativoInput.val() || 
+                                  correlativoInput.prop('value') || 
+                                  correlativoInput.attr('data-correlativo-value') || 
+                                  correlativoInput[0].value || '';
+              }
+
+              console.log(`Form ${formNumber} - Correlativo input found:`, correlativoInput.length);
+              console.log(`Form ${formNumber} - Correlativo value:`, correlativoValue);
+              console.log(`Form ${formNumber} - Input element:`, correlativoInput[0]);
+
+              // Debug adicional: mostrar todos los inputs del formulario
+              console.log(`Form ${formNumber} - All inputs in form:`, form.find("input").length);
+              form.find("input").each(function (i, input) {
+                console.log(`Form ${formNumber} - Input ${i}:`, input.name, input.id, input.value);
+              });
+
+              return correlativoValue || null;
+            })(),
           };
           activos.push(activo);
         } else {
@@ -3463,7 +3547,8 @@ function ListarCombosFiltros() {
 function cargarTodosLosCombosOptimizado(data) {
   // 1. Cargar categorías
   $("#filtroCategoria").html(
-    '<option value="">Seleccionar Categoría</option><option value="TODOS">Todas las Categorías</option>' + data.categorias
+    '<option value="">Seleccionar Categoría</option><option value="TODOS">Todas las Categorías</option>' +
+      data.categorias
   );
 
   // 2. Cargar empresas (sin opción "Todos" - filtro obligatorio)
@@ -3478,7 +3563,8 @@ function cargarTodosLosCombosOptimizado(data) {
 
   // 4. Cargar ambientes
   $("#filtroAmbiente").html(
-    '<option value="">Seleccionar Ambiente</option><option value="TODOS">Todos los Ambientes</option>' + data.ambientes
+    '<option value="">Seleccionar Ambiente</option><option value="TODOS">Todos los Ambientes</option>' +
+      data.ambientes
   );
 
   // 5. Inicializar todos los Select2 de una vez
@@ -3590,7 +3676,9 @@ function configurarEventListenersFiltros() {
         unidadNegocioSelect.html(
           '<option value="">Seleccionar Sucursal</option>'
         );
-        ambienteSelect.html('<option value="">Seleccionar Ambiente</option><option value="TODOS">🌍 Todos los Ambientes</option>');
+        ambienteSelect.html(
+          '<option value="">Seleccionar Ambiente</option><option value="TODOS">🌍 Todos los Ambientes</option>'
+        );
       }
     });
 
@@ -3616,7 +3704,8 @@ function configurarEventListenersFiltros() {
             if (res.status) {
               ambienteSelect
                 .html(
-                  '<option value="">Seleccionar Ambiente</option><option value="TODOS">🌍 Todos los Ambientes</option>' + res.data
+                  '<option value="">Seleccionar Ambiente</option><option value="TODOS">🌍 Todos los Ambientes</option>' +
+                    res.data
                 )
                 .trigger("change");
             } else {
@@ -3634,7 +3723,9 @@ function configurarEventListenersFiltros() {
           },
         });
       } else {
-        ambienteSelect.html('<option value="">Seleccionar Ambiente</option><option value="TODOS">🌍 Todos los Ambientes</option>');
+        ambienteSelect.html(
+          '<option value="">Seleccionar Ambiente</option><option value="TODOS">🌍 Todos los Ambientes</option>'
+        );
       }
     });
 }
@@ -4844,6 +4935,31 @@ function addActivoManualForm(combos) {
       <div class="card-body">
         <form class="frmmantenimientoManual">
           <div class="row">
+            <!-- El campo correlativo se agregará dinámicamente aquí -->
+            <div class="col-md-12" id="correlativoContainer_${activoFormCount}" style="display: none;">
+              <div class="alert alert-info correlativo-info">
+                <i class="fas fa-info-circle"></i>
+                <span class="correlativo-message">Seleccione empresa y categoría para configurar el correlativo</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="empresa_${activoFormCount}">Empresa: </label>
+                <select name="Empresa[]" id="empresa_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="unidadNegocio_${activoFormCount}">Unidad de Negocio: </label>
+                <select name="UnidadNegocio[]" id="unidadNegocio_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Categoria_${activoFormCount}">Categoria: </label>
+                <select name="Categoria[]" id="Categoria_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
             <div class="col-md-4">
               <div class="form-group">
                 <label for="nombre_${activoFormCount}">Nombre: </label>
@@ -4863,12 +4979,6 @@ function addActivoManualForm(combos) {
               </div>
             </div>
             <div class="col-md-4">
-              <div class="form-group">
-                <label for="Categoria_${activoFormCount}">Categoria: </label>
-                <select name="Categoria[]" id="Categoria_${activoFormCount}" class="form-control select-2" required></select>
-              </div>
-            </div>
-             <div class="col-md-4">
               <div class="form-group">
                 <label for="Responsable_${activoFormCount}">Responsable de activo: </label>
                 <select name="Responsable[]" id="Responsable_${activoFormCount}" class="form-control select-2" required></select>
@@ -4892,18 +5002,7 @@ function addActivoManualForm(combos) {
                 <textarea name="Descripcion[]" id="descripcion_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech color negro"></textarea>
               </div>
             </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="empresa_${activoFormCount}">Empresa: </label>
-                <select name="Empresa[]" id="empresa_${activoFormCount}" class="form-control select-2" required></select>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="unidadNegocio_${activoFormCount}">Unidad de Negocio: </label>
-                <select name="UnidadNegocio[]" id="unidadNegocio_${activoFormCount}" class="form-control select-2" required></select>
-              </div>
-            </div>
+            
             <div class="col-md-4">
               <div class="form-group">
                 <label for="Ambiente_${activoFormCount}">Ambiente:</label>
@@ -5173,6 +5272,15 @@ function addActivoManualForm(combos) {
     ambienteSelect.html(
       '<option value="">Seleccione Empresa y Unidad de Negocio primero</option>'
     );
+
+    // Verificar correlativo cuando cambien empresa o categoría
+    verificarCorrelativo(activoFormCount);
+  });
+
+  // Event listener para cambio de categoría
+  newForm.find(`[name='Categoria[]']`).on("change", function () {
+    // Verificar correlativo cuando cambien empresa o categoría
+    verificarCorrelativo(activoFormCount);
   });
 
   // Event listener para cambio de unidad de negocio
@@ -5257,6 +5365,82 @@ function updateActivoFormNumbers() {
   } else {
     $(".btn-remove-activo").hide();
   }
+}
+
+// Función para verificar configuración de correlativo
+function verificarCorrelativo(formId) {
+  const form = $(`[data-form-number='${formId}']`);
+  const idEmpresa = form.find(`[name='Empresa[]']`).val();
+  const idCategoria = form.find(`[name='Categoria[]']`).val();
+  const correlativoContainer = form.find(`#correlativoContainer_${formId}`);
+
+  // Limpiar contenedor
+  correlativoContainer.hide().find(".correlativo-info").remove();
+
+  if (!idEmpresa || !idCategoria) {
+    return;
+  }
+
+  // Verificar configuración
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=verificarCorrelativo",
+    type: "POST",
+    data: {
+      idEmpresa: idEmpresa,
+      idCategoria: idCategoria,
+    },
+    dataType: "json",
+    success: function (res) {
+      if (res.status && res.data) {
+        const config = res.data;
+        correlativoContainer.show();
+
+        if (config.estadoActivo == 1) {
+          // Correlativo automático
+          correlativoContainer.html(`
+            <div class="alert alert-success correlativo-info">
+              <i class="fas fa-check-circle"></i>
+              <strong>Correlativo Automático:</strong> ${config.AbreEmpresa}-${config.codigoClase}-XXXXX
+              <br><small>El sistema generará automáticamente el correlativo para esta combinación empresa-categoría.</small>
+              <input type="hidden" name="correlativo[]" value="">
+            </div>
+          `);
+        } else {
+          // Correlativo manual
+          correlativoContainer.html(`
+            <div class="alert alert-warning correlativo-info">
+              <i class="fas fa-edit"></i>
+              <strong>Correlativo Manual:</strong> ${config.AbreEmpresa}-${config.codigoClase}-
+              <div class="row mt-2">
+                <div class="col-md-6">
+                  <label for="correlativoManual_${formId}">Número de Correlativo:</label>
+                  <input type="number" name="correlativo[]" id="correlativoManual_${formId}" 
+                         class="form-control correlativo-manual" placeholder="Ej. 1, 2, 3..." min="1" required>
+                  <small class="text-muted">Ingrese solo el número. Formato final: ${config.AbreEmpresa}-${config.codigoClase}-00001</small>
+                </div>
+              </div>
+            </div>
+          `);
+        }
+      } else {
+        correlativoContainer.show().html(`
+          <div class="alert alert-danger correlativo-info">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Error:</strong> No existe configuración de correlativo para esta combinación empresa-categoría.
+            <br><small>Contacte al administrador para configurar el correlativo.</small>
+          </div>
+        `);
+      }
+    },
+    error: function () {
+      correlativoContainer.show().html(`
+        <div class="alert alert-danger correlativo-info">
+          <i class="fas fa-exclamation-triangle"></i>
+          <strong>Error:</strong> No se pudo verificar la configuración del correlativo.
+        </div>
+      `);
+    },
+  });
 }
 
 // Función para notificaciones toast
@@ -5365,6 +5549,7 @@ $(document).ready(function () {
           IdSucursal: form.find("select[name='UnidadNegocio[]']").val(),
           IdAmbiente: form.find("select[name='Ambiente[]']").val(),
           IdCategoria: form.find("select[name='Categoria[]']").val(),
+          VidaUtil: 3, // Valor por defecto
           Serie: fila.find(".serie-manual").val(), // Serie única de la tabla
           Observaciones: form.find("textarea[name='Observaciones[]']").val(),
           ValorAdquisicion: parseFloat(
@@ -5375,6 +5560,7 @@ $(document).ready(function () {
             : 0,
           FechaAdquisicion: form.find("input[name='fechaAdquisicion[]']").val(),
           Cantidad: 1, // Cada fila de preview es 1 activo individual
+          Correlativo: form.find("input[name='correlativo[]']").val(),
         };
         activos.push(activo);
         totalActivosPreview++;
@@ -5405,6 +5591,7 @@ $(document).ready(function () {
             IdSucursal: form.find("select[name='UnidadNegocio[]']").val(),
             IdAmbiente: form.find("select[name='Ambiente[]']").val(),
             IdCategoria: form.find("select[name='Categoria[]']").val(),
+            VidaUtil: 3, // Valor por defecto
             Serie: form.find("input[name='serie[]']").val(),
             Observaciones: form.find("textarea[name='Observaciones[]']").val(),
             ValorAdquisicion: parseFloat(
@@ -5417,6 +5604,7 @@ $(document).ready(function () {
               .find("input[name='fechaAdquisicion[]']")
               .val(),
             Cantidad: 1,
+            Correlativo: form.find("input[name='correlativo[]']").val(),
           };
           activos.push(activo);
         } else {

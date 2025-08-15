@@ -335,7 +335,8 @@ class GestionarActivos
                 @pAplicaIGV = ?,
                 @pFechaAdquisicion = ?,
                 @pUserMod = ?,
-                @pCantidad = ?');
+                @pCantidad = ?,
+                @pCorrelativoManual = ?');
 
             //$stmt->bindParam(1, $data['IdActivo'], \PDO::PARAM_INT);
             $stmt->bindParam(1, $data['Nombre'], \PDO::PARAM_STR);
@@ -360,6 +361,10 @@ class GestionarActivos
             $stmt->bindParam(19, $data['UserMod'], \PDO::PARAM_STR);
             //$stmt->bindParam(22, $data['MotivoBaja'], \PDO::PARAM_STR);
             $stmt->bindParam(20, $data['Cantidad'], \PDO::PARAM_INT);
+            $stmt->bindParam(21, $data['Correlativo'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+
+            // Debug: Log del correlativo que se envía al SP
+            error_log("Correlativo enviado al SP: " . ($data['Correlativo'] ?? 'NULL'), 3, __DIR__ . '/../../logs/debug.log');
 
             $stmt->execute();
             return true;
@@ -457,7 +462,7 @@ class GestionarActivos
     {
         try {
             // Verificar si el artículo ya existe para este documento de venta
-            
+
             $stmt = $this->db->prepare("
                 SELECT CAST(CASE WHEN EXISTS (
                 SELECT 1 
@@ -558,18 +563,41 @@ class GestionarActivos
         }
     }
 
+    public function verificarConfiguracionCorrelativo($idEmpresa, $idCategoria)
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT 
+                    c.estadoActivo,
+                    v.AbreEmpresa,
+                    v.codigoClase,
+                    c.numeroCorrelativo
+                FROM tCorrelativo c
+                JOIN vCorrelativoActivos v ON v.idEmpresa = c.idEmpresa AND v.idCategoria = c.idCategoria
+                WHERE c.idEmpresa = ? AND c.idCategoria = ?
+            ");
+            $stmt->bindParam(1, $idEmpresa, PDO::PARAM_INT);
+            $stmt->bindParam(2, $idCategoria, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error in verificarConfiguracionCorrelativo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
     public function obtenerUltimosEventosActivo($idActivo)
     {
         try {
             /*error_log("=== DEBUGGING MODELO EVENTOS ===", 3, __DIR__ . '/../../logs/debug.log');
             error_log("Consultando eventos para activo ID: " . $idActivo, 3, __DIR__ . '/../../logs/debug.log');*/
-            
+
             // Primero verificar si la vista existe
             $checkView = $this->db->prepare("SELECT COUNT(*) as existe FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vUltimosEventosActivo'");
             $checkView->execute();
             $vistaExiste = $checkView->fetch(PDO::FETCH_ASSOC);
             error_log("¿Vista existe? " . print_r($vistaExiste, true), 3, __DIR__ . '/../../logs/debug.log');
-            
+
             if ($vistaExiste['existe'] == 0) {
                 error_log("La vista vUltimosEventosActivo no existe", 3, __DIR__ . '/../../logs/debug.log');
                 // Crear consulta alternativa
@@ -618,20 +646,20 @@ class GestionarActivos
                     FROM vUltimosEventosActivo 
                     WHERE idActivo = ?");
             }
-            
+
             $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
             $stmt->execute();
             $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             error_log("Resultado de la consulta: " . print_r($resultado, true), 3, __DIR__ . '/../../logs/debug.log');
-            
+
             // Verificar si existen registros de mantenimiento para este activo
             $checkMant = $this->db->prepare("SELECT COUNT(*) as total FROM tDetalleMantenimiento WHERE idActivo = ?");
             $checkMant->bindParam(1, $idActivo, PDO::PARAM_INT);
             $checkMant->execute();
             $totalMant = $checkMant->fetch(PDO::FETCH_ASSOC);
             error_log("Total registros de mantenimiento para activo $idActivo: " . $totalMant['total'], 3, __DIR__ . '/../../logs/debug.log');
-            
+
             if ($totalMant['total'] > 0) {
                 // Obtener el último mantenimiento directamente
                 $lastMant = $this->db->prepare("
@@ -650,14 +678,14 @@ class GestionarActivos
                 $lastMant->execute();
                 $ultimoMant = $lastMant->fetch(PDO::FETCH_ASSOC);
                 error_log("Último mantenimiento directo: " . print_r($ultimoMant, true), 3, __DIR__ . '/../../logs/debug.log');
-                
+
                 // Si la consulta principal no devolvió el mantenimiento pero existe, agregarlo manualmente
                 if ($resultado && !$resultado['fechaUltimoMantenimiento'] && $ultimoMant) {
                     $resultado['fechaUltimoMantenimiento'] = $ultimoMant['fechaUltimoMantenimiento'];
                     error_log("Mantenimiento agregado manualmente al resultado", 3, __DIR__ . '/../../logs/debug.log');
                 }
             }
-            
+
             return $resultado;
         } catch (\PDOException $e) {
             error_log("Error in obtenerUltimosEventosActivo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/debug.log');

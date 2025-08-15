@@ -736,6 +736,11 @@ switch ($action) {
                     throw new Exception("No se recibieron datos de activos válidos.");
                 }
 
+                // Debug: Log de los datos recibidos
+                error_log("=== DATOS RECIBIDOS EN CONTROLADOR ===", 3, __DIR__ . '/../../logs/debug.log');
+                error_log("Total activos: " . count($requestData['activos']), 3, __DIR__ . '/../../logs/debug.log');
+                error_log("Datos completos: " . print_r($requestData, true), 3, __DIR__ . '/../../logs/debug.log');
+
                 $activosGuardados = [];
                 foreach ($requestData['activos'] as $activo) {
                     // Preparar los datos para el modelo
@@ -764,8 +769,13 @@ switch ($action) {
                         'UserMod' => $_SESSION['CodEmpleado'] ?? 'SYSTEM',
                         //'Codigo' => $activo['Codigo'] ?? null,
                         'Cantidad' => $activo['Cantidad'] ?? 1,
+                        'Correlativo' => !empty($activo['Correlativo']) ? $activo['Correlativo'] : null,
                     ];
 
+                    // Debug: Log de los datos que se envían al modelo
+                    error_log("Datos enviados al modelo: " . print_r($data, true), 3, __DIR__ . '/../../logs/debug.log');
+                    error_log("Campo Correlativo específico: " . ($data['Correlativo'] ?? 'NULL'), 3, __DIR__ . '/../../logs/debug.log');
+                    
                     $activos->GuardarActivosManual($data);
                     $activosGuardados[] = $data['Nombre']; // Guardar el nombre del activo para la respuesta
                 }
@@ -890,6 +900,30 @@ switch ($action) {
             echo json_encode([
                 'status' => false,
                 'message' => 'Error al cargar ambientes: ' . $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'verificarCorrelativo':
+        try {
+            $idEmpresa = $_POST['idEmpresa'] ?? null;
+            $idCategoria = $_POST['idCategoria'] ?? null;
+            
+            if (!$idEmpresa || !$idCategoria) {
+                throw new Exception("Se requiere empresa y categoría");
+            }
+
+            $configuracion = $activos->verificarConfiguracionCorrelativo($idEmpresa, $idCategoria);
+            echo json_encode([
+                'status' => true,
+                'data' => $configuracion,
+                'message' => 'Configuración obtenida correctamente'
+            ]);
+        } catch (Exception $e) {
+            error_log("Error verificarCorrelativo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al verificar correlativo: ' . $e->getMessage()
             ]);
         }
         break;
