@@ -5531,12 +5531,18 @@ $(document).ready(function () {
     let totalActivosPreview = 0;
 
     // Primero, recopilar activos de las tablas de preview (activos procesados)
-    $("[id^='tblPreviewActivos_'] tbody tr").each(function () {
+    $("[id^='tblPreviewActivos_'] tbody tr").each(function (index) {
       const fila = $(this);
       const formId = fila.data("form-id");
       const form = $(`[data-form-number='${formId}']`);
 
       if (form.length > 0) {
+        // Obtener el correlativo base del formulario
+        const correlativoBase = parseInt(form.find("input[name='correlativo[]']").val()) || 0;
+        
+        // Calcular correlativo incremental para cada activo
+        const correlativoIncremental = correlativoBase + index;
+        
         const activo = {
           Nombre: form.find("input[name='nombre[]']").val(),
           Descripcion: form.find("textarea[name='Descripcion[]']").val(),
@@ -5560,7 +5566,7 @@ $(document).ready(function () {
             : 0,
           FechaAdquisicion: form.find("input[name='fechaAdquisicion[]']").val(),
           Cantidad: 1, // Cada fila de preview es 1 activo individual
-          Correlativo: form.find("input[name='correlativo[]']").val(),
+          Correlativo: correlativoIncremental.toString(),
         };
         activos.push(activo);
         totalActivosPreview++;
