@@ -1413,6 +1413,7 @@ function init() {
       if (form.length > 0) {
         const activo = {
           Nombre: form.find("input[name='nombre[]']").val(),
+          CodigoAntiguo: form.find("input[name='codigoAntiguo[]']").val(),
           Descripcion: form.find("textarea[name='Descripcion[]']").val(),
           IdEstado: form.find("select[name='Estado[]']").val(),
           Garantia: 0,
@@ -1488,6 +1489,7 @@ function init() {
         if (cantidad === 1) {
           const activo = {
             Nombre: form.find("input[name='nombre[]']").val(),
+            CodigoAntiguo: form.find("input[name='codigoAntiguo[]']").val(),
             Descripcion: form.find("textarea[name='Descripcion[]']").val(),
             IdEstado: form.find("select[name='Estado[]']").val(),
             Garantia: 0,
@@ -2019,25 +2021,22 @@ function init() {
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
-                                                <label class="form-label small mb-1 fw-bold text-uppercase">Código</label>
-                                                <div class="fw-bold text-slate-700">${activo.codigo}</div>
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Serie</label>
+                                                <div class="fw-bold text-slate-700">${activo.Serie}</div>
                                             </div>
                                         </div>
                                         
                                         <!-- Fila 2: Serie y Estado -->
                                         <div class="col-sm-6">
                                             <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
-                                                <label class="form-label small mb-1 fw-bold text-uppercase">Serie</label>
-                                                <div class="fw-bold text-slate-700">${activo.Serie}</div>
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Código</label>
+                                                <div class="fw-bold text-slate-700">${activo.codigo}</div>
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
-                                            <div class="info-card p-2 rounded-3 h-100 text" style="background: #f0fdfa; border-left: 4px solid #28A745;">
-                                                <label class="form-label small mb-1 fw-bold text-uppercase">Estado</label>
-                                                <span class="badge bg-emerald-500 text-white px-3 py-2 rounded-pill">
-                                                    <i class="fas fa-check-circle me-1"></i>
-                                                    ${activo.Estado}
-                                                </span>
+                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #C42000; ">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Código antiguo</label>
+                                                <div class="fw-bold text-danger">${activo.codigoAntiguo}</div>
                                             </div>
                                         </div>
                                         
@@ -3819,6 +3818,7 @@ function listarActivosTable() {
     columns: [
       { data: "idActivo" },
       { data: "codigo" },
+      { data: "codigoAntiguo", visible: false },
       { data: "NombreActivo" },
       { data: "idEstadoActivo", visible: false, searchable: false },
       {
@@ -4962,6 +4962,12 @@ function addActivoManualForm(combos) {
             </div>
             <div class="col-md-4">
               <div class="form-group">
+                <label for="codigoAntiguo_${activoFormCount}">Código Antiguo: </label>
+                <input type="text" name="codigoAntiguo[]" id="codigoAntiguo_${activoFormCount}" class="form-control" placeholder="Ej. ACH-001">
+              </div>
+            </div> 
+            <div class="col-md-4">
+              <div class="form-group">
                 <label for="nombre_${activoFormCount}">Nombre: </label>
                 <input type="text" name="nombre[]" id="nombre_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech" required>
               </div>
@@ -5545,6 +5551,7 @@ $(document).ready(function () {
         
         const activo = {
           Nombre: form.find("input[name='nombre[]']").val(),
+          CodigoAntiguo: form.find("input[name='codigoAntiguo[]']").val(),
           Descripcion: form.find("textarea[name='Descripcion[]']").val(),
           IdEstado: form.find("select[name='Estado[]']").val(),
           Garantia: 0,
@@ -5587,6 +5594,7 @@ $(document).ready(function () {
         if (cantidad === 1) {
           const activo = {
             Nombre: form.find("input[name='nombre[]']").val(),
+            CodigoAntiguo: form.find("input[name='codigoAntiguo[]']").val(),
             Descripcion: form.find("textarea[name='Descripcion[]']").val(),
             IdEstado: form.find("select[name='Estado[]']").val(),
             Garantia: 0,

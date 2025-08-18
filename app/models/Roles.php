@@ -21,6 +21,16 @@ class Roles{
         }
     }
 
+    public function listarPermisosRoles($IdRol){
+        try {
+            $stmt = $this->db->prepare('SELECT p.CodPermiso, p.CodMenu, p.IdRol, p.Permiso, p.UserUpdate, p.FechaUpdate, m.NombreMenu FROM tPermisos p LEFT JOIN tMenu m ON p.CodMenu = m.CodMenu WHERE p.IdRol = ? ORDER BY m.NombreMenu ASC');
+            $stmt->execute([$IdRol]);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error in permisos::listarPermisosRoles: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
     //* LISTAR ROLES POR ID
     public function listarPorId($IdRol){
         try{
@@ -81,6 +91,18 @@ class Roles{
             return $stmt->rowCount();
         }catch(\PDOException $e){
             error_log("Error in Roles::desactivar: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
+    //* CAMBIAR ESTADO DE PERMISO
+    public function cambiarEstadoPermiso($IdRol, $IdPermiso, $nuevoEstado){
+        try{
+            $stmt = $this->db->prepare('UPDATE tPermisos SET Permiso = ?, FechaUpdate = GETDATE() WHERE IdRol = ? AND CodPermiso = ?');
+            $stmt->execute([$nuevoEstado, $IdRol, $IdPermiso]);
+            return $stmt->rowCount();
+        }catch(\PDOException $e){
+            error_log("Error in Roles::cambiarEstadoPermiso: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }

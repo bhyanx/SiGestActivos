@@ -117,6 +117,7 @@ if (isset($_SESSION["IdRol"])) {
                                                             <tr>
                                                                 <th>Id</th>
                                                                 <th>Código</th>
+                                                                <th>Código Antiguo</th>
                                                                 <th>Nombre</th>
                                                                 <th>Id Estado</th>
                                                                 <th>Estado</th>
