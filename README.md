@@ -168,7 +168,7 @@ graph LR
 
 1. **Clonar el repositorio**
    ```bash
-   git clone https://github.com/tu-usuario/SiGestActivos.git
+   git clone https://github.com/bhyanx/SiGestActivosV2.git
    cd SiGestActivos
    ```
 
@@ -363,8 +363,8 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 ## 📞 Soporte
 
 Para soporte técnico o consultas:
-- **Issues**: [GitHub Issues](https://github.com/tu-usuario/SiGestActivos/issues)
-- **Email**: soporte@empresa.com
+- **Issues**: [GitHub Issues](https://github.com/bhyanx/SiGestActivosV2/issues)
+- **Email**: bhyanxdev@gmail.com
 
 ## 🔄 Changelog
 
