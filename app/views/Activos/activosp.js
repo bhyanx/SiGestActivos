@@ -2737,26 +2737,42 @@ function init() {
     const idActivo = $(this).data("idActivo");
     // Guardar el ID del activo en el formulario
     $("#frmBajaActivo").data("idActivo", idActivo);
+    
+    // Limpiar el formulario
+    $("#frmBajaActivo")[0].reset();
 
-    // Cargar el combo de autorizadores
+    // Cargar los combos necesarios
     $.ajax({
       url: "../../controllers/GestionarActivosController.php?action=combos",
       type: "POST",
       dataType: "json",
       success: function (res) {
         if (res.status) {
+          // Cargar combo de autorizadores
           $("#Autorizador").html(res.data.autorizador).trigger("change");
           $("#Autorizador").select2({
             theme: "bootstrap4",
             dropdownParent: $("#modalBajaActivo"),
             width: "100%",
           });
-          // Mostrar el modal después de cargar el combo
+          
+          // Cargar combo de tipos de baja
+          $("#tipoBaja").html(res.data.tipoBaja).trigger("change");
+          $("#tipoBaja").select2({
+            theme: "bootstrap4",
+            dropdownParent: $("#modalBajaActivo"),
+            width: "100%",
+          });
+          
+          // Establecer valor por defecto para tipoBaja
+          $("#tipoBaja").val("1").trigger("change");
+          
+          // Mostrar el modal después de cargar los combos
           $("#modalBajaActivo").modal("show");
         } else {
           Swal.fire(
             "Error",
-            "No se pudieron cargar los autorizadores",
+            "No se pudieron cargar los datos necesarios",
             "error"
           );
         }
@@ -2764,7 +2780,7 @@ function init() {
       error: function (xhr, status, error) {
         Swal.fire(
           "Error",
-          "Error al cargar los autorizadores: " + error,
+          "Error al cargar los datos: " + error,
           "error"
         );
       },
@@ -2799,26 +2815,42 @@ function init() {
 
     // Guardar el ID del activo en el formulario
     $("#frmBajaActivo").data("idActivo", datos.idActivo);
+    
+    // Limpiar el formulario
+    $("#frmBajaActivo")[0].reset();
 
-    // Cargar el combo de autorizadores
+    // Cargar los combos necesarios
     $.ajax({
       url: "../../controllers/GestionarActivosController.php?action=combos",
       type: "POST",
       dataType: "json",
       success: function (res) {
         if (res.status) {
+          // Cargar combo de autorizadores
           $("#Autorizador").html(res.data.autorizador).trigger("change");
           $("#Autorizador").select2({
             theme: "bootstrap4",
             dropdownParent: $("#modalBajaActivo"),
             width: "100%",
           });
-          // Mostrar el modal después de cargar el combo
+          
+          // Cargar combo de tipos de baja
+          $("#tipoBaja").html(res.data.tipoBaja).trigger("change");
+          $("#tipoBaja").select2({
+            theme: "bootstrap4",
+            dropdownParent: $("#modalBajaActivo"),
+            width: "100%",
+          });
+          
+          // Establecer valor por defecto para tipoBaja
+          $("#tipoBaja").val("1").trigger("change");
+          
+          // Mostrar el modal después de cargar los combos
           $("#modalBajaActivo").modal("show");
         } else {
           Swal.fire(
             "Error",
-            "No se pudieron cargar los autorizadores",
+            "No se pudieron cargar los datos necesarios",
             "error"
           );
         }
@@ -2826,7 +2858,7 @@ function init() {
       error: function (xhr, status, error) {
         Swal.fire(
           "Error",
-          "Error al cargar los autorizadores: " + error,
+          "Error al cargar los datos: " + error,
           "error"
         );
       },
@@ -2839,10 +2871,13 @@ function init() {
 
     const idActivo = $(this).data("idActivo");
     const autorizador = $("#Autorizador").val();
+    const tipoBaja = $("#tipoBaja").val();
     const motivoBaja = $("#motivoBaja").val();
+    const docRespaldo = $("#docRespaldo").val();
+    const observaciones = $("#observaciones").val();
 
-    if (!autorizador || !motivoBaja) {
-      Swal.fire("Error", "Todos los campos son obligatorios", "error");
+    if (!autorizador || !tipoBaja || !motivoBaja) {
+      Swal.fire("Error", "Los campos Autorizador, Tipo de Baja y Motivo son obligatorios", "error");
       return;
     }
 
@@ -2858,19 +2893,24 @@ function init() {
 
     // Log para depuración
     console.log("Datos a enviar:", {
-      idActivo: idActivo,
+      IdActivo: idActivo,
       idResponsable: autorizador,
-      motivoBaja: motivoBaja,
+      pidTipoBaja: tipoBaja,
+      Motivo: motivoBaja,
+      DocumentoSoporte: docRespaldo,
+      Observaciones: observaciones,
       userMod: userMod,
     });
 
     $.ajax({
-      url: "../../controllers/GestionarActivosController.php?action=darBaja",
+      url: "../../controllers/GestionarActivosController.php?action=DarBaja",
       type: "POST",
       data: {
-        idActivo: idActivo,
-        idResponsable: autorizador,
-        motivoBaja: motivoBaja,
+        IdActivo: idActivo,
+        pidTipoBaja: tipoBaja,
+        Motivo: motivoBaja,
+        DocumentoSoporte: docRespaldo,
+        Observaciones: observaciones,
         userMod: userMod,
       },
       dataType: "json",
@@ -2902,8 +2942,14 @@ function init() {
     });
   });
 
-  // Inicializar select2 para el autorizador en el modal de baja
+  // Inicializar select2 para los campos en el modal de baja
   $("#Autorizador").select2({
+    theme: "bootstrap4",
+    dropdownParent: $("#modalBajaActivo"),
+    width: "100%",
+  });
+  
+  $("#tipoBaja").select2({
     theme: "bootstrap4",
     dropdownParent: $("#modalBajaActivo"),
     width: "100%",

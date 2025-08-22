@@ -72,4 +72,53 @@ class Dashboard
             throw $e;
         }
     }
+
+    public function TotalActivosAsignados(){
+        try {
+            // Consulta directa para contar activos asignados
+            $sql = "SELECT COUNT(a.idActivo) AS total 
+                    FROM vActivos AS a 
+                    INNER JOIN vEmpleados AS e 
+                    ON a.idResponsable = e.codTrabajador 
+                    WHERE a.idResponsable IS NOT NULL 
+                    AND e.codTrabajador IS NOT NULL 
+                    AND (idEstado NOT IN(3,4))";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            
+            error_log("TotalActivosAsignados - Resultado: " . print_r($result, true), 3, __DIR__ . '/../../logs/debug.log');
+            
+            // Devolver un objeto con la cantidad
+            return ['cantidad' => (int)$result['total']];
+        } catch (\PDOException $e) {
+            error_log("Error en TotalActivosAsignados: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
+    public function TotalActivosNoAsignados(){
+        try {
+            // Consulta directa para contar activos no asignados
+            $sql = "SELECT COUNT(a.idActivo) AS total 
+                    FROM vActivos AS a 
+                    LEFT JOIN vEmpleados AS e 
+                    ON a.idResponsable = e.codTrabajador 
+                    WHERE a.idResponsable IS NULL 
+                    OR e.codTrabajador IS NULL AND (idEstado NOT IN(3,4))";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            
+            error_log("TotalActivosNoAsignados - Resultado: " . print_r($result, true), 3, __DIR__ . '/../../logs/debug.log');
+            
+            // Devolver un objeto con la cantidad
+            return ['cantidad' => (int)$result['total']];
+        } catch (\PDOException $e) {
+            error_log("Error en TotalActivosNoAsignados: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
 }

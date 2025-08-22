@@ -49,6 +49,26 @@ switch ($action) {
         }
         break;
 
+    case 'TotalActivosAsignados':
+        try {
+            $data = $Dashboard->TotalActivosAsignados();
+            echo json_encode($data);
+        } catch (Exception $e) {
+            error_log("Error TotalActivosAsignados: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');  
+            echo json_encode(['status' => false, 'message' => 'Error al consultar activos: ' . $e->getMessage()]);
+        }
+        break;
+
+    case 'TotalActivosNoAsignados':
+        try {
+            $data = $Dashboard->TotalActivosNoAsignados();
+            echo json_encode($data);
+        } catch (Exception $e) {
+            error_log("Error TotalActivosNoAsignados: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode(['status' => false, 'message' => 'Error al consultar activos: ' . $e->getMessage()]);
+        }
+        break;
+
     default:
         echo json_encode(['status' => false, 'message' => 'Acción no válida.']);
         break;

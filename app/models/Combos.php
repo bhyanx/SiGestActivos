@@ -152,6 +152,18 @@ class Combos
         }
     }
 
+    public function comboTipoBaja(){
+        try {
+            $sql = "SELECT * FROM tTipoBaja";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error in comboTipoBaja: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
     public function comboMarcas()
     {
         try{

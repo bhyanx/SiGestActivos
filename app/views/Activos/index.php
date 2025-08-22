@@ -692,10 +692,28 @@ if (isset($_SESSION["IdRol"])) {
                                                             <select name="Autorizador" id="Autorizador" class="form-control select-2"></select>
                                                         </div>
                                                     </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="tipoBaja">Tipo de Baja</label>
+                                                            <select name="tipoBaja" id="tipoBaja" class="form-control select-2"></select>
+                                                        </div>
+                                                    </div>
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label for="motivoBaja">Motivo de Baja:</label>
                                                             <textarea name="motivoBaja" id="motivoBaja" class="form-control" rows="3" placeholder="Ingrese el motivo de la baja del activo..."></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label for="docRespaldo">Documento de Respaldo:</label>
+                                                            <input type="text" name="docRespaldo" id="docRespaldo" class="form-control" placeholder="Número o referencia del documento de respaldo...">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label for="observaciones">Observaciones:</label>
+                                                            <textarea name="observaciones" id="observaciones" class="form-control" rows="2" placeholder="Observaciones adicionales..."></textarea>
                                                         </div>
                                                     </div>
                                                 </div>

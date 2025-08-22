@@ -16,6 +16,32 @@ header('Content-Type: application/json');
 
 switch ($action) {
 
+    case 'DarBaja':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $idActivo = isset($_POST['IdActivo']) ? (int)$_POST['IdActivo'] : null;
+                if (!$idActivo) {
+                    throw new Exception("El ID del activo es requerido.");
+                }
+
+                $data = [
+                    'IdActivo' => $idActivo,
+                    'pidTipoBaja' => isset($_POST['pidTipoBaja']) ? (int)$_POST['pidTipoBaja'] : null,
+                    'Motivo' => $_POST['Motivo'] ?? '',
+                    'DocumentoSoporte' => $_POST['DocumentoSoporte'] ?? null,
+                    'Observaciones' => $_POST['Observaciones'] ?? null,
+                    'UserMod' => $_SESSION['CodEmpleado'] ?? null
+                ];
+
+                $activos->darBajaActivo($data);
+                echo json_encode(['status' => true, 'message' => 'Activo dado de baja con éxito.']);
+            } catch (Exception $e) {
+                error_log("Error DarBaja: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+                echo json_encode(['status' => false, 'message' => 'Error al dar de baja el activo: ' . $e->getMessage()]);
+            }
+        }
+        break;
+
     case 'ConsultarActivos':
         try {
             // Procesar filtros especiales: convertir "TODOS" a null para no aplicar filtro
@@ -275,8 +301,9 @@ switch ($action) {
         try {
             $db = (new Conectar())->ConexionBdPracticante(); // Usar bdActivos
 
+            // ! SIN USO - AHORA SE LISTA POR MEDIO DE BUSQUEDA, NO POR FILTROS.
             // Documentos de ingreso al almacén
-            $stmt = $db->query("SELECT idDocIngAlmacen AS IdDocIngresoAlm FROM vListadoDeArticulosPorDocIngresoAlmacen GROUP BY idDocIngAlmacen");
+            /*$stmt = $db->query("SELECT idDocIngAlmacen AS IdDocIngresoAlm FROM vListadoDeArticulosPorDocIngresoAlmacen GROUP BY idDocIngAlmacen");
             $combos['docIngresoAlm'] = '<option value="">Seleccione</option>';
             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
                 $combos['docIngresoAlm'] .= "<option value='{$row['IdDocIngresoAlm']}'>{$row['IdDocIngresoAlm']}</option>";
@@ -287,6 +314,15 @@ switch ($action) {
             $combos['docVenta'] = '<option value="">Seleccione</option>';
             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
                 $combos['docVenta'] .= "<option value='{$row['IdDocVenta']}'>{$row['IdDocVenta']}</option>";
+            }*/
+
+            // ! SIN USO - AHORA SE LISTA POR MEDIO DE BUSQUEDA, NO POR FILTROS.
+
+            // Tipos de baja
+            $tiposBaja = $combo->comboTipoBaja();
+            $combos['tipoBaja'] = '<option value="">Seleccione</option>';
+            foreach ($tiposBaja as $row) {
+                $combos['tipoBaja'] .= "<option value='{$row['idTipoBaja']}'>{$row['descripcion']}</option>";
             }
 
             // Proveedores

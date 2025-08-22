@@ -10,7 +10,7 @@ class Mantenimientos
         //$this->db = (new Conectar())->ConexionBdPruebas();
     }
 
-    //! REGISTRAR MANTENIMIENTO CON PROCEDIMIENTOS ALMACENADOS
+    // * REGISTRAR MANTENIMIENTO CON PROCEDIMIENTOS ALMACENADOS
 
     public function crearMantenimientoConCodigo($data)
     {

@@ -94,69 +94,19 @@ if (!isset($_SESSION["IdRol"])) {
                         </div>
                     </div>
                 </div>
-                <!-- SE HARÁ UNA MODIFICACIÓN PARA MOSTRAR LA CANTIDAD DE ACTIVOS QUE TIENE CADA USUARIO. -->
-                <!-- <div class="col-6" id="divtblRegistros">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title"><i class="fa fa-list"></i> Listado de ingresos Recientes</h3>
-                        </div>
-                        <div class="dataTables_wrapper dt-bootstrap4">
+                <!-- Gráfico de activos asignados y no asignados -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card shadow">
+                            <div class="card-header bg-primary">
+                                <h3 class="card-title"><i class="fas fa-chart-pie mr-2"></i>Distribución de Activos</h3>
+                            </div>
                             <div class="card-body">
-                                <div class="row">
-                                    <div class=""></div>
-                                </div>
-                                <div class="col-sm-12">
-                                    <div class="table-responsive">
-                                        <table id="tblRegistros" class="table table-bordered table-striped mt-4 table-hover">
-                                            <thead class="table-success">
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Id Activo</th>
-                                                    <th>Código</th>
-                                                    <th>Serie</th>
-                                                    <th>Nombre</th>
-                                                    <th>idSucursal</th>
-                                                    <th>idProveedor</th>
-                                                    <th>Estado</th>
-                                                    <th>Valor</th>
-                                                    <th>Responsable</th>
-                                                    <th>idarticulo</th>
-                                                    <th>idAmbiente</th>
-                                                    <th>IdCategoria</th>
-                                                    <th>FechaAdquisición</th>
-                                                    <th>Observaciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                            <tfoot>
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Id Activo</th>
-                                                    <th>Código</th>
-                                                    <th>Serie</th>
-                                                    <th>Nombre</th>
-                                                    <th>idSucursal</th>
-                                                    <th>idProveedor</th>
-                                                    <th>Estado</th>
-                                                    <th>Valor</th>
-                                                    <th>Responsable</th>
-                                                    <th>idarticulo</th>
-                                                    <th>idAmbiente</th>
-                                                    <th>IdCategoria</th>
-                                                    <th>FechaAdquisición</th>
-                                                    <th>Observaciones</th>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                </div>
-
+                                <canvas id="graficoActivosAsignados" height="300"></canvas>
                             </div>
                         </div>
-
                     </div>
-                </div> -->
-                <!-- SE AGREGARÁ ALGUN GRAFICO DE BARRAS O LINEAL DE ACUERDO A LA CANTIDAD DE MOVIMIENTOS REALIZADOS POR SEMANA. -->
+                </div>
             </section>
             <!-- /.content -->
 

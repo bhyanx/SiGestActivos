@@ -495,7 +495,7 @@ class GestionarActivos
             $stmt = $this->db->prepare("
                 SELECT COUNT(*) as existe
                 FROM tUbicacionActivo
-                WHERE idActivo = 1
+                WHERE idActivo = ?
                 AND idResponsable IS NOT NULL
                 AND esActual = 1
             ");
@@ -692,6 +692,32 @@ class GestionarActivos
         } catch (\PDOException $e) {
             error_log("Error in obtenerUltimosEventosActivo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/debug.log');
             error_log("SQL Error: " . $e->getTraceAsString(), 3, __DIR__ . '/../../logs/debug.log');
+            throw $e;
+        }
+    }
+
+    public function darBajaActivo($data)
+    {
+        try {
+            $stmt = $this->db->prepare('EXEC sp_BajaActivo 
+                @pIdActivo = ?, 
+                @pidTipoBaja = ?, 
+                @pMotivo = ?, 
+                @pDocumentoSoporte = ?, 
+                @pObservaciones = ?, 
+                @pUserMod = ?');
+
+            $stmt->bindParam(1, $data['IdActivo'], \PDO::PARAM_INT);
+            $stmt->bindParam(2, $data['pidTipoBaja'], \PDO::PARAM_INT);
+            $stmt->bindParam(3, $data['Motivo'], \PDO::PARAM_STR);
+            $stmt->bindParam(4, $data['DocumentoSoporte'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(5, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(6, $data['UserMod'], \PDO::PARAM_STR);
+
+            $stmt->execute();
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error in darBajaActivo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }
