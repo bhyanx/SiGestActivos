@@ -294,7 +294,7 @@ function init() {
     const valor = $(this).val();
     const formId = $(this).closest(".activo-manual-form").data("form-number");
     console.log(`Correlativo changed in form ${formId}: ${valor}`);
-    
+
     // Almacenar el valor en un atributo data para asegurar que se mantenga
     $(this).attr("data-correlativo-value", valor);
   });
@@ -1436,35 +1436,51 @@ function init() {
           Correlativo: (function () {
             // Buscar el input de correlativo de manera más específica
             let correlativoInput = form.find(`#correlativoManual_${formId}`);
-            
+
             // Si no encuentra por ID, buscar por name
             if (correlativoInput.length === 0) {
               correlativoInput = form.find("input[name='correlativo[]']");
             }
-            
+
             // Si aún no encuentra, buscar por clase
             if (correlativoInput.length === 0) {
               correlativoInput = form.find(".correlativo-manual");
             }
 
             // Obtener el valor directamente del DOM
-            let correlativoValue = '';
+            let correlativoValue = "";
             if (correlativoInput.length > 0) {
               // Usar tanto .val() como .prop('value') y el atributo data para asegurar que obtenemos el valor
-              correlativoValue = correlativoInput.val() || 
-                                correlativoInput.prop('value') || 
-                                correlativoInput.attr('data-correlativo-value') || 
-                                correlativoInput[0].value || '';
+              correlativoValue =
+                correlativoInput.val() ||
+                correlativoInput.prop("value") ||
+                correlativoInput.attr("data-correlativo-value") ||
+                correlativoInput[0].value ||
+                "";
             }
 
-            console.log(`Form ${formId} - Correlativo input found:`, correlativoInput.length);
-            console.log(`Form ${formId} - Correlativo value:`, correlativoValue);
+            console.log(
+              `Form ${formId} - Correlativo input found:`,
+              correlativoInput.length
+            );
+            console.log(
+              `Form ${formId} - Correlativo value:`,
+              correlativoValue
+            );
             console.log(`Form ${formId} - Input element:`, correlativoInput[0]);
 
             // Debug adicional: mostrar todos los inputs del formulario
-            console.log(`Form ${formId} - All inputs in form:`, form.find("input").length);
+            console.log(
+              `Form ${formId} - All inputs in form:`,
+              form.find("input").length
+            );
             form.find("input").each(function (i, input) {
-              console.log(`Form ${formId} - Input ${i}:`, input.name, input.id, input.value);
+              console.log(
+                `Form ${formId} - Input ${i}:`,
+                input.name,
+                input.id,
+                input.value
+              );
             });
 
             return correlativoValue || null;
@@ -1513,38 +1529,59 @@ function init() {
             Cantidad: 1,
             Correlativo: (function () {
               const formNumber = form.data("form-number");
-              
+
               // Buscar el input de correlativo de manera más específica
-              let correlativoInput = form.find(`#correlativoManual_${formNumber}`);
-              
+              let correlativoInput = form.find(
+                `#correlativoManual_${formNumber}`
+              );
+
               // Si no encuentra por ID, buscar por name
               if (correlativoInput.length === 0) {
                 correlativoInput = form.find("input[name='correlativo[]']");
               }
-              
+
               // Si aún no encuentra, buscar por clase
               if (correlativoInput.length === 0) {
                 correlativoInput = form.find(".correlativo-manual");
               }
 
               // Obtener el valor directamente del DOM
-              let correlativoValue = '';
+              let correlativoValue = "";
               if (correlativoInput.length > 0) {
                 // Usar tanto .val() como .prop('value') y el atributo data para asegurar que obtenemos el valor
-                correlativoValue = correlativoInput.val() || 
-                                  correlativoInput.prop('value') || 
-                                  correlativoInput.attr('data-correlativo-value') || 
-                                  correlativoInput[0].value || '';
+                correlativoValue =
+                  correlativoInput.val() ||
+                  correlativoInput.prop("value") ||
+                  correlativoInput.attr("data-correlativo-value") ||
+                  correlativoInput[0].value ||
+                  "";
               }
 
-              console.log(`Form ${formNumber} - Correlativo input found:`, correlativoInput.length);
-              console.log(`Form ${formNumber} - Correlativo value:`, correlativoValue);
-              console.log(`Form ${formNumber} - Input element:`, correlativoInput[0]);
+              console.log(
+                `Form ${formNumber} - Correlativo input found:`,
+                correlativoInput.length
+              );
+              console.log(
+                `Form ${formNumber} - Correlativo value:`,
+                correlativoValue
+              );
+              console.log(
+                `Form ${formNumber} - Input element:`,
+                correlativoInput[0]
+              );
 
               // Debug adicional: mostrar todos los inputs del formulario
-              console.log(`Form ${formNumber} - All inputs in form:`, form.find("input").length);
+              console.log(
+                `Form ${formNumber} - All inputs in form:`,
+                form.find("input").length
+              );
               form.find("input").each(function (i, input) {
-                console.log(`Form ${formNumber} - Input ${i}:`, input.name, input.id, input.value);
+                console.log(
+                  `Form ${formNumber} - Input ${i}:`,
+                  input.name,
+                  input.id,
+                  input.value
+                );
               });
 
               return correlativoValue || null;
@@ -2737,7 +2774,7 @@ function init() {
     const idActivo = $(this).data("idActivo");
     // Guardar el ID del activo en el formulario
     $("#frmBajaActivo").data("idActivo", idActivo);
-    
+
     // Limpiar el formulario
     $("#frmBajaActivo")[0].reset();
 
@@ -2755,7 +2792,7 @@ function init() {
             dropdownParent: $("#modalBajaActivo"),
             width: "100%",
           });
-          
+
           // Cargar combo de tipos de baja
           $("#tipoBaja").html(res.data.tipoBaja).trigger("change");
           $("#tipoBaja").select2({
@@ -2763,10 +2800,10 @@ function init() {
             dropdownParent: $("#modalBajaActivo"),
             width: "100%",
           });
-          
+
           // Establecer valor por defecto para tipoBaja
           $("#tipoBaja").val("1").trigger("change");
-          
+
           // Mostrar el modal después de cargar los combos
           $("#modalBajaActivo").modal("show");
         } else {
@@ -2778,11 +2815,7 @@ function init() {
         }
       },
       error: function (xhr, status, error) {
-        Swal.fire(
-          "Error",
-          "Error al cargar los datos: " + error,
-          "error"
-        );
+        Swal.fire("Error", "Error al cargar los datos: " + error, "error");
       },
     });
   });
@@ -2815,7 +2848,7 @@ function init() {
 
     // Guardar el ID del activo en el formulario
     $("#frmBajaActivo").data("idActivo", datos.idActivo);
-    
+
     // Limpiar el formulario
     $("#frmBajaActivo")[0].reset();
 
@@ -2833,7 +2866,7 @@ function init() {
             dropdownParent: $("#modalBajaActivo"),
             width: "100%",
           });
-          
+
           // Cargar combo de tipos de baja
           $("#tipoBaja").html(res.data.tipoBaja).trigger("change");
           $("#tipoBaja").select2({
@@ -2841,10 +2874,10 @@ function init() {
             dropdownParent: $("#modalBajaActivo"),
             width: "100%",
           });
-          
+
           // Establecer valor por defecto para tipoBaja
           $("#tipoBaja").val("1").trigger("change");
-          
+
           // Mostrar el modal después de cargar los combos
           $("#modalBajaActivo").modal("show");
         } else {
@@ -2856,11 +2889,7 @@ function init() {
         }
       },
       error: function (xhr, status, error) {
-        Swal.fire(
-          "Error",
-          "Error al cargar los datos: " + error,
-          "error"
-        );
+        Swal.fire("Error", "Error al cargar los datos: " + error, "error");
       },
     });
   });
@@ -2877,7 +2906,11 @@ function init() {
     const observaciones = $("#observaciones").val();
 
     if (!autorizador || !tipoBaja || !motivoBaja) {
-      Swal.fire("Error", "Los campos Autorizador, Tipo de Baja y Motivo son obligatorios", "error");
+      Swal.fire(
+        "Error",
+        "Los campos Autorizador, Tipo de Baja y Motivo son obligatorios",
+        "error"
+      );
       return;
     }
 
@@ -2948,7 +2981,7 @@ function init() {
     dropdownParent: $("#modalBajaActivo"),
     width: "100%",
   });
-  
+
   $("#tipoBaja").select2({
     theme: "bootstrap4",
     dropdownParent: $("#modalBajaActivo"),
@@ -3909,12 +3942,23 @@ function listarActivosTable() {
       { data: "fechaRegistro" },
       {
         data: null,
-        render: (data, type, row) =>
-          `<div class="btn-group">
-              <button class="btn btn-primary btnVerDetalles" type="button">
-                <i class="fas fa-eye text-white"></i>
-              </button>
-        </div>`,
+        render: function (data, type, row) {
+          return `
+          <div class="btn-group">
+            <button type="button" class="btn btn-info btn-sm dropdown-toggle" 
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-cog"></i>
+            </button>
+            <div class="dropdown-menu">
+              <button class="dropdown-item btnVerDetalles" type="button" data-id="${row.id}">
+                <i class="fas fa-eye text-primary"></i> Ver Detalles
+            </button>
+            <button class="dropdown-item btnVerMantenimientos" type="button" data-id="${row.id}">
+              <i class="fas fa-tools text-success"></i> Ver Mantenimientos
+            </button>
+          </div>
+        </div>`;
+        },
       },
     ],
     language: {
@@ -5590,11 +5634,12 @@ $(document).ready(function () {
 
       if (form.length > 0) {
         // Obtener el correlativo base del formulario
-        const correlativoBase = parseInt(form.find("input[name='correlativo[]']").val()) || 0;
-        
+        const correlativoBase =
+          parseInt(form.find("input[name='correlativo[]']").val()) || 0;
+
         // Calcular correlativo incremental para cada activo
         const correlativoIncremental = correlativoBase + index;
-        
+
         const activo = {
           Nombre: form.find("input[name='nombre[]']").val(),
           CodigoAntiguo: form.find("input[name='codigoAntiguo[]']").val(),

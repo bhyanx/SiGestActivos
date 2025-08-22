@@ -45,6 +45,7 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $data = [
+                    'idTipoMantenimiento' => $_POST['idTipoMantenimiento'] ?? null,
                     'fechaProgramada' => $_POST['fechaProgramada'] ?? null,
                     'descripcion' => $_POST['descripcion'] ?? null,
                     'observaciones' => $_POST['observaciones'] ?? null,
@@ -80,7 +81,6 @@ switch ($action) {
                 $data = [
                     'idMantenimiento' => $_POST['idMantenimiento'],
                     'idActivo' => $_POST['idActivo'],
-                    'tipoMantenimiento' => $_POST['tipoMantenimiento'],
                     'observaciones' => $_POST['observaciones'] ?? null,
                     'userMod' => $_SESSION['usuario'] ?? null,
                 ];
@@ -260,7 +260,7 @@ switch ($action) {
                     'costoReal' => $_POST['costoReal'] ?? null,
                     'observaciones' => $_POST['observaciones'] ?? null,
                     'idEstadoMantenimiento' => $_POST['idEstadoMantenimiento'],
-                    'userMod' => $_SESSION['usuario']
+                    'userMod' => $_SESSION['CodEmpleado']
                 ];
 
                 $mantenimientos->finalizarMantenimiento($data);
@@ -314,7 +314,7 @@ switch ($action) {
                     'idMantenimiento' => $_POST['idMantenimiento'],
                     'motivo' => $_POST['motivo'] ?? '',
                     'idEstadoMantenimiento' => $_POST['idEstadoMantenimiento'] ?? 4, // Asumiendo que 4 es "Cancelado"
-                    'userMod' => $_SESSION['usuario']
+                    'userMod' => $_SESSION['CodEmpleado']
                 ];
 
                 $mantenimientos->cancelarMantenimiento($data);

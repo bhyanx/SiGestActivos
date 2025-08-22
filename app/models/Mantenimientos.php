@@ -20,6 +20,7 @@ class Mantenimientos
 
                 EXEC sp_CrearMantenimiento 
                     @fechaProgramada = :fechaProgramada,
+                    @idTipoMantenimiento = :idTipoMantenimiento,
                     @descripcion = :descripcion,
                     @observaciones = :observaciones,
                     @costoEstimado = :costoEstimado,
@@ -37,6 +38,7 @@ class Mantenimientos
             $stmt = $this->db->prepare($sql);
 
             $stmt->bindValue(':fechaProgramada', $data['fechaProgramada'], $data['fechaProgramada'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindParam(':idTipoMantenimiento', $data['idTipoMantenimiento'], PDO::PARAM_INT);
             $stmt->bindValue(':descripcion', $data['descripcion'], $data['descripcion'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
             $stmt->bindValue(':observaciones', $data['observaciones'], $data['observaciones'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
             $stmt->bindValue(':costoEstimado', $data['costoEstimado'], $data['costoEstimado'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
@@ -60,7 +62,6 @@ class Mantenimientos
             $sql = "EXEC sp_RegistrarDetalleMantenimiento 
                     @idMantenimiento = :idMantenimiento,
                     @idActivo = :idActivo,
-                    @tipoMantenimiento = :tipoMantenimiento,
                     @observaciones = :observaciones,
                     @userMod = :userMod";
 
@@ -68,7 +69,7 @@ class Mantenimientos
 
             $stmt->bindParam(':idMantenimiento', $data['idMantenimiento'], PDO::PARAM_INT);
             $stmt->bindParam(':idActivo', $data['idActivo'], PDO::PARAM_INT);
-            $stmt->bindParam(':tipoMantenimiento', $data['tipoMantenimiento'], PDO::PARAM_INT);
+            //$stmt->bindParam(':tipoMantenimiento', $data['tipoMantenimiento'], PDO::PARAM_INT);
             $stmt->bindValue(':observaciones', $data['observaciones'], $data['observaciones'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
             $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
 
@@ -158,17 +159,17 @@ class Mantenimientos
     public function obtenerDetallesMantenimiento($idMantenimiento)
     {
         try {
-            $sql = "SELECT 
-                a.codigo AS codigoActivo,
-                a.NombreActivo AS nombreActivo,
-                tm.nombre AS tipoMantenimiento,
-                dm.observaciones,
-                GETDATE() AS fechaRegistro
-                FROM tDetalleMantenimiento dm
-                INNER JOIN vActivos a ON dm.idActivo = a.IdActivo
-                LEFT JOIN tTipoMantenimiento tm ON dm.tipoMantenimiento = tm.idTipoMantenimiento
-                WHERE dm.idMantenimiento = ?
-                ORDER BY a.codigo";
+            $sql = "SELECT a.codigo AS codigoActivo,
+	        a.NombreActivo AS nombreActivo,
+	        tm.nombre AS tipoMantenimiento,
+	        dm.observaciones,
+	        GETDATE() AS fechaRegistro
+            FROM tDetalleMantenimiento dm
+            INNER JOIN tMantenimientos m ON dm.idMantenimiento = m.idMantenimiento
+            INNER JOIN vActivos a ON dm.idActivo = a.IdActivo
+            LEFT JOIN tTipoMantenimiento tm ON m.idtipoMantenimiento = tm.idTipoMantenimiento
+            WHERE dm.idMantenimiento = ?
+            ORDER BY a.codigo";
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idMantenimiento, PDO::PARAM_INT);

@@ -289,6 +289,10 @@ function initMantenimiento() {
       $("#FechaProgramada").val() || null
     );
     formDataMantenimiento.append(
+      "idTipoMantenimiento",
+      $("#IdTipoMantenimiento").val() || null
+    );
+    formDataMantenimiento.append(
       "descripcion",
       $("#DescripcionMantenimiento").val() || null
     );
@@ -721,10 +725,6 @@ function agregarActivosAlMantenimiento(idMantenimiento, codigoMantenimiento) {
     detalleData.append("idMantenimiento", idMantenimiento);
     detalleData.append("idActivo", fila.find("td:eq(0)").text());
     detalleData.append(
-      "tipoMantenimiento",
-      $("#IdTipoMantenimientoHidden").val()
-    );
-    detalleData.append(
       "observaciones",
       $("#ObservacionesMantenimiento").val() || null
     );
@@ -1012,7 +1012,7 @@ function ListarMantenimientos() {
         data: "tipoMant",
         defaultContent: "N/A",
       },
-      { data: "nombreActivo", defaultContent: "N/A" },
+      { data: "NombreActivo", defaultContent: "N/A" },
       { data: "proveedor", defaultContent: "N/A" },
       {
         data: "responsable",
