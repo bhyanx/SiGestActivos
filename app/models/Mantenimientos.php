@@ -123,7 +123,7 @@ class Mantenimientos
             INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
             WHERE a.IdEmpresa = ?
             AND a.IdSucursal = ?
-            AND a.idEstado <> 3
+            AND a.idEstado NOT IN(2,3,4)
             ORDER BY a.NombreActivo";
 
             $stmt = $this->db->prepare($sql);

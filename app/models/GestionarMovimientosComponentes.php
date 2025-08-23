@@ -24,7 +24,7 @@ class GestionarMovimientosComponentes
             INNER JOIN vUnidadesdeNegocio s ON a.IdSucursal = s.cod_UnidadNeg
             INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
             WHERE a.IdEmpresa = 1 
-            AND a.idEstado = 1
+            AND a.idEstado NOT IN(2,3,4)
             AND a.esPadre = 1";
 
             if ($sucursal) {
@@ -62,7 +62,7 @@ class GestionarMovimientosComponentes
             INNER JOIN vUnidadesdeNegocio s ON a.IdSucursal = s.cod_UnidadNeg
             INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
             WHERE a.IdEmpresa = 1 
-            AND a.idEstado = 1";
+            AND a.idEstado NOT IN(2,3,4)";
 
             if ($sucursal) {
                 $sql .= " AND a.IdSucursal = :sucursal";
@@ -233,6 +233,34 @@ class GestionarMovimientosComponentes
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             error_log("Error in listarComponentesSinPadre: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
+    public function consultarActivosModal($data)
+    {
+        try {
+            // Convertir cadenas vacías a null o enteros para parámetros numéricos
+            $pCodigo = empty($data['pCodigo']) ? null : $data['pCodigo'];
+            $pIdEmpresa = empty($data['pIdEmpresa']) ? null : $data['pIdEmpresa'];
+            $pIdSucursal = empty($data['pIdSucursal']) ? null : (int)$data['pIdSucursal'];
+            $pIdAmbiente = empty($data['pIdAmbiente']) ? null : (int)$data['pIdAmbiente'];
+            $pIdCategoria = empty($data['pIdCategoria']) ? null : (int)$data['pIdCategoria'];
+            $pIdEstado = empty($data['pIdEstado']) ? null : (int)$data['pIdEstado'];
+            $pAccion = 1;
+
+            $stmt = $this->db->prepare('EXEC sp_ConsultarActivos @pCodigo = ?, @pIdEmpresa = ?, @pIdSucursal = ?, @pIdAmbiente = ?, @pIdCategoria = ?, @pIdEstado = ?, @pAccion = ?');
+            $stmt->bindParam(1, $pCodigo, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(2, $pIdEmpresa, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(3, $pIdSucursal, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(4, $pIdAmbiente, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(5, $pIdCategoria, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(6, $pIdEstado, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(7, $pAccion, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error in consultarActivos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }

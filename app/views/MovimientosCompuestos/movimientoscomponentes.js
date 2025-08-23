@@ -496,7 +496,7 @@ function cargarActivosPadres() {
 function cargarActivosParaAsignacion() {
   // Cargar todos los activos disponibles para asignar como padre
   $.ajax({
-    url: "../../controllers/GestionarActivosController.php?action=ConsultarActivos",
+    url: "../../controllers/GestionarMovimientosComponentesController.php?action=ConsultarActivos",
     type: "POST",
     data: { IdArticulo: "", IdActivo: "" },
     dataType: "json",
@@ -1203,7 +1203,7 @@ function listarActivosModalBusqueda() {
     ajax: {
       url: "../../controllers/GestionarActivosController.php?action=ConsultarActivos",
       type: "POST",
-      data: { IdArticulo: "", IdActivo: "" },
+      data: { IdArticulo: "", IdActivo: ""},
       dataType: "json",
       dataSrc: function (json) {
         console.log("Respuesta del servidor:", json);

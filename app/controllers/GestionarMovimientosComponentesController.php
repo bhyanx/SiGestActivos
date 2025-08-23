@@ -48,40 +48,40 @@ switch ($action) {
         }
         break;
 
-        case 'listarActivosPadresv2':
-            try {
-                $tipo = $_POST['tipo'] ?? '';
-                $sucursal = null;
-    
-                if ($tipo === 'origen') {
-                    // Para origen usamos la sucursal de la sesión
-                    $sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
-                    if (!$sucursal) {
-                        throw new Exception("No se encontró la sucursal de origen en la sesión");
-                    }
-                } else if ($tipo === 'destino') {
-                    // Para destino usamos la sucursal seleccionada
-                    $sucursal = $_POST['sucursal'] ?? null;
-                    if (!$sucursal) {
-                        throw new Exception("Debe seleccionar una sucursal destino");
-                    }
-                } else {
-                    throw new Exception("Tipo de consulta no válido");
+    case 'listarActivosPadresv2':
+        try {
+            $tipo = $_POST['tipo'] ?? '';
+            $sucursal = null;
+
+            if ($tipo === 'origen') {
+                // Para origen usamos la sucursal de la sesión
+                $sucursal = $_SESSION['cod_UnidadNeg'] ?? null;
+                if (!$sucursal) {
+                    throw new Exception("No se encontró la sucursal de origen en la sesión");
                 }
-    
-                $activosPadres = $movimientosComponentes->listarActivosPadresv2($sucursal);
-                echo json_encode([
-                    'status' => true,
-                    'data' => $activosPadres,
-                    'message' => 'Activos padres listados correctamente'
-                ]);
-            } catch (Exception $e) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Error al listar activos padres: ' . $e->getMessage()
-                ]);
+            } else if ($tipo === 'destino') {
+                // Para destino usamos la sucursal seleccionada
+                $sucursal = $_POST['sucursal'] ?? null;
+                if (!$sucursal) {
+                    throw new Exception("Debe seleccionar una sucursal destino");
+                }
+            } else {
+                throw new Exception("Tipo de consulta no válido");
             }
-            break;
+
+            $activosPadres = $movimientosComponentes->listarActivosPadresv2($sucursal);
+            echo json_encode([
+                'status' => true,
+                'data' => $activosPadres,
+                'message' => 'Activos padres listados correctamente'
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al listar activos padres: ' . $e->getMessage()
+            ]);
+        }
+        break;
 
     case 'listarComponentesActivo':
         try {
@@ -204,7 +204,7 @@ switch ($action) {
     case 'listarComponentesSinPadre':
         try {
             $sucursal = $_POST['sucursal'] ?? $_SESSION['cod_UnidadNeg'] ?? null;
-            
+
             $componentes = $movimientosComponentes->listarComponentesSinPadre($sucursal);
             echo json_encode([
                 'status' => true,
@@ -216,6 +216,35 @@ switch ($action) {
                 'status' => false,
                 'message' => 'Error al listar componentes sin padre: ' . $e->getMessage()
             ]);
+        }
+        break;
+
+    case 'ConsultarActivos':
+        try {
+            // Procesar filtros especiales: convertir "TODOS" a null para no aplicar filtro
+            $filtroSucursal = $_POST['filtroSucursal'] ?? $_SESSION['cod_UnidadNeg'] ?? null;
+            $filtroAmbiente = $_POST['filtroAmbiente'] ?? null;
+            $filtroCategoria = $_POST['filtroCategoria'] ?? null;
+
+            // Si el valor es "TODOS", convertir a null para mostrar todos los registros
+            if ($filtroSucursal === 'TODOS') $filtroSucursal = null;
+            if ($filtroAmbiente === 'TODOS') $filtroAmbiente = null;
+            if ($filtroCategoria === 'TODOS') $filtroCategoria = null;
+
+            $filtros = [
+                'pCodigo' => $_POST['pCodigo'] ?? null,
+                'pIdEmpresa' => $_POST['filtroEmpresa'] ?? $_SESSION['cod_empresa'] ?? null,
+                'pIdSucursal' => $filtroSucursal,
+                'pIdAmbiente' => $filtroAmbiente,
+                'pIdCategoria' => $filtroCategoria,
+                'pIdEstado' => $_POST['pIdEstado'] ?? null
+            ];
+            $resultados = $activos->consultarActivosModal($filtros);
+            error_log("Consultar resultados: " . print_r($resultados, true), 3, __DIR__ . '/../../logs/debug.log');
+            echo json_encode($resultados ?: []);
+        } catch (Exception $e) {
+            error_log("Error Consultar: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode(['status' => false, 'message' => 'Error al consultar activos: ' . $e->getMessage()]);
         }
         break;
 
