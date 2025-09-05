@@ -51,7 +51,16 @@ switch ($action) {
 
     case 'TotalActivosAsignados':
         try {
-            $data = $Dashboard->TotalActivosAsignados();
+
+            $idEmpresa = $_SESSION['cod_empresa'];
+            $idSucursal = $_SESSION['cod_UnidadNeg'];
+
+            if (!$idEmpresa || !$idSucursal) {
+                echo json_encode(['status' => false, 'message' => 'Error al consultar activos: No se encontraron datos de empresa o sucursal']);
+                return;
+            }
+
+            $data = $Dashboard->TotalActivosAsignados($idEmpresa, $idSucursal);
             echo json_encode($data);
         } catch (Exception $e) {
             error_log("Error TotalActivosAsignados: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');  
@@ -61,7 +70,16 @@ switch ($action) {
 
     case 'TotalActivosNoAsignados':
         try {
-            $data = $Dashboard->TotalActivosNoAsignados();
+
+            $idEmpresa = $_SESSION['cod_empresa'];
+            $idSucursal = $_SESSION['cod_UnidadNeg'];
+
+            if (!$idEmpresa || !$idSucursal) {
+                echo json_encode(['status' => false, 'message' => 'Error al consultar activos: No se encontraron datos de empresa o sucursal']);
+                return;
+            }
+
+            $data = $Dashboard->TotalActivosNoAsignados($idEmpresa, $idSucursal);
             echo json_encode($data);
         } catch (Exception $e) {
             error_log("Error TotalActivosNoAsignados: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');

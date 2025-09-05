@@ -11,6 +11,13 @@ function init() {
   ListarCombosFiltros();
   // ListarCombosModalActualizarActivo();
 
+  // Establecer documento de venta como opción por defecto
+  setTimeout(() => {
+    if ($("#tipoDocumento").length > 0) {
+      $("#tipoDocumento").val("venta").trigger("change");
+    }
+  }, 100);
+
   // ? INICIO: SE COMENTO EL CODIGO PARA INICIALIZAR EL MODAL DE REGISTRO MANUAL
   $("#divModalActualizarActivo").on("shown.bs.modal", function () {
     $("#frmEditarActivo")[0].reset();
@@ -31,18 +38,24 @@ function init() {
     }
   );
 
+  // Establecer documento de venta como opción por defecto al cargar la página
+  $(document).ready(function () {
+    // Establecer "venta" como valor por defecto
+    $("#tipoDocumento").val("venta").trigger("change");
+  });
+
   // Manejar cambio de tipo de documento
   $(document).on("change", "#tipoDocumento", function () {
     const tipoDoc = $(this).val();
     const labelDocumento = $("#labelDocumento");
     const inputDocumento = $("#inputDocumento");
 
-    if (tipoDoc === "ingreso") {
-      labelDocumento.text("Doc. Ingreso Almacén:");
-      inputDocumento.attr("placeholder", "ID de Doc. Ingreso");
-    } else if (tipoDoc === "venta") {
+    if (tipoDoc === "venta") {
       labelDocumento.text("Doc. Venta:");
       inputDocumento.attr("placeholder", "ID de Doc. Venta");
+    } else if (tipoDoc === "ingreso") {
+      labelDocumento.text("Doc. Ingreso Almacén:");
+      inputDocumento.attr("placeholder", "ID de Doc. Ingreso");
     }
 
     // Limpiar el input cuando cambie el tipo
@@ -207,6 +220,19 @@ function init() {
 
   $("#frmbusqueda").on("submit", function (e) {
     e.preventDefault();
+
+    // Validar que se haya seleccionado una empresa
+    const empresaSeleccionada = $("#filtroEmpresa").val();
+    if (!empresaSeleccionada || empresaSeleccionada === "") {
+      Swal.fire({
+        icon: "warning",
+        title: "Empresa Requerida",
+        text: "Debe seleccionar una empresa para realizar la búsqueda.",
+        confirmButtonText: "Entendido",
+      });
+      return;
+    }
+
     $("#divtblactivos").show();
     $("#divregistroActivo").hide();
     $("#divlistadoactivos").show();
@@ -261,6 +287,16 @@ function init() {
     if (combosActivos) {
       addActivoManualForm(combosActivos);
     }
+  });
+
+  // Event handler para capturar cambios en el campo correlativo
+  $(document).on("input change", ".correlativo-manual", function () {
+    const valor = $(this).val();
+    const formId = $(this).closest(".activo-manual-form").data("form-number");
+    console.log(`Correlativo changed in form ${formId}: ${valor}`);
+
+    // Almacenar el valor en un atributo data para asegurar que se mantenga
+    $(this).attr("data-correlativo-value", valor);
   });
 
   $(document).on("click", ".btn-remove-activo", function () {
@@ -401,6 +437,7 @@ function init() {
     const ambienteId = filaActual.find("select.ambiente").val();
     const categoriaId = filaActual.find("select.categoria").val();
     const proveedorId = filaActual.find("select.proveedor").val();
+    const marcaId = filaActual.find("select.marca").val();
 
     if (!ambienteId || !categoriaId) {
       NotificacionToast(
@@ -585,6 +622,9 @@ function init() {
 
     // Obtener los valores de la fila principal
     const valor = filaActual.find("input[name='valor[]']").val();
+    const aplicaIgvPrincipal = filaActual
+      .find("input[name='aplicaIgv[]']")
+      .is(":checked");
     const ambienteId = filaActual.find("select.ambiente").val();
     const categoriaId = filaActual.find("select.categoria").val();
     // Para documentos de venta, usar el proveedor del modal; para ingreso, usar el de la fila
@@ -633,6 +673,10 @@ function init() {
     // Actualizar la serie de la fila original y agregar distintivo visual
     filaActual.find("input[name='serie[]']").val(serieBase + "-1");
     filaActual.find("textarea[name='observaciones[]']").val(observacionesBase);
+    // Mantener el estado del IGV de la fila principal
+    filaActual
+      .find("input[name='aplicaIgv[]']")
+      .prop("checked", aplicaIgvPrincipal);
 
     // Actualizar el proveedor en la fila original si es documento de venta
     if (tipoDoc === "venta" && proveedorModal) {
@@ -724,7 +768,17 @@ function init() {
                     <td>${inputEstadoActivo}</td>
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
-                    <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}"></td>
+                    <td>
+                      <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}">
+                      <div class="custom-control custom-switch custom-switch-sm mt-2">
+                        <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${
+        aplicaIgvPrincipal ? "checked" : ""
+      }>
+                        <label class="custom-control-label small text-success font-weight-bold" for="aplicaIgv${numeroFilas}">
+                          <i class="fas fa-percentage mr-1"></i>IGV
+                        </label>
+                      </div>
+                    </td>
                     <td>${inputCantidad}</td>
                     <td>${proveedorDisplay}</td>
                     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea></td>
@@ -743,7 +797,8 @@ function init() {
       ultimaFilaInsertada.hide().fadeIn(300);
 
       // Cargar combos para la nueva fila (solo ambiente y categoría para filas procesadas)
-      ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
+      // Para documentos de venta/ingreso, cargar ambientes basados en la sesión del usuario
+      ListarCombosAmbienteSesion(`comboAmbiente${numeroFilas}`);
       ListarCombosCategoria(`comboCategoria${numeroFilas}`);
 
       // Establecer los valores seleccionados en los combos
@@ -909,6 +964,9 @@ function init() {
       .val()
       .replace("-1", "");
     const valor = filaPrincipal.find("input[name='valor[]']").val();
+    const aplicaIgv = filaPrincipal
+      .find("input[name='aplicaIgv[]']")
+      .is(":checked");
     const observacionesBase = filaPrincipal
       .find("textarea[name='observaciones[]']")
       .val();
@@ -956,7 +1014,17 @@ function init() {
                       <td>${inputEstadoActivo}</td>
                       <td>${selectAmbiente}</td>
                       <td>${selectCategoria}</td>
-                      <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}"></td>
+                      <td>
+                        <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}">
+                        <div class="custom-control custom-switch custom-switch-sm mt-2">
+                          <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${
+          aplicaIgv ? "checked" : ""
+        }>
+                          <label class="custom-control-label small text-success font-weight-bold" for="aplicaIgv${numeroFilas}">
+                            <i class="fas fa-percentage mr-1"></i>IGV
+                          </label>
+                        </div>
+                      </td>
                       <td>${inputCantidad}</td>
                       <td>${proveedorDisplay}</td>
                       <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea></td>
@@ -1169,6 +1237,9 @@ function init() {
             IdCategoria: parseInt(row.find("select.categoria").val()) || null,
             ValorAdquisicion:
               parseFloat(row.find("input[name='valor[]']").val()) || 0,
+            AplicaIGV: row.find("input[name='aplicaIgv[]']").is(":checked")
+              ? 1
+              : 0,
             IdProveedor: proveedor || null,
             Observaciones:
               row.find("textarea[name='observaciones[]']").val() || "",
@@ -1202,6 +1273,9 @@ function init() {
             IdCategoria: parseInt(row.find("select.categoria").val()) || null,
             ValorAdquisicion:
               parseFloat(row.find("input[name='valor[]']").val()) || 0,
+            AplicaIGV: row.find("input[name='aplicaIgv[]']").is(":checked")
+              ? 1
+              : 0,
             IdProveedor: proveedor || null,
             Observaciones:
               row.find("textarea[name='observaciones[]']").val() || "",
@@ -1340,13 +1414,14 @@ function init() {
       if (form.length > 0) {
         const activo = {
           Nombre: form.find("input[name='nombre[]']").val(),
+          CodigoAntiguo: form.find("input[name='codigoAntiguo[]']").val(),
           Descripcion: form.find("textarea[name='Descripcion[]']").val(),
           IdEstado: form.find("select[name='Estado[]']").val(),
           Garantia: 0,
           IdResponsable: form.find("select[name='Responsable[]']").val(),
           IdProveedor: form.find("select[name='Proveedor[]']").val(),
-          IdEmpresa: null,
-          IdSucursal: null,
+          IdEmpresa: form.find("select[name='Empresa[]']").val(),
+          IdSucursal: form.find("select[name='UnidadNegocio[]']").val(),
           IdAmbiente: form.find("select[name='Ambiente[]']").val(),
           IdCategoria: form.find("select[name='Categoria[]']").val(),
           Serie: fila.find(".serie-manual").val(), // Serie única de la tabla
@@ -1354,8 +1429,63 @@ function init() {
           ValorAdquisicion: parseFloat(
             form.find("input[name='ValorAdquisicion[]']").val()
           ),
+          AplicaIGV: form.find("input[name='AplicaIGV[]']").is(":checked")
+            ? 1
+            : 0,
           FechaAdquisicion: form.find("input[name='fechaAdquisicion[]']").val(),
           Cantidad: 1, // Cada fila de preview es 1 activo individual
+          Correlativo: (function () {
+            // Buscar el input de correlativo de manera más específica
+            let correlativoInput = form.find(`#correlativoManual_${formId}`);
+
+            // Si no encuentra por ID, buscar por name
+            if (correlativoInput.length === 0) {
+              correlativoInput = form.find("input[name='correlativo[]']");
+            }
+
+            // Si aún no encuentra, buscar por clase
+            if (correlativoInput.length === 0) {
+              correlativoInput = form.find(".correlativo-manual");
+            }
+
+            // Obtener el valor directamente del DOM
+            let correlativoValue = "";
+            if (correlativoInput.length > 0) {
+              // Usar tanto .val() como .prop('value') y el atributo data para asegurar que obtenemos el valor
+              correlativoValue =
+                correlativoInput.val() ||
+                correlativoInput.prop("value") ||
+                correlativoInput.attr("data-correlativo-value") ||
+                correlativoInput[0].value ||
+                "";
+            }
+
+            console.log(
+              `Form ${formId} - Correlativo input found:`,
+              correlativoInput.length
+            );
+            console.log(
+              `Form ${formId} - Correlativo value:`,
+              correlativoValue
+            );
+            console.log(`Form ${formId} - Input element:`, correlativoInput[0]);
+
+            // Debug adicional: mostrar todos los inputs del formulario
+            console.log(
+              `Form ${formId} - All inputs in form:`,
+              form.find("input").length
+            );
+            form.find("input").each(function (i, input) {
+              console.log(
+                `Form ${formId} - Input ${i}:`,
+                input.name,
+                input.id,
+                input.value
+              );
+            });
+
+            return correlativoValue || null;
+          })(),
         };
         activos.push(activo);
         totalActivosPreview++;
@@ -1376,13 +1506,14 @@ function init() {
         if (cantidad === 1) {
           const activo = {
             Nombre: form.find("input[name='nombre[]']").val(),
+            CodigoAntiguo: form.find("input[name='codigoAntiguo[]']").val(),
             Descripcion: form.find("textarea[name='Descripcion[]']").val(),
             IdEstado: form.find("select[name='Estado[]']").val(),
             Garantia: 0,
             IdResponsable: form.find("select[name='Responsable[]']").val(),
             IdProveedor: form.find("select[name='Proveedor[]']").val(),
-            IdEmpresa: null,
-            IdSucursal: null,
+            IdEmpresa: form.find("select[name='Empresa[]']").val(),
+            IdSucursal: form.find("select[name='UnidadNegocio[]']").val(),
             IdAmbiente: form.find("select[name='Ambiente[]']").val(),
             IdCategoria: form.find("select[name='Categoria[]']").val(),
             Serie: form.find("input[name='serie[]']").val(),
@@ -1390,10 +1521,72 @@ function init() {
             ValorAdquisicion: parseFloat(
               form.find("input[name='ValorAdquisicion[]']").val()
             ),
+            AplicaIGV: form.find("input[name='AplicaIGV[]']").is(":checked")
+              ? 1
+              : 0,
             FechaAdquisicion: form
               .find("input[name='fechaAdquisicion[]']")
               .val(),
             Cantidad: 1,
+            Correlativo: (function () {
+              const formNumber = form.data("form-number");
+
+              // Buscar el input de correlativo de manera más específica
+              let correlativoInput = form.find(
+                `#correlativoManual_${formNumber}`
+              );
+
+              // Si no encuentra por ID, buscar por name
+              if (correlativoInput.length === 0) {
+                correlativoInput = form.find("input[name='correlativo[]']");
+              }
+
+              // Si aún no encuentra, buscar por clase
+              if (correlativoInput.length === 0) {
+                correlativoInput = form.find(".correlativo-manual");
+              }
+
+              // Obtener el valor directamente del DOM
+              let correlativoValue = "";
+              if (correlativoInput.length > 0) {
+                // Usar tanto .val() como .prop('value') y el atributo data para asegurar que obtenemos el valor
+                correlativoValue =
+                  correlativoInput.val() ||
+                  correlativoInput.prop("value") ||
+                  correlativoInput.attr("data-correlativo-value") ||
+                  correlativoInput[0].value ||
+                  "";
+              }
+
+              console.log(
+                `Form ${formNumber} - Correlativo input found:`,
+                correlativoInput.length
+              );
+              console.log(
+                `Form ${formNumber} - Correlativo value:`,
+                correlativoValue
+              );
+              console.log(
+                `Form ${formNumber} - Input element:`,
+                correlativoInput[0]
+              );
+
+              // Debug adicional: mostrar todos los inputs del formulario
+              console.log(
+                `Form ${formNumber} - All inputs in form:`,
+                form.find("input").length
+              );
+              form.find("input").each(function (i, input) {
+                console.log(
+                  `Form ${formNumber} - Input ${i}:`,
+                  input.name,
+                  input.id,
+                  input.value
+                );
+              });
+
+              return correlativoValue || null;
+            })(),
           };
           activos.push(activo);
         } else {
@@ -1423,6 +1616,8 @@ function init() {
         activo.IdEstado &&
         activo.IdCategoria &&
         activo.IdResponsable &&
+        activo.IdEmpresa &&
+        activo.IdSucursal &&
         activo.ValorAdquisicion > 0
       );
     });
@@ -1431,7 +1626,7 @@ function init() {
       Swal.fire({
         icon: "error",
         title: "Datos Incompletos",
-        text: "Todos los activos deben tener nombre, serie, estado, categoría, responsable y valor de adquisición.",
+        text: "Todos los activos deben tener nombre, serie, estado, categoría, responsable, empresa, unidad de negocio y valor de adquisición.",
       });
       return;
     }
@@ -1758,6 +1953,336 @@ function init() {
     width: "100%",
   });
 
+  $(document).on("click", ".btnVerMantenimientos", function () {
+    const fila = $(this).closest("tr");
+    const datos =
+      $(fila).closest("table").attr("id") === "tblRegistros"
+        ? $("#tblRegistros").DataTable().row(fila).data()
+        : $("#tblTodosActivos").DataTable().row(fila).data();
+
+    if (!datos) {
+      Swal.fire(
+        "Error",
+        "No se pudo obtener la información del activo.",
+        "error"
+      );
+      return;
+    }
+
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=obtenerMantenimientosActivo",
+      type: "POST",
+      data: { idActivo: datos.idActivo },
+      dataType: "json",
+      success: function (res) {
+        if (res.status && res.data) {
+          let activo = res.data;
+
+          $("#modalHistorialMantenimiento").remove();
+          let modalHtml = `
+<div class="modal fade" id="modalHistorialMantenimiento" tabindex="-1" aria-labelledby="modalHistorialLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0" style="border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.08);">
+            
+            <!-- Header del Modal -->
+            <div class="modal-header position-relative overflow-hidden border-0 p-3 bg-teal-600" style="background: linear-gradient(135deg, #0d9488, #0f766e); border-radius: 20px 20px 0 0;">
+                <div class="d-flex align-items-center text-white w-100 position-relative">
+                    <div class="me-3 p-3 rounded-circle" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
+                        <i class="fas fa-wrench fs-4"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h4 class="modal-title mb-1 fw-bold" id="modalHistorialLabel">Historial de Mantenimientos</h4>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge px-3 py-2 rounded-pill" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
+                                <i class="fas fa-barcode me-1"></i>
+                                ${activo.codigo}
+                            </span>
+                            <span class="badge bg-white text-teal-600 px-3 py-2 rounded-pill fw-semibold">
+                                <i class="fas fa-tools me-1"></i>
+                                ${mantenimientos.length} registros
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Body del Modal -->
+            <div class="modal-body p-0" style="background: #f8fafc; max-height: 80vh; overflow-y: auto;">
+                
+                <!-- Tarjeta Principal del Activo -->
+                <div class="container-fluid p-4">
+                    <div class="card border-0 shadow-sm mb-4 bg-teal-500" style="border-radius: 16px;">
+                        <div class="card-body text-white p-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h5 class="mb-2 fw-bold">${
+                                      activo.NombreActivo
+                                    }</h5>
+                                    <p class="mb-0 opacity-90">
+                                        <i class="fas fa-tag me-2"></i> ${
+                                          activo.Categoria
+                                        }
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                    <div class="d-inline-block px-4 py-2 rounded-pill" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
+                                        <i class="fas fa-calendar-check me-1"></i>
+                                        <span class="fw-bold fs-6">${
+                                          activo.Serie
+                                        }</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Historial de Mantenimientos -->
+                    <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                        <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-radius: 16px 16px 0 0;">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3 p-2 rounded-circle" style="background: rgba(6, 182, 212, 0.1);">
+                                    <i class="fas fa-list-ol text-cyan-600"></i>
+                                </div>
+                                <h6 class="mb-0 fw-bold text-cyan-700">Registros de Mantenimiento</h6>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="historialMantenimientos" class="p-3">
+                                ${
+                                  mantenimientos.length > 0
+                                    ? mantenimientos
+                                        .map(
+                                          (mto, index) => `
+                                        <div class="card mb-3 border-0 shadow-sm" style="border-left: 5px solid #0891b2; border-radius: 12px;">
+                                            <div class="card-body p-3">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h6 class="fw-bold text-slate-800 mb-0">
+                                                        <i class="fas fa-tools me-2 text-teal-500"></i>
+                                                        ${
+                                                          mto.tipoMantenimiento ||
+                                                          "Mantenimiento General"
+                                                        }
+                                                    </h6>
+                                                    <span class="badge bg-teal-100 text-teal-800 small px-3 py-2 rounded-pill">
+                                                        <i class="fas fa-calendar-alt me-1"></i>
+                                                        ${
+                                                          mto.fechaMantenimiento ||
+                                                          "N/A"
+                                                        }
+                                                    </span>
+                                                </div>
+                                                <p class="text-slate-600 small mb-2">
+                                                    <strong>Descripción:</strong> ${
+                                                      mto.descripcion ||
+                                                      "Sin descripción registrada."
+                                                    }
+                                                </p>
+                                                <div class="row g-2 small">
+                                                    <div class="col-sm-6">
+                                                        <strong><i class="fas fa-user-cog me-1 text-cyan-500"></i> Técnico:</strong>
+                                                        <span class="text-slate-700">${
+                                                          mto.tecnico ||
+                                                          "No asignado"
+                                                        }</span>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <strong><i class="fas fa-clock me-1 text-emerald-500"></i> Duración:</strong>
+                                                        <span class="text-slate-700">${
+                                                          mto.duracion || "N/A"
+                                                        } horas</span>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <strong><i class="fas fa-money-bill-wave me-1 text-purple-500"></i> Costo:</strong>
+                                                        <span class="text-slate-700 fw-semibold">$${(
+                                                          mto.costo || 0
+                                                        ).toLocaleString(
+                                                          "es-CL"
+                                                        )}</span>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <strong><i class="fas fa-check-circle me-1 text-green-500"></i> Estado:</strong>
+                                                        <span class="badge ${
+                                                          mto.estado ===
+                                                          "Completado"
+                                                            ? "bg-success"
+                                                            : "bg-warning"
+                                                        } text-white px-2 py-1 rounded-pill">
+                                                            ${
+                                                              mto.estado ||
+                                                              "Pendiente"
+                                                            }
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                ${
+                                                  mto.observaciones
+                                                    ? `
+                                                    <div class="mt-2 p-2 bg-slate-50 rounded small">
+                                                        <strong><i class="fas fa-sticky-note me-1 text-slate-500"></i> Observaciones:</strong>
+                                                        <p class="mb-0 text-slate-700">${mto.observaciones}</p>
+                                                    </div>
+                                                `
+                                                    : ""
+                                                }
+                                            </div>
+                                        </div>
+                                    `
+                                        )
+                                        .join("")
+                                    : `
+                                        <div class="text-center py-4 text-slate-500">
+                                            <i class="fas fa-tools fa-2x mb-2 opacity-50"></i>
+                                            <p class="mb-0 fw-semibold">No se han registrado mantenimientos para este activo.</p>
+                                        </div>
+                                    `
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer del Modal -->
+            <div class="modal-footer border-0 p-4" style="background: #f8fafc; border-radius: 0 0 20px 20px;">
+                <div class="d-flex flex-wrap gap-3 w-100 justify-content-center">
+                    <button type="button" class="btn btn-outline-cyan btnAgregarMantenimiento px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${
+                      activo.idActivo
+                    }" style="min-width: 140px; border-color: #06b6d4; color: #0891b2;">
+                        <i class="fas fa-plus-circle m-2"></i>Agregar
+                    </button>
+                    <button type="button" class="btn btn-outline-emerald btnImprimirHistorial px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${
+                      activo.idActivo
+                    }" style="min-width: 120px; border-color: #10b981; color: #059669;">
+                        <i class="fas fa-print m-2"></i>Imprimir
+                    </button>
+                    <button type="button" class="btn btn-outline-slate px-4 py-2 rounded-pill shadow-sm m-1 btnCerrarModal" style="min-width: 100px; border-color: #64748b; color: #475569;">
+                        <i class="fas fa-times m-2"></i>Cerrar
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<style>
+/* Paleta de colores personalizada */
+.bg-teal-500 { background-color: #14b8a6 !important; }
+.bg-teal-600 { background-color: #0d9488 !important; }
+.text-teal-500 { color: #14b8a6 !important; }
+.text-teal-600 { color: #0d9488 !important; }
+.text-teal-700 { color: #0f766e !important; }
+
+.text-cyan-500 { color: #06b6d4 !important; }
+.text-cyan-600 { color: #0891b2 !important; }
+.text-cyan-700 { color: #0e7490 !important; }
+
+.text-emerald-500 { color: #10b981 !important; }
+.text-purple-500 { color: #9333ea !important; }
+.text-green-500 { color: #22c55e !important; }
+.text-slate-500 { color: #64748b !important; }
+.text-slate-600 { color: #475569 !important; }
+.text-slate-700 { color: #334155 !important; }
+.text-slate-800 { color: #1e293b !important; }
+
+.bg-success { background-color: #10b981 !important; }
+.bg-warning { background-color: #f59e0b !important; }
+
+/* Botones personalizados */
+.btn-outline-cyan {
+    border-color: #06b6d4;
+    color: #0891b2;
+}
+.btn-outline-cyan:hover {
+    background-color: #06b6d4;
+    border-color: #06b6d4;
+    color: white;
+}
+
+.btn-outline-emerald {
+    border-color: #10b981;
+    color: #059669;
+}
+.btn-outline-emerald:hover {
+    background-color: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+
+.btn-outline-slate {
+    border-color: #64748b;
+    color: #475569;
+}
+.btn-outline-slate:hover {
+    background-color: #64748b;
+    border-color: #64748b;
+    color: white;
+}
+
+/* Animaciones */
+.card {
+    transition: all 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.modal-content {
+    animation: modalSlideIn 0.4s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    .btn {
+        min-width: auto !important;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+</style>`;
+
+          $("body").append(modalHtml);
+
+          $("#modalHistorialMantenimiento").modal("show");
+
+          $(document)
+            .off("click", ".btnCerrarModal")
+            .on("click", ".btnCerrarModal", function () {
+              $("#modalHistorialMantenimiento").modal("hide");
+            });
+        } else {
+          Swal.fire(
+            "Detalles del mantenimiento",
+            "Error al obtener los detalles: " + res.message,
+            "info"
+          );
+        }
+      },
+      error: function (xhr, status, error) {
+        Swal.fire(
+          "Error",
+          "No se pudo obtener los detalles del mantenimiento: " + error,
+          "error"
+        );
+      },
+    });
+  });
+
   // Manejador para el botón de Ver (detalles completos del activo)
   $(document).on("click", ".btnVerDetalles", function () {
     const fila = $(this).closest("tr");
@@ -1864,25 +2389,22 @@ function init() {
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
-                                                <label class="form-label small mb-1 fw-bold text-uppercase">Código</label>
-                                                <div class="fw-bold text-slate-700">${activo.codigo}</div>
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Serie</label>
+                                                <div class="fw-bold text-slate-700">${activo.Serie}</div>
                                             </div>
                                         </div>
                                         
                                         <!-- Fila 2: Serie y Estado -->
                                         <div class="col-sm-6">
                                             <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
-                                                <label class="form-label small mb-1 fw-bold text-uppercase">Serie</label>
-                                                <div class="fw-bold text-slate-700">${activo.Serie}</div>
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Código</label>
+                                                <div class="fw-bold text-slate-700">${activo.codigo}</div>
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
-                                            <div class="info-card p-2 rounded-3 h-100 text" style="background: #f0fdfa; border-left: 4px solid #28A745;">
-                                                <label class="form-label small mb-1 fw-bold text-uppercase">Estado</label>
-                                                <span class="badge bg-emerald-500 text-white px-3 py-2 rounded-pill">
-                                                    <i class="fas fa-check-circle me-1"></i>
-                                                    ${activo.Estado}
-                                                </span>
+                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #C42000; ">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Código antiguo</label>
+                                                <div class="fw-bold text-danger">${activo.codigoAntiguo}</div>
                                             </div>
                                         </div>
                                         
@@ -2584,35 +3106,47 @@ function init() {
     // Guardar el ID del activo en el formulario
     $("#frmBajaActivo").data("idActivo", idActivo);
 
-    // Cargar el combo de autorizadores
+    // Limpiar el formulario
+    $("#frmBajaActivo")[0].reset();
+
+    // Cargar los combos necesarios
     $.ajax({
       url: "../../controllers/GestionarActivosController.php?action=combos",
       type: "POST",
       dataType: "json",
       success: function (res) {
         if (res.status) {
+          // Cargar combo de autorizadores
           $("#Autorizador").html(res.data.autorizador).trigger("change");
           $("#Autorizador").select2({
             theme: "bootstrap4",
             dropdownParent: $("#modalBajaActivo"),
             width: "100%",
           });
-          // Mostrar el modal después de cargar el combo
+
+          // Cargar combo de tipos de baja
+          $("#tipoBaja").html(res.data.tipoBaja).trigger("change");
+          $("#tipoBaja").select2({
+            theme: "bootstrap4",
+            dropdownParent: $("#modalBajaActivo"),
+            width: "100%",
+          });
+
+          // Establecer valor por defecto para tipoBaja
+          $("#tipoBaja").val("1").trigger("change");
+
+          // Mostrar el modal después de cargar los combos
           $("#modalBajaActivo").modal("show");
         } else {
           Swal.fire(
             "Error",
-            "No se pudieron cargar los autorizadores",
+            "No se pudieron cargar los datos necesarios",
             "error"
           );
         }
       },
       error: function (xhr, status, error) {
-        Swal.fire(
-          "Error",
-          "Error al cargar los autorizadores: " + error,
-          "error"
-        );
+        Swal.fire("Error", "Error al cargar los datos: " + error, "error");
       },
     });
   });
@@ -2646,35 +3180,47 @@ function init() {
     // Guardar el ID del activo en el formulario
     $("#frmBajaActivo").data("idActivo", datos.idActivo);
 
-    // Cargar el combo de autorizadores
+    // Limpiar el formulario
+    $("#frmBajaActivo")[0].reset();
+
+    // Cargar los combos necesarios
     $.ajax({
       url: "../../controllers/GestionarActivosController.php?action=combos",
       type: "POST",
       dataType: "json",
       success: function (res) {
         if (res.status) {
+          // Cargar combo de autorizadores
           $("#Autorizador").html(res.data.autorizador).trigger("change");
           $("#Autorizador").select2({
             theme: "bootstrap4",
             dropdownParent: $("#modalBajaActivo"),
             width: "100%",
           });
-          // Mostrar el modal después de cargar el combo
+
+          // Cargar combo de tipos de baja
+          $("#tipoBaja").html(res.data.tipoBaja).trigger("change");
+          $("#tipoBaja").select2({
+            theme: "bootstrap4",
+            dropdownParent: $("#modalBajaActivo"),
+            width: "100%",
+          });
+
+          // Establecer valor por defecto para tipoBaja
+          $("#tipoBaja").val("1").trigger("change");
+
+          // Mostrar el modal después de cargar los combos
           $("#modalBajaActivo").modal("show");
         } else {
           Swal.fire(
             "Error",
-            "No se pudieron cargar los autorizadores",
+            "No se pudieron cargar los datos necesarios",
             "error"
           );
         }
       },
       error: function (xhr, status, error) {
-        Swal.fire(
-          "Error",
-          "Error al cargar los autorizadores: " + error,
-          "error"
-        );
+        Swal.fire("Error", "Error al cargar los datos: " + error, "error");
       },
     });
   });
@@ -2685,10 +3231,17 @@ function init() {
 
     const idActivo = $(this).data("idActivo");
     const autorizador = $("#Autorizador").val();
+    const tipoBaja = $("#tipoBaja").val();
     const motivoBaja = $("#motivoBaja").val();
+    const docRespaldo = $("#docRespaldo").val();
+    const observaciones = $("#observaciones").val();
 
-    if (!autorizador || !motivoBaja) {
-      Swal.fire("Error", "Todos los campos son obligatorios", "error");
+    if (!autorizador || !tipoBaja || !motivoBaja) {
+      Swal.fire(
+        "Error",
+        "Los campos Autorizador, Tipo de Baja y Motivo son obligatorios",
+        "error"
+      );
       return;
     }
 
@@ -2704,19 +3257,24 @@ function init() {
 
     // Log para depuración
     console.log("Datos a enviar:", {
-      idActivo: idActivo,
+      IdActivo: idActivo,
       idResponsable: autorizador,
-      motivoBaja: motivoBaja,
+      pidTipoBaja: tipoBaja,
+      Motivo: motivoBaja,
+      DocumentoSoporte: docRespaldo,
+      Observaciones: observaciones,
       userMod: userMod,
     });
 
     $.ajax({
-      url: "../../controllers/GestionarActivosController.php?action=darBaja",
+      url: "../../controllers/GestionarActivosController.php?action=DarBaja",
       type: "POST",
       data: {
-        idActivo: idActivo,
-        idResponsable: autorizador,
-        motivoBaja: motivoBaja,
+        IdActivo: idActivo,
+        pidTipoBaja: tipoBaja,
+        Motivo: motivoBaja,
+        DocumentoSoporte: docRespaldo,
+        Observaciones: observaciones,
         userMod: userMod,
       },
       dataType: "json",
@@ -2748,8 +3306,14 @@ function init() {
     });
   });
 
-  // Inicializar select2 para el autorizador en el modal de baja
+  // Inicializar select2 para los campos en el modal de baja
   $("#Autorizador").select2({
+    theme: "bootstrap4",
+    dropdownParent: $("#modalBajaActivo"),
+    width: "100%",
+  });
+
+  $("#tipoBaja").select2({
     theme: "bootstrap4",
     dropdownParent: $("#modalBajaActivo"),
     width: "100%",
@@ -2904,7 +3468,8 @@ function init() {
         if (res.status) {
           $("#Responsable").html(res.data.responsable).trigger("change");
           $("#Estado").html(res.data.estado).trigger("change");
-          $("#Ambiente").html(res.data.ambientes).trigger("change");
+          // Para el registro manual, cargar ambientes basados en la sesión del usuario
+          ListarCombosAmbienteSesion("Ambiente");
           $("#Categoria").html(res.data.categorias).trigger("change");
           $("#Proveedor").html(res.data.proveedores).trigger("change");
 
@@ -2934,6 +3499,8 @@ function init() {
 }
 
 // ? FIN CODIGO PARA GUARDAR MANUAL SIN UTILIZAR.
+
+
 
 function listarActivosModal(documento, tipoDoc = "ingreso") {
   if ($.fn.DataTable.isDataTable("#tbllistarActivos")) {
@@ -3121,7 +3688,15 @@ function agregarActivoAlDetalle(activo) {
                     <td>${inputEstadoActivo}</td>
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
-                    <td><input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valorPrellenado}"></td>
+                    <td>
+                      <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valorPrellenado}">
+                      <div class="custom-control custom-switch custom-switch-sm mt-2">
+                        <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1">
+                        <label class="custom-control-label small text-success font-weight-bold" for="aplicaIgv${numeroFilas}">
+                          <i class="fas fa-percentage mr-1"></i>IGV
+                        </label>
+                      </div>
+                    </td>
                     <td>${inputCantidad}</td>
                     <td>${selectProveedor}</td>
                     <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea></td>
@@ -3134,7 +3709,8 @@ function agregarActivoAlDetalle(activo) {
                 </tr>`;
         $("#tbldetalleactivoreg tbody").append(nuevaFila);
 
-        ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
+        // Para documentos de venta/ingreso, cargar ambientes basados en la sesión del usuario
+        ListarCombosAmbienteSesion(`comboAmbiente${numeroFilas}`);
         ListarCombosCategoria(`comboCategoria${numeroFilas}`);
 
         // Determinar si el proveedor es obligatorio según el tipo de documento
@@ -3265,6 +3841,45 @@ function ListarCombosAmbiente(elemento) {
   });
 }
 
+// Nueva función para cargar ambientes basados en la sesión del usuario (para documentos de venta/ingreso)
+function ListarCombosAmbienteSesion(elemento) {
+  // Verificar si tenemos la empresa y sucursal de la sesión
+  if (typeof empresaSesion !== "undefined" && empresaSesion && 
+      typeof sucursalSesion !== "undefined" && sucursalSesion) {
+    
+    // Cargar ambientes específicos para la empresa y sucursal de la sesión
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=comboAmbiente",
+      type: "POST",
+      data: {
+        idEmpresa: empresaSesion,
+        idSucursal: sucursalSesion,
+      },
+      dataType: "json",
+      async: false,
+      success: (res) => {
+        if (res.status) {
+          $(`#${elemento}`).html(res.data).trigger("change");
+          $(`#${elemento}`).select2({
+            theme: "bootstrap4",
+            width: "100%",
+          });
+        } else {
+          // Si falla, cargar todos los ambientes como fallback
+          ListarCombosAmbiente(elemento);
+        }
+      },
+      error: () => {
+        // Si hay error, cargar todos los ambientes como fallback
+        ListarCombosAmbiente(elemento);
+      },
+    });
+  } else {
+    // Si no hay sesión, cargar todos los ambientes
+    ListarCombosAmbiente(elemento);
+  }
+}
+
 function ListarCombosProveedor(elemento, esObligatorio = false) {
   // Inicializar Select2 con AJAX para búsqueda dinámica
   $(`#${elemento}`).select2({
@@ -3302,7 +3917,7 @@ function ListarCombosProveedor(elemento, esObligatorio = false) {
       cache: true,
     },
     placeholder: esObligatorio
-      ? "🔍 Buscar y Seleccionar Proveedor (OBLIGATORIO)"
+      ? "🔍 Buscar y Seleccionar Proveedor"
       : "🔍 Buscar Proveedor (Opcional)",
     allowClear: !esObligatorio,
   });
@@ -3350,20 +3965,19 @@ function mostrarNotificacionModalActivos(mensaje, tipo = "success") {
 }
 
 function ListarCombosFiltros() {
+  // Mostrar loading en los combos
+  $("#filtroEmpresa, #filtroSucursal, #filtroAmbiente, #filtroCategoria").html(
+    '<option value="">Cargando...</option>'
+  );
+
   $.ajax({
     url: "../../controllers/GestionarActivosController.php?action=combos",
     type: "POST",
     dataType: "json",
     success: (res) => {
       if (res.status) {
-        $("#filtroCategoria").html(res.data.categorias).trigger("change");
-        //$("#filtroSucursal").html(res.data.sucursales).trigger("change");
-        $("#filtroAmbiente").html(res.data.ambientes).trigger("change");
-        $("#filtroCategoria, #filtroAmbiente").select2({
-          theme: "bootstrap4",
-          dropdownParent: $("#divtblRegistros .modal-body"),
-          width: "100%",
-        });
+        // Cargar todos los combos de una vez
+        cargarTodosLosCombosOptimizado(res.data);
       } else {
         Swal.fire(
           "Filtro de movimientos",
@@ -3380,6 +3994,192 @@ function ListarCombosFiltros() {
       );
     },
   });
+}
+
+function cargarTodosLosCombosOptimizado(data) {
+  // 1. Cargar categorías
+  $("#filtroCategoria").html(
+    '<option value="">Seleccionar Categoría</option><option value="3">Todas las Categorías</option>' +
+      data.categorias
+  );
+
+  // 2. Cargar empresas (sin opción "Todos" - filtro obligatorio)
+  $("#filtroEmpresa").html(
+    '<option value="">Seleccionar Empresa</option>' + data.empresas
+  );
+
+  // 3. Cargar todas las sucursales inicialmente
+  $("#filtroSucursal").html(
+    '<option value="">Seleccionar Sucursal</option>' + data.unidadesNegocio
+  );
+
+  // 4. Cargar ambientes
+  $("#filtroAmbiente").html(
+    '<option value="">Seleccionar Ambiente</option><option value="TODOS">Todos los Ambientes</option>' +
+      data.ambientes
+  );
+
+  // 5. Inicializar todos los Select2 de una vez
+  $(
+    "#filtroCategoria, #filtroEmpresa, #filtroSucursal, #filtroAmbiente"
+  ).select2({
+    theme: "bootstrap4",
+    width: "100%",
+    allowClear: true,
+  });
+
+  // 6. Establecer placeholders específicos
+  $("#filtroCategoria").select2("destroy").select2({
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Filtrar por Categoría",
+    allowClear: true,
+  });
+
+  $("#filtroEmpresa").select2("destroy").select2({
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Empresa (Obligatorio)",
+    allowClear: false, // Empresa es obligatoria
+  });
+
+  $("#filtroSucursal").select2("destroy").select2({
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Filtrar por Sucursal",
+    allowClear: true,
+  });
+
+  $("#filtroAmbiente").select2("destroy").select2({
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Filtrar por Ambiente",
+    allowClear: true,
+  });
+
+  // 7. Establecer valores por defecto de sesión
+  if (
+    typeof empresaSesion !== "undefined" &&
+    empresaSesion &&
+    empresaSesion !== ""
+  ) {
+    $("#filtroEmpresa").val(empresaSesion).trigger("change.select2");
+  }
+
+  if (
+    typeof sucursalSesion !== "undefined" &&
+    sucursalSesion &&
+    sucursalSesion !== ""
+  ) {
+    $("#filtroSucursal").val(sucursalSesion).trigger("change.select2");
+  }
+
+  // 8. Configurar event listeners optimizados
+  configurarEventListenersFiltros();
+}
+
+function configurarEventListenersFiltros() {
+  // Event listener para empresa (copiado exacto del registro manual)
+  $("#filtroEmpresa")
+    .off("change.filtros")
+    .on("change.filtros", function () {
+      const codEmpresa = $(this).val();
+      const unidadNegocioSelect = $("#filtroSucursal");
+      const ambienteSelect = $("#filtroAmbiente");
+
+      if (codEmpresa) {
+        // Cargar unidades de negocio para la empresa seleccionada
+        $.ajax({
+          url: "../../controllers/GestionarActivosController.php?action=comboUnidadNegocio",
+          type: "POST",
+          data: { codEmpresa: codEmpresa },
+          dataType: "json",
+          success: function (res) {
+            if (res.status) {
+              unidadNegocioSelect
+                .html(
+                  '<option value="">Seleccionar Sucursal</option>' + res.data
+                )
+                .trigger("change");
+
+              // Mantener la selección de sucursal de sesión si corresponde a la empresa
+              if (
+                typeof sucursalSesion !== "undefined" &&
+                sucursalSesion &&
+                sucursalSesion !== ""
+              ) {
+                unidadNegocioSelect.val(sucursalSesion).trigger("change");
+              }
+            } else {
+              unidadNegocioSelect.html(
+                '<option value="">Error al cargar</option>'
+              );
+              NotificacionToast("error", res.message);
+            }
+          },
+          error: function () {
+            unidadNegocioSelect.html(
+              '<option value="">Error al cargar</option>'
+            );
+            NotificacionToast("error", "Error al cargar unidades de negocio");
+          },
+        });
+      } else {
+        unidadNegocioSelect.html(
+          '<option value="">Seleccionar Sucursal</option>'
+        );
+        ambienteSelect.html(
+          '<option value="">Seleccionar Ambiente</option><option value="TODOS">🌍 Todos los Ambientes</option>'
+        );
+      }
+    });
+
+  // Event listener para sucursal (copiado exacto del registro manual)
+  $("#filtroSucursal")
+    .off("change.filtros")
+    .on("change.filtros", function () {
+      const codEmpresa = $("#filtroEmpresa").val();
+      const codUnidadNegocio = $(this).val();
+      const ambienteSelect = $("#filtroAmbiente");
+
+      if (codEmpresa && codUnidadNegocio) {
+        // Cargar ambientes para la empresa y unidad de negocio seleccionadas
+        $.ajax({
+          url: "../../controllers/GestionarActivosController.php?action=comboAmbiente",
+          type: "POST",
+          data: {
+            idEmpresa: codEmpresa,
+            idSucursal: codUnidadNegocio,
+          },
+          dataType: "json",
+          success: function (res) {
+            if (res.status) {
+              ambienteSelect
+                .html(
+                  '<option value="">Seleccionar Ambiente</option><option value="TODOS">🌍 Todos los Ambientes</option>' +
+                    res.data
+                )
+                .trigger("change");
+            } else {
+              ambienteSelect.html(
+                '<option value="">Error al cargar ambientes</option>'
+              );
+              NotificacionToast("error", res.message);
+            }
+          },
+          error: function () {
+            ambienteSelect.html(
+              '<option value="">Error al cargar ambientes</option>'
+            );
+            NotificacionToast("error", "Error al cargar ambientes");
+          },
+        });
+      } else {
+        ambienteSelect.html(
+          '<option value="">Seleccionar Ambiente</option><option value="TODOS">🌍 Todos los Ambientes</option>'
+        );
+      }
+    });
 }
 
 function ListarCombosMov() {
@@ -3452,10 +4252,16 @@ function listarActivosTable() {
     ajax: {
       url: "../../controllers/GestionarActivosController.php?action=ConsultarActivos",
       type: "POST",
-      data: {
-        IdArticulo: "",
-        IdActivo: "",
-        pIdCategoria: "3",
+      data: function (d) {
+        // Obtener valores de los filtros
+        return {
+          filtroEmpresa: $("#filtroEmpresa").val() || null,
+          filtroSucursal: $("#filtroSucursal").val() || null,
+          filtroAmbiente: $("#filtroAmbiente").val() || null,
+          filtroCategoria: $("#filtroCategoria").val() || null,
+          pIdEstado: null, // Estado si se implementa
+          filtroFecha: $("#filtroFecha").val() || null,
+        };
       },
       dataType: "json",
       dataSrc: function (json) {
@@ -3465,6 +4271,7 @@ function listarActivosTable() {
     columns: [
       { data: "idActivo" },
       { data: "codigo" },
+      { data: "codigoAntiguo", visible: false },
       { data: "NombreActivo" },
       { data: "idEstadoActivo", visible: false, searchable: false },
       {
@@ -3488,7 +4295,7 @@ function listarActivosTable() {
           }
         },
       },
-      { data: "idCategoria", visible: false },
+      { data: "idCategoria", visible: false, searchable: false },
       { data: "idEmpresa", visible: false, searchable: false },
       { data: "idSucursal", visible: false, searchable: false },
       { data: "idAmbiente", visible: false, searchable: false },
@@ -3509,12 +4316,23 @@ function listarActivosTable() {
       { data: "fechaRegistro" },
       {
         data: null,
-        render: (data, type, row) =>
-          `<div class="btn-group">
-              <button class="btn btn-primary btnVerDetalles" type="button">
-                <i class="fas fa-eye text-white"></i>
-              </button>
-        </div>`,
+        render: function (data, type, row) {
+          return `
+          <div class="btn-group">
+            <button type="button" class="btn btn-info btn-sm dropdown-toggle" 
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-cog"></i>
+            </button>
+            <div class="dropdown-menu">
+              <button class="dropdown-item btnVerDetalles" type="button" data-id="${row.id}">
+                <i class="fas fa-eye text-primary"></i> Ver Detalles
+            </button>
+            <button class="dropdown-item btnVerMantenimientos" type="button" data-id="${row.id}">
+              <i class="fas fa-tools text-success"></i> Ver Mantenimientos
+            </button>
+          </div>
+        </div>`;
+        },
       },
     ],
     language: {
@@ -3580,157 +4398,6 @@ function obtenerCombosActivos(callback) {
       Swal.fire("Error", "Error al cargar combos: " + error, "error");
     },
   });
-}
-
-function addActivoManualForm(combos) {
-  activoFormCount++;
-  const formHtml = `
-    <div class="card card-success activo-manual-form" data-form-number="${activoFormCount}">
-      <div class="card-header">
-        <h3 class="card-title"><i class="fas fa-plus-circle"></i> Activo Nuevo <span class="activo-num">#${activoFormCount}</span></h3>
-        <div class="card-tools">
-            <button type="button" class="btn btn-tool" data-card-widget="maximize">
-                <i class="fas fa-expand"></i>
-            </button>
-            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                <i class="fas fa-minus"></i>
-            </button>
-            <button type="button" class="btn btn-tool btn-remove-activo" style="display:none;">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-      </div>
-      <div class="card-body">
-        <form class="frmmantenimientoManual">
-          <div class="row">
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="nombre_${activoFormCount}">Nombre</label>
-                <input type="text" name="nombre[]" id="nombre_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech" required>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="serie_${activoFormCount}">Serie</label>
-                <input type="text" name="serie[]" id="serie_${activoFormCount}" class="form-control" placeholder="Ej. ML-123" required>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="Estado_${activoFormCount}">Estado</label>
-                <select name="Estado[]" id="Estado_${activoFormCount}" class="form-control select-2" required></select>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="Categoria_${activoFormCount}">Categoria</label>
-                <select name="Categoria[]" id="Categoria_${activoFormCount}" class="form-control select-2" required></select>
-              </div>
-            </div>
-             <div class="col-md-4">
-              <div class="form-group">
-                <label for="Responsable_${activoFormCount}">Responsable</label>
-                <select name="Responsable[]" id="Responsable_${activoFormCount}" class="form-control select-2" required></select>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="Proveedor_${activoFormCount}">Proveedor</label>
-                <select name="Proveedor[]" id="Proveedor_${activoFormCount}" class="form-control select-2" required></select>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <label for="descripcion_${activoFormCount}">Descripción</label>
-                <textarea name="Descripcion[]" id="descripcion_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech color negro"></textarea>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="empresa_${activoFormCount}">Empresa</label>
-                <input type="text" class="form-control" name="empresa[]" id="empresa_${activoFormCount}" disabled>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="unidadNegocio_${activoFormCount}">Unidad de Negocio</label>
-                <input type="text" class="form-control" name="unidadNegocio[]" id="unidadNegocio_${activoFormCount}" disabled>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="Ambiente_${activoFormCount}">Ambiente:</label>
-                <select name="Ambiente[]" id="Ambiente_${activoFormCount}" class="form-control select-2"></select>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="form-group">
-                <label for="Cantidad_${activoFormCount}"> Cantidad: </label>
-                <input type="number" name="Cantidad[]" id="Cantidad_${activoFormCount}" class="form-control" placeholder="Ej. 1" value="1" min="1" required>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="ValorAdquisicion_${activoFormCount}">Valor Adquisición:</label>
-                <input type="number" step="0.01" name="ValorAdquisicion[]" id="ValorAdquisicion_${activoFormCount}" class="form-control" placeholder="Ej. 10.00" required>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="fechaAdquisicion_${activoFormCount}">Fecha Adquisición: </label>
-                <input type="date" name="fechaAdquisicion[]" id="fechaAdquisicion_${activoFormCount}" class="form-control" value="${new Date()
-    .toISOString()
-    .slice(0, 10)}" required>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <label for="Observaciones_${activoFormCount}">Observaciones: </label>
-                <textarea name="Observaciones[]" id="Observaciones_${activoFormCount}" class="form-control" rows="3" placeholder="Ingrese las observaciones según el activo..."></textarea>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group text-center">
-                <button type="button" class="btn btn-info btnProcesarActivoManual" data-form-id="${activoFormCount}">
-                  <i class="fas fa-cogs"></i> Procesar Activo
-                </button>
-              </div>
-            </div>
-          </div>
-        </form>
-        
-        <!-- Tabla de previsualización de activos procesados -->
-        <div class="tabla-preview-activos" id="tablaPreview_${activoFormCount}" style="display: none;">
-          <hr>
-          <h6><i class="fas fa-eye"></i> Previsualización de Activos a Crear</h6>
-          <div class="table-responsive">
-            <table class="table table-sm table-bordered" id="tblPreviewActivos_${activoFormCount}">
-              <thead class="table-info">
-                <tr>
-                  <th>Serie</th>
-                  <th>Nombre</th>
-                  <th>Estado</th>
-                  <th>Categoría</th>
-                  <th>Responsable</th>
-                  <th>Ambiente</th>
-                  <th>Valor</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-              <tfoot>
-                <tr>
-                  <th colspan="7" class="text-right">Total Activos:</th>
-                  <th class="text-center"><span class="badge badge-info total-activos-preview">0</span></th>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-  $("#activosContainer").append(formHtml);
 
   // Solo actualiza el número y atributos del nuevo formulario
   const newForm = $(`[data-form-number='${activoFormCount}']`);
@@ -3762,6 +4429,18 @@ function addActivoManualForm(combos) {
     width: "100%",
     placeholder: "Seleccionar Ambiente",
     allowClear: true,
+  });
+  newForm.find(`[name='Empresa[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Empresa",
+  });
+  newForm.find(`[name='UnidadNegocio[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Unidad de Negocio",
   });
 
   // Proveedor: inicializar Select2 con AJAX para búsqueda dinámica
@@ -3802,6 +4481,42 @@ function addActivoManualForm(combos) {
     allowClear: true,
   });
 
+  newForm.find(`[name='Marca[]']`).select2({
+    dropdownParent: newForm,
+    minimumInputLength: 2,
+    theme: "bootstrap4",
+    language: {
+      inputTooShort: function (args) {
+        return "Ingresar Marca.";
+      },
+      noResults: function () {
+        return "Datos no encontrados.";
+      },
+      searching: function () {
+        return "Buscando...";
+      },
+    },
+    ajax: {
+      url: "../../controllers/GestionarActivosController.php?action=comboMarcas",
+      type: "GET",
+      dataType: "json",
+      delay: 250,
+      data: function (params) {
+        return {
+          filtro: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data || [],
+        };
+      },
+      cache: true,
+    },
+    placeholder: "Ingresar/Seleccionar Marca",
+    allowClear: true,
+  });
+
   // Cargar combos normales
   if (combos) {
     newForm
@@ -3817,8 +4532,67 @@ function addActivoManualForm(combos) {
       .find(`[name='Ambiente[]']`)
       .html(combos.ambientes)
       .trigger("change");
+    newForm.find(`[name='Empresa[]']`).html(combos.empresas).trigger("change");
+    newForm
+      .find(`[name='UnidadNegocio[]']`)
+      .html(combos.unidadesNegocio)
+      .trigger("change");
     // No cargar combos.proveedores aquí
   }
+
+  // Event listener para cambio de empresa
+  newForm.find(`[name='Empresa[]']`).on("change", function () {
+    const codEmpresa = $(this).val();
+    const unidadNegocioSelect = newForm.find(`[name='UnidadNegocio[]']`);
+
+    if (codEmpresa) {
+      // Cargar unidades de negocio para la empresa seleccionada
+      $.ajax({
+        url: "../../controllers/GestionarActivosController.php?action=comboUnidadNegocio",
+        type: "POST",
+        data: { codEmpresa: codEmpresa },
+        dataType: "json",
+        success: function (res) {
+          if (res.status) {
+            unidadNegocioSelect.html(res.data).trigger("change");
+          } else {
+            unidadNegocioSelect.html(
+              '<option value="">Error al cargar</option>'
+            );
+            NotificacionToast("error", res.message);
+          }
+        },
+        error: function () {
+          unidadNegocioSelect.html('<option value="">Error al cargar</option>');
+          NotificacionToast("error", "Error al cargar unidades de negocio");
+        },
+      });
+    } else {
+      unidadNegocioSelect.html(
+        '<option value="">Seleccione Empresa primero</option>'
+      );
+    }
+  });
+
+  // Event listener para mostrar/ocultar botón de procesar según la cantidad
+  newForm.find('input[name="Cantidad[]"]').on("input change", function () {
+    const cantidad = parseInt($(this).val()) || 1;
+    const btnProcesar = newForm.find(".btnProcesarActivoManual");
+    const alertInfo = newForm.find(".procesar-info");
+
+    if (cantidad > 1) {
+      btnProcesar
+        .show()
+        .find("i")
+        .next()
+        .text(` Procesar Activo (${cantidad} unidades)`);
+      alertInfo.show();
+    } else {
+      btnProcesar.hide();
+      alertInfo.hide();
+    }
+  });
+
   if (typeof $.fn.CardWidget === "function") {
     newForm.CardWidget();
   }
@@ -4024,6 +4798,26 @@ $(document).ready(function () {
         padding: 6px 12px;
       }
       
+      /* Estilos para el aviso de procesar */
+      .procesar-info {
+        border-radius: 8px;
+        border: 1px solid #bee5eb;
+        margin-bottom: 15px;
+        font-size: 0.9em;
+        animation: fadeInUp 0.3s ease-out;
+      }
+      
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
       /* Estilos para el loader de procesamiento */
       .procesamiento-popup {
         border-radius: 15px;
@@ -4090,6 +4884,8 @@ $(document).on("click", ".btnProcesarActivoManual", function () {
   const categoria = form.find("select[name='Categoria[]']").val();
   const responsable = form.find("select[name='Responsable[]']").val();
   const ambiente = form.find("select[name='Ambiente[]']").val();
+  const empresa = form.find("select[name='Empresa[]']").val();
+  const unidadNegocio = form.find("select[name='UnidadNegocio[]']").val();
   const valor =
     parseFloat(form.find("input[name='ValorAdquisicion[]']").val()) || 0;
   const observaciones = form
@@ -4109,7 +4905,10 @@ $(document).on("click", ".btnProcesarActivoManual", function () {
   }
 
   if (cantidad <= 1) {
-    NotificacionToast("info", "La cantidad debe ser mayor a 1 para procesar");
+    NotificacionToast(
+      "warning",
+      "Para procesar un activo, la cantidad debe ser mayor a 1. Con cantidad = 1, el activo se guardará directamente."
+    );
     return;
   }
 
@@ -4118,6 +4917,11 @@ $(document).on("click", ".btnProcesarActivoManual", function () {
       "error",
       "Estado, categoría y responsable son requeridos"
     );
+    return;
+  }
+
+  if (!empresa || !unidadNegocio) {
+    NotificacionToast("error", "Empresa y unidad de negocio son requeridos");
     return;
   }
 
@@ -4164,7 +4968,7 @@ $(document).on("click", ".btnProcesarActivoManual", function () {
         <p><strong>Cantidad:</strong> ${cantidad} unidades</p>
         <p><strong>Valor Unitario:</strong> S/${valor}</p>
         <hr>
-        <p class="text-info"><i class="fas fa-info-circle"></i> Se crearán S/{cantidad} activos individuales con series únicas.</p>
+        <p class="text-info"><i class="fas fa-info-circle"></i> Se crearán ${cantidad} activos individuales con series únicas.</p>
       </div>
     `,
     icon: "question",
@@ -4183,6 +4987,8 @@ $(document).on("click", ".btnProcesarActivoManual", function () {
         categoria,
         responsable,
         ambiente,
+        empresa,
+        unidadNegocio,
         valor,
         observaciones,
       });
@@ -4244,6 +5050,12 @@ function procesarActivoManual(formId, datos) {
   const ambienteTexto = form
     .find("select[name='Ambiente[]'] option:selected")
     .text();
+  const empresaTexto = form
+    .find("select[name='Empresa[]'] option:selected")
+    .text();
+  const unidadNegocioTexto = form
+    .find("select[name='UnidadNegocio[]'] option:selected")
+    .text();
 
   // Crear filas progresivamente
   let activosCreados = 0;
@@ -4272,6 +5084,8 @@ function procesarActivoManual(formId, datos) {
         <td>${estadoTexto}</td>
         <td>${categoriaTexto}</td>
         <td>${responsableTexto}</td>
+        <td>${empresaTexto}</td>
+        <td>${unidadNegocioTexto}</td>
         <td>${ambienteTexto || "No asignado"}</td>
         <td>S/.${datos.valor.toFixed(2)}</td>
         <td>
@@ -4432,4 +5246,1001 @@ $(document).on("click", ".btnResetActivoManual", function () {
       NotificacionToast("success", "Formulario reseteado correctamente.");
     }
   });
+});
+
+// Agregar estilos CSS personalizados para los switches de IGV
+$(document).ready(function () {
+  const igvStyles = `
+    <style>
+      /* Estilos personalizados para switches de IGV */
+      .custom-switch-sm .custom-control-label::before {
+        width: 1.5rem;
+        height: 0.875rem;
+        border-radius: 0.875rem;
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+      }
+      
+      .custom-switch-sm .custom-control-label::after {
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 50%;
+        background-color: #fff;
+        transition: all 0.3s ease;
+        top: 0.0625rem;
+        left: 0.0625rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      .custom-switch-sm .custom-control-input:checked ~ .custom-control-label::before {
+        background-color: #28a745;
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+      }
+      
+      .custom-switch-sm .custom-control-input:checked ~ .custom-control-label::after {
+        transform: translateX(0.625rem);
+        background-color: #fff;
+      }
+      
+      .custom-switch-sm .custom-control-input:focus ~ .custom-control-label::before {
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+      }
+      
+      .custom-switch-sm .custom-control-label {
+        padding-left: 2rem;
+        font-size: 0.75rem;
+        line-height: 1.2;
+      }
+      
+      /* Animación hover para el switch */
+      .custom-switch-sm:hover .custom-control-label::before {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.1rem rgba(40, 167, 69, 0.15);
+      }
+      
+      /* Estilo para el texto del IGV */
+      .custom-switch-sm .custom-control-label.text-success {
+        color: #28a745 !important;
+        font-weight: 600;
+      }
+      
+      .custom-switch-sm .custom-control-input:checked ~ .custom-control-label.text-success {
+        color: #155724 !important;
+      }
+      
+      /* Efecto de brillo cuando está activado */
+      .custom-switch-sm .custom-control-input:checked ~ .custom-control-label::before {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        animation: igvGlow 2s ease-in-out infinite alternate;
+      }
+      
+      @keyframes igvGlow {
+        0% { box-shadow: 0 0 5px rgba(40, 167, 69, 0.3); }
+        100% { box-shadow: 0 0 10px rgba(40, 167, 69, 0.5); }
+      }
+      
+      /* Estilo para el icono de porcentaje */
+      .custom-switch-sm .fa-percentage {
+        color: #28a745;
+        font-size: 0.7rem;
+        margin-right: 0.25rem;
+      }
+      
+      .custom-switch-sm .custom-control-input:checked ~ .custom-control-label .fa-percentage {
+        color: #155724;
+        animation: bounce 0.6s ease-in-out;
+      }
+      
+      @keyframes bounce {
+        0%, 20%, 60%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-3px); }
+        80% { transform: translateY(-1px); }
+      }
+      
+      /* Responsive para móviles */
+      @media (max-width: 768px) {
+        .custom-switch-sm .custom-control-label {
+          font-size: 0.7rem;
+        }
+        
+        .custom-switch-sm .fa-percentage {
+          font-size: 0.6rem;
+        }
+      }
+    </style>
+  `;
+
+  // Agregar los estilos al head de
+});
+// Función para obtener combos de activos
+function obtenerCombosActivos(callback) {
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    success: function (res) {
+      if (res.status) {
+        callback(res.data);
+      } else {
+        Swal.fire(
+          "Error",
+          "No se pudieron cargar los combos: " + res.message,
+          "error"
+        );
+      }
+    },
+    error: function (xhr, status, error) {
+      Swal.fire("Error", "Error al cargar combos: " + error, "error");
+    },
+  });
+}
+
+// Función para agregar formulario manual de activo
+function addActivoManualForm(combos) {
+  activoFormCount++;
+  const formHtml = `
+    <div class="card card-success activo-manual-form" data-form-number="${activoFormCount}">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-plus-circle"></i> Activo Nuevo <span class="activo-num">#${activoFormCount}</span></h3>
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                <i class="fas fa-expand"></i>
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-tool btn-remove-activo" style="display:none;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <form class="frmmantenimientoManual">
+          <div class="row">
+            <!-- El campo correlativo se agregará dinámicamente aquí -->
+            <div class="col-md-12" id="correlativoContainer_${activoFormCount}" style="display: none;">
+              <div class="alert alert-info correlativo-info">
+                <i class="fas fa-info-circle"></i>
+                <span class="correlativo-message">Seleccione empresa y categoría para configurar el correlativo</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="empresa_${activoFormCount}">Empresa: </label>
+                <select name="Empresa[]" id="empresa_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="unidadNegocio_${activoFormCount}">Unidad de Negocio: </label>
+                <select name="UnidadNegocio[]" id="unidadNegocio_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Categoria_${activoFormCount}">Categoria: </label>
+                <select name="Categoria[]" id="Categoria_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="codigoAntiguo_${activoFormCount}">Código Antiguo: </label>
+                <input type="text" name="codigoAntiguo[]" id="codigoAntiguo_${activoFormCount}" class="form-control" placeholder="Ej. ACH-001">
+              </div>
+            </div> 
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="nombre_${activoFormCount}">Nombre: </label>
+                <input type="text" name="nombre[]" id="nombre_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech" required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="serie_${activoFormCount}">Serie: </label>
+                <input type="text" name="serie[]" id="serie_${activoFormCount}" class="form-control" placeholder="Ej. ML-123" required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Estado_${activoFormCount}">Estado: </label>
+                <select name="Estado[]" id="Estado_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Responsable_${activoFormCount}">Responsable de activo: </label>
+                <select name="Responsable[]" id="Responsable_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Marca_${activoFormCount}">Marca:</label>
+                <select name="Marca[]" id="Marca_${activoFormCount}" class="form-control select-2"></select>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <label for="Proveedor_${activoFormCount}">Proveedor: </label>
+                <select name="Proveedor[]" id="Proveedor_${activoFormCount}" class="form-control select-2" required></select>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="descripcion_${activoFormCount}">Descripción</label>
+                <textarea name="Descripcion[]" id="descripcion_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech color negro"></textarea>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="Ambiente_${activoFormCount}">Ambiente:</label>
+                <select name="Ambiente[]" id="Ambiente_${activoFormCount}" class="form-control select-2"></select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="Cantidad_${activoFormCount}"> Cantidad: </label>
+                <input type="number" name="Cantidad[]" id="Cantidad_${activoFormCount}" class="form-control" placeholder="Ej. 1" value="1" min="1" required>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="ValorAdquisicion_${activoFormCount}">Valor Adquisición:</label>
+                <input type="number" step="0.01" name="ValorAdquisicion[]" id="ValorAdquisicion_${activoFormCount}" class="form-control" placeholder="Ej. 10.00" required>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <label class="text-muted small">IGV</label>
+                <div class="custom-control custom-switch mt-1">
+                  <input type="checkbox" class="custom-control-input" name="AplicaIGV[]" id="AplicaIGV_${activoFormCount}" value="1">
+                  <label class="custom-control-label text-success font-weight-bold" for="AplicaIGV_${activoFormCount}">
+                    <i class="fas fa-percentage mr-1"></i>Incluye IGV
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="fechaAdquisicion_${activoFormCount}">Fecha Adquisición: </label>
+                <input type="date" name="fechaAdquisicion[]" id="fechaAdquisicion_${activoFormCount}" class="form-control" value="${new Date()
+    .toISOString()
+    .slice(0, 10)}" required>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="Observaciones_${activoFormCount}">Observaciones: </label>
+                <textarea name="Observaciones[]" id="Observaciones_${activoFormCount}" class="form-control" rows="3" placeholder="Ingrese las observaciones según el activo..."></textarea>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group text-center">
+                <div class="alert alert-info procesar-info" style="display: none;">
+                  <i class="fas fa-info-circle"></i>
+                  <strong>Procesar Activo:</strong> Cuando la cantidad sea mayor a 1, use este botón para generar múltiples activos individuales con series únicas automáticamente.
+                </div>
+                <button type="button" class="btn btn-info btnProcesarActivoManual" data-form-id="${activoFormCount}" style="display: none;">
+                  <i class="fas fa-cogs"></i> Procesar Activo
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+        
+        <!-- Tabla de previsualización de activos procesados -->
+        <div class="tabla-preview-activos" id="tablaPreview_${activoFormCount}" style="display: none;">
+          <hr>
+          <h6><i class="fas fa-eye"></i> Previsualización de Activos a Crear</h6>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered" id="tblPreviewActivos_${activoFormCount}">
+              <thead class="table-info">
+                <tr>
+                  <th>Serie</th>
+                  <th>Nombre</th>
+                  <th>Estado</th>
+                  <th>Categoría</th>
+                  <th>Responsable</th>
+                  <th>Empresa</th>
+                  <th>Unidad Negocio</th>
+                  <th>Ambiente</th>
+                  <th>Valor</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+              <tfoot>
+                <tr>
+                  <th colspan="9" class="text-right">Total Activos:</th>
+                  <th class="text-center"><span class="badge badge-info total-activos-preview">0</span></th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  $("#activosContainer").append(formHtml);
+
+  // Solo actualiza el número y atributos del nuevo formulario
+  const newForm = $(`[data-form-number='${activoFormCount}']`);
+  newForm.find(".activo-num").text(`#${activoFormCount}`);
+
+  // Initialize Select2 for static combos after they are populated
+  newForm.find(`[name='Responsable[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Responsable",
+  });
+  newForm.find(`[name='Estado[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Estado",
+  });
+  newForm.find(`[name='Categoria[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Categoria",
+  });
+  newForm.find(`[name='Ambiente[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Ambiente",
+    allowClear: true,
+  });
+  newForm.find(`[name='Empresa[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Empresa",
+  });
+  newForm.find(`[name='UnidadNegocio[]']`).select2({
+    dropdownParent: newForm,
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Seleccionar Unidad de Negocio",
+  });
+
+  // Proveedor: inicializar Select2 con AJAX para búsqueda dinámica
+  newForm.find('[name="Proveedor[]"]').select2({
+    dropdownParent: newForm,
+    minimumInputLength: 2,
+    theme: "bootstrap4",
+    language: {
+      inputTooShort: function (args) {
+        return "Ingresar mas de 2 caracteres.";
+      },
+      noResults: function () {
+        return "Datos no encontrados.";
+      },
+      searching: function () {
+        return "Buscando...";
+      },
+    },
+    ajax: {
+      url: "../../controllers/GestionarActivosController.php?action=comboProveedor",
+      type: "GET",
+      dataType: "json",
+      delay: 250,
+      data: function (params) {
+        return {
+          filtro: params.term, // término de búsqueda
+        };
+      },
+      processResults: function (data) {
+        // data ya debe ser un array de objetos {id, text}
+        return {
+          results: data || [],
+        };
+      },
+      cache: true,
+    },
+    placeholder: "Ingresar/Seleccionar Proveedor",
+    allowClear: true,
+  });
+
+  newForm.find(`[name='Marca[]']`).select2({
+    dropdownParent: newForm,
+    minimumInputLength: 2,
+    theme: "bootstrap4",
+    language: {
+      inputTooShort: function (args) {
+        return "Ingresar Marca.";
+      },
+      noResults: function () {
+        return "Datos no encontrados.";
+      },
+      searching: function () {
+        return "Buscando...";
+      },
+    },
+    ajax: {
+      url: "../../controllers/GestionarActivosController.php?action=comboMarcas",
+      type: "GET",
+      dataType: "json",
+      delay: 250,
+      data: function (params) {
+        return {
+          filtro: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data || [],
+        };
+      },
+      cache: true,
+    },
+    placeholder: "Ingresar/Seleccionar Marca",
+    allowClear: true,
+  });
+
+  // Cargar combos normales
+  if (combos) {
+    newForm
+      .find(`[name='Responsable[]']`)
+      .html(combos.responsable)
+      .trigger("change");
+    newForm.find(`[name='Estado[]']`).html(combos.estado).trigger("change");
+    newForm
+      .find(`[name='Categoria[]']`)
+      .html(combos.categorias)
+      .trigger("change");
+    // Para el registro manual, cargar ambientes basados en la sesión del usuario
+    const ambienteSelect = newForm.find(`[name='Ambiente[]']`);
+    if (typeof empresaSesion !== "undefined" && empresaSesion && 
+        typeof sucursalSesion !== "undefined" && sucursalSesion) {
+      // Cargar ambientes específicos para la empresa y sucursal de la sesión
+      $.ajax({
+        url: "../../controllers/GestionarActivosController.php?action=comboAmbiente",
+        type: "POST",
+        data: {
+          idEmpresa: empresaSesion,
+          idSucursal: sucursalSesion,
+        },
+        dataType: "json",
+        async: false,
+        success: function (res) {
+          if (res.status) {
+            ambienteSelect.html(res.data).trigger("change");
+          } else {
+            // Si falla, cargar todos los ambientes como fallback
+            ambienteSelect.html(combos.ambientes).trigger("change");
+          }
+        },
+        error: () => {
+          // Si hay error, cargar todos los ambientes como fallback
+          ambienteSelect.html(combos.ambientes).trigger("change");
+        },
+      });
+    } else {
+      // Si no hay sesión, cargar todos los ambientes
+      ambienteSelect.html(combos.ambientes).trigger("change");
+    }
+    newForm.find(`[name='Empresa[]']`).html(combos.empresas).trigger("change");
+    newForm
+      .find(`[name='UnidadNegocio[]']`)
+      .html(combos.unidadesNegocio)
+      .trigger("change");
+  }
+
+  // Event listener para cambio de empresa
+  newForm.find(`[name='Empresa[]']`).on("change", function () {
+    const codEmpresa = $(this).val();
+    const unidadNegocioSelect = newForm.find(`[name='UnidadNegocio[]']`);
+    const ambienteSelect = newForm.find(`[name='Ambiente[]']`);
+
+    if (codEmpresa) {
+      // Cargar unidades de negocio para la empresa seleccionada
+      $.ajax({
+        url: "../../controllers/GestionarActivosController.php?action=comboUnidadNegocio",
+        type: "POST",
+        data: { codEmpresa: codEmpresa },
+        dataType: "json",
+        success: function (res) {
+          if (res.status) {
+            unidadNegocioSelect.html(res.data).trigger("change");
+          } else {
+            unidadNegocioSelect.html(
+              '<option value="">Error al cargar</option>'
+            );
+            NotificacionToast("error", res.message);
+          }
+        },
+        error: function () {
+          unidadNegocioSelect.html('<option value="">Error al cargar</option>');
+          NotificacionToast("error", "Error al cargar unidades de negocio");
+        },
+      });
+    } else {
+      unidadNegocioSelect.html(
+        '<option value="">Seleccione Empresa primero</option>'
+      );
+    }
+
+    // Limpiar ambientes cuando cambie la empresa
+    ambienteSelect.html(
+      '<option value="">Seleccione Empresa y Unidad de Negocio primero</option>'
+    );
+
+    // Verificar correlativo cuando cambien empresa o categoría
+    verificarCorrelativo(activoFormCount);
+  });
+
+  // Event listener para cambio de categoría
+  newForm.find(`[name='Categoria[]']`).on("change", function () {
+    // Verificar correlativo cuando cambien empresa o categoría
+    verificarCorrelativo(activoFormCount);
+  });
+
+  // Event listener para cambio de unidad de negocio
+  newForm.find(`[name='UnidadNegocio[]']`).on("change", function () {
+    const codEmpresa = newForm.find(`[name='Empresa[]']`).val();
+    const codUnidadNegocio = $(this).val();
+    const ambienteSelect = newForm.find(`[name='Ambiente[]']`);
+
+    if (codEmpresa && codUnidadNegocio) {
+      // Cargar ambientes para la empresa y unidad de negocio seleccionadas
+      $.ajax({
+        url: "../../controllers/GestionarActivosController.php?action=comboAmbiente",
+        type: "POST",
+        data: {
+          idEmpresa: codEmpresa,
+          idSucursal: codUnidadNegocio,
+        },
+        dataType: "json",
+        success: function (res) {
+          if (res.status) {
+            ambienteSelect.html(res.data).trigger("change");
+          } else {
+            ambienteSelect.html(
+              '<option value="">Error al cargar ambientes</option>'
+            );
+            NotificacionToast("error", res.message);
+          }
+        },
+        error: function () {
+          ambienteSelect.html(
+            '<option value="">Error al cargar ambientes</option>'
+          );
+          NotificacionToast("error", "Error al cargar ambientes");
+        },
+      });
+    } else {
+      ambienteSelect.html('<option value="">Seleccionar Ambiente</option>');
+    }
+  });
+
+  // Event listener para mostrar/ocultar botón de procesar según la cantidad
+  newForm.find('input[name="Cantidad[]"]').on("input change", function () {
+    const cantidad = parseInt($(this).val()) || 1;
+    const btnProcesar = newForm.find(".btnProcesarActivoManual");
+    const alertInfo = newForm.find(".procesar-info");
+
+    if (cantidad > 1) {
+      btnProcesar
+        .show()
+        .find("i")
+        .next()
+        .text(` Procesar Activo (${cantidad} unidades)`);
+      alertInfo.show();
+    } else {
+      btnProcesar.hide();
+      alertInfo.hide();
+    }
+  });
+
+  if (typeof $.fn.CardWidget === "function") {
+    newForm.CardWidget();
+  }
+  // Mostrar/ocultar botón de eliminar solo en el nuevo formulario
+  if ($("#activosContainer .activo-manual-form").length > 1) {
+    $(".btn-remove-activo").show();
+  } else {
+    $(".btn-remove-activo").hide();
+  }
+}
+
+// Función para actualizar números de formularios
+function updateActivoFormNumbers() {
+  $("#activosContainer .activo-manual-form").each(function (index) {
+    $(this)
+      .find(".activo-num")
+      .text(`#${index + 1}`);
+    $(this).attr("data-form-number", index + 1);
+  });
+  activoFormCount = $("#activosContainer .activo-manual-form").length;
+  if (activoFormCount > 1) {
+    $(".btn-remove-activo").show();
+  } else {
+    $(".btn-remove-activo").hide();
+  }
+}
+
+// Función para verificar configuración de correlativo
+function verificarCorrelativo(formId) {
+  const form = $(`[data-form-number='${formId}']`);
+  const idEmpresa = form.find(`[name='Empresa[]']`).val();
+  const idCategoria = form.find(`[name='Categoria[]']`).val();
+  const correlativoContainer = form.find(`#correlativoContainer_${formId}`);
+
+  // Limpiar contenedor
+  correlativoContainer.hide().find(".correlativo-info").remove();
+
+  if (!idEmpresa || !idCategoria) {
+    return;
+  }
+
+  // Verificar configuración
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=verificarCorrelativo",
+    type: "POST",
+    data: {
+      idEmpresa: idEmpresa,
+      idCategoria: idCategoria,
+    },
+    dataType: "json",
+    success: function (res) {
+      if (res.status && res.data) {
+        const config = res.data;
+        correlativoContainer.show();
+
+        if (config.estadoActivo == 1) {
+          // Correlativo automático
+          correlativoContainer.html(`
+            <div class="alert alert-success correlativo-info">
+              <i class="fas fa-check-circle"></i>
+              <strong>Correlativo Automático:</strong> ${config.AbreEmpresa}-${config.codigoClase}-XXXXX
+              <br><small>El sistema generará automáticamente el correlativo para esta combinación empresa-categoría.</small>
+              <input type="hidden" name="correlativo[]" value="">
+            </div>
+          `);
+        } else {
+          // Correlativo manual
+          correlativoContainer.html(`
+            <div class="alert alert-warning correlativo-info">
+              <i class="fas fa-edit"></i>
+              <strong>Correlativo Manual:</strong> ${config.AbreEmpresa}-${config.codigoClase}-
+              <div class="row mt-2">
+                <div class="col-md-6">
+                  <label for="correlativoManual_${formId}">Número de Correlativo:</label>
+                  <input type="number" name="correlativo[]" id="correlativoManual_${formId}" 
+                         class="form-control correlativo-manual" placeholder="Ej. 1, 2, 3..." min="1" required>
+                  <small class="text-muted">Ingrese solo el número. Formato final: ${config.AbreEmpresa}-${config.codigoClase}-00001</small>
+                </div>
+              </div>
+            </div>
+          `);
+        }
+      } else {
+        correlativoContainer.show().html(`
+          <div class="alert alert-danger correlativo-info">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Error:</strong> No existe configuración de correlativo para esta combinación empresa-categoría.
+            <br><small>Contacte al administrador para configurar el correlativo.</small>
+          </div>
+        `);
+      }
+    },
+    error: function () {
+      correlativoContainer.show().html(`
+        <div class="alert alert-danger correlativo-info">
+          <i class="fas fa-exclamation-triangle"></i>
+          <strong>Error:</strong> No se pudo verificar la configuración del correlativo.
+        </div>
+      `);
+    },
+  });
+}
+
+// Función para notificaciones toast
+function NotificacionToast(tipo, mensaje) {
+  toastr.options = {
+    closeButton: false,
+    debug: false,
+    newestOnTop: true,
+    progressBar: true,
+    positionClass: "toast-bottom-left",
+    preventDuplicates: true,
+    onclick: null,
+    showDuration: "300",
+    hideDuration: "1000",
+    timeOut: "3000",
+    extendedTimeOut: "1000",
+    showEasing: "swing",
+    hideEasing: "linear",
+    showMethod: "fadeIn",
+    hideMethod: "fadeOut",
+  };
+  toastr[tipo](mensaje);
+} // Event handlers para formularios manuales
+
+$(document).ready(function () {
+  // Manejador para el botón "Crear Activo"
+  $("#btnCrearActivo")
+    .off("click")
+    .on("click", function () {
+      $("#divRegistroManualActivoMultiple").show();
+      $("#divlistadoactivos").hide();
+      $("#tblRegistros").hide();
+      $("#divtblRegistros").hide();
+      $("#divtblactivos").hide();
+      $("#divregistroActivo").hide();
+      $("#activosContainer").empty();
+      activoFormCount = 0;
+      if (!combosActivos) {
+        obtenerCombosActivos(function (data) {
+          combosActivos = data;
+          addActivoManualForm(combosActivos);
+        });
+      } else {
+        addActivoManualForm(combosActivos);
+      }
+    });
+
+  // Manejador para agregar otro activo
+  $("#btnAgregarOtroActivo").on("click", function () {
+    if (combosActivos) {
+      addActivoManualForm(combosActivos);
+    }
+  });
+
+  // Manejador para eliminar formulario de activo
+  $(document).on("click", ".btn-remove-activo", function () {
+    const formToRemove = $(this).closest(".activo-manual-form");
+    if ($("#activosContainer .activo-manual-form").length > 1) {
+      Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Se eliminará este formulario de activo.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonColor: "#d33",
+        cancelButtonText: "Cancelar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          formToRemove.remove();
+          updateActivoFormNumbers();
+        }
+      });
+    } else {
+      Swal.fire({
+        icon: "warning",
+        title: "Advertencia",
+        text: "No puedes eliminar el último formulario de activo.",
+      });
+    }
+  });
+
+  // Manejador para guardar activos manuales
+  $("#btnGuardarActivosManuales").on("click", function (e) {
+    e.preventDefault();
+
+    const activos = [];
+    let totalActivosPreview = 0;
+
+    // Primero, recopilar activos de las tablas de preview (activos procesados)
+    $("[id^='tblPreviewActivos_'] tbody tr").each(function (index) {
+      const fila = $(this);
+      const formId = fila.data("form-id");
+      const form = $(`[data-form-number='${formId}']`);
+
+      if (form.length > 0) {
+        // Obtener el correlativo base del formulario
+        const correlativoBase =
+          parseInt(form.find("input[name='correlativo[]']").val()) || 0;
+
+        // Calcular correlativo incremental para cada activo
+        const correlativoIncremental = correlativoBase + index;
+
+        const activo = {
+          Nombre: form.find("input[name='nombre[]']").val(),
+          CodigoAntiguo: form.find("input[name='codigoAntiguo[]']").val(),
+          Descripcion: form.find("textarea[name='Descripcion[]']").val(),
+          IdEstado: form.find("select[name='Estado[]']").val(),
+          Garantia: 0,
+          IdResponsable: form.find("select[name='Responsable[]']").val(),
+          IdProveedor: form.find("select[name='Proveedor[]']").val(),
+          IdMarca: form.find("select[name='Marca[]']").val(),
+          IdEmpresa: form.find("select[name='Empresa[]']").val(),
+          IdSucursal: form.find("select[name='UnidadNegocio[]']").val(),
+          IdAmbiente: form.find("select[name='Ambiente[]']").val(),
+          IdCategoria: form.find("select[name='Categoria[]']").val(),
+          VidaUtil: 3, // Valor por defecto
+          Serie: fila.find(".serie-manual").val(), // Serie única de la tabla
+          Observaciones: form.find("textarea[name='Observaciones[]']").val(),
+          ValorAdquisicion: parseFloat(
+            form.find("input[name='ValorAdquisicion[]']").val()
+          ),
+          AplicaIGV: form.find("input[name='AplicaIGV[]']").is(":checked")
+            ? 1
+            : 0,
+          FechaAdquisicion: form.find("input[name='fechaAdquisicion[]']").val(),
+          Cantidad: 1, // Cada fila de preview es 1 activo individual
+          Correlativo: correlativoIncremental.toString(),
+        };
+        activos.push(activo);
+        totalActivosPreview++;
+      }
+    });
+
+    // Luego, recopilar activos de formularios no procesados (cantidad = 1)
+    $("#activosContainer .activo-manual-form").each(function () {
+      const form = $(this);
+      const formId = form.data("form-number");
+      const tablaPreview = $(`#tblPreviewActivos_${formId} tbody tr`);
+
+      // Solo agregar si no tiene tabla de preview (no fue procesado)
+      if (tablaPreview.length === 0) {
+        const cantidad =
+          parseInt(form.find("input[name='Cantidad[]']").val()) || 1;
+
+        if (cantidad === 1) {
+          const activo = {
+            Nombre: form.find("input[name='nombre[]']").val(),
+            CodigoAntiguo: form.find("input[name='codigoAntiguo[]']").val(),
+            Descripcion: form.find("textarea[name='Descripcion[]']").val(),
+            IdEstado: form.find("select[name='Estado[]']").val(),
+            Garantia: 0,
+            IdResponsable: form.find("select[name='Responsable[]']").val(),
+            IdProveedor: form.find("select[name='Proveedor[]']").val(),
+            IdMarca: form.find("select[name='Marca[]']").val(),
+            IdEmpresa: form.find("select[name='Empresa[]']").val(),
+            IdSucursal: form.find("select[name='UnidadNegocio[]']").val(),
+            IdAmbiente: form.find("select[name='Ambiente[]']").val(),
+            IdCategoria: form.find("select[name='Categoria[]']").val(),
+            VidaUtil: 3, // Valor por defecto
+            Serie: form.find("input[name='serie[]']").val(),
+            Observaciones: form.find("textarea[name='Observaciones[]']").val(),
+            ValorAdquisicion: parseFloat(
+              form.find("input[name='ValorAdquisicion[]']").val()
+            ),
+            AplicaIGV: form.find("input[name='AplicaIGV[]']").is(":checked")
+              ? 1
+              : 0,
+            FechaAdquisicion: form
+              .find("input[name='fechaAdquisicion[]']")
+              .val(),
+            Cantidad: 1,
+            Correlativo: form.find("input[name='correlativo[]']").val(),
+          };
+          activos.push(activo);
+        } else {
+          NotificacionToast(
+            "warning",
+            `El formulario #${formId} tiene cantidad > 1. Use "Procesar Activo" primero.`
+          );
+          return false;
+        }
+      }
+    });
+
+    if (activos.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Sin Activos",
+        text: "No hay activos para guardar. Agregue al menos un activo o procese los formularios con cantidad > 1.",
+      });
+      return;
+    }
+
+    // Validar que todos los activos tengan los campos requeridos
+    const activosValidos = activos.every((activo) => {
+      return (
+        activo.Nombre &&
+        activo.Serie &&
+        activo.IdEstado &&
+        activo.IdCategoria &&
+        activo.IdResponsable &&
+        activo.IdEmpresa &&
+        activo.IdSucursal &&
+        activo.ValorAdquisicion > 0
+      );
+    });
+
+    if (!activosValidos) {
+      Swal.fire({
+        icon: "error",
+        title: "Datos Incompletos",
+        text: "Todos los activos deben tener nombre, serie, estado, categoría, responsable, empresa, unidad de negocio y valor de adquisición.",
+      });
+      return;
+    }
+
+    // Mostrar confirmación con resumen
+    Swal.fire({
+      title: "Confirmar Guardado",
+      html: `
+        <div class="text-left">
+          <p><strong>Total de activos a guardar:</strong> ${activos.length}</p>
+          <p><strong>Activos procesados:</strong> ${totalActivosPreview}</p>
+          <p><strong>Activos simples:</strong> ${
+            activos.length - totalActivosPreview
+          }</p>
+          <hr>
+          <p class="text-info"><i class="fas fa-info-circle"></i> ¿Desea proceder con el guardado?</p>
+        </div>
+      `,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      confirmButtonText: "Sí, guardar",
+      cancelButtonColor: "#6c757d",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        guardarActivosManuales(activos);
+      }
+    });
+  });
+
+  // Función separada para guardar activos manuales
+  function guardarActivosManuales(activos) {
+    Swal.fire({
+      title: "Procesando",
+      text: "Registrando activos...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    $.ajax({
+      url: "../../controllers/GestionarActivosController.php?action=GuardarActivosManual",
+      type: "POST",
+      data: JSON.stringify({ activos: activos }),
+      contentType: "application/json",
+      dataType: "json",
+      success: function (res) {
+        if (res.status) {
+          Swal.fire({
+            icon: "success",
+            title: "Éxito",
+            text: res.message,
+            timer: 2000,
+          }).then(() => {
+            // Limpiar todo
+            $("#activosContainer").empty();
+            activoFormCount = 0;
+
+            // Volver a la vista principal
+            $("#divRegistroManualActivoMultiple").hide();
+            $("#divlistadoactivos").show();
+            $("#divtblactivos").show();
+            $("#tblRegistros").show();
+
+            // Recargar tabla principal
+            listarActivosTable();
+
+            NotificacionToast(
+              "success",
+              "Activos guardados correctamente. Regresando a la lista principal."
+            );
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: res.message,
+          });
+        }
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.error("Error en la petición:", jqXHR.responseText);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error al registrar los activos: " + errorThrown,
+        });
+      },
+    });
+  }
 });

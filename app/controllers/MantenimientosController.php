@@ -332,6 +332,26 @@ switch ($action) {
         }
         break;
 
+    case 'obtenerHistorialEstadoMantenimiento':
+        try {
+            $idMantenimiento = $_POST['idMantenimiento'] ?? null;
+            if (!$idMantenimiento) {
+                throw new Exception("ID de mantenimiento no proporcionado");
+            }
+
+            $historial = $mantenimientos->obtenerHistorialMantenimientos($idMantenimiento);
+            echo json_encode([
+                'status' => true,
+                'data' => $historial
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+
     default:
         echo json_encode([
             'status' => false,

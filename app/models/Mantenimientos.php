@@ -312,11 +312,11 @@ class Mantenimientos
             $xml .= '</Mantenimientos>';
 
             $sql = "EXEC sp_CancelarMantenimiento @XmlMantenimientos = :xml, @pUserMod = :userMod";
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':xml', $xml, PDO::PARAM_STR);
             $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
-            
+
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
@@ -348,6 +348,27 @@ class Mantenimientos
             $stmt->bindParam(1, $idMantenimiento, PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Error al obtener datos del mantenimiento: " . $e->getMessage());
+        }
+    }
+
+    public function obtenerHistorialMantenimientos($idMantenimiento)
+    {
+        try {
+            $sql = "SELECT h.idHistorialEstadoMantenimiento, h.idMantenimiento, ea.nombre as EstadoAnterior,
+            en.nombre AS estadoNuevo, h.fechaCambio, h.userMod, e.NombreTrabajador as nombreUsuario
+            FROM tHistorialEstadoMantenimiento h
+            LEFT JOIN tEstadoMantenimiento ea ON h.idEstadoAnterior = ea.idEstadoMantenimiento
+            INNER JOIN tEstadoMantenimiento en ON h.idEstadoNuevo = en.idEstadoMantenimiento
+            LEFT JOIN vEmpleados e ON h.userMod = e.codTrabajador
+            WHERE h.idMantenimiento = ?
+            ORDER BY h.fechaCambio DESC";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idMantenimiento, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             throw new Exception("Error al obtener datos del mantenimiento: " . $e->getMessage());
         }

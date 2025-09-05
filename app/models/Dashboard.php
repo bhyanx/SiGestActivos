@@ -55,7 +55,7 @@ class Dashboard
             $pIdCategoria = empty($data['pIdCategoria']) ? null : (int)$data['pIdCategoria'];
             $pIdEstado = empty($data['pIdEstado']) ? null : (int)$data['pIdEstado'];
             $pAccion = 2;
-        
+
             $stmt = $this->db->prepare('EXEC sp_ListadoDashboard @pIdArticulo = ?, @pCodigo = ?, @pIdEmpresa = ?, @pIdSucursal = ?, @pIdCategoria = ?, @pIdEstado = ?, @pAccion = ?');
             $stmt->bindParam(1, $pIdArticulo, \PDO::PARAM_INT | \PDO::PARAM_NULL);
             $stmt->bindParam(2, $pCodigo, \PDO::PARAM_STR | \PDO::PARAM_NULL);
@@ -66,30 +66,32 @@ class Dashboard
             $stmt->bindParam(7, $pAccion, \PDO::PARAM_INT | \PDO::PARAM_NULL);
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
         } catch (\PDOException $e) {
             error_log("Error in consultarActivos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }
 
-    public function TotalActivosAsignados(){
+    public function TotalActivosAsignados($idEmpresa, $idSucursal)
+    {
         try {
             // Consulta directa para contar activos asignados
             $sql = "SELECT COUNT(a.idActivo) AS total 
                     FROM vActivos AS a 
                     INNER JOIN vEmpleados AS e 
                     ON a.idResponsable = e.codTrabajador 
-                    WHERE a.idResponsable IS NOT NULL 
+                    WHERE a.idResponsable IS NOT NULL
+                    AND a.idEmpresa = ?
+                    AND a.idSucursal = ?
                     AND e.codTrabajador IS NOT NULL 
                     AND (idEstado NOT IN(3,4))";
-            
+
             $stmt = $this->db->prepare($sql);
-            $stmt->execute();
+            $stmt->execute([$idEmpresa, $idSucursal]);
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-            
+
             error_log("TotalActivosAsignados - Resultado: " . print_r($result, true), 3, __DIR__ . '/../../logs/debug.log');
-            
+
             // Devolver un objeto con la cantidad
             return ['cantidad' => (int)$result['total']];
         } catch (\PDOException $e) {
@@ -98,7 +100,8 @@ class Dashboard
         }
     }
 
-    public function TotalActivosNoAsignados(){
+    public function TotalActivosNoAsignados($idEmpresa, $idSucursal)
+    {
         try {
             // Consulta directa para contar activos no asignados
             $sql = "SELECT COUNT(a.idActivo) AS total 
@@ -106,14 +109,16 @@ class Dashboard
                     LEFT JOIN vEmpleados AS e 
                     ON a.idResponsable = e.codTrabajador 
                     WHERE a.idResponsable IS NULL 
+                    AND a.idEmpresa = ?
+                    AND a.idSucursal = ?
                     OR e.codTrabajador IS NULL AND (idEstado NOT IN(3,4))";
-            
+
             $stmt = $this->db->prepare($sql);
-            $stmt->execute();
+            $stmt->execute([$idEmpresa, $idSucursal]);
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-            
+
             error_log("TotalActivosNoAsignados - Resultado: " . print_r($result, true), 3, __DIR__ . '/../../logs/debug.log');
-            
+
             // Devolver un objeto con la cantidad
             return ['cantidad' => (int)$result['total']];
         } catch (\PDOException $e) {

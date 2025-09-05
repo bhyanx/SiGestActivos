@@ -381,6 +381,66 @@ function initMantenimiento() {
 }
 
 // ==================== FUNCIONES DE MANTENIMIENTO ====================
+function verHistorialEstados(idMantenimiento) {
+  $.ajax({
+    url: "../../controllers/MantenimientosController.php?action=obtenerHistorialEstadoMantenimiento",
+    type: "POST",
+    data: { idMantenimiento: idMantenimiento },
+    dataType: "json",
+    success: function (res) {
+      if (res.status) {
+        let historialHtml = `
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead class="thead-dark">
+                <tr>
+                  <th>Estado Anterior</th>
+                  <th>Estado Nuevo</th>
+                  <th>Fecha Cambio</th>
+                  <th>Usuario</th>
+                </tr>
+              </thead>
+              <tbody>`;
+
+        res.data.forEach(function (item) {
+          const estadoAnterior = item.EstadoAnterior;
+          const estadoNuevo = item.estadoNuevo;
+          const fecha = moment(item.fechaCambio).format("DD/MM/YYYY HH:mm:ss");
+          const usuario = item.nombreUsuario || item.userMod;
+
+          historialHtml += `
+            <tr>
+              <td>${estadoAnterior}</td>
+              <td><strong>${estadoNuevo}</strong></td>
+              <td>${fecha}</td>
+              <td>${usuario}</td>
+            </tr>`;
+        });
+
+        historialHtml += `
+              </tbody>
+            </table>
+          </div>`;
+
+        Swal.fire({
+          title: "Historial de Estados del Mantenimiento",
+          html: historialHtml,
+          width: "80%",
+          showCloseButton: true,
+          showConfirmButton: false,
+        });
+      } else {
+        NotificacionToast(
+          "error",
+          res.message || "Error al cargar el historial"
+        );
+      }
+    },
+    error: function () {
+      NotificacionToast("error", "Error al comunicarse con el servidor");
+    },
+  });
+}
 
 function ListarCombosMantenimiento() {
   $.ajax({
@@ -968,7 +1028,11 @@ function ListarMantenimientos() {
             </a>
             <a class="dropdown-item" href="#" onclick="imprimirReporteMantenimiento(${row.idMantenimiento})">
               <i class="fas fa-print"></i> Imprimir Reporte
-            </a>`;
+            </a>
+            <a class="dropdown-item" href="#" onclick="verHistorialEstados(${row.idMantenimiento})">
+              <i class="fas fa-history"></i> Ver Historial
+            </a>
+            `;
 
           // Solo agregar botones de acción si no está finalizado ni cancelado
           if (!esFinalizado && !esCancelado) {

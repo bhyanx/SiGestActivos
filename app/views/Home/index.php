@@ -42,13 +42,13 @@ if (!isset($_SESSION["IdRol"])) {
             <!-- Main content -->
             <section class="content">
                 <div class="row">
-                    <div class="col-md-6 col-lg-3 col-xl-2">
+                    <!-- <div class="col-md-6 col-lg-3 col-xl-2">
                         <div class="card shadow">
                             <div class="card-body">
-                                <img class='img-fluid w-100' src="<?php echo Conectar::ruta(); ?>public/img/Logo-Lubriseng.png" alt="" />
+                                <img class='img-fluid w-100' src="<?php //echo Conectar::ruta(); ?>public/img/Logo-Lubriseng.png" alt="" />
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                     <div class="col-md-6 col-lg-3 col-xl-2">
                         <div class="small-box bg-success shadow">
                             <div class="inner">
@@ -90,6 +90,17 @@ if (!isset($_SESSION["IdRol"])) {
                             </div>
                             <div class="icon">
                                 <i class="fas fa-ban"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3 col-xl-2">
+                        <div class="small-box bg-info shadow">
+                            <div class="inner">
+                                <h3 id="lblvalordeactivos">0</h3>
+                                <p>Valor Activos</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-hand-holding-dollar"></i>
                             </div>
                         </div>
                     </div>

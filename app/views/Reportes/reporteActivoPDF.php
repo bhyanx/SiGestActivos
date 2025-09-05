@@ -45,7 +45,7 @@ class PDF extends FPDF
         // Header con logo y información de empresa
         $logoPath = '../../../public/img/Logo-Lubriseng.png';
         if (file_exists($logoPath)) {
-            $this->Image($logoPath, 15, 15, 20);
+            $this->Image($logoPath, 15, 25, 25);
         }
 
         // Información de la empresa (lado izquierdo)

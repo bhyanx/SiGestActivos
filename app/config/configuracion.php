@@ -27,14 +27,23 @@ class Conectar
     public function ConexionBdProgSistemas()
     {
         try {
-            $conexion = new PDO("sqlsrv:Server=192.168.1.52;Database=bdGestionLubriseng", "MastLub", "123");
-            //$conexion = new PDO("sqlsrv:Server=192.168.1.37;Database=bdActivos", "","");
-            //$conexion = new PDO("sqlsrv:Server=BHYANX;Database=bdActivos", "", "");
-            //$conexion = new PDO("sqlsrv:Server=localhost;Database=bdActivos", "sa", "Bryan260904");
+            $conexion = new PDO("sqlsrv:Server=192.168.1.52;Database=bdGestionLubriseng", "Mastlub", "Popeye**2025**");
             $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $conexion;
         } catch (PDOException $e) {
             error_log("Error de conexión a bdActivos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
+    public function ConexionBdGestionLubriseng()
+    {
+        try {
+            $conexion = new PDO("sqlsrv:Server=zeus;Database=bdGestionLubriseng", "MastLub", "Popeye**2025**");
+            $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            return $conexion;
+        } catch (PDOException $e) {
+            error_log("Error de conexión a bdGestionLubriseng: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
             throw $e;
         }
     }
