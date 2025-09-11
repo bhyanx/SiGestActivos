@@ -55,13 +55,13 @@ session_start();
                                                     <select class="form-control" name="filtroSucursal" id="filtroSucursal" disabled></select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
                                                 <div class="form-group">
                                                     <label for="filtroFecha">Fecha Movimiento:</label>
                                                     <input type="date" class="form-control" name="filtroFecha" id="filtroFecha" value="<?php echo date('Y-m-d'); ?>">
                                                 </div>
                                             </div>
-                                            <div class="col-md-2 offset-md-6">
+                                            <div class="col-md-2 offset-md-1">
                                                 <div class="form-group mb-0">
                                                     <label for="">&nbsp;</label>
                                                     <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">
@@ -73,7 +73,7 @@ session_start();
                                                 <div class="form-group mb-0">
                                                     <label for="">&nbsp;</label>
                                                     <button type="button" class="btn btn-success btn-sm btn-block" id="btnnuevo">
-                                                        <i class="fa fa-plus"></i> Nuevo Movimiento
+                                                        <i class="fas fa-route"></i> Nuevo Movimiento
                                                     </button>
                                                 </div>
                                             </div>
@@ -204,13 +204,13 @@ session_start();
                         <div class="col-12" id="divtblmovimientos" style="display: none;">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title"><i class="fa fa-list"></i> Lista de Movimientos entre Activos</h3>
+                                    <h3 class="card-title"><i class="fa fa-list-check"></i> Lista de Movimientos entre Activos</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="col-md-12">
                                         <div class="table-responsive">
                                             <table id="tblMovimientos" class="table table-bordered table-striped w-100 h-100">
-                                                <thead>
+                                                <thead class="table-success">
                                                     <tr>
                                                         <th><i class="fa fa-cogs" title="Acciones"></i></th>
                                                         <th>Id DetalleMovimiento</th>
@@ -227,17 +227,18 @@ session_start();
                                                     </tr>
                                                 </thead>
                                                 <tbody></tbody>
-                                                <tfoot>
+                                                <tfoot class="table-success">
                                                     <tr>
                                                         <th><i class="fa fa-cogs" title="Acciones"></i></th>
                                                         <th>Id DetalleMovimiento</th>
                                                         <th>Id Componente</th>
+                                                        <th>Codigo Componente</th>
                                                         <th>Nombre Componente</th>
+                                                        <th>Tipo de Mov.</th>
                                                         <th>Activo Padre Origen</th>
                                                         <th>Activo Padre Destino</th>
                                                         <th>Sucursal</th>
                                                         <th>Ambiente</th>
-                                                        <th>Autorizador</th>
                                                         <th>Responsable</th>
                                                         <th>Fecha Movimiento</th>
                                                     </tr>
@@ -382,7 +383,7 @@ session_start();
                                         <div class="col-md-12">
                                             <div class="table-responsive">
                                                 <table id="tbldetallecomponentes" class="table table-hover table-bordered table-striped table-sm w-100">
-                                                    <thead>
+                                                    <thead class="text-center table-success">
                                                         <tr>
                                                             <th>Código</th>
                                                             <th>Nombre</th>
@@ -470,7 +471,7 @@ session_start();
     <div class="modal fade" id="modalBuscarActivos" tabindex="-1" role="dialog" aria-labelledby="modalBuscarActivosLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-success">
                     <h5 class="modal-title" id="modalBuscarActivosLabel">Buscar Activos</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -481,7 +482,7 @@ session_start();
                         <div class="col-md-12">
                             <div class="table-responsive">
                                 <table id="tblActivos" class="table table-bordered table-striped">
-                                    <thead>
+                                    <thead class="text-center table-success">
                                         <tr>
                                             <th>ID</th>
                                             <th>Código</th>
@@ -493,3 +494,18 @@ session_start();
                                     </thead>
                                     <tbody></tbody>
                                 </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php require_once("../Layouts/Footer.php"); ?>
+    <script src="movimientoscomponentes.js"></script>
+</body>
+
+</html>

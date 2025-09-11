@@ -90,32 +90,11 @@ session_start();
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group">
-                                                    <label for="filtroTipoListado">Tipo de Listado:</label>
-                                                    <select class="form-control" name="filtroTipoListado" id="filtroTipoListado">
-                                                        <option value="enviados">Movimientos Enviados</option>
-                                                        <option value="recibidos">Movimientos Recibidos</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <!-- <div class="col-md-2">
-                                                <div class="form-group">
-                                                    <label for="filtroSucursal">Sucursal:</label>
-                                                    <select class="form-control" name="filtroSucursal" id="filtroSucursal"></select>
-                                                </div>
-                                            </div> -->
-                                            <!-- <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label for="filtroAmbiente">Ambiente Destino:</label>
-                                                    <select class="form-control" name="filtroAmbiente"id="filtroAmbiente"></select>
-                                                </div>
-                                            </div> -->
-                                            <div class="col-md-2">
-                                                <div class="form-group">
                                                     <label for="filtroFecha">Fecha Movimiento:</label>
                                                     <input type="date" class="form-control" name="filtroFecha" id="filtroFecha" value="<?php echo date('Y-m-d'); ?>">
                                                 </div>
                                             </div>
-                                            <div class="col-md-2 offset-md-6">
+                                            <div class="col-md-2 offset-md-2">
                                                 <div class="form-group mb-0">
                                                     <label for="">&nbsp;</label>
                                                     <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">
@@ -123,14 +102,6 @@ session_start();
                                                     </button>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-md-2">
-                                                <div class="form-group mb-0">
-                                                    <label for="">&nbsp;</label>
-                                                    <button type="button" class="btn btn-success btn-sm btn-block" id="btnnuevomantenimiento">
-                                                        <i class="fa fa-plus"></i> Nuevo Mantenimiento
-                                                    </button>
-                                                </div>
-                                            </div> -->
                                             <div class="col-md-2">
                                                 <div class="form-group mb-0">
                                                     <label for="">&nbsp;</label>
@@ -139,14 +110,6 @@ session_start();
                                                     </button>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-md-2">
-                                                <div class="form-group mb-0">
-                                                    <lable>&nbsp;</lable>
-                                                    <button class="btn btn-success btn-sm btn-block" id="btnCompuesto">
-                                                        <i class="fa fa-plus"></i> Nuevo Movimiento Compuesto
-                                                    </button>
-                                                </div>
-                                            </div> -->
                                         </div>
                                     </div>
                                 </div>
@@ -155,13 +118,13 @@ session_start();
                         <div class="col-12" id="divtblmovimientos" style="display: none;">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title" id="tituloTablaMovimientos"><i class="fa fa-list"></i> Lista de Movimientos Enviados</h3>
+                                    <h3 class="card-title" id="tituloTablaMovimientos"><i class="fa fa-list-check"></i> Lista de Movimientos Enviados</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="col-md-12">
                                         <div class="table-responsive">
                                             <table id="tblMovimientos" class="table table-bordered table-striped w-100 h-100">
-                                                <thead>
+                                                <thead class="table-warning">
                                                     <tr>
                                                         <th><i class="fa fa-cogs" title="Acciones"></i></th>
                                                         <th>Código</th>
@@ -174,7 +137,7 @@ session_start();
                                                     </tr>
                                                 </thead>
                                                 <tbody></tbody>
-                                                <tfoot>
+                                                <tfoot class="table-warning">
                                                     <tr>
                                                         <th><i class="fa fa-cogs" title="Acciones"></i></th>
                                                         <th>Código</th>
@@ -385,7 +348,7 @@ session_start();
                         <div class="col-md-12">
                             <div class="card card-primary">
                                 <div class="card-header">
-                                    <h3 class="card-title"><i class="fas fa-list"></i> Activos para Mantenimiento</h3>
+                                    <h3 class="card-title"><i class="fas fa-list-check"></i> Activos para Mantenimiento</h3>
                                     <div class="card-tools">
                                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                             <i class="fas fa-minus"></i>
@@ -417,7 +380,7 @@ session_start();
 
                                     <div class="table-responsive">
                                         <table id="tblactivosmantenimiento" class="table table-hover table-bordered table-striped table-sm w-100">
-                                            <thead>
+                                            <thead class="table-warning">
                                                 <tr>
                                                     <th>ID</th>
                                                     <th>Código</th>
@@ -429,7 +392,7 @@ session_start();
                                                 </tr>
                                             </thead>
                                             <tbody></tbody>
-                                            <tfoot>
+                                            <tfoot class="table-warning">
                                                 <tr>
                                                     <th colspan="6" style="text-align: right;">TOTAL ACTIVOS:</th>
                                                     <th class="text-center">
@@ -467,7 +430,7 @@ session_start();
                     <div class="modal fade" id="ModalArticulosMantenimiento" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalArticulosMantenimientoTitle">
                         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
                             <div class="modal-content">
-                                <div class="modal-header dragable_touch">
+                                <div class="modal-header bg-warning">
                                     <h5 class="modal-title" id="ModalArticulosMantenimientoTitulo"><i class="fas fa-tools"></i> Lista de activos para mantenimiento</h5>
                                     <button class="close" data-dismiss="modal" aria-label="Close">
                                         <span>&times;</span>
@@ -478,27 +441,27 @@ session_start();
                                         <div class="col-md-12">
                                             <div class="table-responsive">
                                                 <table id="tbllistarActivosMantenimiento" class="table table-bordered table-striped display nowrap" style="width:100%">
-                                                    <thead>
+                                                    <thead class="table-warning">
                                                         <tr>
                                                             <th>Id</th>
                                                             <th>Código</th>
                                                             <th>Nombre</th>
                                                             <th>Sucursal</th>
                                                             <th>Ambiente</th>
-                                                            <th><i class="fa fa-cogs"></i></th>
+                                                            <th><i class="fa fa-screwdriver-wrench"></i></th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <!-- Aquí se llenarán los datos dinámicamente -->
                                                     </tbody>
-                                                    <tfoot>
+                                                    <tfoot class="table-warning">
                                                         <tr>
                                                             <th>Id</th>
                                                             <th>Código</th>
                                                             <th>Nombre</th>
                                                             <th>Sucursal</th>
                                                             <th>Ambiente</th>
-                                                            <th><i class="fa fa-cogs"></i></th>
+                                                            <th><i class="fa fa-screwdriver-wrench"></i></th>
                                                         </tr>
                                                     </tfoot>
                                                 </table>

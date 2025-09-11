@@ -90,7 +90,7 @@ session_start();
                                 <div class="row">
                                     <div class="col-md-12" id="divfiltros">
                                         <div class="row">
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
                                                 <div class="form-group">
                                                     <label for="filtroTipoMovimiento">Tipo Movimiento:</label>
                                                     <select class="form-control" name="filtroTipoMovimiento" id="filtroTipoMovimiento"></select>
@@ -105,16 +105,10 @@ session_start();
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-2">
+                                            <!-- <div class="col-md-2">
                                                 <div class="form-group">
                                                     <label for="filtroSucursal">Sucursal:</label>
                                                     <select class="form-control" name="filtroSucursal" id="filtroSucursal" disabled></select>
-                                                </div>
-                                            </div>
-                                            <!-- <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label for="filtroAmbiente">Ambiente Destino:</label>
-                                                    <select class="form-control" name="filtroAmbiente"id="filtroAmbiente"></select>
                                                 </div>
                                             </div> -->
                                             <div class="col-md-2">
@@ -135,19 +129,10 @@ session_start();
                                                 <div class="form-group mb-0">
                                                     <label for="">&nbsp;</label>
                                                     <button type="button" class="btn btn-success btn-sm btn-block" id="btnnuevo">
-                                                        <i class="fa fa-plus"></i> Nuevo Movimiento
+                                                        <i class="fas fa-route"></i> Nuevo Movimiento
                                                     </button>
                                                 </div>
                                             </div>
-
-                                            <!-- <div class="col-md-2">
-                                                <div class="form-group mb-0">
-                                                    <lable>&nbsp;</lable>
-                                                    <button class="btn btn-success btn-sm btn-block" id="btnCompuesto">
-                                                        <i class="fa fa-plus"></i> Nuevo Movimiento Compuesto
-                                                    </button>
-                                                </div>
-                                            </div> -->
                                         </div>
                                     </div>
                                 </div>
@@ -156,13 +141,13 @@ session_start();
                         <div class="col-12" id="divtblmovimientos" style="display: none;">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title" id="tituloTablaMovimientos"><i class="fa fa-list"></i> Lista de Movimientos Enviados</h3>
+                                    <h3 class="card-title" id="tituloTablaMovimientos"><i class="fa fa-list-check-check"></i> Lista de Movimientos Enviados</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="col-md-12">
                                         <div class="table-responsive">
                                             <table id="tblMovimientos" class="table table-bordered table-striped w-100 h-100">
-                                                <thead>
+                                                <thead class="table-success">
                                                     <tr>
                                                         <th><i class="fa fa-cogs" title="Acciones"></i></th>
                                                         <th>Código</th>
@@ -175,7 +160,7 @@ session_start();
                                                     </tr>
                                                 </thead>
                                                 <tbody></tbody>
-                                                <tfoot>
+                                                <tfoot class="table-success">
                                                     <tr>
                                                         <th><i class="fa fa-cogs" title="Acciones"></i></th>
                                                         <th>Código</th>
@@ -439,7 +424,7 @@ session_start();
                                             </div>
                                             <div class="table-responsive">
                                                 <table id="tbldetalleactivomov" class="table table-hover table-bordered table-striped table-sm w-100">
-                                                    <thead>
+                                                    <thead class="table-success">
                                                         <tr>
                                                             <th>ID</th>
                                                             <th>Código</th>
@@ -541,77 +526,25 @@ session_start();
                         <!-- Modal Articulos -->
                         <div class="modal fade" id="ModalArticulos" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalArticulosTitle" style="z-index: 9999 !important;">
                             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header dragable_touch">
-                                    <h5 class="modal-title" id="ModalArticulosTitulo"><i class="fas fa-box"></i> Lista de artículos</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="table-responsive">
-
-                                                <table id="tbllistarActivos" class="table table-bordered table-striped display nowrap" style="width:100%">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Id</th>
-                                                            <th>Código</th>
-                                                            <th>Nombre</th>
-                                                            <!-- <th>Marca</th> -->
-                                                            <th>Sucursal</th>
-                                                            <th>Ambiente</th>
-                                                            <th><i class="fa fa-cogs"></i></th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <!-- Aquí se llenarán los datos dinámicamente -->
-                                                    </tbody>
-                                                    <tfoot>
-                                                        <tr>
-                                                            <th>Id</th>
-                                                            <th>Código</th>
-                                                            <th>Nombre</th>
-                                                            <!-- <th>Marca</th> -->
-                                                            <th>Sucursal</th>
-                                                            <th>Ambiente</th>
-                                                            <th><i class="fa fa-cogs"></i></th>
-                                                        </tr>
-                                                    </tfoot>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                        <i class="fas fa-times"></i> Cerrar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Modal Articulos para Mantenimiento -->
-                        <div class="modal fade" id="ModalArticulosMantenimiento" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalArticulosMantenimientoTitle">
-                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
                                 <div class="modal-content">
-                                    <div class="modal-header dragable_touch">
-                                        <h5 class="modal-title" id="ModalArticulosMantenimientoTitulo"><i class="fas fa-tools"></i> Lista de activos para mantenimiento</h5>
-                                        <button class="close" data-dismiss="modal" aria-label="Close">
-                                            <span>&times;</span>
+                                    <div class="modal-header dragable_touch bg-primary">
+                                        <h5 class="modal-title" id="ModalArticulosTitulo"><i class="fas fa-box"></i> Lista de artículos</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
                                     <div class="modal-body">
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="table-responsive">
-                                                    <table id="tbllistarActivosMantenimiento" class="table table-bordered table-striped display nowrap" style="width:100%">
-                                                        <thead>
+
+                                                    <table id="tbllistarActivos" class="table table-bordered table-striped display nowrap" style="width:100%">
+                                                        <thead class="table-success">
                                                             <tr>
                                                                 <th>Id</th>
                                                                 <th>Código</th>
                                                                 <th>Nombre</th>
+                                                                <!-- <th>Marca</th> -->
                                                                 <th>Sucursal</th>
                                                                 <th>Ambiente</th>
                                                                 <th><i class="fa fa-cogs"></i></th>
@@ -620,11 +553,12 @@ session_start();
                                                         <tbody>
                                                             <!-- Aquí se llenarán los datos dinámicamente -->
                                                         </tbody>
-                                                        <tfoot>
+                                                        <tfoot class="table-success">
                                                             <tr>
                                                                 <th>Id</th>
                                                                 <th>Código</th>
                                                                 <th>Nombre</th>
+                                                                <!-- <th>Marca</th> -->
                                                                 <th>Sucursal</th>
                                                                 <th>Ambiente</th>
                                                                 <th><i class="fa fa-cogs"></i></th>
@@ -635,17 +569,67 @@ session_start();
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                            <i class="fas fa-times"></i> Cerrar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Modal Articulos para Mantenimiento -->
+                            <div class="modal fade" id="ModalArticulosMantenimiento" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalArticulosMantenimientoTitle">
+                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header dragable_touch">
+                                            <h5 class="modal-title" id="ModalArticulosMantenimientoTitulo"><i class="fas fa-tools"></i> Lista de activos para mantenimiento</h5>
+                                            <button class="close" data-dismiss="modal" aria-label="Close">
+                                                <span>&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="table-responsive">
+                                                        <table id="tbllistarActivosMantenimiento" class="table table-bordered table-striped display nowrap" style="width:100%">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Id</th>
+                                                                    <th>Código</th>
+                                                                    <th>Nombre</th>
+                                                                    <th>Sucursal</th>
+                                                                    <th>Ambiente</th>
+                                                                    <th><i class="fa fa-cogs"></i></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <!-- Aquí se llenarán los datos dinámicamente -->
+                                                            </tbody>
+                                                            <tfoot>
+                                                                <tr>
+                                                                    <th>Id</th>
+                                                                    <th>Código</th>
+                                                                    <th>Nombre</th>
+                                                                    <th>Sucursal</th>
+                                                                    <th>Ambiente</th>
+                                                                    <th><i class="fa fa-cogs"></i></th>
+                                                                </tr>
+                                                            </tfoot>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
+            </section>
         </div>
-        </section>
-    </div>
-    <?php require_once("../Layouts/Footer.php"); ?>
-    <script src="movimiento.js"></script>
+        <?php require_once("../Layouts/Footer.php"); ?>
+        <script src="movimiento.js"></script>
     </div>
 </body>
 

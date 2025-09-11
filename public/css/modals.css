@@ -1,0 +1,15 @@
+.modal-content{
+    border-radius: 21px !important;
+}
+
+.modal-header{
+    border-radius: 20px 20px 0 0 !important;
+}
+
+.card-title{
+    font-weight: 600 !important;
+}
+
+.fa-list-check{
+    color: #28A745 !important;
+}

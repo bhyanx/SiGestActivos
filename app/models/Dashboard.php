@@ -111,7 +111,7 @@ class Dashboard
                     WHERE a.idResponsable IS NULL 
                     AND a.idEmpresa = ?
                     AND a.idSucursal = ?
-                    OR e.codTrabajador IS NULL AND (idEstado NOT IN(3,4))";
+                    AND e.codTrabajador IS NULL AND (idEstado NOT IN(3,4))";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$idEmpresa, $idSucursal]);

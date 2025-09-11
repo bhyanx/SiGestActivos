@@ -103,7 +103,7 @@ if (isset($_SESSION["IdRol"])) {
                             <div class="col-12" id="divtblRegistros" style="display: none;">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h3 class="card-title"><i class="fa fa-list"></i> Lista de Activos Registrados</h3>
+                                        <h3 class="card-title"><i class="fa fa-list-check"></i> Lista de Activos Registrados</h3>
                                     </div>
                                     <div class="dataTables_wrapper dt-bootstrap4">
                                         <div class="card-body">
@@ -135,10 +135,11 @@ if (isset($_SESSION["IdRol"])) {
                                                             </tr>
                                                         </thead>
                                                         <tbody></tbody>
-                                                        <tfoot>
+                                                        <tfoot class="table-success">
                                                             <tr>
                                                                 <th>Id</th>
                                                                 <th>Código</th>
+                                                                <th>Código Antiguo</th>
                                                                 <th>Nombre</th>
                                                                 <th>Id Estado</th>
                                                                 <th>Estado</th>
@@ -289,7 +290,7 @@ if (isset($_SESSION["IdRol"])) {
                                 <div class="modal fade" id="ModalArticulos" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalArticulosTitle">
                                     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document" id="frmArticulos">
                                         <div class="modal-content">
-                                            <div class="modal-header dragable_touch">
+                                            <div class="modal-header dragable_touch bg-primary">
                                                 <h5 class="modal-title" id="ModalArticulosTitulo"><i class="fas fa-box"></i> Lista de artículos</h5>
                                                 <button class="close" data-dismiss="modal" aria-label="Close">
                                                     <span>&times;</span>
@@ -299,9 +300,8 @@ if (isset($_SESSION["IdRol"])) {
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <div class="table-responsive">
-
                                                             <table id="tbllistarActivos" class="table table-bordered table-striped display nowrap" style="width:100%">
-                                                                <thead>
+                                                                <thead class="table-primary">
                                                                     <tr>
                                                                         <th>Id</th>
                                                                         <th>Nombre</th>
@@ -313,7 +313,7 @@ if (isset($_SESSION["IdRol"])) {
                                                                 <tbody>
                                                                     <!-- Aquí se llenarán los datos dinámicamente -->
                                                                 </tbody>
-                                                                <tfoot>
+                                                                <tfoot class="table-primary">
                                                                     <tr>
                                                                         <th>Id</th>
                                                                         <th>Nombre</th>
@@ -473,112 +473,6 @@ if (isset($_SESSION["IdRol"])) {
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- COMENTADO PORQUE YA NO SE USARÁ EL REGISTRO MANUAL -->
-                            <!--<div class="modal fade" id="divModalRegistroManualActivo" tabindex="-1" role="dialog" aria-labelledby="ModalRegistroManualLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-primary">
-                                            <h5 class="modal-title" id="tituloModalRegistroManual"><i class="fa fa-plus-circle"></i> Crear Activo</h5>
-                                        </div>
-                                        <form id="frmmantenimiento">
-                                            <div class="modal-body">
-                                                <div class="row">
-                                                    <input type="hidden" name="IdActivo" id="IdActivo" value="0">
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <label for="nombre">Nombre</label>
-                                                            <input type="text" name="nombre" id="nombre" class="form-control" placeholder="Ej. Mouse Logitech" required>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label for="serie">Serie</label>
-                                                            <input type="text" name="serie" id="serie" class="form-control" placeholder="Ej. ML-123" required>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-12">
-                                                        <div class="form-group">
-                                                            <label for="descripcion">Descripción</label>
-                                                            <textarea name="Descripcion" id="Descripcion" class="form-control" placeholder="Ej. Mouse Logitech color negro"></textarea>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label for="empresa">Empresa</label>
-                                                            <input type="text" class="form-control" id="empresa" disabled>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label for="unidadNegocio">Unidad de Negocio</label>
-                                                            <input type="text" class="form-control" id="unidadNegocio" disabled>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label for="">Responsable</label>
-                                                            <select name="Responsable" id="Responsable" class="form-control select-2" required></select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <label for="estado">Estado</label>
-                                                            <select name="Estado" id="Estado" class="form-control select-2" required></select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-8">
-                                                        <div class="form-group">
-                                                            <label for="categoria">Categoria</label>
-                                                            <select name="Categoria" id="Categoria" class="form-control select-2" required></select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-8">
-                                                        <div class="form-group">
-                                                            <label for="ambiente">Ambiente:</label>
-                                                            <select name="Ambiente" id="Ambiente" class="form-control select-2"></select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-8">
-                                                        <div class="form-group">
-                                                            <label for="">Proveedor</label>
-                                                            <select name="Proveedor" id="Proveedor" class="form-control select-2"></select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <label for="Cantidad"> Cantidad: </label>
-                                                            <input type="text" name="Cantidad" id="Cantidad" class="form-control" placeholder="Ej. 1" required>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <label for="">Valor Adquisición:</label>
-                                                            <input type="text" name="ValorAdquisicion" id="ValorAdquisicion" class="form-control" placeholder="Ej. 10.00" required>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label for="fechaAdquisicion">Fecha Adquisición: </label>
-                                                            <input type="date" name="fechaAdquisicion" id="fechaAdquisicion" class="form-control" required>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-12">
-                                                        <div class="form-group">
-                                                            <label for="">Observaciones: </label>
-                                                            <textarea name="Observaciones" id="Observaciones" class="form-control" rows="3" placeholder="Ingrese las observaciones según el activo..."></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times"></i> Cerrar</button>
-                                                <button type="submit" class="btn btn-primary" id="btnGuardarManual"><i class="fa fa-save"></i> Guardar</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>-->
 
                             <!-- MODAL PARA PODER ACTUALIZAR EL ACTIVO. -->
                             <div class="modal fade" id="divModalActualizarActivo" style="z-index: 9999 !important;" role="dialog" aria-labelledby="ModalActualizarActivoLabel" aria-hidden="true">
@@ -761,7 +655,7 @@ if (isset($_SESSION["IdRol"])) {
                                 <div class="modal-dialog modal-xl" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header bg-info">
-                                            <h5 class="modal-title" id="modalListarTodosActivosLabel"><i class="fa fa-list"></i> Lista de Todos los Activos</h5>
+                                            <h5 class="modal-title" id="modalListarTodosActivosLabel"><i class="fa fa-list-check"></i> Lista de Todos los Activos</h5>
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                                                 <span aria-hidden="true">&times;</span>
                                             </button>

@@ -4364,7 +4364,7 @@ function listarActivosTable() {
         render: function (data, type, row) {
           return `
           <div class="btn-group">
-            <button type="button" class="btn btn-info btn-sm dropdown-toggle" 
+            <button type="button" class="btn btn-success btn-sm dropdown-toggle" 
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <i class="fas fa-cog"></i>
             </button>

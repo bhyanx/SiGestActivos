@@ -1536,7 +1536,7 @@ function ListarMovimientosEnviados() {
         render: function (data, type, row) {
           let acciones = `
             <div class="btn-group">
-              <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-cogs"></i>
               </button>
               <div class="dropdown-menu">

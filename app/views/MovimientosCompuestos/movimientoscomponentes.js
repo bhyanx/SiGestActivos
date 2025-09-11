@@ -191,7 +191,7 @@ function init() {
         cancelButtonText: "No, continuar aquí",
       }).then((result) => {
         if (result.isConfirmed) {
-          $("#divregistroMovimiento").hide();
+          $("#divformularioasignacion").hide();
           // $("#divgenerarmov").show();
           $("#divtblmovimientos").show();
           $("#divlistadomovimientos").show();
@@ -869,7 +869,7 @@ function listarMovimientos() {
         data: null,
         render: () =>
           `<div class="btn-group">
-            <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <i class="fas fa-cog"></i>
             </button>
             <div class="dropdown-menu">

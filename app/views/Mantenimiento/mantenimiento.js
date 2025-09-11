@@ -1173,9 +1173,9 @@ function listarActivosModalMantenimiento() {
         data: null,
         render: function (data, type, row) {
           return (
-            '<button class="btn btn-success btn-sm btnSeleccionarActivoMantenimiento" data-id="' +
+            '<button class="btn btn-warning btn-sm btnSeleccionarActivoMantenimiento" data-id="' +
             row.IdActivo +
-            '"><i class="fa fa-check"></i></button>'
+            '"><i class="fas fa-screwdriver-wrench"></i></button>'
           );
         },
       },
