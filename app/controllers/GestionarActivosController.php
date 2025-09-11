@@ -48,12 +48,12 @@ switch ($action) {
             $filtroSucursal = $_POST['filtroSucursal'] ?? $_SESSION['cod_UnidadNeg'] ?? null;
             $filtroAmbiente = $_POST['filtroAmbiente'] ?? null;
             $filtroCategoria = $_POST['filtroCategoria'] ?? null;
-            
+
             // Si el valor es "TODOS", convertir a null para mostrar todos los registros
             if ($filtroSucursal === 'TODOS') $filtroSucursal = null;
             if ($filtroAmbiente === 'TODOS') $filtroAmbiente = null;
             if ($filtroCategoria === 'TODOS') $filtroCategoria = null;
-            
+
             $filtros = [
                 'pCodigo' => $_POST['pCodigo'] ?? null,
                 'pIdEmpresa' => $_POST['filtroEmpresa'] ?? $_SESSION['cod_empresa'] ?? null,
@@ -432,14 +432,13 @@ switch ($action) {
     //Case para el modal y agregar 
     case 'articulos_por_doc':
         try {
-            $dbi = (new Conectar())->ConexionBdProgSistemas(); // Usar bdActivos
+            $dbi = (new Conectar())->ConexionBdPracticante(); // Usar bdActivos
             $IdDocIngresoAlm = $_POST['IdDocIngresoAlm'] ?? null;
             if (!$IdDocIngresoAlm) {
                 throw new Exception("IdDocIngresoAlm no proporcionado.");
             }
 
-            $stmt = $dbi->prepare("
-            SELECT ing.idDocIngAlmacen AS IdDocIngresoAlm,
+            $stmt = $dbi->prepare("SELECT ing.idDocIngAlmacen AS IdDocIngresoAlm,
             ing.idarticulo AS IdArticulo, 
             a.Descripcion_articulo AS Nombre,
             a.DescripcionMarca AS Marca,
@@ -447,8 +446,8 @@ switch ($action) {
             ing.cod_UnidadNeg AS IdUnidadNegocio,
             ing.Nombre_local AS NombreLocal,
             p.RazonSocial AS Proveedor
-            FROM vmListadoDeArticulosPorDocumentoDeIngresoAAlmacen ing
-            INNER JOIN vArticulos a ON ing.IdArticulo = a.IdArticulo
+            FROM vListadoDeArticulosPorDocIngresoAlmacen ing
+            INNER JOIN vArticulos a ON ing.idarticulo = a.IdArticulo
             LEFT JOIN vEmpresas e ON ing.Cod_Empresa = e.cod_empresa 
             LEFT JOIN vEntidadExternaGeneralProveedor p ON p.Documento = ing.Documento
             WHERE ing.idDocIngAlmacen = ?
@@ -812,7 +811,7 @@ switch ($action) {
                     // Debug: Log de los datos que se envían al modelo
                     error_log("Datos enviados al modelo: " . print_r($data, true), 3, __DIR__ . '/../../logs/debug.log');
                     error_log("Campo Correlativo específico: " . ($data['Correlativo'] ?? 'NULL'), 3, __DIR__ . '/../../logs/debug.log');
-                    
+
                     $activos->GuardarActivosManual($data);
                     $activosGuardados[] = $data['Nombre']; // Guardar el nombre del activo para la respuesta
                 }
@@ -916,7 +915,7 @@ switch ($action) {
         try {
             $idEmpresa = $_POST['idEmpresa'] ?? null;
             $idSucursal = $_POST['idSucursal'] ?? null;
-            
+
             if (!$idEmpresa || !$idSucursal) {
                 throw new Exception("Se requiere empresa y unidad de negocio");
             }
@@ -945,7 +944,7 @@ switch ($action) {
         try {
             $idEmpresa = $_POST['idEmpresa'] ?? null;
             $idCategoria = $_POST['idCategoria'] ?? null;
-            
+
             if (!$idEmpresa || !$idCategoria) {
                 throw new Exception("Se requiere empresa y categoría");
             }

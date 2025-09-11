@@ -52,7 +52,6 @@ class GestionarMovimientos
         }
     }
 
-
     public function crearDetalleMovimiento($data)
     {
         try {

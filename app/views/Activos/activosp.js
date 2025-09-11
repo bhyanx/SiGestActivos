@@ -1039,7 +1039,8 @@ function init() {
         const ultimaFilaGrupo = $(`tr[data-grupo-id='${grupoId}']`).last();
         ultimaFilaGrupo.after(nuevaFila);
 
-        // Cargar combos para la nueva fila (solo ambiente y categoría)
+        // Cargar combos para la nueva fila (general)
+        // Usar ambientes filtrados por empresa/sucursal de la sesión
         ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
         ListarCombosCategoria(`comboCategoria${numeroFilas}`);
 
@@ -1047,7 +1048,26 @@ function init() {
         setTimeout(() => {
           $(`#comboAmbiente${numeroFilas}`).val(ambienteId).trigger("change");
           $(`#comboCategoria${numeroFilas}`).val(categoriaId).trigger("change");
-        }, 500);
+        }, 100);
+
+        // Forzar sincronización de opciones de ambiente con la fila principal (clonar opciones)
+        setTimeout(() => {
+          const $nuevoAmb = $(`#comboAmbiente${numeroFilas}`);
+          const $ambPrincipal = filaPrincipal.find("select.ambiente");
+          if ($ambPrincipal.length && $nuevoAmb.length) {
+            // Copiar opciones para asegurar misma fuente/filtrado
+            $nuevoAmb.html($ambPrincipal.html());
+            // Re-inicializar select2 en el nuevo select con el mismo contexto
+            if ($nuevoAmb.hasClass("select2-hidden-accessible")) {
+              $nuevoAmb.select2("destroy");
+            }
+            $nuevoAmb.select2({
+              theme: "bootstrap4",
+              width: "100%",
+              dropdownParent: $nuevoAmb.closest("tr"),
+            });
+          }
+        }, 50);
 
         // Actualizar los badges de todas las filas del grupo
         actualizarBadgesGrupo(grupoId);
@@ -3055,7 +3075,7 @@ function init() {
             $("#IdActivoEditar").val(data.idActivo);
             $("#IdActivo").val(data.idActivo);
             $("#CodigoActivo").val(data.codigo);
-            $("#SerieActivo").val(data.Serie);
+            $("#SerieActivo").val(data.serie);
             $("#DocIngresoAlmacen").val(data.DocIngresoAlmacen);
             $("#IdArticulo").val(data.idArticulo);
             $("#nombreArticulo").val(data.NombreActivo);
@@ -3500,8 +3520,6 @@ function init() {
 
 // ? FIN CODIGO PARA GUARDAR MANUAL SIN UTILIZAR.
 
-
-
 function listarActivosModal(documento, tipoDoc = "ingreso") {
   if ($.fn.DataTable.isDataTable("#tbllistarActivos")) {
     $("#tbllistarActivos").DataTable().clear().destroy();
@@ -3843,17 +3861,43 @@ function ListarCombosAmbiente(elemento) {
 
 // Nueva función para cargar ambientes basados en la sesión del usuario (para documentos de venta/ingreso)
 function ListarCombosAmbienteSesion(elemento) {
-  // Verificar si tenemos la empresa y sucursal de la sesión
-  if (typeof empresaSesion !== "undefined" && empresaSesion && 
-      typeof sucursalSesion !== "undefined" && sucursalSesion) {
-    
-    // Cargar ambientes específicos para la empresa y sucursal de la sesión
+  // Helper: obtener empresa/sucursal desde sesión o filtros
+  function obtenerEmpresaSucursalSesion() {
+    let idEmpresa = null;
+    let idSucursal = null;
+
+    if (typeof empresaSesion !== "undefined" && empresaSesion) {
+      idEmpresa = empresaSesion;
+    }
+    if (typeof sucursalSesion !== "undefined" && sucursalSesion) {
+      idSucursal = sucursalSesion;
+    }
+
+    // Fallback: leer de filtros si existen en la vista
+    if ((!idEmpresa || !idSucursal) && typeof $ !== "undefined") {
+      const $fEmpresa = $("#filtroEmpresa");
+      const $fSucursal = $("#filtroSucursal");
+      if (!idEmpresa && $fEmpresa.length && $fEmpresa.val()) {
+        idEmpresa = $fEmpresa.val();
+      }
+      if (!idSucursal && $fSucursal.length && $fSucursal.val()) {
+        idSucursal = $fSucursal.val();
+      }
+    }
+
+    return { idEmpresa, idSucursal };
+  }
+
+  const { idEmpresa, idSucursal } = obtenerEmpresaSucursalSesion();
+
+  if (idEmpresa && idSucursal) {
+    // Cargar ambientes específicos para la empresa y sucursal detectadas
     $.ajax({
       url: "../../controllers/GestionarActivosController.php?action=comboAmbiente",
       type: "POST",
       data: {
-        idEmpresa: empresaSesion,
-        idSucursal: sucursalSesion,
+        idEmpresa: idEmpresa,
+        idSucursal: idSucursal,
       },
       dataType: "json",
       async: false,
@@ -3863,6 +3907,7 @@ function ListarCombosAmbienteSesion(elemento) {
           $(`#${elemento}`).select2({
             theme: "bootstrap4",
             width: "100%",
+            dropdownParent: $(`#${elemento}`).closest("tr"),
           });
         } else {
           // Si falla, cargar todos los ambientes como fallback
@@ -3875,7 +3920,7 @@ function ListarCombosAmbienteSesion(elemento) {
       },
     });
   } else {
-    // Si no hay sesión, cargar todos los ambientes
+    // Si no se pudo detectar empresa/sucursal, cargar todos los ambientes
     ListarCombosAmbiente(elemento);
   }
 }
@@ -5693,42 +5738,16 @@ function addActivoManualForm(combos) {
       .find(`[name='Categoria[]']`)
       .html(combos.categorias)
       .trigger("change");
-    // Para el registro manual, cargar ambientes basados en la sesión del usuario
-    const ambienteSelect = newForm.find(`[name='Ambiente[]']`);
-    if (typeof empresaSesion !== "undefined" && empresaSesion && 
-        typeof sucursalSesion !== "undefined" && sucursalSesion) {
-      // Cargar ambientes específicos para la empresa y sucursal de la sesión
-      $.ajax({
-        url: "../../controllers/GestionarActivosController.php?action=comboAmbiente",
-        type: "POST",
-        data: {
-          idEmpresa: empresaSesion,
-          idSucursal: sucursalSesion,
-        },
-        dataType: "json",
-        async: false,
-        success: function (res) {
-          if (res.status) {
-            ambienteSelect.html(res.data).trigger("change");
-          } else {
-            // Si falla, cargar todos los ambientes como fallback
-            ambienteSelect.html(combos.ambientes).trigger("change");
-          }
-        },
-        error: () => {
-          // Si hay error, cargar todos los ambientes como fallback
-          ambienteSelect.html(combos.ambientes).trigger("change");
-        },
-      });
-    } else {
-      // Si no hay sesión, cargar todos los ambientes
-      ambienteSelect.html(combos.ambientes).trigger("change");
-    }
+    newForm
+      .find(`[name='Ambiente[]']`)
+      .html(combos.ambientes)
+      .trigger("change");
     newForm.find(`[name='Empresa[]']`).html(combos.empresas).trigger("change");
     newForm
       .find(`[name='UnidadNegocio[]']`)
       .html(combos.unidadesNegocio)
       .trigger("change");
+    // No cargar combos.proveedores aquí
   }
 
   // Event listener para cambio de empresa

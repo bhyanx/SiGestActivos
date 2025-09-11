@@ -108,7 +108,7 @@ session_start();
                                             <div class="col-md-2">
                                                 <div class="form-group">
                                                     <label for="filtroSucursal">Sucursal:</label>
-                                                    <select class="form-control" name="filtroSucursal" id="filtroSucursal"></select>
+                                                    <select class="form-control" name="filtroSucursal" id="filtroSucursal" disabled></select>
                                                 </div>
                                             </div>
                                             <!-- <div class="col-md-3">
