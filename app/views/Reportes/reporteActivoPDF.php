@@ -5,9 +5,11 @@ ob_clean();
 
 session_start();
 require_once("../../config/configuracion.php");
+require_once("../../models/Mantenimientos.php");
 require_once("../../models/GestionarActivos.php");
 require_once("../../../includes/vendor/setasign/fpdf/fpdf.php");
 
+$mantenimiento = new Mantenimientos();
 $activos = new GestionarActivos();
 $idActivo = $_GET['idActivo'] ?? null;
 
@@ -21,6 +23,22 @@ try {
         die("No se encontró el activo con el ID proporcionado");
     }
     $componentes = $activos->obtenerComponente($idActivo);
+
+    // Obtener información de la empresa y sucursal desde la sesión
+    $idEmpresa = $_SESSION['cod_empresa'] ?? 1;
+    $idSucursal = $_SESSION['cod_UnidadNeg'] ?? 1;
+
+    $empresaInfo = $mantenimiento->obtenerEmpresaInfo($idEmpresa);
+    $sucursalInfo = $mantenimiento->obtenerSucursalInfo($idSucursal);
+
+    // Preparar información de la empresa para el reporte
+    $companyInfo = [
+        'nombre' => $empresaInfo['nombre'] ?? 'LUBRISENG E.I.R.L',
+        'ruc' => $empresaInfo['ruc'] ?? '20399129614',
+        'direccion' => $sucursalInfo['direccion'] ,
+        'sucursal' => $sucursalInfo['nombre'] ?? 'Autocentro Lubriseng'
+    ];
+    
 } catch (Exception $e) {
     die("Error al obtener datos del activo: " . $e->getMessage());
 }
@@ -48,22 +66,20 @@ class PDF extends FPDF
             $this->Image($logoPath, 15, 25, 25);
         }
 
-        // Información de la empresa (lado izquierdo)
+       // Información de la empresa (lado izquierdo)
         $this->SetFont('Arial', 'B', 14);
         $this->SetTextColor(40, 167, 69); // Verde corporativo
         $this->SetXY(40, 18);
-        $this->Cell(0, 6, 'LUBRISENG', 0, 1);
+        $this->Cell(0, 6, $this->convertToLatin1($this->companyInfo['nombre']), 0, 1);
 
         $this->SetFont('Arial', 'B', 12);
         $this->SetXY(40, 25);
         $this->Cell(0, 5, $this->convertToLatin1('Gestión de Activos'), 0, 1);
 
-        // Información adicional de la empresa
         $this->SetFont('Arial', '', 9);
         $this->SetTextColor(102, 102, 102); // Gris
         $this->SetXY(40, 32);
         $this->Cell(0, 4, $this->convertToLatin1('Dirección fiscal: ' . $this->companyInfo['direccion']), 0, 1);
-
         $this->SetXY(40, 36);
         $this->Cell(0, 4, $this->convertToLatin1('Sucursal: ' . $this->companyInfo['sucursal']), 0, 1);
 

@@ -35,7 +35,7 @@ try {
     $companyInfo = [
         'nombre' => $empresaInfo['nombre'] ?? 'LUBRISENG E.I.R.L',
         'ruc' => $empresaInfo['ruc'] ?? '20399129614',
-        'direccion' => $empresaInfo['direccion'] ?? 'Av Bolognesi - 80-Talara',
+        'direccion' => $sucursalInfo['direccion'] ?? 'Av Bolognesi - 80-Talara',
         'sucursal' => $sucursalInfo['nombre'] ?? 'Autocentro Lubriseng'
     ];
 } catch (Exception $e) {
@@ -62,7 +62,7 @@ class PDF extends FPDF
         // Header con logo y información de empresa
         $logoPath = '../../../public/img/Logo-Lubriseng.png';
         if (file_exists($logoPath)) {
-            $this->Image($logoPath, 15, 15, 20);
+            $this->Image($logoPath, 15, 25, 25);
         }
 
         // Información de la empresa (lado izquierdo)
@@ -102,10 +102,10 @@ class PDF extends FPDF
 
         // Línea separadora verde
         $this->SetDrawColor(40, 167, 69);
-        $this->Line(15, 45, 195, 45);
+        $this->Line(15, 50, 195, 50);
 
         $this->SetTextColor(0, 0, 0); // Volver a negro
-        $this->Ln(15);
+        $this->Ln(20);
     }
 
     function Footer()
