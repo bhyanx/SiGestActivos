@@ -1973,336 +1973,6 @@ function init() {
     width: "100%",
   });
 
-  $(document).on("click", ".btnVerMantenimientos", function () {
-    const fila = $(this).closest("tr");
-    const datos =
-      $(fila).closest("table").attr("id") === "tblRegistros"
-        ? $("#tblRegistros").DataTable().row(fila).data()
-        : $("#tblTodosActivos").DataTable().row(fila).data();
-
-    if (!datos) {
-      Swal.fire(
-        "Error",
-        "No se pudo obtener la información del activo.",
-        "error"
-      );
-      return;
-    }
-
-    $.ajax({
-      url: "../../controllers/GestionarActivosController.php?action=obtenerMantenimientosActivo",
-      type: "POST",
-      data: { idActivo: datos.idActivo },
-      dataType: "json",
-      success: function (res) {
-        if (res.status && res.data) {
-          let activo = res.data;
-
-          $("#modalHistorialMantenimiento").remove();
-          let modalHtml = `
-<div class="modal fade" id="modalHistorialMantenimiento" tabindex="-1" aria-labelledby="modalHistorialLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content border-0" style="border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.08);">
-            
-            <!-- Header del Modal -->
-            <div class="modal-header position-relative overflow-hidden border-0 p-3 bg-teal-600" style="background: linear-gradient(135deg, #0d9488, #0f766e); border-radius: 20px 20px 0 0;">
-                <div class="d-flex align-items-center text-white w-100 position-relative">
-                    <div class="me-3 p-3 rounded-circle" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
-                        <i class="fas fa-wrench fs-4"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                        <h4 class="modal-title mb-1 fw-bold" id="modalHistorialLabel">Historial de Mantenimientos</h4>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge px-3 py-2 rounded-pill" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
-                                <i class="fas fa-barcode me-1"></i>
-                                ${activo.codigo}
-                            </span>
-                            <span class="badge bg-white text-teal-600 px-3 py-2 rounded-pill fw-semibold">
-                                <i class="fas fa-tools me-1"></i>
-                                ${mantenimientos.length} registros
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Body del Modal -->
-            <div class="modal-body p-0" style="background: #f8fafc; max-height: 80vh; overflow-y: auto;">
-                
-                <!-- Tarjeta Principal del Activo -->
-                <div class="container-fluid p-4">
-                    <div class="card border-0 shadow-sm mb-4 bg-teal-500" style="border-radius: 16px;">
-                        <div class="card-body text-white p-3">
-                            <div class="row align-items-center">
-                                <div class="col-md-8">
-                                    <h5 class="mb-2 fw-bold">${
-                                      activo.NombreActivo
-                                    }</h5>
-                                    <p class="mb-0 opacity-90">
-                                        <i class="fas fa-tag me-2"></i> ${
-                                          activo.Categoria
-                                        }
-                                    </p>
-                                </div>
-                                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                                    <div class="d-inline-block px-4 py-2 rounded-pill" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
-                                        <i class="fas fa-calendar-check me-1"></i>
-                                        <span class="fw-bold fs-6">${
-                                          activo.Serie
-                                        }</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Historial de Mantenimientos -->
-                    <div class="card border-0 shadow-sm" style="border-radius: 16px;">
-                        <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-radius: 16px 16px 0 0;">
-                            <div class="d-flex align-items-center">
-                                <div class="me-3 p-2 rounded-circle" style="background: rgba(6, 182, 212, 0.1);">
-                                    <i class="fas fa-list-ol text-cyan-600"></i>
-                                </div>
-                                <h6 class="mb-0 fw-bold text-cyan-700">Registros de Mantenimiento</h6>
-                            </div>
-                        </div>
-                        <div class="card-body p-0">
-                            <div id="historialMantenimientos" class="p-3">
-                                ${
-                                  mantenimientos.length > 0
-                                    ? mantenimientos
-                                        .map(
-                                          (mto, index) => `
-                                        <div class="card mb-3 border-0 shadow-sm" style="border-left: 5px solid #0891b2; border-radius: 12px;">
-                                            <div class="card-body p-3">
-                                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                                    <h6 class="fw-bold text-slate-800 mb-0">
-                                                        <i class="fas fa-tools me-2 text-teal-500"></i>
-                                                        ${
-                                                          mto.tipoMantenimiento ||
-                                                          "Mantenimiento General"
-                                                        }
-                                                    </h6>
-                                                    <span class="badge bg-teal-100 text-teal-800 small px-3 py-2 rounded-pill">
-                                                        <i class="fas fa-calendar-alt me-1"></i>
-                                                        ${
-                                                          mto.fechaMantenimiento ||
-                                                          "N/A"
-                                                        }
-                                                    </span>
-                                                </div>
-                                                <p class="text-slate-600 small mb-2">
-                                                    <strong>Descripción:</strong> ${
-                                                      mto.descripcion ||
-                                                      "Sin descripción registrada."
-                                                    }
-                                                </p>
-                                                <div class="row g-2 small">
-                                                    <div class="col-sm-6">
-                                                        <strong><i class="fas fa-user-cog me-1 text-cyan-500"></i> Técnico:</strong>
-                                                        <span class="text-slate-700">${
-                                                          mto.tecnico ||
-                                                          "No asignado"
-                                                        }</span>
-                                                    </div>
-                                                    <div class="col-sm-6">
-                                                        <strong><i class="fas fa-clock me-1 text-emerald-500"></i> Duración:</strong>
-                                                        <span class="text-slate-700">${
-                                                          mto.duracion || "N/A"
-                                                        } horas</span>
-                                                    </div>
-                                                    <div class="col-sm-6">
-                                                        <strong><i class="fas fa-money-bill-wave me-1 text-purple-500"></i> Costo:</strong>
-                                                        <span class="text-slate-700 fw-semibold">$${(
-                                                          mto.costo || 0
-                                                        ).toLocaleString(
-                                                          "es-CL"
-                                                        )}</span>
-                                                    </div>
-                                                    <div class="col-sm-6">
-                                                        <strong><i class="fas fa-check-circle me-1 text-green-500"></i> Estado:</strong>
-                                                        <span class="badge ${
-                                                          mto.estado ===
-                                                          "Completado"
-                                                            ? "bg-success"
-                                                            : "bg-warning"
-                                                        } text-white px-2 py-1 rounded-pill">
-                                                            ${
-                                                              mto.estado ||
-                                                              "Pendiente"
-                                                            }
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                ${
-                                                  mto.observaciones
-                                                    ? `
-                                                    <div class="mt-2 p-2 bg-slate-50 rounded small">
-                                                        <strong><i class="fas fa-sticky-note me-1 text-slate-500"></i> Observaciones:</strong>
-                                                        <p class="mb-0 text-slate-700">${mto.observaciones}</p>
-                                                    </div>
-                                                `
-                                                    : ""
-                                                }
-                                            </div>
-                                        </div>
-                                    `
-                                        )
-                                        .join("")
-                                    : `
-                                        <div class="text-center py-4 text-slate-500">
-                                            <i class="fas fa-tools fa-2x mb-2 opacity-50"></i>
-                                            <p class="mb-0 fw-semibold">No se han registrado mantenimientos para este activo.</p>
-                                        </div>
-                                    `
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Footer del Modal -->
-            <div class="modal-footer border-0 p-4" style="background: #f8fafc; border-radius: 0 0 20px 20px;">
-                <div class="d-flex flex-wrap gap-3 w-100 justify-content-center">
-                    <button type="button" class="btn btn-outline-cyan btnAgregarMantenimiento px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${
-                      activo.idActivo
-                    }" style="min-width: 140px; border-color: #06b6d4; color: #0891b2;">
-                        <i class="fas fa-plus-circle m-2"></i>Agregar
-                    </button>
-                    <button type="button" class="btn btn-outline-emerald btnImprimirHistorial px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${
-                      activo.idActivo
-                    }" style="min-width: 120px; border-color: #10b981; color: #059669;">
-                        <i class="fas fa-print m-2"></i>Imprimir
-                    </button>
-                    <button type="button" class="btn btn-outline-slate px-4 py-2 rounded-pill shadow-sm m-1 btnCerrarModal" style="min-width: 100px; border-color: #64748b; color: #475569;">
-                        <i class="fas fa-times m-2"></i>Cerrar
-                    </button>
-                </div>
-            </div>
-            
-        </div>
-    </div>
-</div>
-
-<style>
-/* Paleta de colores personalizada */
-.bg-teal-500 { background-color: #14b8a6 !important; }
-.bg-teal-600 { background-color: #0d9488 !important; }
-.text-teal-500 { color: #14b8a6 !important; }
-.text-teal-600 { color: #0d9488 !important; }
-.text-teal-700 { color: #0f766e !important; }
-
-.text-cyan-500 { color: #06b6d4 !important; }
-.text-cyan-600 { color: #0891b2 !important; }
-.text-cyan-700 { color: #0e7490 !important; }
-
-.text-emerald-500 { color: #10b981 !important; }
-.text-purple-500 { color: #9333ea !important; }
-.text-green-500 { color: #22c55e !important; }
-.text-slate-500 { color: #64748b !important; }
-.text-slate-600 { color: #475569 !important; }
-.text-slate-700 { color: #334155 !important; }
-.text-slate-800 { color: #1e293b !important; }
-
-.bg-success { background-color: #10b981 !important; }
-.bg-warning { background-color: #f59e0b !important; }
-
-/* Botones personalizados */
-.btn-outline-cyan {
-    border-color: #06b6d4;
-    color: #0891b2;
-}
-.btn-outline-cyan:hover {
-    background-color: #06b6d4;
-    border-color: #06b6d4;
-    color: white;
-}
-
-.btn-outline-emerald {
-    border-color: #10b981;
-    color: #059669;
-}
-.btn-outline-emerald:hover {
-    background-color: #10b981;
-    border-color: #10b981;
-    color: white;
-}
-
-.btn-outline-slate {
-    border-color: #64748b;
-    color: #475569;
-}
-.btn-outline-slate:hover {
-    background-color: #64748b;
-    border-color: #64748b;
-    color: white;
-}
-
-/* Animaciones */
-.card {
-    transition: all 0.3s ease;
-}
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-}
-
-.modal-content {
-    animation: modalSlideIn 0.4s ease-out;
-}
-
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-30px) scale(0.98);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .modal-dialog {
-        margin: 0.5rem;
-    }
-    .btn {
-        min-width: auto !important;
-        width: 100%;
-        margin-bottom: 0.5rem;
-    }
-}
-</style>`;
-
-          $("body").append(modalHtml);
-
-          $("#modalHistorialMantenimiento").modal("show");
-
-          $(document)
-            .off("click", ".btnCerrarModal")
-            .on("click", ".btnCerrarModal", function () {
-              $("#modalHistorialMantenimiento").modal("hide");
-            });
-        } else {
-          Swal.fire(
-            "Detalles del mantenimiento",
-            "Error al obtener los detalles: " + res.message,
-            "info"
-          );
-        }
-      },
-      error: function (xhr, status, error) {
-        Swal.fire(
-          "Error",
-          "No se pudo obtener los detalles del mantenimiento: " + error,
-          "error"
-        );
-      },
-    });
-  });
-
   // Manejador para el botón de Ver (detalles completos del activo)
   $(document).on("click", ".btnVerDetalles", function () {
     const fila = $(this).closest("tr");
@@ -3607,6 +3277,84 @@ function setSucursalOrigenDestino() {
   $("#sucursal_destino").val(sucursalDestinoText);
 }
 
+function listarActivosModalMantenimiento() {
+  // Destruir la instancia existente si existe
+  if ($.fn.DataTable.isDataTable("#tbllistarMantenimientos")) {
+    $("#tbllistarMantenimientos").DataTable().destroy();
+  }
+
+  // Debug: Verificar que el IdActivo tenga valor
+  const idActivo = $("#IdActivo").val();
+  console.log("IdActivo enviado:", idActivo);
+
+  if (!idActivo) {
+    NotificacionToast("error", "No se ha seleccionado un activo válido.");
+    return;
+  }
+
+  $("#tbllistarMantenimientos").DataTable({
+    dom: "Bfrtip",
+    responsive: false,
+    ajax: {
+      url: "../../controllers/GestionarActivosController.php?action=obtenerMantenimientos",
+      type: "POST",
+      data: { idActivo: idActivo },
+      dataType: "json",
+      dataSrc: function (json) {
+        console.log("Respuesta del servidor:", json);
+        if (!json.status) {
+          NotificacionToast("error", json.message);
+          return [];
+        }
+        console.log("Datos de mantenimientos:", json.data);
+        return json.data || [];
+      },
+      error: function (xhr, status, error) {
+        console.error("Error en la petición AJAX:", xhr, status, error);
+        NotificacionToast(
+          "error",
+          "Error al cargar los mantenimientos: " + error
+        );
+        return [];
+      },
+    },
+    columns: [
+      { data: "idMantenimiento", visible: false },
+      { data: "codigoMantenimiento" },
+      { data: "fechaRegistro" },
+      { data: "descripcion" },
+      { data: "costoEstimado", visible: false },
+      { data: "CostoReal" },
+      {
+        data: "estadoActual",
+        render: function (data, type, row) {
+          switch (data) {
+            case "Completado":
+              return '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Completado</span>';
+            case "Cancelado":
+              return '<span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i> Cancelado</span>';
+
+            default:
+              break;
+          }
+        },
+      },
+      { data: "tipoMantenimiento" },
+      { data: "idResponsable", visible: false },
+      { data: "responsable" },
+    ],
+    language: {
+      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+    },
+    order: [[2, "asc"]], // Ordenar por NombreArticulo
+    pageLength: 10,
+    lengthMenu: [
+      [10, 25, 50, -1],
+      [10, 25, 50, "Todos"],
+    ],
+  });
+}
+
 function agregarActivoAlDetalle(activo) {
   const tipoDoc = $("#tipoDocumento").val();
   const documento = $("#inputDocumento").val();
@@ -4286,9 +4034,12 @@ function listarActivosTable() {
           "colvis",
         ],
       },
-      bottom: "paging",
-      bottomStart: null,
-      bottomEnd: null,
+      bottomEnd: {
+        paging:{
+          firstLast: false
+        }
+      },
+      
     },
     lengthChange: false,
     colReorder: true,
@@ -4372,7 +4123,7 @@ function listarActivosTable() {
               <button class="dropdown-item btnVerDetalles" type="button" data-id="${row.id}">
                 <i class="fas fa-eye text-primary"></i> Ver Detalles
             </button>
-            <button class="dropdown-item btnVerMantenimientos" type="button" data-id="${row.id}">
+            <button class="dropdown-item btnVerMantenimientos" type="button" data-id="${row.idActivo}">
               <i class="fas fa-tools text-success"></i> Ver Mantenimientos
             </button>
           </div>
@@ -4398,6 +4149,40 @@ $(document).on("click", ".btnVerDetalle", function () {
   }
   // Listar los activos en el modal, enviando el IdArticulo
   //listarActivosTableModal({ IdArticulo: datos.Codigo });
+});
+
+// Event listener for Ver Mantenimientos button
+$(document).on("click", ".btnVerMantenimientos", function () {
+  // Obtener el IdActivo de la fila seleccionada
+  const fila = $(this).closest("tr");
+  const datos = $("#tblRegistros").DataTable().row(fila).data();
+
+  console.log("Datos de la fila seleccionada:", datos);
+
+  if (!datos || !datos.idActivo) {
+    NotificacionToast("error", "No se pudo obtener el ID del activo.");
+    return;
+  }
+
+  // Establecer el IdActivo en el campo hidden
+  $("#IdActivo").val(datos.idActivo);
+  console.log("IdActivo establecido en el campo hidden:", $("#IdActivo").val());
+
+  // Abrir el modal de mantenimientos
+  $("#ModalMantenimiento").modal("show");
+
+  // Cargar los mantenimientos del activo
+  listarActivosModalMantenimiento();
+});
+
+// Event listener for maintenance selection button
+$(document).on("click", ".btnSeleccionarActivoMantenimiento", function () {
+  const mantenimientoId = $(this).data("id");
+  NotificacionToast(
+    "success",
+    "Mantenimiento seleccionado: " + mantenimientoId
+  );
+  // Add your maintenance selection logic here
 });
 
 // Add the event handler for the print button

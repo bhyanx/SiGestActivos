@@ -226,6 +226,8 @@ switch ($action) {
         }
         break;
 
+    
+
     case 'obtenerMantenimientoParaFinalizar':
         try {
             $idMantenimiento = $_POST['idMantenimiento'] ?? null;
@@ -349,6 +351,30 @@ switch ($action) {
                 'status' => false,
                 'message' => $e->getMessage()
             ]);
+        }
+        break;
+
+    case 'AprobarMantenimiento':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $data = [
+                    'idMantenimiento' => $_POST['idMantenimiento'],
+                    'observacionAprobar' => $_POST['observaciones'] ?? null,
+                    'userMod' => $_SESSION['CodEmpleado']
+                ];
+
+                $mantenimientos->aprobarMantenimiento($data);
+
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Mantenimiento aprobado correctamente'
+                ]);
+            } catch (Exception $e) {
+                echo json_encode([
+                    'status' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
         }
         break;
 

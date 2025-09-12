@@ -588,6 +588,31 @@ class GestionarActivos
         }
     }
 
+    public function obtenerMantenimientosActivo($idActivo){
+        try {
+            //code...
+            $stmt = $this->db->prepare("SELECT m.idMantenimiento, m.codigoMantenimiento,
+                    ISNULL(CONVERT(VARCHAR(10), m.fechaRegistro, 103), 'Sin Fecha') AS fechaRegistro,
+                    m.descripcion, m.costoEstimado,
+                    ISNULL(CAST(m.costoReal AS VARCHAR(50)), 'Se canceló o en proceso') AS CostoReal,
+                    em.nombre AS estadoActual, tm.nombre AS tipoMantenimiento, m.idResponsable, e.NombreTrabajador AS responsable
+                    FROM tMantenimientos m
+                    INNER JOIN tDetalleMantenimiento dm ON m.idMantenimiento = dm.idMantenimiento
+                    INNER JOIN tEstadoMantenimiento em ON m.estadoMantenimiento = em.idEstadoMantenimiento
+                    INNER JOIN tTipoMantenimiento tm ON m.idTipoMantenimiento = tm.idTipoMantenimiento
+                    LEFT JOIN vEmpleados e ON m.idResponsable = e.codTrabajador
+                    WHERE dm.idActivo = ?
+                    ORDER BY m.fechaRegistro DESC;");
+
+            $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error in obtenerMantenimientosActivo: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
     public function obtenerUltimosEventosActivo($idActivo)
     {
         try {
@@ -603,15 +628,10 @@ class GestionarActivos
             if ($vistaExiste['existe'] == 0) {
                 error_log("La vista vUltimosEventosActivo no existe", 3, __DIR__ . '/../../logs/debug.log');
                 // Crear consulta alternativa
-                $stmt = $this->db->prepare("SELECT 
-                    a.idActivo,
-                    a.codigo,
-                    a.NombreActivo AS nombreActivo,
+                $stmt = $this->db->prepare("SELECT a.idActivo, a.codigo, a.NombreActivo AS nombreActivo,
                     -- Último Movimiento (cualquier tipo)
-                    (SELECT TOP 1 dm.fecha
-                     FROM tDetalleMovimiento dm
-                     WHERE dm.idActivo = a.idActivo
-                     ORDER BY dm.fecha DESC) AS fechaUltimoMovimiento,
+                    (SELECT TOP 1 dm.fecha FROM tDetalleMovimiento dm
+                     WHERE dm.idActivo = a.idActivo ORDER BY dm.fecha DESC) AS fechaUltimoMovimiento,
                     -- Último Préstamo
                     (SELECT TOP 1 dm.fecha
                      FROM tDetalleMovimiento dm
@@ -619,20 +639,20 @@ class GestionarActivos
                      ORDER BY dm.fecha DESC) AS fechaUltimoPrestamo,
                     -- Última Devolución
                     (SELECT TOP 1 dm.fecha
-                     FROM tDetalleMovimiento dm
-                     WHERE dm.idActivo = a.idActivo AND dm.idTipoMovimiento = 3
-                     ORDER BY dm.fecha DESC) AS fechaUltimaDevolucion,
+                    FROM tDetalleMovimiento dm
+                    WHERE dm.idActivo = a.idActivo AND dm.idTipoMovimiento = 3
+                    ORDER BY dm.fecha DESC) AS fechaUltimaDevolucion,
                     -- Último Traslado
                     (SELECT TOP 1 dm.fecha
-                     FROM tDetalleMovimiento dm
-                     WHERE dm.idActivo = a.idActivo AND dm.idTipoMovimiento = 1
-                     ORDER BY dm.fecha DESC) AS fechaUltimoTraslado,
+                    FROM tDetalleMovimiento dm
+                    WHERE dm.idActivo = a.idActivo AND dm.idTipoMovimiento = 1
+                    ORDER BY dm.fecha DESC) AS fechaUltimoTraslado,
                     -- Último mantenimiento
-                    (SELECT TOP 1 ISNULL(m.fechaRealizada, m.fechaProgramada)
-                     FROM tDetalleMantenimiento dm
-                     INNER JOIN tMantenimientos m ON m.idMantenimiento = dm.idMantenimiento
-                     WHERE dm.idActivo = a.idActivo
-                     ORDER BY ISNULL(m.fechaRealizada, m.fechaProgramada) DESC) AS fechaUltimoMantenimiento
+                    (SELECT TOP 1 fechaRegistro
+                    FROM tDetalleMantenimiento dm
+                    INNER JOIN tMantenimientos m ON m.idMantenimiento = dm.idMantenimiento
+                    WHERE dm.idActivo = a.idActivo
+                    ORDER BY m.fechaRegistro) AS fechaUltimoMantenimiento
                     FROM vActivos a
                     WHERE a.idActivo = ?");
             } else {
@@ -664,17 +684,12 @@ class GestionarActivos
 
             if ($totalMant['total'] > 0) {
                 // Obtener el último mantenimiento directamente
-                $lastMant = $this->db->prepare("
-                    SELECT TOP 1 
-                        dm.idActivo,
-                        dm.idMantenimiento,
-                        m.fechaProgramada,
-                        m.fechaRealizada,
-                        ISNULL(m.fechaRealizada, m.fechaProgramada) as fechaUltimoMantenimiento
+                $lastMant = $this->db->prepare("SELECT TOP 1 
+                    dm.idActivo, dm.idMantenimiento, m.fechaRegistro, ISNULL(m.fechaRegistro, m.fechaMod) as fechaUltimoMantenimiento
                     FROM tDetalleMantenimiento dm
                     INNER JOIN tMantenimientos m ON m.idMantenimiento = dm.idMantenimiento
                     WHERE dm.idActivo = ?
-                    ORDER BY ISNULL(m.fechaRealizada, m.fechaProgramada) DESC
+                    ORDER BY fechaRegistro DESC
                 ");
                 $lastMant->bindParam(1, $idActivo, PDO::PARAM_INT);
                 $lastMant->execute();

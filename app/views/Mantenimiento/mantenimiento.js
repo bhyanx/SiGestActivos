@@ -392,9 +392,8 @@ function verHistorialEstados(idMantenimiento) {
         let historialHtml = `
           <div class="table-responsive">
             <table class="table table-bordered table-striped">
-              <thead class="thead-dark">
+              <thead class="table-warning">
                 <tr>
-                  <th>Estado Anterior</th>
                   <th>Estado Nuevo</th>
                   <th>Fecha Cambio</th>
                   <th>Usuario</th>
@@ -403,14 +402,13 @@ function verHistorialEstados(idMantenimiento) {
               <tbody>`;
 
         res.data.forEach(function (item) {
-          const estadoAnterior = item.EstadoAnterior;
+          //const estadoAnterior = item.EstadoAnterior;
           const estadoNuevo = item.estadoNuevo;
           const fecha = moment(item.fechaCambio).format("DD/MM/YYYY HH:mm:ss");
           const usuario = item.nombreUsuario || item.userMod;
 
           historialHtml += `
             <tr>
-              <td>${estadoAnterior}</td>
               <td><strong>${estadoNuevo}</strong></td>
               <td>${fecha}</td>
               <td>${usuario}</td>
@@ -439,6 +437,93 @@ function verHistorialEstados(idMantenimiento) {
     error: function () {
       NotificacionToast("error", "Error al comunicarse con el servidor");
     },
+  });
+}
+
+function verHistorialEstados2(idMantenimiento) {
+  // Destruir la instancia existente si existe
+  if ($.fn.DataTable.isDataTable("#tbllistarEstadosMantenimiento")) {
+    $("#tbllistarEstadosMantenimiento").DataTable().destroy();
+  }
+
+  // Limpiar cualquier backdrop previo
+  $(".modal-backdrop").remove();
+
+  // Configurar z-index antes de abrir
+  $("#ModalEstadosMantenimiento").css("z-index", "10000");
+
+  // Abrir el modal
+  $("#ModalEstadosMantenimiento").modal({
+    backdrop: "static",
+    keyboard: false,
+    show: true,
+  });
+
+  // Inicializar la DataTable después de que el modal se abra
+  $("#ModalEstadosMantenimiento").on("shown.bs.modal", function () {
+    $("#tbllistarEstadosMantenimiento").DataTable({
+      dom: "Bfrtip",
+      responsive: false,
+      ajax: {
+        url: "../../controllers/MantenimientosController.php?action=obtenerHistorialEstadoMantenimiento",
+        type: "POST",
+        data: { idMantenimiento: idMantenimiento },
+        dataType: "json",
+        dataSrc: function (json) {
+          if (!json.status) {
+            NotificacionToast("error", json.message);
+            return [];
+          }
+          return json.data || [];
+        },
+        error: function (xhr, status, error) {
+          NotificacionToast("error", "Error al cargar el historial: " + error);
+          return [];
+        },
+      },
+      columns: [
+        {
+          data: "estadoNuevo",
+          title: "Estado",
+        },
+        {
+          data: "fechaCambio",
+          title: "Fecha Cambio",
+          render: function (data) {
+            if (!data) return "N/A";
+            try {
+              return moment(data).format("DD/MM/YYYY HH:mm:ss");
+            } catch (e) {
+              return data;
+            }
+          },
+        },
+        {
+          data: "nombreUsuario",
+          title: "Usuario",
+          render: function (data, type, row) {
+            return data || row.userMod || "N/A";
+          },
+        },
+      ],
+      language: {
+        url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      },
+      order: [[1, "asc"]], // Ordenar por fecha ascendente (más antiguo primero)
+      pageLength: 10,
+      lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, "Todos"],
+      ],
+    });
+  });
+
+  // Limpiar el evento cuando se cierre el modal
+  $("#ModalEstadosMantenimiento").on("hidden.bs.modal", function () {
+    $(this).off("shown.bs.modal");
+    if ($.fn.DataTable.isDataTable("#tbllistarEstadosMantenimiento")) {
+      $("#tbllistarEstadosMantenimiento").DataTable().destroy();
+    }
   });
 }
 
@@ -1015,6 +1100,7 @@ function ListarMantenimientos() {
         data: null,
         render: function (data, type, row) {
           // Determinar el estado del mantenimiento para mostrar botones apropiados
+          const estadoId = row.estadoMantenimiento || row.estadoMant;
           const estado = row.estadoMant ? row.estadoMant.toLowerCase() : "";
           const esFinalizado =
             estado.includes("finalizado") ||
@@ -1031,21 +1117,45 @@ function ListarMantenimientos() {
             <a class="dropdown-item" href="#" onclick="imprimirReporteMantenimiento(${row.idMantenimiento})">
               <i class="fas fa-print"></i> Imprimir Reporte
             </a>
-            <a class="dropdown-item" href="#" onclick="verHistorialEstados(${row.idMantenimiento})">
+            <a class="dropdown-item" href="#" onclick="verHistorialEstados2(${row.idMantenimiento})">
               <i class="fas fa-history"></i> Ver Historial
             </a>
             `;
 
-          // Solo agregar botones de acción si no está finalizado ni cancelado
+          // Agregar botones según el estado del mantenimiento
           if (!esFinalizado && !esCancelado) {
-            dropdownItems += `
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#" onclick="finalizarMantenimiento(${row.idMantenimiento})">
-                <i class="fas fa-check-circle text-success"></i> Finalizar Mantenimiento
-              </a>
-              <a class="dropdown-item" href="#" onclick="cancelarMantenimiento(${row.idMantenimiento})">
-                <i class="fas fa-times-circle text-danger"></i> Cancelar Mantenimiento
-              </a>`;
+            dropdownItems += `<div class="dropdown-divider"></div>`;
+
+            // Si está pendiente (estado = 1), mostrar solo aprobar y cancelar
+            if (estadoId == 1) {
+              dropdownItems += `
+                <a class="dropdown-item" href="#" onclick="aprobarMantenimiento(${row.idMantenimiento})">
+                  <i class="fas fa-check text-success"></i> Aprobar Mantenimiento
+                </a>
+                <a class="dropdown-item" href="#" onclick="cancelarMantenimiento(${row.idMantenimiento})">
+                  <i class="fas fa-times-circle text-danger"></i> Cancelar Mantenimiento
+                </a>`;
+            }
+            // Si está aprobado/en proceso (estado = 2), mostrar finalizar y cancelar
+            else if (estadoId == 2) {
+              dropdownItems += `
+                <a class="dropdown-item" href="#" onclick="finalizarMantenimiento(${row.idMantenimiento})">
+                  <i class="fas fa-check-circle text-success"></i> Finalizar Mantenimiento
+                </a>
+                <a class="dropdown-item" href="#" onclick="cancelarMantenimiento(${row.idMantenimiento})">
+                  <i class="fas fa-times-circle text-danger"></i> Cancelar Mantenimiento
+                </a>`;
+            }
+            // Para otros estados activos, mostrar finalizar y cancelar por defecto
+            else {
+              dropdownItems += `
+                <a class="dropdown-item" href="#" onclick="finalizarMantenimiento(${row.idMantenimiento})">
+                  <i class="fas fa-check-circle text-success"></i> Finalizar Mantenimiento
+                </a>
+                <a class="dropdown-item" href="#" onclick="cancelarMantenimiento(${row.idMantenimiento})">
+                  <i class="fas fa-times-circle text-danger"></i> Cancelar Mantenimiento
+                </a>`;
+            }
           } else {
             // Mostrar estado actual si está finalizado o cancelado
             const estadoIcon = esFinalizado
@@ -1086,7 +1196,21 @@ function ListarMantenimientos() {
       },
       {
         data: "estadoMant",
-        defaultContent: "N/A",
+        render: function (data, type, row) {
+          switch (data) {
+            case "Pendiente":
+              return '<span class="badge bg-warning"><i class="fas fa-circle-info me-1"></i> Pendiente</span>';
+            case "En Proceso":
+              return '<span class="badge bg-info"><i class="fas fa-spinner me-1"></i> En Proceso</span>';
+            case "Completado":
+              return '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Completado</span>';
+            case "Cancelado":
+              return '<span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i> Cancelado</span>';
+
+            default:
+              break;
+          }
+        },
       },
       {
         data: "fechaRegistro",
@@ -1286,9 +1410,7 @@ function finalizarMantenimiento(idMantenimiento) {
                     }</p>
                     <p class="mb-1"><strong>Fecha Programada:</strong> ${
                       mantenimiento.fechaMod
-                        ? moment(mantenimiento.fechaMod).format(
-                            "DD/MM/YYYY"
-                          )
+                        ? moment(mantenimiento.fechaMod).format("DD/MM/YYYY")
                         : "No programada"
                     }</p>
                     <p class="mb-1"><strong>Costo Estimado:</strong> S/. ${
@@ -1563,9 +1685,7 @@ function cancelarMantenimiento(idMantenimiento) {
                     }</p>
                     <p class="mb-1"><strong>Fecha Programada:</strong> ${
                       mantenimiento.fechaMod
-                        ? moment(mantenimiento.fechaMod).format(
-                            "DD/MM/YYYY"
-                          )
+                        ? moment(mantenimiento.fechaMod).format("DD/MM/YYYY")
                         : "No programada"
                     }</p>
                     <p class="mb-0"><strong>Total de Activos:</strong> ${
@@ -1771,6 +1891,243 @@ function procesarCancelacionMantenimiento(idMantenimiento, datos) {
       } else {
         Swal.fire({
           title: "Error al Cancelar",
+          html: `
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-triangle"></i> ${res.message}
+            </div>
+          `,
+          icon: "error",
+          confirmButtonText: "Intentar de nuevo",
+        });
+      }
+    },
+    error: function (xhr, status, error) {
+      console.error("Error en la petición:", error);
+      Swal.fire({
+        title: "Error de Comunicación",
+        html: `
+          <div class="alert alert-danger">
+            <i class="fas fa-wifi"></i> No se pudo comunicar con el servidor.<br>
+            <small>Error: ${error}</small>
+          </div>
+        `,
+        icon: "error",
+        confirmButtonText: "Reintentar",
+      });
+    },
+  });
+}
+
+function aprobarMantenimiento(idMantenimiento) {
+  // Primero obtener los datos del mantenimiento
+  $.ajax({
+    url: "../../controllers/MantenimientosController.php?action=obtenerMantenimientoParaFinalizar",
+    type: "POST",
+    data: { idMantenimiento: idMantenimiento },
+    dataType: "json",
+    success: function (res) {
+      if (res.status) {
+        const mantenimiento = res.data.mantenimiento;
+
+        // Mostrar modal de aprobación
+        Swal.fire({
+          title: "Aprobar Mantenimiento",
+          html: `
+            <div class="container-fluid">
+              <div class="row mb-3">
+                <div class="col-12">
+                  <div class="alert alert-info">
+                    <h5><i class="fas fa-tools"></i> ${
+                      mantenimiento.codigoMantenimiento
+                    }</h5>
+                    <p class="mb-1"><strong>Descripción:</strong> ${
+                      mantenimiento.descripcion || "Sin descripción"
+                    }</p>
+                    <p class="mb-1"><strong>Estado Actual:</strong> ${
+                      mantenimiento.estadoActual
+                    }</p>
+                    <p class="mb-1"><strong>Fecha Programada:</strong> ${
+                      mantenimiento.fechaProgramada
+                        ? moment(mantenimiento.fechaProgramada).format(
+                            "DD/MM/YYYY"
+                          )
+                        : "No programada"
+                    }</p>
+                    <p class="mb-1"><strong>Costo Estimado:</strong> S/. ${
+                      mantenimiento.costoEstimado || "0.00"
+                    }</p>
+                    <p class="mb-0"><strong>Total de Activos:</strong> ${
+                      mantenimiento.totalActivos
+                    }</p>
+                  </div>
+                </div>
+              </div>
+              
+              <form id="formAprobarMantenimiento">
+                <div class="row">
+                  <div class="col-12 mb-3">
+                    <label for="observacionesAprobacion" class="form-label"><strong>Observaciones de Aprobación</strong></label>
+                    <textarea class="form-control" id="observacionesAprobacion" name="observacionesAprobacion" 
+                              rows="4" maxlength="500" placeholder="Ingrese observaciones sobre la aprobación del mantenimiento..."></textarea>
+                    <small class="form-text text-muted">
+                      <span id="contadorAprobacion">0</span>/500 caracteres
+                    </small>
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-12">
+                    <div class="alert alert-success">
+                      <h6><i class="fas fa-info-circle"></i> Información Importante</h6>
+                      <ul class="mb-0">
+                        <li>Los activos asociados cambiarán automáticamente a estado "En Mantenimiento"</li>
+                        <li>El mantenimiento pasará a estado "En Proceso"</li>
+                        <li>Se registrará el historial de cambios de estado</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          `,
+          width: "700px",
+          showCancelButton: true,
+          confirmButtonText:
+            '<i class="fas fa-check"></i> Aprobar Mantenimiento',
+          cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
+          confirmButtonColor: "#28a745",
+          cancelButtonColor: "#6c757d",
+          preConfirm: () => {
+            return {
+              observaciones:
+                document.getElementById("observacionesAprobacion").value ||
+                null,
+            };
+          },
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Confirmar la aprobación
+            Swal.fire({
+              title: "¿Está completamente seguro?",
+              html: `
+                <div class="alert alert-success">
+                  <h6><i class="fas fa-check-circle"></i> Confirmación Final</h6>
+                  <p>Está a punto de aprobar el mantenimiento <strong>${mantenimiento.codigoMantenimiento}</strong></p>
+                  <p class="mb-0">Los activos cambiarán a estado "En Mantenimiento"</p>
+                </div>
+              `,
+              icon: "question",
+              showCancelButton: true,
+              confirmButtonText: "Sí, aprobar mantenimiento",
+              cancelButtonText: "No, mantener pendiente",
+              confirmButtonColor: "#28a745",
+              cancelButtonColor: "#6c757d",
+            }).then((confirmResult) => {
+              if (confirmResult.isConfirmed) {
+                // Procesar la aprobación
+                procesarAprobacionMantenimiento(idMantenimiento, result.value);
+              }
+            });
+          }
+        });
+
+        // Contador de caracteres para observaciones
+        $(document).on("input", "#observacionesAprobacion", function () {
+          const currentLength = $(this).val().length;
+          $("#contadorAprobacion").text(currentLength);
+
+          if (currentLength > 450) {
+            $("#contadorAprobacion")
+              .removeClass("text-muted")
+              .addClass("text-danger");
+          } else if (currentLength > 350) {
+            $("#contadorAprobacion")
+              .removeClass("text-muted text-danger")
+              .addClass("text-warning");
+          } else {
+            $("#contadorAprobacion")
+              .removeClass("text-warning text-danger")
+              .addClass("text-muted");
+          }
+        });
+      } else {
+        NotificacionToast(
+          "error",
+          res.message || "Error al cargar los datos del mantenimiento"
+        );
+      }
+    },
+    error: function () {
+      NotificacionToast("error", "Error al comunicarse con el servidor");
+    },
+  });
+}
+
+function procesarAprobacionMantenimiento(idMantenimiento, datos) {
+  // Mostrar loading
+  Swal.fire({
+    title: "Aprobando Mantenimiento",
+    html: `
+      <div class="text-center">
+        <div class="spinner-border text-success mb-3" role="status">
+          <span class="sr-only">Procesando...</span>
+        </div>
+        <p>Aprobando mantenimiento y actualizando estados de activos...</p>
+      </div>
+    `,
+    allowOutsideClick: false,
+    showConfirmButton: false,
+  });
+
+  // Enviar datos al servidor
+  const formData = new FormData();
+  formData.append("idMantenimiento", idMantenimiento);
+  formData.append("observaciones", datos.observaciones || null);
+
+  $.ajax({
+    url: "../../controllers/MantenimientosController.php?action=AprobarMantenimiento",
+    type: "POST",
+    data: formData,
+    contentType: false,
+    processData: false,
+    dataType: "json",
+    success: function (res) {
+      if (res.status) {
+        Swal.fire({
+          title: "¡Mantenimiento Aprobado!",
+          html: `
+            <div class="alert alert-success">
+              <h5><i class="fas fa-check-circle text-success"></i> Aprobación Completada</h5>
+              <p class="mb-2">El mantenimiento ha sido aprobado correctamente.</p>
+              <hr>
+              <div class="row text-left">
+                <div class="col-6"><strong>Estado Anterior:</strong></div>
+                <div class="col-6">Pendiente</div>
+                
+                <div class="col-6"><strong>Estado Nuevo:</strong></div>
+                <div class="col-6">En Proceso</div>
+              </div>
+            </div>
+            
+            <div class="mt-3 p-3 bg-light rounded">
+              <small class="text-muted">
+                <i class="fas fa-info-circle"></i> Los activos han sido actualizados automáticamente a estado "En Mantenimiento".
+              </small>
+            </div>
+          `,
+          icon: "success",
+          width: "600px",
+          confirmButtonText: "Continuar",
+          confirmButtonColor: "#28a745",
+        }).then(() => {
+          // Recargar la tabla de mantenimientos
+          if ($.fn.DataTable.isDataTable("#tblMovimientos")) {
+            $("#tblMovimientos").DataTable().ajax.reload(null, false);
+          }
+        });
+      } else {
+        Swal.fire({
+          title: "Error al Aprobar",
           html: `
             <div class="alert alert-danger">
               <i class="fas fa-exclamation-triangle"></i> ${res.message}

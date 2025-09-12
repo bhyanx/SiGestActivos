@@ -244,6 +244,34 @@ class Mantenimientos
         }
     }
 
+    public function obtenerMantenimientoParaAprobar($idMantenimiento)
+    {
+       try {
+            $sql = "SELECT 
+                m.idMantenimiento,
+                m.codigoMantenimiento,
+                m.descripcion,
+                m.fechaRegistro,
+                m.costoEstimado,
+                m.estadoMantenimiento,
+                em.nombre as estadoActual,
+                COUNT(dm.idActivo) as totalActivos
+                FROM tMantenimientos m
+                LEFT JOIN tEstadoMantenimiento em ON m.estadoMantenimiento = em.idEstadoMantenimiento
+                LEFT JOIN tDetalleMantenimiento dm ON m.idMantenimiento = dm.idMantenimiento
+                WHERE m.idMantenimiento = ?
+                GROUP BY m.idMantenimiento, m.codigoMantenimiento, m.descripcion, 
+                         m.fechaRegistro, m.costoEstimado, m.estadoMantenimiento, em.nombre";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idMantenimiento, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Error al obtener datos del mantenimiento: " . $e->getMessage());
+        }
+    }
+
     public function finalizarMantenimiento($data)
     {
         try {
@@ -371,6 +399,23 @@ class Mantenimientos
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             throw new Exception("Error al obtener datos del mantenimiento: " . $e->getMessage());
+        }
+    }
+
+    public function aprobarMantenimiento($data)
+    {
+        try {
+            $sql = "EXEC sp_AprobarMantenimiento @idMantenimiento = :idMantenimiento, @observacionAprobar = :observacionAprobar, @userMod = :userMod";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':idMantenimiento', $data['idMantenimiento'], PDO::PARAM_INT);
+            $stmt->bindValue(':observacionAprobar', $data['observacionAprobar'] ?? null, PDO::PARAM_STR);
+            $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
+
+            $stmt->execute();
+            return true;
+        } catch (PDOException $e) {
+            throw new Exception("Error al aprobar mantenimiento: " . $e->getMessage());
         }
     }
 }

@@ -822,7 +822,66 @@ if (isset($_SESSION["IdRol"])) {
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="modal fade" id="ModalMantenimiento" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalMantenimientoTitle">
+                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document" id="frmMantenimiento">
+                                    <div class="modal-content">
+                                        <div class="modal-header dragable_touch bg-warning">
+                                            <h5 class="modal-title" id="ModalMantenimientoTitulo"><i class="fas fa-box"></i> Lista de Mantenimientos</h5>
+                                            <button class="close" data-dismiss="modal" aria-label="Close">
+                                                <span>&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" id="IdActivo" name="IdActivo" value="">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="table-responsive">
+                                                        <table id="tbllistarMantenimientos" class="table table-bordered table-striped display nowrap" style="width:100%">
+                                                            <thead class="table-warning">
+                                                                <tr>
+                                                                    <th>Id Mantenimiento</th>
+                                                                    <th>Codigo Mantenimiento</th>
+                                                                    <th>Fecha Mantenimiento</th>
+                                                                    <th>Descripción</th>
+                                                                    <th>Costo Estimado</th>
+                                                                    <th>Costo Real</th>
+                                                                    <th>Estado Actual</th>
+                                                                    <th>Tipo Mantenimiento</th>
+                                                                    <th>Id Responsable</th>
+                                                                    <th>Responsable</th>
+                                                                    <!-- <th><i class="fa fa-cogs"></i></th> -->
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <!-- Aquí se llenarán los datos dinámicamente -->
+                                                            </tbody>
+                                                            <tfoot class="table-warning">
+                                                                <tr>
+                                                                    <th>Id Mantenimiento</th>
+                                                                    <th>Codigo Mantenimiento</th>
+                                                                    <th>Fecha Mantenimiento</th>
+                                                                    <th>Descripción</th>
+                                                                    <th>Costo Estimado</th>
+                                                                    <th>Costo Real</th>
+                                                                    <th>Estado Actual</th>
+                                                                    <th>Nombre</th>
+                                                                    <th>Id Responsable</th>
+                                                                    <th>Responsable</th>
+                                                                    <!-- <th><i class="fa fa-cogs"></i></th> -->
+                                                                </tr>
+                                                            </tfoot>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
+                    </div>
                 </section>
             </div>
 

@@ -964,6 +964,24 @@ switch ($action) {
         }
         break;
 
+    case 'obtenerMantenimientos':
+        try{
+            $idActivo = $_POST['idActivo'] ?? null;
+            $mantenimientos = $activos->obtenerMantenimientosActivo($idActivo);
+            echo json_encode([
+                'status' => true,
+                'data' => $mantenimientos,
+                'message' => 'Mantenimientos obtenidos correctamente'
+            ]);
+        } catch (Exception $e) {
+            error_log("Error obtenerMantenimientos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al obtener mantenimientos: ' . $e->getMessage()
+            ]);
+        }
+        break;
+
     default:
         echo json_encode(['status' => false, 'message' => 'Acción no válida.']);
         break;

@@ -473,6 +473,46 @@ session_start();
                         </div>
                     </div>
 
+                    <div class="modal fade" id="ModalEstadosMantenimiento" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalEstadosMantenimientoTitle">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-warning">
+                                    <h5 class="modal-title" id="ModalEstadosMantenimientoTitulo"><i class="fas fa-history"></i> Historial de Estados del Mantenimiento</h5>
+                                    <button class="close" data-dismiss="modal" aria-label="Close">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="table-responsive">
+                                                <table id="tbllistarEstadosMantenimiento" class="table table-bordered table-striped display nowrap" style="width:100%">
+                                                    <thead class="table-warning">
+                                                        <tr>
+                                                            <th>Estado Nuevo</th>
+                                                            <th>Fecha Cambio</th>
+                                                            <th>Usuario</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <!-- Aquí se llenarán los datos dinámicamente -->
+                                                    </tbody>
+                                                    <tfoot class="table-warning">
+                                                        <tr>
+                                                            <th>Estado Nuevo</th>
+                                                            <th>Fecha Cambio</th>
+                                                            <th>Usuario</th>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
         </div>
         </section>
