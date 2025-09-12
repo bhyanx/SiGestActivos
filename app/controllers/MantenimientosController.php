@@ -53,7 +53,7 @@ switch ($action) {
                     'idProveedor' => $_POST['idProveedor'] ?? null,
                     'idResponsable' => $_POST['idResponsable'] ?? null,
                     'estadoMantenimiento' => $_POST['estadoMantenimiento'] ?? 1,
-                    'userMod' => $_SESSION['usuario'],
+                    'userMod' => $_SESSION['CodEmpleado'] ?? null,
                     'idEmpresa' => $_SESSION['cod_empresa'] ?? null,
                     'idSucursal' => $_SESSION['cod_UnidadNeg'] ?? null
                 ];
@@ -256,7 +256,7 @@ switch ($action) {
             try {
                 $data = [
                     'idMantenimiento' => $_POST['idMantenimiento'],
-                    'fechaRealizada' => $_POST['fechaRealizada'],
+                    'fechaMod' => $_POST['fechaMod'],
                     'costoReal' => $_POST['costoReal'] ?? null,
                     'observaciones' => $_POST['observaciones'] ?? null,
                     'idEstadoMantenimiento' => $_POST['idEstadoMantenimiento'],

@@ -454,10 +454,12 @@ function ListarCombosMantenimiento() {
           .html(res.data.tiposMantenimiento)
           .trigger("change");
 
-        // Cargar estados de mantenimiento
+        // Cargar estados de mantenimiento y dejar por defecto 'Pendiente' (id = 1)
         $("#IdEstadoMantenimiento")
           .html(res.data.estadosMantenimiento)
-          .trigger("change");
+          .val("1")
+          .trigger("change")
+          .prop("disabled", true);
 
         // Cargar responsables de mantenimiento
         $("#IdResponsableMantenimiento")
@@ -723,10 +725,10 @@ function limpiarYRecargarMantenimiento() {
 
   // Limpiar formulario
   $("#IdTipoMantenimiento").val("").trigger("change");
-  $("#IdEstadoMantenimiento").val("").trigger("change");
+  $("#IdEstadoMantenimiento").val("1").trigger("change").prop("disabled", true);
   $("#IdProveedor").val("").trigger("change");
   $("#IdResponsableMantenimiento").val("").trigger("change");
-  $("#FechaProgramada").val("");
+  $("#FechaMod").val("");
   $("#CostoEstimado").val("");
   $("#DescripcionMantenimiento").val("");
 
@@ -1059,7 +1061,7 @@ function ListarMantenimientos() {
 
           return `
             <div class="btn-group">
-              <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <button type="button" class="btn btn-warning btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-cogs"></i>
               </button>
               <div class="dropdown-menu">
@@ -1087,7 +1089,7 @@ function ListarMantenimientos() {
         defaultContent: "N/A",
       },
       {
-        data: "fechaProgramada",
+        data: "fechaRegistro",
         render: function (data) {
           if (!data) return "No programada";
           try {
@@ -1283,8 +1285,8 @@ function finalizarMantenimiento(idMantenimiento) {
                       mantenimiento.descripcion || "Sin descripción"
                     }</p>
                     <p class="mb-1"><strong>Fecha Programada:</strong> ${
-                      mantenimiento.fechaProgramada
-                        ? moment(mantenimiento.fechaProgramada).format(
+                      mantenimiento.fechaMod
+                        ? moment(mantenimiento.fechaMod).format(
                             "DD/MM/YYYY"
                           )
                         : "No programada"
@@ -1302,8 +1304,8 @@ function finalizarMantenimiento(idMantenimiento) {
               <form id="formFinalizarMantenimiento">
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label for="fechaRealizada" class="form-label"><strong>Fecha de Realización *</strong></label>
-                    <input type="date" class="form-control" id="fechaRealizada" name="fechaRealizada" 
+                    <label for="fechaCancelada" class="form-label"><strong>Fecha de Realización *</strong></label>
+                    <input type="date" class="form-control" id="fechaCancelada" name="fechaCancelada" 
                            value="${moment().format("YYYY-MM-DD")}" required>
                   </div>
                   
@@ -1322,7 +1324,7 @@ function finalizarMantenimiento(idMantenimiento) {
                 <div class="row">
                   <div class="col-12 mb-3">
                     <label for="estadoFinal" class="form-label"><strong>Estado Final *</strong></label>
-                    <select class="form-control" id="estadoFinal" name="estadoFinal" required>
+                    <select class="form-control" id="estadoFinal" name="estadoFinal" required disabled>
                       ${estadosOptions}
                     </select>
                   </div>
@@ -1350,7 +1352,7 @@ function finalizarMantenimiento(idMantenimiento) {
           cancelButtonColor: "#6c757d",
           preConfirm: () => {
             const fechaRealizada =
-              document.getElementById("fechaRealizada").value;
+              document.getElementById("fechaCancelada").value;
             const estadoFinal = document.getElementById("estadoFinal").value;
 
             if (!fechaRealizada) {
@@ -1560,8 +1562,8 @@ function cancelarMantenimiento(idMantenimiento) {
                       mantenimiento.estadoActual
                     }</p>
                     <p class="mb-1"><strong>Fecha Programada:</strong> ${
-                      mantenimiento.fechaProgramada
-                        ? moment(mantenimiento.fechaProgramada).format(
+                      mantenimiento.fechaMod
+                        ? moment(mantenimiento.fechaMod).format(
                             "DD/MM/YYYY"
                           )
                         : "No programada"
@@ -1576,7 +1578,7 @@ function cancelarMantenimiento(idMantenimiento) {
               <form id="formCancelarMantenimiento">
                 <div class="row">
                   <div class="col-12 mb-3">
-                    <label for="estadoCancelacion" class="form-label"><strong>Estado de Cancelación</strong></label>
+                    <label for="estadoCancelacion" class="form-label"><strong>Estado</strong></label>
                     <select class="form-control" id="estadoCancelacion" name="estadoCancelacion" readonly>
                       ${estadosOptions}
                     </select>

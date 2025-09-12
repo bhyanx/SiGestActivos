@@ -181,7 +181,7 @@ $y_start = $pdf->GetY();
 
 // Datos de la columna izquierda
 $leftData = [
-    ['label' => 'Fecha Programada:', 'value' => $cabecera['fechaProgramada'] ? date('d/m/Y', strtotime($cabecera['fechaProgramada'])) : 'No programada'],
+    ['label' => 'Fecha:', 'value' => $cabecera['fechaRegistro'] ? date('d/m/Y', strtotime($cabecera['fechaRegistro'])) : 'No programada'],
     ['label' => 'Responsable:', 'value' => $cabecera['Proveedor'] ?? '']
 ];
 

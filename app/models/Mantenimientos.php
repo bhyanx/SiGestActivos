@@ -183,13 +183,13 @@ class Mantenimientos
     public function obtenerCabeceraMantenimiento($idMantenimiento)
     {
         try {
-            $sql = "SELECT m.idMantenimiento, m.codigoMantenimiento, m.fechaProgramada,
+            $sql = "SELECT m.idMantenimiento, m.codigoMantenimiento, m.fechaRegistro,
 	            m.descripcion, m.observaciones, m.costoEstimado,
 	            tm.nombre as tipoMantenimiento,
 	            em.nombre as estadoMantenimiento,
 	            emp.NombreTrabajador as responsable,
 	            m.userMod as usuarioRegistro,
-	            m.fechaProgramada as fechaCreacion,
+	            --m.fechaMod as fechaUltimaModificacion,
 	            m.idProveedor, prov.RazonSocial as Proveedor
                     FROM tMantenimientos m
                     LEFT JOIN tTipoMantenimiento tm ON m.estadoMantenimiento = tm.idTipoMantenimiento
@@ -251,7 +251,7 @@ class Mantenimientos
             $xml = '<Mantenimientos>';
             $xml .= '<Mantenimiento>';
             $xml .= '<idMantenimiento>' . $data['idMantenimiento'] . '</idMantenimiento>';
-            $xml .= '<fechaRealizada>' . $data['fechaRealizada'] . '</fechaRealizada>';
+            $xml .= '<fechaMod>' . $data['fechaMod'] . '</fechaMod>';
             $xml .= '<costoReal>' . ($data['costoReal'] ?? 0) . '</costoReal>';
             $xml .= '<observaciones>' . htmlspecialchars($data['observaciones'] ?? '') . '</observaciones>';
             $xml .= '<idEstadoMantenimiento>' . $data['idEstadoMantenimiento'] . '</idEstadoMantenimiento>';
@@ -278,7 +278,7 @@ class Mantenimientos
                 m.idMantenimiento,
                 m.codigoMantenimiento,
                 m.descripcion,
-                m.fechaProgramada,
+                m.fechaRegistro,
                 m.costoEstimado,
                 m.estadoMantenimiento,
                 em.nombre as estadoActual,
@@ -288,7 +288,7 @@ class Mantenimientos
                 LEFT JOIN tDetalleMantenimiento dm ON m.idMantenimiento = dm.idMantenimiento
                 WHERE m.idMantenimiento = ?
                 GROUP BY m.idMantenimiento, m.codigoMantenimiento, m.descripcion, 
-                         m.fechaProgramada, m.costoEstimado, m.estadoMantenimiento, em.nombre";
+                         m.fechaRegistro, m.costoEstimado, m.estadoMantenimiento, em.nombre";
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idMantenimiento, PDO::PARAM_INT);
@@ -331,7 +331,7 @@ class Mantenimientos
                 m.idMantenimiento,
                 m.codigoMantenimiento,
                 m.descripcion,
-                m.fechaProgramada,
+                m.fechaRegistro,
                 m.costoEstimado,
                 m.estadoMantenimiento,
                 em.nombre as estadoActual,
@@ -342,7 +342,7 @@ class Mantenimientos
                 WHERE m.idMantenimiento = ?
                 AND m.estadoMantenimiento NOT IN (3, 4) -- No finalizado ni cancelado
                 GROUP BY m.idMantenimiento, m.codigoMantenimiento, m.descripcion, 
-                         m.fechaProgramada, m.costoEstimado, m.estadoMantenimiento, em.nombre";
+                         m.fechaRegistro, m.costoEstimado, m.estadoMantenimiento, em.nombre";
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idMantenimiento, PDO::PARAM_INT);
@@ -363,7 +363,7 @@ class Mantenimientos
             INNER JOIN tEstadoMantenimiento en ON h.idEstadoNuevo = en.idEstadoMantenimiento
             LEFT JOIN vEmpleados e ON h.userMod = e.codTrabajador
             WHERE h.idMantenimiento = ?
-            ORDER BY h.fechaCambio DESC";
+            ORDER BY h.fechaCambio ASC";
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idMantenimiento, PDO::PARAM_INT);

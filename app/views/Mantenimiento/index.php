@@ -133,7 +133,7 @@ session_start();
                                                         <th>Proveedor</th>
                                                         <th>Autorizador</th>
                                                         <th>Estado Mantenimiento</th>
-                                                        <th>Fecha Movimiento</th>
+                                                        <th>Fecha Mantenimiento</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody></tbody>
@@ -146,7 +146,7 @@ session_start();
                                                         <th>Proveedor</th>
                                                         <th>Autorizador</th>
                                                         <th>Estado Mantenimiento</th>
-                                                        <th>Fecha Movimiento</th>
+                                                        <th>Fecha Mantenimiento</th>
                                                     </tr>
                                                 </tfoot>
                                             </table>
@@ -176,7 +176,7 @@ session_start();
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="IdEstadoMantenimiento">Estado:</label>
-                                                    <select name="IdEstadoMantenimiento" id="IdEstadoMantenimiento" class="form-control" required></select>
+                                                    <select name="IdEstadoMantenimiento" id="IdEstadoMantenimiento" class="form-control" value="1" required disabled></select>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
