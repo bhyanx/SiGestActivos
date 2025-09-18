@@ -198,7 +198,7 @@ if (isset($_SESSION["IdRol"])) {
                                                         <div class="col-md-3">
                                                             <div class="form-group">
                                                                 <label for="tipoDocumento">Tipo de Documento:</label>
-                                                                <select class="form-control" id="tipoDocumento">
+                                                                <select class="form-control" id="tipoDocumento" disabled>
                                                                     <option value="ingreso">Doc. Ingreso Almacén</option>
                                                                     <option value="venta">Doc. Venta</option>
                                                                 </select>

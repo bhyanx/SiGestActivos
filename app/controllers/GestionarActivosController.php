@@ -784,6 +784,7 @@ switch ($action) {
                         //'IdDocumentoVenta' => $activo['IdDocumentoVenta'] ?? null,
                         //'IdOrdendeCompra' => $activo['IdOrdendeCompra'] ?? null,
                         'Nombre' => $activo['Nombre'] ?? null,
+                        'IdFactura' => $activo['IdFactura'] ?? null,
                         'CodigoAntiguo' => $activo['CodigoAntiguo'] ?? null,
                         'Descripcion' => $activo['Descripcion'] ?? null,
                         'IdEstado' => $activo['IdEstado'] ?? null,

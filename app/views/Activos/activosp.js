@@ -1526,6 +1526,7 @@ function init() {
         if (cantidad === 1) {
           const activo = {
             Nombre: form.find("input[name='nombre[]']").val(),
+            IdFactura: form.find("select[name='numFactura[]']").val(),
             CodigoAntiguo: form.find("input[name='codigoAntiguo[]']").val(),
             Descripcion: form.find("textarea[name='Descripcion[]']").val(),
             IdEstado: form.find("select[name='Estado[]']").val(),
@@ -4035,11 +4036,10 @@ function listarActivosTable() {
         ],
       },
       bottomEnd: {
-        paging:{
-          firstLast: false
-        }
+        paging: {
+          firstLast: false,
+        },
       },
-      
     },
     lengthChange: false,
     colReorder: true,
@@ -5250,6 +5250,12 @@ function addActivoManualForm(combos) {
             </div>
             <div class="col-md-4">
               <div class="form-group">
+                <label for="Ambiente_${activoFormCount}">Ambiente:</label>
+                <select name="Ambiente[]" id="Ambiente_${activoFormCount}" class="form-control select-2"></select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
                 <label for="Categoria_${activoFormCount}">Categoria: </label>
                 <select name="Categoria[]" id="Categoria_${activoFormCount}" class="form-control select-2" required></select>
               </div>
@@ -5258,6 +5264,12 @@ function addActivoManualForm(combos) {
               <div class="form-group">
                 <label for="codigoAntiguo_${activoFormCount}">Código Antiguo: </label>
                 <input type="text" name="codigoAntiguo[]" id="codigoAntiguo_${activoFormCount}" class="form-control" placeholder="Ej. ACH-001">
+              </div>
+            </div> 
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="numFactura_${activoFormCount}">Nro. Factura: </label>
+                <input type="text" name="numFactura[]" id="numFactura_${activoFormCount}" class="form-control" placeholder="Ej. F001-010203">
               </div>
             </div> 
             <div class="col-md-4">
@@ -5300,13 +5312,6 @@ function addActivoManualForm(combos) {
               <div class="form-group">
                 <label for="descripcion_${activoFormCount}">Descripción</label>
                 <textarea name="Descripcion[]" id="descripcion_${activoFormCount}" class="form-control" placeholder="Ej. Mouse Logitech color negro"></textarea>
-              </div>
-            </div>
-            
-            <div class="col-md-4">
-              <div class="form-group">
-                <label for="Ambiente_${activoFormCount}">Ambiente:</label>
-                <select name="Ambiente[]" id="Ambiente_${activoFormCount}" class="form-control select-2"></select>
               </div>
             </div>
             <div class="col-md-3">
@@ -5890,6 +5895,7 @@ $(document).ready(function () {
         if (cantidad === 1) {
           const activo = {
             Nombre: form.find("input[name='nombre[]']").val(),
+            IdFactura: form.find("input[name='numFactura[]']").val(),
             CodigoAntiguo: form.find("input[name='codigoAntiguo[]']").val(),
             Descripcion: form.find("textarea[name='Descripcion[]']").val(),
             IdEstado: form.find("select[name='Estado[]']").val(),
