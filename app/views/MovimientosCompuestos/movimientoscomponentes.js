@@ -450,7 +450,7 @@ function cargarActivosPadres() {
   const sucursalDestino = $("#IdSucursalDestino").val();
   if (sucursalDestino) {
     $.ajax({
-      url: "../../controllers/GestionarMovimientosComponentesController.php?action=listarActivosPadresv2",
+      url: "../../controllers/GestionarMovimientosComponentesController.php?action=listarActivosPadresDestino",
       type: "POST",
       data: { tipo: "destino", sucursal: sucursalDestino },
       dataType: "json",
@@ -569,7 +569,7 @@ function cargarComponentesActivo(idActivoPadre) {
             <tr data-id="${componente.IdActivo}" class="componente-deshabilitado" style="opacity: 0.6; background-color: #f8f9fa;">
               <td>${componente.CodigoActivo}</td>
               <td>${componente.NombreArticulo}</td>
-              <td>${componente.MarcaArticulo}</td>
+              <td>${componente.Marca}</td>
               <td>${componente.NumeroSerie}</td>
               <td>
                 <input type="text" class="form-control componente-observacion" placeholder="Ingrese observaciones para este componente">
@@ -1098,7 +1098,7 @@ function listarComponentesModal(idActivoPadre) {
       { data: "IdActivo" },
       { data: "CodigoActivo" },
       { data: "NombreArticulo" },
-      { data: "MarcaArticulo" },
+      { data: "Marca" },
       { data: "NumeroSerie" },
       {
         data: null,

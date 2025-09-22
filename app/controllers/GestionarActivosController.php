@@ -48,11 +48,13 @@ switch ($action) {
             $filtroSucursal = $_POST['filtroSucursal'] ?? $_SESSION['cod_UnidadNeg'] ?? null;
             $filtroAmbiente = $_POST['filtroAmbiente'] ?? null;
             $filtroCategoria = $_POST['filtroCategoria'] ?? null;
+            $filtroEstado = $_POST['filtroEstado'] ?? null;
 
             // Si el valor es "TODOS", convertir a null para mostrar todos los registros
             if ($filtroSucursal === 'TODOS') $filtroSucursal = null;
             if ($filtroAmbiente === 'TODOS') $filtroAmbiente = null;
             if ($filtroCategoria === 'TODOS') $filtroCategoria = null;
+            if ($filtroEstado === 'TODOS') $filtroEstado = null;
 
             $filtros = [
                 'pCodigo' => $_POST['pCodigo'] ?? null,
@@ -60,7 +62,7 @@ switch ($action) {
                 'pIdSucursal' => $filtroSucursal,
                 'pIdAmbiente' => $filtroAmbiente,
                 'pIdCategoria' => $filtroCategoria,
-                'pIdEstado' => $_POST['pIdEstado'] ?? null
+                'pIdEstado' => $filtroEstado
             ];
             $resultados = $activos->consultarActivosModal($filtros);
             error_log("Consultar resultados: " . print_r($resultados, true), 3, __DIR__ . '/../../logs/debug.log');
@@ -160,7 +162,7 @@ switch ($action) {
                     throw new Exception("El ID del activo es requerido.");
                 }
 
-                $original_activo = $activos->obtenerActivoPorId($idActivo);
+                $original_activo = $activos->obtenerActivoDocumentos($idActivo);
                 if (!$original_activo) {
                     throw new Exception("Activo no encontrado con ID " . $idActivo);
                 }
@@ -224,6 +226,22 @@ switch ($action) {
         try {
             $idActivo = $_POST['idActivo'];
             $info = $activos->obtenerActivoPorId($idActivo);
+            echo json_encode([
+                'status' => true,
+                'data' => $info
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'obtenerActivosDocumentos':
+        try {
+            $idActivo = $_POST['idActivo'];
+            $info = $activos->obtenerActivoDocumentos($idActivo);
             echo json_encode([
                 'status' => true,
                 'data' => $info
@@ -380,6 +398,12 @@ switch ($action) {
             $combos['estado'] = '<option value="">Seleccione</option>';
             foreach ($estadoActivo as $row) {
                 $combos['estado'] .= "<option value='{$row['idEstadoActivo']}'>{$row['nombre']}</option>";
+            }
+
+            $estadoActivoTodos = $combo->comboEstadoActivoTodos();
+            $combos['estadoTodos'] = '<option value="">Seleccione</option>';
+            foreach ($estadoActivoTodos as $row) {
+                $combos['estadoTodos'] .= "<option value='{$row['idEstadoActivo']}'>{$row['nombre']}</option>";
             }
 
             echo json_encode(['status' => true, 'data' => $combos, 'message' => 'Combos cargados correctamente.']);

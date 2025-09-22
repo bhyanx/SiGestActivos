@@ -67,10 +67,16 @@ if (isset($_SESSION["IdRol"])) {
                                                 </div>
                                                 <div class="col-md-2">
                                                     <div class="form-group">
+                                                        <label for="filtroEstado">Estado de activos:</label>
+                                                        <select class="form-control" name="filtroEstado" id="filtroEstado"></select>
+                                                    </div>
+                                                </div>
+                                                <!--<div class="col-md-2">
+                                                    <div class="form-group">
                                                         <label for="filtroFecha">Fecha Registro:</label>
                                                         <input type="date" class="form-control" name="filtroFecha" id="filtroFecha" value="<?php echo date('Y-m-d'); ?>">
                                                     </div>
-                                                </div>
+                                                </div>-->
                                                 <div class="col-md-2 offset-md-6">
                                                     <div class="form-group mb-0">
                                                         <label>&nbsp;</label>
@@ -505,8 +511,20 @@ if (isset($_SESSION["IdRol"])) {
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
+                                                            <label for="DocVenta">Doc. Venta</label>
+                                                            <input type="text" id="DocVenta" class="form-control" name="DocVenta" disabled>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
                                                             <label for="DocIngresoAlmacen">Doc. Ingreso Almacén</label>
                                                             <input type="text" id="DocIngresoAlmacen" name="DocIngresoAlmacen" class="form-control" disabled>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="IdFactura">Numero Factura</label>
+                                                            <input type="text" id="IdFactura" name="IdFactura" class="form-control">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
@@ -545,16 +563,10 @@ if (isset($_SESSION["IdRol"])) {
                                                             <select name="IdCategoria" id="IdCategoria" class="form-control select-2"></select>
                                                         </div>
                                                     </div>
-                                                    <!-- <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <label for="Cantidad">Cantidad: </label>
-                                                            <input type="text" name="Cantidad" id="Cantidad" class="form-control" disabled>
-                                                        </div>
-                                                    </div> -->
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label for="fechaAdquisicion">Fecha Adquisición: </label>
-                                                            <input type="date" name="fechaAdquisicion" id="fechaAdquisicion" class="form-control" disabled>
+                                                            <input type="date" name="fechaAdquisicion" id="fechaAdquisicion" class="form-control">
                                                         </div>
                                                     </div>
                                                 </div>

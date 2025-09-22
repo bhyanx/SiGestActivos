@@ -2746,8 +2746,10 @@ function init() {
             $("#IdActivoEditar").val(data.idActivo);
             $("#IdActivo").val(data.idActivo);
             $("#CodigoActivo").val(data.codigo);
-            $("#SerieActivo").val(data.serie);
-            $("#DocIngresoAlmacen").val(data.DocIngresoAlmacen);
+            $("#SerieActivo").val(data.Serie);
+            $("#DocVenta").val(data.idDocumentoVenta);
+            $("#DocIngresoAlmacen").val(data.idDocumentoIngresoAlm);
+            $("#IdFactura").val(data.idFactura);
             $("#IdArticulo").val(data.idArticulo);
             $("#nombreArticulo").val(data.NombreActivo);
             $("#marca").val(data.Marca);
@@ -2758,8 +2760,14 @@ function init() {
             $("#ValorAdquisicion").val(data.valorAdquisicion);
 
             // Asignar valores a los combos
-            $("#IdEstado").val(data.idEstado).trigger("change");
-            $("#IdAmbiente").val(data.idAmbiente).trigger("change");
+            $("#IdEstado").val(data.estado).trigger("change");
+
+            // Cargar ambientes basados en la sesión (como en venta/ingreso)
+            ListarCombosAmbienteSesion("IdAmbiente");
+            setTimeout(() => {
+              $("#IdAmbiente").val(data.selectAmbiente).trigger("change");
+            }, 100);
+
             $("#IdCategoria")
               .val(data.idCategoria)
               .trigger("change")
@@ -3577,6 +3585,31 @@ function ListarCombosCategoria(elemento) {
   });
 }
 
+function ListarCombosEstado(elemento) {
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    async: false,
+
+    success: (res) => {
+      if (res.status) {
+        $(`#${elemento}`).html(res.data.estadoTodos).trigger("change");
+        $(`#${elemento}`).select2({
+          theme: "bootstrap4",
+          width: "100%",
+        });
+      } else {
+        Swal.fire(
+          "Filtro de estados",
+          "No se pudieron cargar los combos: " + res.message,
+          "warning"
+        );
+      }
+    }
+  });
+}
+
 function ListarCombosAmbiente(elemento) {
   $.ajax({
     url: "../../controllers/GestionarActivosController.php?action=combos",
@@ -3652,11 +3685,20 @@ function ListarCombosAmbienteSesion(elemento) {
       async: false,
       success: (res) => {
         if (res.status) {
-          $(`#${elemento}`).html(res.data).trigger("change");
-          $(`#${elemento}`).select2({
+          const $el = $(`#${elemento}`);
+          $el.html(res.data).trigger("change");
+          // Determinar un dropdownParent válido: modal > fila > contenedor inmediato > body
+          let $parent = $el.closest(".modal");
+          if (!$parent.length) $parent = $el.closest("tr");
+          if (!$parent.length) $parent = $el.closest(".modal-body");
+          if (!$parent.length) $parent = $el.parent();
+          if ($el.hasClass("select2-hidden-accessible")) {
+            $el.select2("destroy");
+          }
+          $el.select2({
             theme: "bootstrap4",
             width: "100%",
-            dropdownParent: $(`#${elemento}`).closest("tr"),
+            dropdownParent: $parent.length ? $parent : $("body"),
           });
         } else {
           // Si falla, cargar todos los ambientes como fallback
@@ -3760,7 +3802,7 @@ function mostrarNotificacionModalActivos(mensaje, tipo = "success") {
 
 function ListarCombosFiltros() {
   // Mostrar loading en los combos
-  $("#filtroEmpresa, #filtroSucursal, #filtroAmbiente, #filtroCategoria").html(
+  $("#filtroEmpresa, #filtroSucursal, #filtroAmbiente, #filtroCategoria, #filtroEstado").html(
     '<option value="">Cargando...</option>'
   );
 
@@ -3797,6 +3839,11 @@ function cargarTodosLosCombosOptimizado(data) {
       data.categorias
   );
 
+  $("#filtroEstado").html(
+    '<option value="">Seleccionar Estado</option><option value="TODOS">Todos los Estados</option>' +
+      data.estadoTodos
+  );
+
   // 2. Cargar empresas (sin opción "Todos" - filtro obligatorio)
   $("#filtroEmpresa").html(
     '<option value="">Seleccionar Empresa</option>' + data.empresas
@@ -3815,7 +3862,7 @@ function cargarTodosLosCombosOptimizado(data) {
 
   // 5. Inicializar todos los Select2 de una vez
   $(
-    "#filtroCategoria, #filtroEmpresa, #filtroSucursal, #filtroAmbiente"
+    "#filtroCategoria, #filtroEmpresa, #filtroSucursal, #filtroAmbiente, #filtroEstado"
   ).select2({
     theme: "bootstrap4",
     width: "100%",
@@ -3827,6 +3874,13 @@ function cargarTodosLosCombosOptimizado(data) {
     theme: "bootstrap4",
     width: "100%",
     placeholder: "Filtrar por Categoría",
+    allowClear: true,
+  });
+
+  $("#filtroEstado").select2("destroy").select2({
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Filtrar por Estado",
     allowClear: true,
   });
 
@@ -3974,6 +4028,7 @@ function configurarEventListenersFiltros() {
         );
       }
     });
+
 }
 
 function ListarCombosMov() {
@@ -4055,8 +4110,8 @@ function listarActivosTable() {
           filtroSucursal: $("#filtroSucursal").val() || null,
           filtroAmbiente: $("#filtroAmbiente").val() || null,
           filtroCategoria: $("#filtroCategoria").val() || null,
-          pIdEstado: null, // Estado si se implementa
-          filtroFecha: $("#filtroFecha").val() || null,
+          filtroEstado: $("#filtroEstado").val() || null,
+          //filtroFecha: $("#filtroFecha").val() || null,
         };
       },
       dataType: "json",
@@ -4077,9 +4132,9 @@ function listarActivosTable() {
             case "Operativa":
               return '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Operativo</span>';
             case "Reparación":
-              return '<span class="badge bg-danger"><i class="fas fa-wrench me-1"></i> Reparación</span>';
+              return '<span class="badge bg-warning"><i class="fas fa-wrench me-1"></i> Reparación</span>';
             case "Baja":
-              return '<span class="badge bg-warning text-dark"><i class="fas fa-times-circle me-1"></i> Baja</span>';
+              return '<span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i> Baja</span>';
             case "Vendido":
               return '<span class="badge bg-secondary"><i class="fas fa-dollar-sign me-1"></i> Vendido</span>';
             case "Regular":
@@ -5852,6 +5907,7 @@ $(document).ready(function () {
 
         const activo = {
           Nombre: form.find("input[name='nombre[]']").val(),
+          IdFactura: form.find("input[name='numfactura[]']").val(),
           CodigoAntiguo: form.find("input[name='codigoAntiguo[]']").val(),
           Descripcion: form.find("textarea[name='Descripcion[]']").val(),
           IdEstado: form.find("select[name='Estado[]']").val(),

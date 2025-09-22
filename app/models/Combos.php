@@ -46,6 +46,14 @@ class Combos
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+    public function comboEstadoActivoTodos()
+    {
+        $sql = "SELECT idEstadoActivo, nombre FROM tEstadoActivo";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
     public function comboResponsable()
     {
         $sql = "SELECT codTrabajador, NombreTrabajador FROM vEmpleados";

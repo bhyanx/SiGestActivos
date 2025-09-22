@@ -115,6 +115,19 @@ class GestionarActivos
         }
     }
 
+    public function obtenerActivoDocumentos($idActivo)
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM vActivosDocumentos WHERE IdActivo = ?");
+            $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error in obtenerActivoDocumentos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            throw $e;
+        }
+    }
+
     public function obtenerInfoActivo($idActivo)
     {
         $stmt = $this->db->prepare("SELECT Codigo AS CodigoActivo, Sucursal AS SucursalActual, Ambiente AS AmbienteActual FROM tActivos WHERE IdActivo = ?");
@@ -342,7 +355,7 @@ class GestionarActivos
 
             //$stmt->bindParam(1, $data['IdActivo'], \PDO::PARAM_INT);
             $stmt->bindParam(1, $data['Nombre'], \PDO::PARAM_STR);
-            $stmt->bindParam(2, $data['IdFactura'], \PDO::PARAM_INT);
+            $stmt->bindParam(2, $data['IdFactura'], \PDO::PARAM_STR);
             $stmt->bindParam(3, $data['CodigoAntiguo'], \PDO::PARAM_STR);
             $stmt->bindParam(4, $data['Descripcion'], \PDO::PARAM_STR);
             $stmt->bindParam(5, $data['IdEstado'], \PDO::PARAM_INT);
@@ -364,7 +377,7 @@ class GestionarActivos
             $stmt->bindParam(20, $data['FechaAdquisicion'], \PDO::PARAM_STR);
             $stmt->bindParam(21, $data['UserMod'], \PDO::PARAM_STR);
             //$stmt->bindParam(22, $data['MotivoBaja'], \PDO::PARAM_STR);
-            $stmt->bindParam(21, $data['Cantidad'], \PDO::PARAM_INT);
+            $stmt->bindParam(22, $data['Cantidad'], \PDO::PARAM_INT);
             $stmt->bindParam(23, $data['Correlativo'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
 
             // Debug: Log del correlativo que se envía al SP

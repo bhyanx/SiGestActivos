@@ -149,7 +149,7 @@ session_start();
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
-                                            <div class="col-md-12 mb-3">
+                                            <!-- <div class="col-md-12 mb-3">
                                                 <div class="input-group">
                                                     <input type="text" class="form-control" id="buscarActivo" placeholder="Buscar activo por código, nombre o serie...">
                                                     <div class="input-group-append">
@@ -158,7 +158,7 @@ session_start();
                                                         </button>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div> -->
                                             <div class="col-md-12">
                                                 <div class="table-responsive">
                                                     <table id="tbldetalleactivos" class="table table-hover table-bordered table-striped table-sm w-100">
@@ -367,9 +367,9 @@ session_start();
                                 <div class="card-header">
                                     <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Componentes a Mover</h3>
                                     <div class="card-tools">
-                                        <button type="button" class="btn btn-primary btn-sm" id="btnBuscarComponentes">
+                                        <!-- <button type="button" class="btn btn-primary btn-sm" id="btnBuscarComponentes">
                                             <i class="fas fa-search"></i> Buscar Componentes
-                                        </button>
+                                        </button> -->
                                         <button type="button" class="btn btn-tool" data-card-widget="maximize">
                                             <i class="fas fa-expand"></i>
                                         </button>
@@ -382,7 +382,7 @@ session_start();
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="table-responsive">
-                                                <table id="tbldetallecomponentes" class="table table-hover table-bordered table-striped table-sm w-100">
+                                                <table id="tbldetallecomponentes" class="table table-hover table-bordered table-striped table-sm">
                                                     <thead class="text-center table-success">
                                                         <tr>
                                                             <th>Código</th>
@@ -430,7 +430,7 @@ session_start();
     </div>
 
     <!-- Modal de Búsqueda de Componentes -->
-    <div class="modal fade" id="modalBuscarComponentes" tabindex="-1" role="dialog" aria-labelledby="modalBuscarComponentesLabel" aria-hidden="true">
+    <!-- <div class="modal fade" id="modalBuscarComponentes" tabindex="-1" role="dialog" aria-labelledby="modalBuscarComponentesLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -443,7 +443,7 @@ session_start();
                     <div class="row">
                         <div class="col-md-12">
                             <div class="table-responsive">
-                                <table id="tblComponentes" class="table table-bordered table-striped">
+                                <table id="tblComponentes" class="table table-bordered table-striped" style="width: 100%;">
                                     <thead>
                                         <tr>
                                             <th>ID</th>
@@ -465,7 +465,7 @@ session_start();
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Modal de Búsqueda de Activos -->
     <div class="modal fade" id="modalBuscarActivos" tabindex="-1" role="dialog" aria-labelledby="modalBuscarActivosLabel" aria-hidden="true">

@@ -47,7 +47,7 @@ class GestionarMovimientosComponentes
             throw $e;
         }
     }
-    public function listarActivosPadresv2($sucursal = null)
+    public function listarActivosPadresDestino($sucursal = null)
     {
         try {
             $sql = "
@@ -62,7 +62,8 @@ class GestionarMovimientosComponentes
             INNER JOIN vUnidadesdeNegocio s ON a.IdSucursal = s.cod_UnidadNeg
             INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
             WHERE a.IdEmpresa = 1 
-            AND a.idEstado NOT IN(2,3,4)";
+            AND a.idEstado NOT IN(2,3,4)
+            AND a.esPadre = 1";
 
             if ($sucursal) {
                 $sql .= " AND a.IdSucursal = :sucursal";
@@ -89,19 +90,18 @@ class GestionarMovimientosComponentes
     {
         try {
             $sql = "
-            SELECT 
-                a.IdActivo,
-                a.codigo as CodigoActivo,
-                ISNULL(a.NombreActivo, '') as NombreArticulo,
-                ISNULL(a.Serie, '') as NumeroSerie,
-                ISNULL(s.Nombre_local, '') AS Sucursal,
-                ISNULL(amb.nombre, '') AS Ambiente
-            FROM vActivos a
-            INNER JOIN vUnidadesdeNegocio s ON a.IdSucursal = s.cod_UnidadNeg
-            INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
-            WHERE a.idActivoPadre = ?
-            AND a.idEstado = 1
-            ORDER BY a.NombreActivo";
+            SELECT  a.IdActivo, a.codigo as CodigoActivo,
+        ISNULL(a.NombreActivo, '') as NombreArticulo,
+        ISNULL( a.Marca, '') as Marca,
+        ISNULL(a.Serie, '') as NumeroSerie,
+        ISNULL(s.Nombre_local, '') AS Sucursal,
+        ISNULL(amb.nombre, '') AS Ambiente
+FROM vActivos a
+INNER JOIN vUnidadesdeNegocio s ON a.IdSucursal = s.cod_UnidadNeg
+INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
+WHERE a.idActivoPadre = ?
+AND a.idEstado = 1
+ORDER BY a.NombreActivo";
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(1, $idActivoPadre, PDO::PARAM_INT);

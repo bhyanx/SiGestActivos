@@ -48,7 +48,7 @@ switch ($action) {
         }
         break;
 
-    case 'listarActivosPadresv2':
+    case 'listarActivosPadresDestino':
         try {
             $tipo = $_POST['tipo'] ?? '';
             $sucursal = null;
@@ -69,7 +69,7 @@ switch ($action) {
                 throw new Exception("Tipo de consulta no válido");
             }
 
-            $activosPadres = $movimientosComponentes->listarActivosPadresv2($sucursal);
+            $activosPadres = $movimientosComponentes->listarActivosPadresDestino($sucursal);
             echo json_encode([
                 'status' => true,
                 'data' => $activosPadres,
