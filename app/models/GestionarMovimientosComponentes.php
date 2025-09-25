@@ -138,7 +138,7 @@ ORDER BY a.NombreActivo";
     public function consultarMovimientosEntreActivos($filtros = [])
     {
         try {
-            $sql = "SELECT 
+            $sql = "SELECT
             hc.idHistorialComponente as IdDetalleMovimiento,
             c.IdActivo AS IdComponente,
             c.codigo AS CodigoComponente,
@@ -184,6 +184,7 @@ ORDER BY a.NombreActivo";
             throw $e;
         }
     }
+
     public function asignarComponenteActivo($data)
     {
         try {
@@ -268,3 +269,4 @@ ORDER BY a.NombreActivo";
         }
     }
 }
+

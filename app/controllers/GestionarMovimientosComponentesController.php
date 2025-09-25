@@ -145,7 +145,7 @@ switch ($action) {
     case 'ConsultarMovimientosEntreActivos':
         try {
             $filtros = [
-                'sucursal' => $_POST['filtroSucursal'] ?? null,
+                'sucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
                 'fechaInicio' => $_POST['fechaInicio'] ?? null,
                 'fechaFin' => $_POST['fechaFin'] ?? null,
                 //'fecha' => $_POST['filtroFecha'] ?? null
@@ -196,9 +196,24 @@ switch ($action) {
                 'message' => 'Componente asignado correctamente'
             ]);
         } catch (Exception $e) {
+            $errorMessage = $e->getMessage();
+
+            // Personalizar mensajes de error
+            if (strpos($errorMessage, 'ya es padre') !== false) {
+                $customMessage = 'Este activo ya tiene componentes asignados y no puede ser asignado como componente de otro activo.';
+            } elseif (strpos($errorMessage, 'dado de baja') !== false) {
+                $customMessage = 'No se puede asignar un activo que está dado de baja o inactivo.';
+            } elseif (strpos($errorMessage, 'no existe') !== false) {
+                $customMessage = 'El activo seleccionado no existe en el sistema.';
+            } elseif (strpos($errorMessage, 'su propio padre') !== false) {
+                $customMessage = 'Un activo no puede ser asignado como componente de sí mismo.';
+            } else {
+                $customMessage = 'Error al asignar el componente: ' . $errorMessage;
+            }
+
             echo json_encode([
                 'success' => false,
-                'message' => 'Error al asignar el componente: ' . $e->getMessage()
+                'message' => $customMessage
             ]);
         }
         break;
@@ -257,3 +272,4 @@ switch ($action) {
         ]);
         break;
 }
+

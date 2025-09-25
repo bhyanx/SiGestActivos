@@ -188,7 +188,13 @@ function init() {
   });
 
   // Función para guardar el movimiento completo
-  $("#btnGuardarMov").on("click", function () {
+  $(document).off("click", "#btnGuardarMov").on("click", "#btnGuardarMov", function () {
+    // Prevenir múltiples clics
+    if ($(this).data('processing')) {
+      return;
+    }
+    $(this).data('processing', true);
+
     // Verificar si el activo padre destino es diferente al origen
     const idActivoPadreOrigen = $("#IdActivoPadreOrigen").val();
     const idActivoPadreDestino = $("#IdActivoPadreDestino").val();
@@ -200,6 +206,7 @@ function init() {
         icon: "error",
         confirmButtonText: "Aceptar",
       });
+      $(this).data('processing', false);
       return;
     }
 
@@ -212,12 +219,14 @@ function init() {
         "error",
         "Debe seleccionar al menos un componente para mover"
       );
+      $(this).data('processing', false);
       return;
     }
 
     // Verificar que se haya seleccionado un activo padre destino
     if (!$("#IdActivoPadreDestino").val()) {
       NotificacionToast("error", "Debe seleccionar un activo padre destino");
+      $(this).data('processing', false);
       return;
     }
 
@@ -238,6 +247,7 @@ function init() {
         icon: "error",
         confirmButtonText: "Aceptar"
       });
+      $(this).data('processing', false);
       return;
     }
 
@@ -677,6 +687,7 @@ function guardarDetallesMovimiento() {
                 listarMovimientos();
               });
             }
+            $("#btnGuardarMov").data('processing', false);
           }
         },
         error: function () {
