@@ -389,6 +389,21 @@ switch ($action) {
                     throw new Exception("ID de movimiento no proporcionado");
                 }
 
+                // Validar que el usuario actual sea el autorizador del movimiento
+                $sql = "SELECT idAutorizador FROM tMovimientos WHERE idMovimiento = ?";
+                $stmt = $movimientos->db->prepare($sql);
+                $stmt->bindParam(1, $idMovimiento, PDO::PARAM_INT);
+                $stmt->execute();
+                $movimiento = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$movimiento) {
+                    throw new Exception("Movimiento no encontrado");
+                }
+
+                if ($movimiento['idAutorizador'] !== $_SESSION['CodEmpleado']) {
+                    throw new Exception("Solo el autorizador del movimiento puede aprobarlo");
+                }
+
                 $userMod = $_SESSION['CodEmpleado'];
                 $resultado = $movimientos->aprobarMovimiento($idMovimiento, $userMod);
 
@@ -435,6 +450,21 @@ switch ($action) {
                 $idMovimiento = $_POST['idMovimiento'] ?? null;
                 if (!$idMovimiento) {
                     throw new Exception("ID de movimiento no proporcionado");
+                }
+
+                // Validar que el usuario actual sea el receptor del movimiento
+                $sql = "SELECT idReceptor FROM tMovimientos WHERE idMovimiento = ?";
+                $stmt = $movimientos->db->prepare($sql);
+                $stmt->bindParam(1, $idMovimiento, PDO::PARAM_INT);
+                $stmt->execute();
+                $movimiento = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$movimiento) {
+                    throw new Exception("Movimiento no encontrado");
+                }
+
+                if ($movimiento['idReceptor'] !== $_SESSION['CodEmpleado']) {
+                    throw new Exception("Solo el receptor origen puede aceptar el movimiento");
                 }
 
                 $userMod = $_SESSION['CodEmpleado'];

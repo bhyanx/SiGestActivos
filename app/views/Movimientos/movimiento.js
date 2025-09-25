@@ -1555,16 +1555,17 @@ function ListarMovimientosEnviados() {
           // Agregar acciones según el estado
 
           if (row.idEstadoMovimiento == 1 || row.idEstadoMovimiento === "1") {
-            // Pendiente
-
-            acciones += `
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item text-success" href="#" onclick="aprobarMovimiento(${row.idMovimiento})">
-                <i class="fas fa-check"></i> Aprobar
-              </a>
-              <a class="dropdown-item text-danger" href="#" onclick="rechazarMovimiento(${row.idMovimiento})">
-                <i class="fas fa-times"></i> Rechazar
-              </a>`;
+            // Pendiente - Solo el autorizador puede aprobar/rechazar
+            if (row.idAutorizador == window.currentUserId) {
+              acciones += `
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item text-success" href="#" onclick="aprobarMovimiento(${row.idMovimiento})">
+                  <i class="fas fa-check"></i> Aprobar
+                </a>
+                <a class="dropdown-item text-danger" href="#" onclick="rechazarMovimiento(${row.idMovimiento})">
+                  <i class="fas fa-times"></i> Rechazar
+                </a>`;
+            }
           }
 
           acciones += `
@@ -1676,12 +1677,14 @@ function ListarMovimientosRecibidos() {
           // Agregar acciones según el estado para movimientos recibidos
 
           if (row.idEstadoMovimiento == 2 || row.idEstadoMovimiento === "2") {
-            // Aprobado - puede ser aceptado
-            acciones += `
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item text-success" href="#" onclick="aceptarMovimiento(${row.idMovimiento})">
-                <i class="fas fa-check-double"></i> Aceptar Movimiento
-              </a>`;
+            // Aprobado - Solo el receptor puede aceptar
+            if (row.idReceptor == window.currentUserId) {
+              acciones += `
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item text-success" href="#" onclick="aceptarMovimiento(${row.idMovimiento})">
+                  <i class="fas fa-check-double"></i> Aceptar Movimiento
+                </a>`;
+            }
           }
 
           acciones += `

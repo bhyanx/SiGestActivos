@@ -250,7 +250,7 @@ ORDER BY a.NombreActivo";
             $pIdAmbiente = empty($data['pIdAmbiente']) ? null : (int)$data['pIdAmbiente'];
             $pIdCategoria = empty($data['pIdCategoria']) ? null : (int)$data['pIdCategoria'];
             $pIdEstado = empty($data['pIdEstado']) ? null : (int)$data['pIdEstado'];
-            $pAccion = 1;
+            $pAccion = 2;
 
             $stmt = $this->db->prepare('EXEC sp_ConsultarActivos @pCodigo = ?, @pIdEmpresa = ?, @pIdSucursal = ?, @pIdAmbiente = ?, @pIdCategoria = ?, @pIdEstado = ?, @pAccion = ?');
             $stmt->bindParam(1, $pCodigo, \PDO::PARAM_STR | \PDO::PARAM_NULL);

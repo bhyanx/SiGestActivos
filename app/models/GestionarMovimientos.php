@@ -296,6 +296,9 @@ class GestionarMovimientos
             ed.Razon_empresa AS empresaDestino,
             sd.Nombre_local AS sucursalDestino,
             u.NombreTrabajador AS autorizador,
+            u.codTrabajador AS idAutorizador,
+            rec.NombreTrabajador AS receptor,
+            rec.codTrabajador AS idReceptor,
             em.nombre AS estadoMovimiento,
             m.idEstadoMovimiento
 
@@ -311,8 +314,9 @@ class GestionarMovimientos
             LEFT JOIN vEmpresas ed ON m.idEmpresaDestino= ed.cod_empresa
             LEFT JOIN vUnidadesdeNegocio sd ON m.idSucursalDestino = sd.cod_UnidadNeg
 
-            -- Autorizador
+            -- Autorizador y Receptor
             LEFT JOIN vEmpleados u ON m.idAutorizador = u.codTrabajador
+            LEFT JOIN vEmpleados rec ON m.idReceptor = rec.codTrabajador
             WHERE 1=1";
 
             $params = [];
@@ -369,6 +373,9 @@ class GestionarMovimientos
             ed.Razon_empresa AS empresaDestino,
             sd.Nombre_local AS sucursalDestino,
             u.NombreTrabajador AS autorizador,
+            u.codTrabajador AS idAutorizador,
+            rec.NombreTrabajador AS receptor,
+            rec.codTrabajador AS idReceptor,
             em.nombre AS estadoMovimiento,
             m.idEstadoMovimiento
 
@@ -386,6 +393,10 @@ class GestionarMovimientos
 
             -- Autorizador
             LEFT JOIN vEmpleados u ON m.idAutorizador = u.codTrabajador
+
+            -- Receptor
+            LEFT JOIN vEmpleados rec ON m.idReceptor = rec.codTrabajador
+
             WHERE 1=1";
 
             $params = [];

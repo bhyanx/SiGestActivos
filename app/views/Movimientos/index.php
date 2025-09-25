@@ -635,6 +635,9 @@ session_start();
             </section>
         </div>
         <?php require_once("../Layouts/Footer.php"); ?>
+        <script>
+            window.currentUserId = '<?php echo $_SESSION['CodEmpleado'] ?? ''; ?>';
+        </script>
         <script src="movimiento.js"></script>
     </div>
 </body>

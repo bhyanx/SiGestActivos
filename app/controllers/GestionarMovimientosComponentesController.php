@@ -241,7 +241,7 @@ switch ($action) {
                 'pIdCategoria' => $filtroCategoria,
                 'pIdEstado' => $_POST['pIdEstado'] ?? null
             ];
-            $resultados = $activos->consultarActivosModal($filtros);
+            $resultados = $movimientosComponentes->consultarActivosModal($filtros);
             error_log("Consultar resultados: " . print_r($resultados, true), 3, __DIR__ . '/../../logs/debug.log');
             echo json_encode($resultados ?: []);
         } catch (Exception $e) {

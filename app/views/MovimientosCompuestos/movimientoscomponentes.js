@@ -64,61 +64,6 @@ function init() {
       $("#divtblmovimientos").show();
     });
 
-  // Manejar el envío del formulario de asignación de componentes
-  $("#formAsignarComponente")
-    .off("submit")
-    .on("submit", function (e) {
-      e.preventDefault();
-      const formData = $(this).serialize();
-
-      Swal.fire({
-        title: "Procesando",
-        text: "Guardando la asignación...",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      $.ajax({
-        url: "../../controllers/GestionarMovimientosComponentesController.php?action=asignarComponente",
-        type: "POST",
-        data: formData,
-        dataType: "json",
-        success: function (res) {
-          Swal.close();
-          if (res.success) {
-            Swal.fire({
-              title: "Éxito",
-              text: res.message,
-              icon: "success",
-            }).then(() => {
-              $("#divformularioasignacion").hide();
-              $("#divlistadomovimientos").show();
-              $("#divtblmovimientos").show();
-              $("#formAsignarComponente")[0].reset();
-              if ($.fn.DataTable.isDataTable("#tblMovimientos")) {
-                $("#tblMovimientos").DataTable().ajax.reload(null, false);
-              }
-            });
-          } else {
-            Swal.fire({
-              title: "Error",
-              text: res.message,
-              icon: "error",
-            });
-          }
-        },
-        error: function (xhr, status, error) {
-          Swal.close();
-          Swal.fire({
-            title: "Error",
-            text: "Error al comunicarse con el servidor",
-            icon: "error",
-          });
-        },
-      });
-    });
 
   // Botón procesar en generarmov
   $("#btnprocesarempresa")
@@ -326,15 +271,43 @@ function init() {
   });
 
   // Evento para guardar la asignación de componentes
-  $(document).on("click", "#btnGuardarAsignacion", function () {
+  $(document).off("click", "#btnGuardarAsignacion").on("click", "#btnGuardarAsignacion", function () {
+    // Prevenir múltiples clics
+    if ($(this).data('processing')) {
+      return;
+    }
+    $(this).data('processing', true);
+
     const idPadre = $("#IdAsignacionPadre").val();
     if (!idPadre) {
       Swal.fire("Error", "Debe seleccionar un activo padre.", "error");
+      $(this).data('processing', false);
       return;
     }
     const filas = $("#tbldetalleactivos tbody tr");
     if (filas.length === 0) {
       Swal.fire("Error", "Debe agregar al menos un componente.", "error");
+      $(this).data('processing', false);
+      return;
+    }
+
+    // Validaciones previas
+    let erroresPrevios = [];
+    filas.each(function () {
+      const idComponente = $(this).data("id");
+      // Validación: no puede ser su propio padre
+      if (idComponente == idPadre) {
+        erroresPrevios.push("El componente " + idComponente + " no puede ser asignado a sí mismo como padre.");
+      }
+    });
+
+    if (erroresPrevios.length > 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Errores de validación",
+        html: erroresPrevios.join("<br>"),
+      });
+      $(this).data('processing', false);
       return;
     }
 
@@ -355,6 +328,7 @@ function init() {
     filas.each(function () {
       const idComponente = $(this).data("id");
       const observacion = $(this).find(".observacion-componente").val() || "";
+
       $.ajax({
         url: "../../controllers/GestionarMovimientosComponentesController.php?action=asignarComponente",
         type: "POST",
@@ -389,6 +363,7 @@ function init() {
                 html: erroresMsg.join("<br>"),
               });
             }
+            $("#btnGuardarAsignacion").data('processing', false);
           }
         },
         error: function (xhr, status, error) {
@@ -401,6 +376,7 @@ function init() {
               title: "Algunos errores",
               html: erroresMsg.join("<br>"),
             });
+            $("#btnGuardarAsignacion").data('processing', false);
           }
         },
       });
@@ -496,7 +472,7 @@ function cargarActivosPadres() {
 function cargarActivosParaAsignacion() {
   // Cargar todos los activos disponibles para asignar como padre
   $.ajax({
-    url: "../../controllers/GestionarActivosController.php?action=ConsultarActivos",
+    url: "../../controllers/GestionarMovimientosComponentesController.php?action=ConsultarActivos",
     type: "POST",
     data: { IdArticulo: "", IdActivo: "" },
     dataType: "json",
@@ -1203,14 +1179,20 @@ function listarActivosModalBusqueda() {
   }
   $("#tblActivos").DataTable({
     ajax: {
-      url: "../../controllers/GestionarActivosController.php?action=ConsultarActivos",
+      url: "../../controllers/GestionarMovimientosComponentesController.php?action=ConsultarActivos",
       type: "POST",
       data: { IdArticulo: "", IdActivo: ""},
       dataType: "json",
       dataSrc: function (json) {
         console.log("Respuesta del servidor:", json);
         // ConsultarActivos devuelve directamente un array, no un objeto con status
-        return json || [];
+        let data = json || [];
+        // Excluir el activo seleccionado como padre
+        const excludeId = $("#IdAsignacionPadre").val();
+        if (excludeId) {
+          data = data.filter(item => item.idActivo != excludeId);
+        }
+        return data;
       },
       error: function (xhr, status, error) {
         console.error("Error AJAX:", error);
