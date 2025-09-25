@@ -6,7 +6,7 @@ ob_clean();
 session_start();
 require_once("../../config/configuracion.php");
 require_once("../../models/Mantenimientos.php");
-require_once("../../../includes/vendor/setasign/fpdf/fpdf.php");
+require_once("../../../public/plugins/fpdf/fpdfRequerimiento.php");
 
 $mantenimiento = new Mantenimientos();
 $idMantenimiento = $_GET['id'] ?? null;
@@ -78,9 +78,9 @@ class PDF extends FPDF
         $this->SetFont('Arial', '', 9);
         $this->SetTextColor(102, 102, 102); // Gris
         $this->SetXY(40, 32);
-        $this->Cell(0, 4, $this->convertToLatin1('Dirección fiscal: ' . $this->companyInfo['direccion']), 0, 1);
-        $this->SetXY(40, 36);
-        $this->Cell(0, 4, $this->convertToLatin1('Sucursal: ' . $this->companyInfo['sucursal']), 0, 1);
+        $this->MultiCell(100, 4, $this->convertToLatin1('Dirección fiscal: ' . $this->companyInfo['direccion']), 0, 'L');
+        $this->SetXY(40, $this->GetY());
+        $this->MultiCell(100, 4, $this->convertToLatin1('Sucursal: ' . $this->companyInfo['sucursal']), 0, 'L');
 
         // Cuadro de información del documento (lado derecho)
         $this->SetDrawColor(40, 167, 69);
@@ -128,6 +128,66 @@ class PDF extends FPDF
         $this->SetDrawColor(221, 221, 221);
         $this->Line(15, $this->GetY(), 195, $this->GetY());
         $this->Ln(5);
+    }
+
+    // Función para calcular la altura necesaria para MultiCell
+    function GetMultiCellHeight($w, $h, $txt, $border=0, $align='J')
+    {
+        $cw = &$this->CurrentFont['cw'];
+        if($w==0)
+            $w = $this->w-$this->rMargin-$this->x;
+        $wmax = ($w-2*$this->cMargin)*1000/$this->FontSize;
+        $s = str_replace("\r",'',$txt);
+        $nb = strlen($s);
+        if($nb>0 && $s[$nb-1]=="\n")
+            $nb--;
+        $sep = -1;
+        $i = 0;
+        $j = 0;
+        $l = 0;
+        $ns = 0;
+        $nl = 1;
+        while($i<$nb)
+        {
+            $c = $s[$i];
+            if($c=="\n")
+            {
+                $i++;
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $ns = 0;
+                $nl++;
+                continue;
+            }
+            if($c==' ')
+            {
+                $sep = $i;
+                $ls = $l;
+                $ns++;
+            }
+            $l += $cw[$c];
+            if($l>$wmax)
+            {
+                if($sep==-1)
+                {
+                    if($i==$j)
+                        $i++;
+                }
+                else
+                {
+                    $i = $sep+1;
+                    $sep = -1;
+                    $j = $i;
+                    $l = 0;
+                    $ns = 0;
+                }
+                $nl++;
+            }
+            else
+                $i++;
+        }
+        return $nl*$h;
     }
 
     // Función para crear secciones de datos de mantenimiento
@@ -226,26 +286,34 @@ $pdf->SetTextColor(255, 255, 255);
 $pdf->SetFont('Arial', 'B', 9);
 $pdf->SetDrawColor(40, 167, 69);
 
-$pdf->Cell(20, 8, $pdf->convertToLatin1('N°'), 1, 0, 'C', true);
-$pdf->Cell(35, 8, $pdf->convertToLatin1('CÓDIGO'), 1, 0, 'C', true);
-$pdf->Cell(95, 8, $pdf->convertToLatin1('DESCRIPCIÓN DEL EQUIPO'), 1, 0, 'C', true);
+$pdf->Cell(15, 8, $pdf->convertToLatin1('N°'), 1, 0, 'C', true);
+$pdf->Cell(30, 8, $pdf->convertToLatin1('CÓDIGO'), 1, 0, 'C', true);
+$pdf->Cell(105, 8, $pdf->convertToLatin1('DESCRIPCIÓN DEL EQUIPO'), 1, 0, 'C', true);
 $pdf->Cell(40, 8, 'TIPO MANT.', 1, 1, 'C', true);
+
+// Configurar anchos y alineaciones para la tabla
+$pdf->SetWidths(array(15, 30, 105, 40));
+$pdf->SetAligns(array('C', 'C', 'L', 'C'));
+$pdf->SetFont('Arial', '', 7);
 
 // Datos de la tabla
 $pdf->SetTextColor(0, 0, 0);
-$pdf->SetFont('Arial', '', 8);
 $pdf->SetDrawColor(221, 221, 221);
 
 if (!empty($detalles)) {
     $i = 1;
     foreach ($detalles as $detalle) {
-        $pdf->Cell(20, 6, $i++, 1, 0, 'C');
-        $pdf->Cell(35, 6, $detalle['codigoActivo'] ?? '', 1, 0, 'C');
-        $pdf->Cell(95, 6, $pdf->convertToLatin1($detalle['nombreActivo'] ?? ''), 1, 0, 'L');
-        $pdf->Cell(40, 6, $pdf->convertToLatin1($detalle['tipoMantenimiento'] ?? ''), 1, 1, 'C');
+        $pdf->Row(array(
+            $i++,
+            $detalle['codigoActivo'] ?? '',
+            $pdf->convertToLatin1($detalle['NombreActivo'] ?? ''),
+            $pdf->convertToLatin1($cabecera['tipoMantenimiento'] ?? '')
+        ));
     }
 } else {
-    $pdf->Cell(190, 6, 'No hay equipos registrados para este mantenimiento.', 1, 1, 'C');
+    $pdf->SetWidths(array(190));
+    $pdf->SetAligns(array('C'));
+    $pdf->Row(array('No hay equipos registrados para este mantenimiento.'));
 }
 
 $pdf->Ln(8);

@@ -63,7 +63,8 @@ class Mantenimientos
                     @idMantenimiento = :idMantenimiento,
                     @idActivo = :idActivo,
                     @observaciones = :observaciones,
-                    @userMod = :userMod";
+                    @userMod = :userMod,
+                    @incluirHijos = :incluirHijos";
 
             $stmt = $this->db->prepare($sql);
 
@@ -72,11 +73,76 @@ class Mantenimientos
             //$stmt->bindParam(':tipoMantenimiento', $data['tipoMantenimiento'], PDO::PARAM_INT);
             $stmt->bindValue(':observaciones', $data['observaciones'], $data['observaciones'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
             $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
+            $incluirHijos = isset($data['incluirHijos']) && (int)$data['incluirHijos'] === 1 ? 1 : 0;
+            $stmt->bindValue(':incluirHijos', $incluirHijos, PDO::PARAM_INT);
 
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
             throw new Exception("Error al registrar detalle de mantenimiento: " . $e->getMessage());
+        }
+    }
+
+    public function activoTieneHijos($idActivo)
+    {
+        try {
+            $sql = "SELECT TOP 1 1 FROM tActivos WHERE idActivoPadre = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            throw new Exception("Error al verificar hijos del activo: " . $e->getMessage());
+        }
+    }
+
+    public function listarHijosActivos($idActivoPadre)
+    {
+        try {
+            $sql = "
+            ;WITH CTE AS (
+                SELECT a.idActivo
+                FROM tActivos a
+                WHERE a.idActivoPadre = :idPadre
+                UNION ALL
+                SELECT h.idActivo
+                FROM tActivos h
+                INNER JOIN CTE p ON h.idActivoPadre = p.idActivo
+            )
+            SELECT va.IdActivo, va.codigo, va.NombreActivo,
+                   s.Nombre_local AS Sucursal,
+                   amb.nombre AS Ambiente,
+                   va.idEstado,
+                   ea.nombre AS EstadoActual
+            FROM CTE c
+            INNER JOIN vActivos va ON va.IdActivo = c.idActivo
+            INNER JOIN vUnidadesdeNegocio s ON va.IdSucursal = s.cod_UnidadNeg
+            INNER JOIN tAmbiente amb ON va.IdAmbiente = amb.idAmbiente
+            LEFT JOIN tEstadoActivo ea ON va.idEstado = ea.idEstadoActivo
+            ORDER BY va.NombreActivo";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':idPadre', $idActivoPadre, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Error al listar hijos del activo: " . $e->getMessage());
+        }
+    }
+
+    public function obtenerEstadoActualActivo($idActivo)
+    {
+        try {
+            $sql = "SELECT ea.nombre AS EstadoActual, a.idEstado
+                    FROM vActivos a
+                    LEFT JOIN tEstadoActivo ea ON a.idEstado = ea.idEstadoActivo
+                    WHERE a.IdActivo = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idActivo, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Error al obtener estado del activo: " . $e->getMessage());
         }
     }
 
@@ -117,10 +183,11 @@ class Mantenimientos
         try {
             $sql = "
             SELECT a.IdActivo, a.Serie, a.codigo, a.NombreActivo, s.Nombre_local AS Sucursal
-            ,amb.nombre AS Ambiente
+            ,amb.nombre AS Ambiente, a.idEstado, ea.nombre AS EstadoActual
             FROM vActivos a
             INNER JOIN vUnidadesdeNegocio s ON a.IdSucursal = s.cod_UnidadNeg
             INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
+            LEFT JOIN tEstadoActivo ea ON a.idEstado = ea.idEstadoActivo
             WHERE a.IdEmpresa = ?
             AND a.IdSucursal = ?
             AND a.idEstado NOT IN(2,3,4)
@@ -142,20 +209,17 @@ class Mantenimientos
         try {
             $pIdEmpresa = empty($data['pIdEmpresa']) ? null : $data['pIdEmpresa'];
             $pIdSucursal = empty($data['pIdSucursal']) ? null : (int)$data['pIdSucursal'];
-            $pFechaInico = empty($data['pFechaInico']) ? null : $data['pFechaInico'];
+            $pFechaInicio = empty($data['pFechaInicio']) ? null : $data['pFechaInicio'];
             $pFechaFin = empty($data['pFechaFin']) ? null : $data['pFechaFin'];
-            $pAccion = 1;
 
-            $stmt = $this->db->prepare('EXEC sp_ConsultarMantenimientos @pIdEmpresa = ?,
+            $stmt = $this->db->prepare('EXEC sp_ConsultarMantenimientosCabecera @pIdEmpresa = ?,
                                                                         @pIdSucursal = ?,
                                                                         @pFechaInicio = ?,
-                                                                        @pFechaFin = ?,
-                                                                        @pAccion = ?');
+                                                                        @pFechaFin = ?');
             $stmt->bindParam(1, $pIdEmpresa, \PDO::PARAM_INT | \PDO::PARAM_NULL);
             $stmt->bindParam(2, $pIdSucursal, \PDO::PARAM_INT | \PDO::PARAM_NULL);
-            $stmt->bindParam(3, $pFechaInico, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(3, $pFechaInicio, \PDO::PARAM_STR | \PDO::PARAM_NULL);
             $stmt->bindParam(4, $pFechaFin, \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(5, $pAccion, \PDO::PARAM_INT | \PDO::PARAM_NULL);
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
@@ -167,20 +231,10 @@ class Mantenimientos
     public function obtenerDetallesMantenimiento($idMantenimiento)
     {
         try {
-            $sql = "SELECT a.codigo AS codigoActivo,
-	        a.NombreActivo AS nombreActivo,
-	        tm.nombre AS tipoMantenimiento,
-	        dm.observaciones,
-	        GETDATE() AS fechaRegistro
-            FROM tDetalleMantenimiento dm
-            INNER JOIN tMantenimientos m ON dm.idMantenimiento = m.idMantenimiento
-            INNER JOIN vActivos a ON dm.idActivo = a.IdActivo
-            LEFT JOIN tTipoMantenimiento tm ON m.idtipoMantenimiento = tm.idTipoMantenimiento
-            WHERE dm.idMantenimiento = ?
-            ORDER BY a.codigo";
+            $sql = "EXEC sp_ConsultarMantenimientos @pIdMantenimiento = :idMantenimiento";
 
             $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(1, $idMantenimiento, PDO::PARAM_INT);
+            $stmt->bindParam(':idMantenimiento', $idMantenimiento, PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {

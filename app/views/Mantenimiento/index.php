@@ -14,7 +14,7 @@ session_start();
     <title>Mantenimiento - Sistema Gestion de activos</title>
     <style>
         .swal2-container {
-            z-index: 9999 !important;
+            z-index: 11000 !important;
         }
 
         .dropdown-menu .show {
@@ -32,7 +32,7 @@ session_start();
 
         /* Asegurar que el modal de mantenimiento esté visible */
         #ModalArticulosMantenimiento {
-            z-index: 10000 !important;
+            z-index: 10500 !important;
         }
 
         #ModalArticulosMantenimiento .modal-backdrop {
@@ -40,12 +40,12 @@ session_start();
         }
 
         .modal-backdrop.show {
-            z-index: 9998 !important;
+            z-index: 10490 !important;
         }
 
         /* Forzar z-index para backdrop de mantenimiento */
         .modal-backdrop {
-            z-index: 9998 !important;
+            z-index: 10490 !important;
         }
     </style>
 </head>
@@ -134,8 +134,7 @@ session_start();
                                                     <tr>
                                                         <th><i class="fa fa-cogs" title="Acciones"></i></th>
                                                         <th>Código</th>
-                                                        <th>Tipo Movimiento</th>
-                                                        <th>NombreActivo</th>
+                                                        <th>Tipo Mantenimiento</th>
                                                         <th>Proveedor</th>
                                                         <th>Autorizador</th>
                                                         <th>Estado Mantenimiento</th>
@@ -147,8 +146,7 @@ session_start();
                                                     <tr>
                                                         <th><i class="fa fa-cogs" title="Acciones"></i></th>
                                                         <th>Código</th>
-                                                        <th>Tipo Movimiento</th>
-                                                        <th>NombreActivo</th>
+                                                        <th>Tipo Mantenimiento</th>
                                                         <th>Proveedor</th>
                                                         <th>Autorizador</th>
                                                         <th>Estado Mantenimiento</th>
@@ -201,7 +199,7 @@ session_start();
                                         <div class="row">
                                             <div class="col-md-3">
                                                 <div class="form-group">
-                                                    <label for="IdResponsableMantenimiento">Responsable:</label>
+                                                    <label for="IdResponsableMantenimiento">Autorizador:</label>
                                                     <select name="IdResponsableMantenimiento" id="IdResponsableMantenimiento" class="form-control"></select>
                                                 </div>
                                             </div>

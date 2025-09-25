@@ -24,7 +24,7 @@ switch ($action) {
                 'pIdEmpresa' => $_SESSION['cod_empresa'] ?? null,
                 'pIdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
                 // Mapear los filtros provenientes del DataTable (fechaInicio, fechaFin)
-                'pFechaInico' => $_POST['fechaInicio'] ?? null,
+                'pFechaInicio' => $_POST['fechaInicio'] ?? null,
                 'pFechaFin' => $_POST['fechaFin'] ?? null
             ];
             
@@ -86,6 +86,7 @@ switch ($action) {
                     'idActivo' => $_POST['idActivo'],
                     'observaciones' => $_POST['observaciones'] ?? null,
                     'userMod' => $_SESSION['usuario'] ?? null,
+                    'incluirHijos' => isset($_POST['incluirHijos']) ? (int)$_POST['incluirHijos'] : 0,
                 ];
 
                 $mantenimientos->crearDetalleMantenimiento($data);
@@ -94,6 +95,52 @@ switch ($action) {
             } catch (Exception $e) {
                 echo json_encode(['status' => false, 'message' => $e->getMessage()]);
             }
+        }
+        break;
+
+    case 'ActivoTieneHijos':
+        try {
+            $idActivo = $_POST['idActivo'] ?? null;
+            if (!$idActivo) {
+                throw new Exception("ID de activo no proporcionado");
+            }
+
+            $tiene = $mantenimientos->activoTieneHijos((int)$idActivo);
+            echo json_encode([
+                'status' => true,
+                'data' => [ 'tieneHijos' => $tiene ]
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'ListarHijosActivo':
+        try {
+            $idActivo = $_POST['idActivo'] ?? null;
+            if (!$idActivo) {
+                throw new Exception("ID de activo no proporcionado");
+            }
+            $hijos = $mantenimientos->listarHijosActivos((int)$idActivo);
+            echo json_encode(['status' => true, 'data' => $hijos]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
+    case 'ObtenerEstadoActivo':
+        try {
+            $idActivo = $_POST['idActivo'] ?? null;
+            if (!$idActivo) {
+                throw new Exception("ID de activo no proporcionado");
+            }
+            $estado = $mantenimientos->obtenerEstadoActualActivo((int)$idActivo);
+            echo json_encode(['status' => true, 'data' => $estado]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => false, 'message' => $e->getMessage()]);
         }
         break;
 

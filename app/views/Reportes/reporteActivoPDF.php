@@ -7,7 +7,7 @@ session_start();
 require_once("../../config/configuracion.php");
 require_once("../../models/Mantenimientos.php");
 require_once("../../models/GestionarActivos.php");
-require_once("../../../includes/vendor/setasign/fpdf/fpdf.php");
+require_once("../../../public/plugins/fpdf/fpdfRequerimiento.php");
 
 $mantenimiento = new Mantenimientos();
 $activos = new GestionarActivos();
@@ -79,9 +79,9 @@ class PDF extends FPDF
         $this->SetFont('Arial', '', 9);
         $this->SetTextColor(102, 102, 102); // Gris
         $this->SetXY(40, 32);
-        $this->Cell(0, 4, $this->convertToLatin1('Dirección fiscal: ' . $this->companyInfo['direccion']), 0, 1);
-        $this->SetXY(40, 36);
-        $this->Cell(0, 4, $this->convertToLatin1('Sucursal: ' . $this->companyInfo['sucursal']), 0, 1);
+        $this->MultiCell(100, 4, $this->convertToLatin1('Dirección fiscal: ' . $this->companyInfo['direccion']), 0, 'L');
+        $this->SetXY(40, $this->GetY());
+        $this->MultiCell(100, 4, $this->convertToLatin1('Sucursal: ' . $this->companyInfo['sucursal']), 0, 'L');
 
         // Cuadro de información del documento (lado derecho)
         $this->SetDrawColor(40, 167, 69);
@@ -275,15 +275,21 @@ $pdf->Cell(0, 6, $pdf->convertToLatin1('COMPONENTES DEL ACTIVO'), 0, 1);
 $pdf->SetTextColor(0, 0, 0);
 $pdf->Ln(1);
 
+// Configurar anchos y alineaciones para la tabla de componentes
+$pdf->SetWidths(array(40, 80, 70));
+$pdf->SetAligns(array('C', 'L', 'L'));
+$pdf->SetFont('Arial', 'B', 9);
+
 // Encabezados de tabla de componentes
 $pdf->SetFillColor(40, 167, 69);
 $pdf->SetTextColor(255, 255, 255);
-$pdf->SetFont('Arial', 'B', 9);
 $pdf->SetDrawColor(40, 167, 69);
 
-$pdf->Cell(40, 8, $pdf->convertToLatin1('Código'), 1, 0, 'C', true);
-$pdf->Cell(80, 8, 'Nombre', 1, 0, 'C', true);
-$pdf->Cell(70, 8, 'Observaciones', 1, 1, 'C', true);
+$pdf->Row(array(
+    $pdf->convertToLatin1('Código'),
+    'Nombre',
+    'Observaciones'
+), true);
 
 // Datos de la tabla de componentes
 $pdf->SetTextColor(0, 0, 0);
@@ -292,12 +298,16 @@ $pdf->SetDrawColor(221, 221, 221);
 
 if (!empty($componentes)) {
     foreach ($componentes as $componente) {
-        $pdf->Cell(40, 6, $componente['CodigoComponente'] ?? '', 1, 0, 'C');
-        $pdf->Cell(80, 6, $pdf->convertToLatin1($componente['NombreComponente'] ?? ''), 1, 0, 'L');
-        $pdf->Cell(70, 6, $pdf->convertToLatin1($componente['Observaciones'] ?? ''), 1, 1, 'L');
+        $pdf->Row(array(
+            $componente['CodigoComponente'] ?? '',
+            $pdf->convertToLatin1($componente['NombreComponente'] ?? ''),
+            $pdf->convertToLatin1($componente['Observaciones'] ?? '')
+        ));
     }
 } else {
-    $pdf->Cell(190, 6, 'No hay componentes asociados a este activo.', 1, 1, 'C');
+    $pdf->SetWidths(array(190));
+    $pdf->SetAligns(array('C'));
+    $pdf->Row(array('No hay componentes asociados a este activo.'));
 }
 
 $pdf->Ln(25); // Más espacio antes de las firmas

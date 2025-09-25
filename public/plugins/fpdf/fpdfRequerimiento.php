@@ -2026,139 +2026,87 @@ function RotatedText($x, $y, $txt, $angle)
     $this->Rotate(0);
 }
 
-//////////////////////////////////////
-//html parser
-function WriteHTML($html)
-{
-	//HTML parser
-	$html=strip_tags($html,"<b><u><i><a><img><p><br><strong><em><font><tr><blockquote>"); //supprime tous les tags sauf ceux reconnus
-	$html=str_replace("\n",' ',$html); //remplace retour � la ligne par un espace
-	$a=preg_split('/<(.*)>/U',$html,-1,PREG_SPLIT_DELIM_CAPTURE); //�clate la cha�ne avec les balises
-	foreach($a as $i=>$e)
+	//////////////////////////////////////
+	//html parser
+	function WriteHTML($html)
 	{
-		if($i%2==0)
+		// Intérprete de HTML
+		$html = str_replace("\n",' ',$html);
+		$a = preg_split('/<(.*)>/U',$html,-1,PREG_SPLIT_DELIM_CAPTURE);
+		foreach($a as $i=>$e)
 		{
-			//Text
-			if($this->HREF)
-				$this->PutLink($this->HREF,$e);
-			else
-				$this->Write(5,txtentities($e));
-		}
-		else
-		{
-			//Tag
-			if($e[0]=='/')
-				$this->CloseTag(strtoupper(substr($e,1)));
+			if($i%2==0)
+			{
+				// Text
+				if($this->HREF)
+					$this->PutLink($this->HREF,$e);
+				else
+					$this->Write(5,$e);
+			}
 			else
 			{
-				//Extract attributes
-				$a2=explode(' ',$e);
-				$tag=strtoupper(array_shift($a2));
-				$attr=array();
-				foreach($a2 as $v)
+				// Etiqueta
+				if($e[0]=='/')
+					$this->CloseTag(strtoupper(substr($e,1)));
+				else
 				{
-					if(preg_match('/([^=]*)=["\']?([^"\']*)/',$v,$a3))
-						$attr[strtoupper($a3[1])]=$a3[2];
+					// Extraer atributos
+					$a2 = explode(' ',$e);
+					$tag = strtoupper(array_shift($a2));
+					$attr = array();
+					foreach($a2 as $v)
+					{
+						if(preg_match('/([^=]*)=["\']?([^"\']*)/',$v,$a3))
+							$attr[strtoupper($a3[1])] = $a3[2];
+					}
+					$this->OpenTag($tag,$attr);
 				}
-				$this->OpenTag($tag,$attr);
 			}
 		}
 	}
-}
 
-function OpenTag($tag, $attr)
-{
-	//Opening tag
-	switch($tag){
-		case 'STRONG':
-			$this->SetStyle('B',true);
-			break;
-		case 'EM':
-			$this->SetStyle('I',true);
-			break;
-		case 'B':
-		case 'I':
-		case 'U':
-			$this->SetStyle($tag,true);
-			break;
-		case 'A':
-			$this->HREF=$attr['HREF'];
-			break;
-		case 'IMG':
-			if(isset($attr['SRC']) && (isset($attr['WIDTH']) || isset($attr['HEIGHT']))) {
-				if(!isset($attr['WIDTH']))
-					$attr['WIDTH'] = 0;
-				if(!isset($attr['HEIGHT']))
-					$attr['HEIGHT'] = 0;
-				$this->Image($attr['SRC'], $this->GetX(), $this->GetY(), px2mm($attr['WIDTH']), px2mm($attr['HEIGHT']));
-			}
-			break;
-		case 'TR':
-		case 'BLOCKQUOTE':
-		case 'BR':
-			$this->Ln(5);
-			break;
-		case 'P':
-			$this->Ln(10);
-			break;
-		case 'FONT':
-			if (isset($attr['COLOR']) && $attr['COLOR']!='') {
-				$coul=hex2dec($attr['COLOR']);
-				$this->SetTextColor($coul['R'],$coul['V'],$coul['B']);
-				$this->issetcolor=true;
-			}
-			if (isset($attr['FACE']) && in_array(strtolower($attr['FACE']), $this->fontlist)) {
-				$this->SetFont(strtolower($attr['FACE']));
-				$this->issetfont=true;
-			}
-			break;
-	}
-}
-
-function CloseTag($tag)
-{
-	//Closing tag
-	if($tag=='STRONG')
-		$tag='B';
-	if($tag=='EM')
-		$tag='I';
-	if($tag=='B' || $tag=='I' || $tag=='U')
-		$this->SetStyle($tag,false);
-	if($tag=='A')
-		$this->HREF='';
-	if($tag=='FONT'){
-		if ($this->issetcolor==true) {
-			$this->SetTextColor(0);
-		}
-		if ($this->issetfont) {
-			$this->SetFont('arial');
-			$this->issetfont=false;
-		}
-	}
-}
-
-function SetStyle($tag, $enable)
-{
-	//Modify style and select corresponding font
-	$this->$tag+=($enable ? 1 : -1);
-	$style='';
-	foreach(array('B','I','U') as $s)
+	function OpenTag($tag, $attr)
 	{
-		if($this->$s>0)
-			$style.=$s;
+		// Etiqueta de apertura
+		if($tag=='B' || $tag=='I' || $tag=='U')
+			$this->SetStyle($tag,true);
+		if($tag=='A')
+			$this->HREF = $attr['HREF'];
+		if($tag=='BR')
+			$this->Ln(5);
 	}
-	$this->SetFont('',$style);
-}
 
-function PutLink($URL, $txt)
-{
-	//Put a hyperlink
-	$this->SetTextColor(0,0,255);
-	$this->SetStyle('U',true);
-	$this->Write(5,$txt,$URL);
-	$this->SetStyle('U',false);
-	$this->SetTextColor(0);
-}
+	function CloseTag($tag)
+	{
+		// Etiqueta de cierre
+		if($tag=='B' || $tag=='I' || $tag=='U')
+			$this->SetStyle($tag,false);
+		if($tag=='A')
+			$this->HREF = '';
+	}
+
+	function SetStyle($tag, $enable)
+	{
+		// Modificar estilo y escoger la fuente correspondiente
+		$this->$tag += ($enable ? 1 : -1);
+		$style = '';
+		foreach(array('B', 'I', 'U') as $s)
+		{
+			if($this->$s>0)
+				$style .= $s;
+		}
+		$this->SetFont('',$style);
+	}
+
+	function PutLink($URL, $txt)
+	{
+		// Escribir un hiper-enlace
+		$this->SetTextColor(0,0,255);
+		$this->SetStyle('U',true);
+		$this->Write(5,$txt,$URL);
+		$this->SetStyle('U',false);
+		$this->SetTextColor(0);
+	}
 
 	function imageCenterCell($file, $x, $y, $w, $h)
 	{
@@ -2215,6 +2163,132 @@ function PutLink($URL, $txt)
 		$this->Line($x, $y, $x + $width * $cells, $y);
 		$this->Line($x, $y + $maxheight, $x + $width * $cells, $y + $maxheight);
 	}
+
+
+	//CREACION DE TABLA RESPONSIVE
+	protected $widths;
+    protected $aligns;
+	protected $linkscell;
+
+    function SetWidths($w)
+    {
+        // Set the array of column widths
+        $this->widths = $w;
+    }
+
+    function SetAligns($a)
+    {
+        // Set the array of column alignments
+        $this->aligns = $a;
+    }
+
+	function SetLinks($l)
+    {
+        // Set the array of column alignments
+        $this->linkscell = $l;
+    }
+
+    function Row($data, $fill = false)
+	{
+		// Calcular la altura de la fila
+		$nb = 0;
+		for ($i = 0; $i < count($data); $i++) {
+			$nb = max($nb, $this->NbLines($this->widths[$i], $data[$i]));
+		}
+		$h = 4 * $nb;
+
+		// Verificar si se necesita un salto de página
+		$this->CheckPageBreak($h);
+
+		// Dibujar las celdas de la fila
+		for ($i = 0; $i < count($data); $i++) {
+			$w = $this->widths[$i];
+			$a = isset($this->aligns[$i]) ? $this->aligns[$i] : 'L';
+			$x = $this->GetX();	
+			$y = $this->GetY();
+
+			// Dibujar rectángulo (con relleno si $fill=true)
+			$this->Rect($x, $y, $w, $h, $fill ? 'DF' : 'D');
+
+			// Verificar si hay un enlace para esta celda
+			if (isset($this->linkscell[$i]) && !empty($this->linkscell[$i])) {
+				$this->SetXY($x, $y);
+				$this->SetTextColor(0, 0, 255); // Azul para el enlace
+				$this->Write(4, $data[$i], $this->linkscell[$i]);
+				$this->SetTextColor(0, 0, 0); // Restaurar negro
+			} else {
+				// Texto normal dentro de la celda (sin fondo en MultiCell)
+				$this->MultiCell($w, 4, $data[$i], 0, $a);
+			}
+
+			// Colocar la posición a la derecha de la celda
+			$this->SetXY($x + $w, $y);
+		}
+
+		// Ir a la siguiente línea
+		$this->Ln($h);
+	}
+
+    function CheckPageBreak($h)
+    {
+        // If the height h would cause an overflow, add a new page immediately
+        if($this->GetY()+$h>$this->PageBreakTrigger)
+            $this->AddPage($this->CurOrientation);
+    }
+
+    function NbLines($w, $txt)
+    {
+        // Compute the number of lines a MultiCell of width w will take
+        if(!isset($this->CurrentFont))
+            $this->Error('No font has been set');
+        $cw = $this->CurrentFont['cw'];
+        if($w==0)
+            $w = $this->w-$this->rMargin-$this->x;
+        $wmax = ($w-2*$this->cMargin)*1000/$this->FontSize;
+        $s = str_replace("\r",'',(string)$txt);
+        $nb = strlen($s);
+        if($nb>0 && $s[$nb-1]=="\n")
+            $nb--;
+        $sep = -1;
+        $i = 0;
+        $j = 0;
+        $l = 0;
+        $nl = 1;
+        while($i<$nb)
+        {
+            $c = $s[$i];
+            if($c=="\n")
+            {
+                $i++;
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+                continue;
+            }
+            if($c==' ')
+                $sep = $i;
+            $l += $cw[$c];
+            if($l>$wmax)
+            {
+                if($sep==-1)
+                {
+                    if($i==$j)
+                        $i++;
+                }
+                else
+                    $i = $sep+1;
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+            }
+            else
+                $i++;
+        }
+        return $nl;
+    }
+
 }
 
 ?>

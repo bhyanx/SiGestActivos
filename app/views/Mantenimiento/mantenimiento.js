@@ -120,6 +120,9 @@ function initMantenimiento() {
       // Validar campos obligatorios
       const tipoMantenimiento = $("#IdTipoMantenimiento").val();
       const estadoMantenimiento = $("#IdEstadoMantenimiento").val();
+      const descripcion = $("#DescripcionMantenimiento").val().trim();
+      const fechaProgramada = $("#FechaProgramada").val();
+      const observaciones = $("#ObservacionesMantenimiento").val().trim();
 
       if (!tipoMantenimiento) {
         Swal.fire({
@@ -127,6 +130,7 @@ function initMantenimiento() {
           text: "Debe seleccionar un tipo de mantenimiento",
           icon: "warning",
         });
+        $("#IdTipoMantenimiento").focus();
         return;
       }
 
@@ -136,6 +140,107 @@ function initMantenimiento() {
           text: "Debe seleccionar un estado de mantenimiento",
           icon: "warning",
         });
+        $("#IdEstadoMantenimiento").focus();
+        return;
+      }
+
+      if (!descripcion) {
+        Swal.fire({
+          title: "Campo Requerido",
+          text: "Debe ingresar una descripción del mantenimiento",
+          icon: "warning",
+        });
+        $("#DescripcionMantenimiento").focus();
+        return;
+      }
+
+      if (descripcion.length < 10) {
+        Swal.fire({
+          title: "Descripción muy corta",
+          text: "La descripción debe tener al menos 10 caracteres",
+          icon: "warning",
+        });
+        $("#DescripcionMantenimiento").focus();
+        return;
+      }
+
+      if (!fechaProgramada) {
+        Swal.fire({
+          title: "Campo Requerido",
+          text: "Debe seleccionar una fecha programada para el mantenimiento",
+          icon: "warning",
+        });
+        $("#FechaProgramada").focus();
+        return;
+      }
+
+      if (!observaciones) {
+        Swal.fire({
+          title: "Campo Requerido",
+          text: "Debe ingresar observaciones para el mantenimiento",
+          icon: "warning",
+        });
+        $("#ObservacionesMantenimiento").focus();
+        return;
+      }
+
+      // Validar que la fecha no sea anterior a hoy
+      const fechaSeleccionada = new Date(fechaProgramada);
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+
+      if (fechaSeleccionada < hoy) {
+        Swal.fire({
+          title: "Fecha inválida",
+          text: "La fecha programada no puede ser anterior a la fecha actual",
+          icon: "warning",
+        });
+        $("#FechaProgramada").focus();
+        return;
+      }
+
+      // Validar costo estimado (requerido)
+      const costoEstimado = $("#CostoEstimado").val().trim();
+      if (!costoEstimado) {
+        Swal.fire({
+          title: "Campo Requerido",
+          text: "Debe ingresar un costo estimado para el mantenimiento",
+          icon: "warning",
+        });
+        $("#CostoEstimado").focus();
+        return;
+      }
+
+      const costoNum = parseFloat(costoEstimado);
+      if (isNaN(costoNum) || costoNum <= 0) {
+        Swal.fire({
+          title: "Costo inválido",
+          text: "El costo estimado debe ser un número mayor a cero",
+          icon: "warning",
+        });
+        $("#CostoEstimado").focus();
+        return;
+      }
+
+      if (costoNum > 999999.99) {
+        Swal.fire({
+          title: "Costo muy alto",
+          text: "El costo estimado no puede exceder S/. 999,999.99",
+          icon: "warning",
+        });
+        $("#CostoEstimado").focus();
+        return;
+      }
+
+      // Validar proveedor (requerido)
+      const proveedorSeleccionado = $("#IdProveedor").val();
+      if (!proveedorSeleccionado || proveedorSeleccionado.trim() === "") {
+        Swal.fire({
+          title: "Campo Requerido",
+          text: "Debe seleccionar un proveedor para el mantenimiento",
+          icon: "warning",
+        });
+        $("#IdProveedor").focus();
         return;
       }
 
@@ -252,7 +357,66 @@ function initMantenimiento() {
       Ambiente: fila.find("td:eq(4)").text(),
     };
 
-    agregarActivoAMantenimiento(activo);
+    // Verificar si el activo tiene hijos antes de agregar
+    $.ajax({
+      url: "../../controllers/MantenimientosController.php?action=ActivoTieneHijos",
+      type: "POST",
+      dataType: "json",
+      data: { idActivo: activo.id },
+      success: function (res) {
+        if (res.status && res.data && res.data.tieneHijos) {
+          // Preguntar si desea incluir los hijos
+          Swal.fire({
+            title: "Activo con componentes",
+            html:
+              `<p>El activo <strong>${activo.nombre}</strong> tiene activos hijos asociados.</p>` +
+              `<p>¿Desea enviar a mantenimiento solo el activo padre o incluir también los hijos?</p>`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Padre + Hijos",
+            cancelButtonText: "Solo Padre",
+            reverseButtons: true,
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // cargar hijos y agregarlos como filas regulares
+              $.ajax({
+                url: "../../controllers/MantenimientosController.php?action=ListarHijosActivo",
+                type: "POST",
+                dataType: "json",
+                data: { idActivo: activo.id },
+                success: function (rsHijos) {
+                  agregarActivoAMantenimiento(activo);
+                  if (rsHijos.status && Array.isArray(rsHijos.data)) {
+                    rsHijos.data.forEach(function (hijo) {
+                      var hijoActivo = {
+                        id: hijo.IdActivo,
+                        codigo: hijo.codigo,
+                        nombre: hijo.NombreActivo,
+                        Sucursal: hijo.Sucursal,
+                        Ambiente: hijo.Ambiente,
+                        incluirHijos: 0
+                      };
+                      agregarActivoAMantenimiento(hijoActivo);
+                    });
+                  }
+                },
+                error: function () {
+                  agregarActivoAMantenimiento(activo);
+                },
+              });
+            } else {
+              agregarActivoAMantenimiento(activo);
+            }
+          });
+        } else {
+          agregarActivoAMantenimiento(activo);
+        }
+      },
+      error: function () {
+        // En caso de error, continuar como solo padre
+        agregarActivoAMantenimiento(activo);
+      },
+    });
   });
 
   // Función para guardar el mantenimiento completo usando el enfoque cabecera-detalle
@@ -685,13 +849,14 @@ function agregarActivoAMantenimiento(activo) {
     return false;
   }
 
+  var estadoTexto = 'Cargando...';
   var nuevaFila = `<tr data-id='${activo.id}' class='table-light border-left border-info border-3 agregado-temp'>
     <td class="text-center">${activo.id}</td>
     <td><strong>${activo.codigo}</strong></td>
     <td>${activo.nombre}</td>
     <td>${activo.Sucursal}</td>
     <td>${activo.Ambiente}</td>
-    <td>Activo</td>
+    <td><span class='estado-actual'>${estadoTexto}</span></td>
     <td class="text-center">
       <button type='button' class='btn btn-danger btn-sm btnQuitarActivoMant' title='Quitar activo'>
         <i class='fa fa-trash'></i>
@@ -700,6 +865,24 @@ function agregarActivoAMantenimiento(activo) {
   </tr>`;
 
   $("#tblactivosmantenimiento tbody").append(nuevaFila);
+
+  // Cargar estado actual del activo y pintar
+  $.ajax({
+    url: "../../controllers/MantenimientosController.php?action=ObtenerEstadoActivo",
+    type: "POST",
+    dataType: "json",
+    data: { idActivo: activo.id },
+    success: function (r) {
+      if (r.status && r.data && r.data.EstadoActual) {
+        $("#tblactivosmantenimiento tbody tr[data-id='" + activo.id + "'] .estado-actual").text(r.data.EstadoActual);
+      } else {
+        $("#tblactivosmantenimiento tbody tr[data-id='" + activo.id + "'] .estado-actual").text('N/D');
+      }
+    },
+    error: function () {
+      $("#tblactivosmantenimiento tbody tr[data-id='" + activo.id + "'] .estado-actual").text('N/D');
+    }
+  });
 
   // Animación de entrada
   setTimeout(function () {
@@ -735,6 +918,7 @@ function agregarActivoAMantenimiento(activo) {
 
   return true;
 }
+
 
 function actualizarContadorActivosMantenimiento() {
   const totalActivos = $("#tblactivosmantenimiento tbody tr").length;
@@ -875,6 +1059,8 @@ function agregarActivosAlMantenimiento(idMantenimiento, codigoMantenimiento) {
       "observaciones",
       $("#ObservacionesMantenimiento").val() || null
     );
+    // Siempre enviar incluirHijos=0 para procesar solo el activo seleccionado
+    detalleData.append("incluirHijos", 0);
 
     $.ajax({
       url: "../../controllers/MantenimientosController.php?action=AgregarDetalle",
@@ -1173,7 +1359,6 @@ function ListarMantenimientos() {
         data: "tipoMant",
         defaultContent: "N/A",
       },
-      { data: "NombreActivo", defaultContent: "N/A" },
       { data: "proveedor", defaultContent: "N/A" },
       {
         data: "responsable",
@@ -1316,15 +1501,15 @@ function verDetallesMantenimiento(idMantenimiento) {
         detallesHtml += "<thead><tr>";
         detallesHtml += "<th>Código Activo</th>";
         detallesHtml += "<th>Nombre Activo</th>";
-        detallesHtml += "<th>Tipo Mantenimiento</th>";
+        // detallesHtml += "<th>Tipo Mantenimiento</th>";
         detallesHtml += "<th>Observaciones</th>";
         detallesHtml += "</tr></thead><tbody>";
 
         res.data.forEach(function (detalle) {
           detallesHtml += "<tr>";
           detallesHtml += `<td>${detalle.codigoActivo}</td>`;
-          detallesHtml += `<td>${detalle.nombreActivo}</td>`;
-          detallesHtml += `<td>${detalle.tipoMantenimiento || "N/A"}</td>`;
+          detallesHtml += `<td>${detalle.NombreActivo}</td>`;
+          // detallesHtml += `<td>${detalle.tipoMantenimiento || "N/A"}</td>`;
           detallesHtml += `<td>${
             detalle.observaciones || "Sin observaciones"
           }</td>`;

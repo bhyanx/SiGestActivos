@@ -7,7 +7,7 @@ session_start();
 
 require_once("../../config/configuracion.php");
 require_once("../../models/GestionarMovimientos.php");
-require_once("../../../includes/vendor/setasign/fpdf/fpdf.php");
+require_once("../../../public/plugins/fpdf/fpdfRequerimiento.php");
 
 $movimientos = new GestionarMovimientos();
 $idMovimiento = $_GET['id'] ?? null;
@@ -68,9 +68,9 @@ class PDF extends FPDF
         $this->SetFont('Arial', '', 9);
         $this->SetTextColor(102, 102, 102); // Gris
         $this->SetXY(40, 32);
-        $this->Cell(0, 4, $this->convertToLatin1('Dirección fiscal: ' . ($this->cabecera['DireccionOrigen'] ?? '')), 0, 1);
-        $this->SetXY(40, 36);
-        $this->Cell(0, 4, $this->convertToLatin1('Sucursal: ' . ($this->cabecera['sucursalOrigen'] ?? '')), 0, 1);
+        $this->MultiCell(100, 4, $this->convertToLatin1('Dirección fiscal: ' . ($this->cabecera['DireccionOrigen'] ?? '')), 0, 'L');
+        $this->SetXY(40, $this->GetY());
+        $this->MultiCell(100, 4, $this->convertToLatin1('Sucursal: ' . ($this->cabecera['sucursalOrigen'] ?? '')), 0, 'L');
 
         // Cuadro de información del documento (lado derecho)
         $this->SetDrawColor(40, 167, 69);
@@ -240,17 +240,23 @@ $pdf->Cell(0, 6, $pdf->convertToLatin1('DATOS DEL BIEN TRANSPORTADO'), 0, 1);
 $pdf->SetTextColor(0, 0, 0);
 $pdf->Ln(1);
 
+// Configurar anchos y alineaciones para la tabla
+$pdf->SetWidths(array(20, 35, 85, 25, 25));
+$pdf->SetAligns(array('C', 'C', 'L', 'C', 'C'));
+$pdf->SetFont('Arial', 'B', 9);
+
 // Encabezados de tabla con colores corporativos
 $pdf->SetFillColor(40, 167, 69);
 $pdf->SetTextColor(255, 255, 255);
-$pdf->SetFont('Arial', 'B', 9);
 $pdf->SetDrawColor(40, 167, 69);
 
-$pdf->Cell(20, 8, $pdf->convertToLatin1('N°'), 1, 0, 'C', true);
-$pdf->Cell(35, 8, $pdf->convertToLatin1('CÓDIGO'), 1, 0, 'C', true);
-$pdf->Cell(85, 8, $pdf->convertToLatin1('DESCRIPCIÓN'), 1, 0, 'C', true);
-$pdf->Cell(25, 8, 'CANTIDAD', 1, 0, 'C', true);
-$pdf->Cell(25, 8, 'UM', 1, 1, 'C', true);
+$pdf->Row(array(
+    $pdf->convertToLatin1('N°'),
+    $pdf->convertToLatin1('CÓDIGO'),
+    $pdf->convertToLatin1('DESCRIPCIÓN'),
+    'CANTIDAD',
+    'UM'
+), true);
 
 // Datos de la tabla
 $pdf->SetTextColor(0, 0, 0);
@@ -260,14 +266,18 @@ $pdf->SetDrawColor(221, 221, 221);
 if (!empty($detalles)) {
     $i = 1;
     foreach ($detalles as $detalle) {
-        $pdf->Cell(20, 6, $i++, 1, 0, 'C');
-        $pdf->Cell(35, 6, $detalle['codigoActivo'] ?? '', 1, 0, 'C');
-        $pdf->Cell(85, 6, $pdf->convertToLatin1($detalle['nombreActivo'] ?? ''), 1, 0, 'L');
-        $pdf->Cell(25, 6, $detalle['Cantidad'] ?? '1', 1, 0, 'C');
-        $pdf->Cell(25, 6, 'UM', 1, 1, 'C');
+        $pdf->Row(array(
+            $i++,
+            $detalle['codigoActivo'] ?? '',
+            $pdf->convertToLatin1($detalle['nombreActivo'] ?? ''),
+            $detalle['Cantidad'] ?? '1',
+            'UM'
+        ));
     }
 } else {
-    $pdf->Cell(190, 6, 'No hay detalles de movimiento para mostrar.', 1, 1, 'C');
+    $pdf->SetWidths(array(190));
+    $pdf->SetAligns(array('C'));
+    $pdf->Row(array('No hay detalles de movimiento para mostrar.'));
 }
 
 $pdf->Ln(8);
