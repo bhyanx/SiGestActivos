@@ -334,10 +334,16 @@ class GestionarMovimientos
                 $params[] = $filtros['tipo'];
             }
 
-            if (!empty($filtros['fecha'])) {
-                $fecha = date('Y-m-d', strtotime($filtros['fecha']));
-                $sql .= " AND CONVERT(date, m.fechaMovimiento) = ?";
-                $params[] = $fecha;
+            if (!empty($filtros['fechaInicio']) && !empty($filtros['fechaFin'])) {
+                $fechaInicio = date('Y-m-d', strtotime($filtros['fechaInicio']));
+                $fechaFin = date('Y-m-d', strtotime($filtros['fechaFin']));
+                $sql .= " AND CONVERT(date, m.fechaMovimiento) BETWEEN ? AND ?";
+                $params[] = $fechaInicio;
+                $params[] = $fechaFin;
+            // } elseif (!empty($filtros['fecha'])) {
+            //     $fecha = date('Y-m-d', strtotime($filtros['fecha']));
+            //     $sql .= " AND CONVERT(date, m.fechaMovimiento) = ?";
+            //     $params[] = $fecha;
             }
 
             $sql .= " ORDER BY m.fechaMovimiento DESC;";
@@ -401,10 +407,12 @@ class GestionarMovimientos
                 $params[] = $filtros['tipo'];
             }
 
-            if (!empty($filtros['fecha'])) {
-                $fecha = date('Y-m-d', strtotime($filtros['fecha']));
-                $sql .= " AND CONVERT(date, m.fechaMovimiento) = ?";
-                $params[] = $fecha;
+            if (!empty($filtros['fechaInicio']) && !empty($filtros['fechaFin'])) {
+                $fechaInicio = date('Y-m-d', strtotime($filtros['fechaInicio']));
+                $fechaFin = date('Y-m-d', strtotime($filtros['fechaFin']));
+                $sql .= " AND CONVERT(date, m.fechaMovimiento) BETWEEN ? AND ?";
+                $params[] = $fechaInicio;
+                $params[] = $fechaFin;
             }
 
             $sql .= " ORDER BY m.fechaMovimiento DESC;";

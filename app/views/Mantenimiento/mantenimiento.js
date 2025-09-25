@@ -1061,26 +1061,11 @@ function ListarMantenimientos() {
     ajax: {
       url: "../../controllers/MantenimientosController.php?action=Consultar",
       type: "POST",
-      data: {},
-      dataSrc: function (json) {
-        if (json.error) {
-          console.error("Error del servidor:", json.error);
-          NotificacionToast("error", json.error);
-          return [];
-        }
-
-        if (json.data) {
-          console.log("Datos encontrados:", json.data.length, "registros");
-          if (json.data.length > 0) {
-            console.log("Primer registro:", json.data[0]);
-            console.log("Columnas disponibles:", Object.keys(json.data[0]));
-          }
-          return json.data;
-        }
-
-        console.log("No se encontraron datos, devolviendo array vacío");
-        return [];
+      data: function (d) {
+          d.fechaInicio = $("#filtroFechaInicio").val();
+          d.fechaFin = $("#filtroFechaFin").val();
       },
+      dataSrc: "data",
       error: function (xhr, status, error) {
         console.error("=== ERROR AJAX ===");
         console.error("Status:", status);

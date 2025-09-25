@@ -1511,7 +1511,9 @@ function ListarMovimientosEnviados() {
         return {
           tipo: $("#filtroTipoMovimiento").val(),
           sucursal: $("#filtroSucursal").val(),
-          fecha: $("#filtroFecha").val(),
+          fechaInicio: $("#filtroFechaInicio").val(),
+          fechaFin: $("#filtroFechaFin").val(),
+          //fecha: $("#filtroFecha").val(),
         };
       },
       dataSrc: function (json) {
@@ -1630,7 +1632,9 @@ function ListarMovimientosRecibidos() {
         return {
           tipo: $("#filtroTipoMovimiento").val(),
           sucursal: $("#filtroSucursal").val(),
-          fecha: $("#filtroFecha").val(),
+          fechaInicio: $("#filtroFechaInicio").val(),
+          fechaFin: $("#filtroFechaFin").val(),
+          //fecha: $("#filtroFecha").val(),
         };
       },
       dataSrc: function (json) {

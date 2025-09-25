@@ -146,7 +146,9 @@ switch ($action) {
         try {
             $filtros = [
                 'sucursal' => $_POST['filtroSucursal'] ?? null,
-                'fecha' => $_POST['filtroFecha'] ?? null
+                'fechaInicio' => $_POST['fechaInicio'] ?? null,
+                'fechaFin' => $_POST['fechaFin'] ?? null,
+                //'fecha' => $_POST['filtroFecha'] ?? null
             ];
 
             $resultados = $movimientosComponentes->consultarMovimientosEntreActivos($filtros);

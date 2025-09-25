@@ -847,7 +847,9 @@ function listarMovimientos() {
         // Agregar los filtros del formulario
         d.filtroTipoMovimiento = $("#filtroTipoMovimiento").val();
         d.filtroSucursal = $("#filtroSucursal").val();
-        d.filtroFecha = $("#filtroFecha").val();
+        //d.filtroFecha = $("#filtroFecha").val();
+        d.fechaInicio = $("#filtroFechaInicio").val();
+        d.fechaFin = $("#filtroFechaFin").val();
       },
       dataSrc: function (json) {
         if (!json.status) {

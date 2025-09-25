@@ -84,17 +84,23 @@ session_start();
                                         <div class="row">
                                             <div class="col-md-3">
                                                 <div class="form-group">
-                                                    <label for="filtroTipoMovimiento">Tipo Movimiento:</label>
+                                                    <label for="filtroTipoMovimiento">Tipo Mantenimiento:</label>
                                                     <select class="form-control" name="filtroTipoMovimiento" id="filtroTipoMovimiento"></select>
                                                 </div>
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group">
-                                                    <label for="filtroFecha">Fecha Movimiento:</label>
-                                                    <input type="date" class="form-control" name="filtroFecha" id="filtroFecha" value="<?php echo date('Y-m-d'); ?>">
+                                                    <label for="filtroFechaInicio">Fecha Inicio Man:</label>
+                                                    <input type="date" class="form-control" name="filtroFechaInicio" id="filtroFechaInicio" value="<?php echo date('Y-m-d'); ?>">
                                                 </div>
                                             </div>
-                                            <div class="col-md-2 offset-md-2">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="filtroFechaFin">Fecha Fin Man:</label>
+                                                    <input type="date" class="form-control" name="filtroFechaFin" id="filtroFechaFin" value="<?php echo date('Y-m-d'); ?>">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2 offset-md-6">
                                                 <div class="form-group mb-0">
                                                     <label for="">&nbsp;</label>
                                                     <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">

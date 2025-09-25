@@ -23,6 +23,9 @@ switch ($action) {
             $filtros = [
                 'pIdEmpresa' => $_SESSION['cod_empresa'] ?? null,
                 'pIdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
+                // Mapear los filtros provenientes del DataTable (fechaInicio, fechaFin)
+                'pFechaInico' => $_POST['fechaInicio'] ?? null,
+                'pFechaFin' => $_POST['fechaFin'] ?? null
             ];
             
             error_log("Filtros enviados: " . print_r($filtros, true), 3, __DIR__ . '/../../logs/debug.log');

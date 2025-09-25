@@ -294,7 +294,9 @@ switch ($action) {
         try {
             $filtros = [
                 'tipo' => $_POST['tipo'] ?? null,
-                'fecha' => $_POST['fecha'] ?? null,
+                'fechaInicio' => $_POST['fechaInicio'] ?? null,
+                'fechaFin' => $_POST['fechaFin'] ?? null,
+                //'fecha' => $_POST['fecha'] ?? null,
                 'idEmpresa' => $_SESSION['cod_empresa'] ?? null,
                 'idSucursalOrigen' => $_SESSION['cod_UnidadNeg'] ?? null,  // corregido aquí
                 //'idSucursalDestino' => $_POST['cod_UnidadNeg'] ?? null
@@ -317,7 +319,9 @@ switch ($action) {
         try {
             $filtros = [
                 'tipo' => $_POST['tipo'] ?? null,
-                'fecha' => $_POST['fecha'] ?? null,
+                'fechaInicio' => $_POST['fechaInicio'] ?? null,
+                'fechaFin' => $_POST['fechaFin'] ?? null,
+                //'fecha' => $_POST['fecha'] ?? null,
                 'idEmpresa' => $_SESSION['cod_empresa'] ?? null,
                 'idSucursalDestino' => $_SESSION['cod_UnidadNeg'] ?? null,  // corregido aquí
                 //'idSucursalDestino' => $_POST['cod_UnidadNeg'] ?? null

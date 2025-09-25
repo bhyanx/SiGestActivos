@@ -142,12 +142,20 @@ class Mantenimientos
         try {
             $pIdEmpresa = empty($data['pIdEmpresa']) ? null : $data['pIdEmpresa'];
             $pIdSucursal = empty($data['pIdSucursal']) ? null : (int)$data['pIdSucursal'];
+            $pFechaInico = empty($data['pFechaInico']) ? null : $data['pFechaInico'];
+            $pFechaFin = empty($data['pFechaFin']) ? null : $data['pFechaFin'];
             $pAccion = 1;
 
-            $stmt = $this->db->prepare('EXEC sp_ConsultarMantenimientos @pIdEmpresa = ?, @pIdSucursal = ?, @pAccion = ?');
+            $stmt = $this->db->prepare('EXEC sp_ConsultarMantenimientos @pIdEmpresa = ?,
+                                                                        @pIdSucursal = ?,
+                                                                        @pFechaInicio = ?,
+                                                                        @pFechaFin = ?,
+                                                                        @pAccion = ?');
             $stmt->bindParam(1, $pIdEmpresa, \PDO::PARAM_INT | \PDO::PARAM_NULL);
             $stmt->bindParam(2, $pIdSucursal, \PDO::PARAM_INT | \PDO::PARAM_NULL);
-            $stmt->bindParam(3, $pAccion, \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(3, $pFechaInico, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(4, $pFechaFin, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(5, $pAccion, \PDO::PARAM_INT | \PDO::PARAM_NULL);
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {

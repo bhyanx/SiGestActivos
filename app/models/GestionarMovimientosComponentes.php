@@ -166,9 +166,12 @@ ORDER BY a.NombreActivo";
                 $params[] = $filtros['sucursal'];
             }
 
-            if (!empty($filtros['fecha'])) {
-                $sql .= " AND CONVERT(date, hc.fechaCambio) = ?";
-                $params[] = $filtros['fecha'];
+            if (!empty($filtros['fechaInicio']) && !empty($filtros['fechaFin'])) {
+                $fechaInicio = date('Y-m-d', strtotime($filtros['fechaInicio']));
+                $fechaFin = date('Y-m-d', strtotime($filtros['fechaFin']));
+                $sql .= " AND CONVERT(date, hc.fechaCambio) BETWEEN ? AND ?";
+                $params[] = $fechaInicio;
+                $params[] = $fechaFin;
             }
 
             $sql .= " ORDER BY hc.fechaCambio DESC";

@@ -57,11 +57,17 @@ session_start();
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group">
-                                                    <label for="filtroFecha">Fecha Movimiento:</label>
-                                                    <input type="date" class="form-control" name="filtroFecha" id="filtroFecha" value="<?php echo date('Y-m-d'); ?>">
+                                                    <label for="filtroFechaInicio">Fecha Inicio Mov:</label>
+                                                    <input type="date" class="form-control" name="filtroFechaInicio" id="filtroFechaInicio" value="<?php echo date('Y-m-d'); ?>">
                                                 </div>
                                             </div>
-                                            <div class="col-md-2 offset-md-1">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="filtroFechaFin">Fecha Fin Mov:</label>
+                                                    <input type="date" class="form-control" name="filtroFechaFin" id="filtroFechaFin" value="<?php echo date('Y-m-d'); ?>">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2 offset-md-6">
                                                 <div class="form-group mb-0">
                                                     <label for="">&nbsp;</label>
                                                     <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">
