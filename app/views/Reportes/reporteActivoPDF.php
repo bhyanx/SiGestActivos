@@ -145,8 +145,9 @@ class PDF extends FPDF
             $this->Cell(30, 5, $this->convertToLatin1($item['label']), 0, 0);
             $this->SetFont('Arial', '', 9);
             $this->SetTextColor(0, 0, 0);
-            $this->Cell(60, 5, $this->convertToLatin1($item['value']), 0, 0);
-            $y_left += 5;
+            $this->SetXY(45, $y_left);
+            $this->MultiCell(60, 5, $this->convertToLatin1($item['value']), 0, 'L');
+            $y_left = $this->GetY();
         }
 
         // Columna derecha
@@ -158,8 +159,8 @@ class PDF extends FPDF
             $this->SetFont('Arial', '', 9);
             $this->SetTextColor(0, 0, 0);
             $this->SetXY(150, $y_right);
-            $this->Cell(40, 5, $this->convertToLatin1($item['value']), 0, 0);
-            $y_right += 5;
+            $this->MultiCell(40, 5, $this->convertToLatin1($item['value']), 0, 'L');
+            $y_right = $this->GetY();
         }
 
         // Establecer la posición Y al final de la sección más larga
@@ -187,6 +188,12 @@ $pdf->AddPage();
 $pdf->SetFont('Arial', '', 9);
 
 // ===== SECCIÓN: DETALLES DEL ACTIVO =====
+$pdf->SetFont('Arial', 'B', 10);
+$pdf->SetTextColor(40, 167, 69);
+$pdf->Cell(0, 6, $pdf->convertToLatin1('DETALLES DEL ACTIVO'), 0, 1);
+$pdf->SetTextColor(0, 0, 0);
+$pdf->Ln(1);
+
 $y_start = $pdf->GetY();
 
 // Datos de la columna izquierda
@@ -288,7 +295,7 @@ $pdf->SetDrawColor(40, 167, 69);
 $pdf->Row(array(
     $pdf->convertToLatin1('Código'),
     'Nombre',
-    'Observaciones'
+    'Serie'
 ), true);
 
 // Datos de la tabla de componentes
@@ -301,7 +308,7 @@ if (!empty($componentes)) {
         $pdf->Row(array(
             $componente['CodigoComponente'] ?? '',
             $pdf->convertToLatin1($componente['NombreComponente'] ?? ''),
-            $pdf->convertToLatin1($componente['Observaciones'] ?? '')
+            $pdf->convertToLatin1($componente['SerieComponente'] ?? '')
         ));
     }
 } else {

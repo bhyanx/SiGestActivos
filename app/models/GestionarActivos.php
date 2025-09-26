@@ -395,25 +395,26 @@ class GestionarActivos
     public function actualizarActivos($data)
     {
         try {
-            if ($data['accion'] == 3) {
-                $stmt = $this->db->prepare("EXEC sp_GuardarActivoPRUEBA @pIdActivo = ?, @pIdEstado = ?, @pIdResponsable = ?, @pMotivoBaja = ?, @pUserMod = ?, @pAccion = ?");
-                $stmt->bindParam(1, $data['idActivo'], PDO::PARAM_INT);
-                $stmt->bindParam(2, $data['idEstado'], PDO::PARAM_INT);
-                $stmt->bindParam(3, $data['idResponsable'], PDO::PARAM_INT);
-                $stmt->bindParam(4, $data['motivoBaja'], PDO::PARAM_STR);
-                $stmt->bindParam(5, $data['userMod'], PDO::PARAM_STR);
-                $stmt->bindParam(6, $data['accion'], PDO::PARAM_INT);
-            } else {
-                $stmt = $this->db->prepare("EXEC sp_GuardarActivoPRUEBA @pIdActivo = ?, @pSerie = ?, @pIdEstado = ?, @pIdAmbiente = ?, @pIdCategoria = ?, @pObservaciones = ?, @pUserMod = ?, @pAccion = ?");
-                $stmt->bindParam(1, $data['IdActivo'], PDO::PARAM_INT);
-                $stmt->bindParam(2, $data['Serie'], PDO::PARAM_STR);
-                $stmt->bindParam(3, $data['IdEstado'], PDO::PARAM_INT | PDO::PARAM_NULL);
-                $stmt->bindParam(4, $data['IdAmbiente'], PDO::PARAM_INT | PDO::PARAM_NULL);
-                $stmt->bindParam(5, $data['IdCategoria'], PDO::PARAM_INT | PDO::PARAM_NULL);
-                $stmt->bindParam(6, $data['Observaciones'], PDO::PARAM_STR);
-                $stmt->bindParam(7, $data['UserMod'], PDO::PARAM_STR);
-                $stmt->bindParam(8, $data['Accion'], PDO::PARAM_INT);
-            }
+            // Formatear fecha de adquisición si está presente
+            $fechaAdquisicion = !empty($data['FechaAdquisicion']) ? date('Y-m-d', strtotime($data['FechaAdquisicion'])) : null;
+
+            $stmt = $this->db->prepare("EXEC sp_ActualizarActivo
+                @pIdActivo = ?,
+                @pSerie = ?,
+                @pFactura = ?,
+                @pIdEstado = ?,
+                @pIdAmbiente = ?,
+                @pFechaAdquisicion = ?,
+                @pUserMod = ?");
+
+            $stmt->bindParam(1, $data['IdActivo'], PDO::PARAM_INT);
+            $stmt->bindParam(2, $data['Serie'], PDO::PARAM_STR | PDO::PARAM_NULL);
+            $stmt->bindParam(3, $data['Factura'], PDO::PARAM_STR | PDO::PARAM_NULL);
+            $stmt->bindParam(4, $data['IdEstado'], PDO::PARAM_INT | PDO::PARAM_NULL);
+            $stmt->bindParam(5, $data['IdAmbiente'], PDO::PARAM_INT | PDO::PARAM_NULL);
+            $stmt->bindParam(6, $fechaAdquisicion, PDO::PARAM_STR | PDO::PARAM_NULL);
+            $stmt->bindParam(7, $data['UserMod'], PDO::PARAM_STR);
+
             $stmt->execute();
             return true;
         } catch (Exception $e) {
@@ -564,7 +565,9 @@ class GestionarActivos
         try {
             $stmt = $this->db->prepare("SELECT hijo.idActivo AS IdActivoComponente,
             hijo.codigo AS CodigoComponente,
-            hijo.NombreActivo AS NombreComponente, padre.idActivo AS IdActivoPadre,
+            hijo.NombreActivo AS NombreComponente,
+            hijo.Serie AS SerieComponente,
+            padre.idActivo AS IdActivoPadre,
             padre.codigo AS CodigoPadre, padre.NombreActivo AS NombrePadre
             FROM vActivos hijo
             INNER JOIN tActivoDetalle detalleH ON hijo.idActivo = detalleH.idActivo
@@ -603,7 +606,8 @@ class GestionarActivos
         }
     }
 
-    public function obtenerMantenimientosActivo($idActivo){
+    public function obtenerMantenimientosActivo($idActivo)
+    {
         try {
             //code...
             $stmt = $this->db->prepare("SELECT m.idMantenimiento, m.codigoMantenimiento,

@@ -170,12 +170,11 @@ switch ($action) {
                 $data = [
                     'IdActivo' => $idActivo,
                     'Serie' => isset($_POST['Serie']) ? $_POST['Serie'] : $original_activo['NumeroSerie'],
+                    'Factura' => isset($_POST['Factura']) ? $_POST['Factura'] : $original_activo['Factura'],
                     'IdEstado' => (isset($_POST['IdEstado']) && $_POST['IdEstado'] !== '') ? (int)$_POST['IdEstado'] : $original_activo['idEstado'],
                     'IdAmbiente' => (isset($_POST['IdAmbiente']) && $_POST['IdAmbiente'] !== '') ? (int)$_POST['IdAmbiente'] : $original_activo['idAmbiente'],
-                    'IdCategoria' => (isset($_POST['IdCategoria']) && $_POST['IdCategoria'] !== '') ? (int)$_POST['IdCategoria'] : $original_activo['idCategoria'],
-                    'Observaciones' => isset($_POST['Observaciones']) ? $_POST['Observaciones'] : $original_activo['observaciones'],
-                    'UserMod' => $_SESSION['CodEmpleado'] ?? null,
-                    'Accion' => 2
+                    'FechaAdquisicion' => isset($_POST['FechaAdquisicion']) ? $_POST['FechaAdquisicion'] : $original_activo['FechaAdquisicion'],
+                    'UserMod' => $_SESSION['CodEmpleado'] ?? null
                 ];
 
                 $activos->actualizarActivos($data);
@@ -961,6 +960,35 @@ switch ($action) {
             echo json_encode([
                 'status' => false,
                 'message' => 'Error al cargar ambientes: ' . $e->getMessage()
+            ]);
+        }
+        break;
+
+    case 'comboReceptor':
+        try {
+            $idEmpresa = $_POST['idEmpresa'] ?? null;
+            $idSucursal = $_POST['idSucursal'] ?? null;
+
+            if (!$idEmpresa || !$idSucursal) {
+                throw new Exception("Se requiere empresa y unidad de negocio");
+            }
+
+            $receptores = $combo->comboReceptor();
+            $html = '<option value="">Seleccione Receptor</option>';
+            foreach ($receptores as $row) {
+                $html .= "<option value='{$row['codTrabajador']}'>{$row['NombreTrabajador']}</option>";
+            }
+
+            echo json_encode([
+                'status' => true,
+                'data' => $html,
+                'message' => 'Receptores cargados correctamente'
+            ]);
+        } catch (Exception $e) {
+            error_log("Error comboReceptor: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al cargar receptores: ' . $e->getMessage()
             ]);
         }
         break;

@@ -1370,6 +1370,7 @@ function init() {
       },
     });
 
+    console.log(activos);
     // Determinar qué función usar según el tipo de documento
     const tipoDocActual = $("#tipoDocumento").val();
     const action =
@@ -1797,7 +1798,12 @@ function init() {
               .val(data.idCategoria)
               .trigger("change")
               .prop("disabled", true);
-
+    
+            // Store original values to handle unchanged fields
+            ambienteOriginal = data.idAmbiente;
+            $("#frmEditarActivo").data("originalAmbiente", data.idAmbiente);
+            $("#frmEditarActivo").data("originalEstado", data.idEstado);
+    
             // $("#Cantidad")
             //   .val(data.cantidad)
             //   .trigger("change")
@@ -3055,20 +3061,26 @@ function init() {
     });
   }
 
+  // Variable para almacenar el ambiente original del activo
+  let ambienteOriginal = null;
+
   // Modificar el evento submit del formulario
   $("#frmEditarActivo").on("submit", function (e) {
     e.preventDefault();
+
+    // Si no se selecciona un nuevo ambiente, enviar el que ya tiene actualmente
+    const ambienteSeleccionado = $("#Ambiente").val();
+    const ambienteFinal = ambienteSeleccionado === "" || ambienteSeleccionado === null ? ambienteOriginal : ambienteSeleccionado;
 
     // Solo enviamos los campos que realmente necesitamos actualizar
     const datos = {
       IdActivo: $("#IdActivoEditar").val() || null,
       Serie: $("#SerieActivo").val() || null,
+      Factura: $("#IdFactura").val() || null,
       IdEstado: $("#IdEstado").val() === "" ? null : $("#IdEstado").val(),
-      IdAmbiente: $("#Ambiente").val() === "" ? null : $("#Ambiente").val(),
-      IdCategoria: $("#Categoria").val() === "" ? null : $("#Categoria").val(), // La categoría se mantiene pero no es editable
-      Observaciones: $("#Observaciones").val() || null,
+      IdAmbiente: ambienteFinal,
+      FechaAdquisicion: $("#fechaAdquisicion").val() || null,
       UserMod: userMod,
-      Accion: 2,
     };
 
     // Validar campos requeridos
@@ -3084,10 +3096,6 @@ function init() {
       datos.IdAmbiente = parseInt(datos.IdAmbiente);
       if (isNaN(datos.IdAmbiente)) datos.IdAmbiente = null;
     }
-    if (datos.IdCategoria !== null) {
-      datos.IdCategoria = parseInt(datos.IdCategoria);
-      if (isNaN(datos.IdCategoria)) datos.IdCategoria = null;
-    }
 
     console.log("Datos a enviar:", datos);
 
@@ -3097,23 +3105,20 @@ function init() {
       data: datos,
       dataType: "json",
       success: function (res) {
-        if (res.status) {
-          Swal.fire("Éxito", res.message, "success");
-          $("#divModalActualizarActivo").modal("hide");
-          listarActivosTable();
-          const idArticulo = $("#frmEditarActivo").data("idArticulo");
-          // if (idArticulo) {
-          //   // listarActivosTableModal({
-          //   //   IdArticulo: idArticulo,
-          //   // });
-          // }
-        } else {
-          Swal.fire(
-            "Error",
-            res.message || "Error al actualizar el activo",
-            "error"
-          );
-        }
+          if (res.status) {
+              Swal.fire("Éxito", res.message, "success");
+              $("#divModalActualizarActivo").modal("hide");
+              listarActivosTable();
+              const idArticulo = $("#frmEditarActivo").data("idArticulo");
+              // if (idArticulo) {
+              //   // listarActivosTableModal({
+              //   //   IdArticulo: idArticulo,
+              //   // });
+              // }
+          } else {
+              Swal.fire("Error", res.message || "Error al actualizar el activo", "error");
+              $("#divModalActualizarActivo").modal("hide");
+          }
       },
       error: function (xhr, status, error) {
         console.error("Error en la petición:", xhr.responseText);
@@ -3342,6 +3347,8 @@ function listarActivosModalMantenimiento() {
               return '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Completado</span>';
             case "Cancelado":
               return '<span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i> Cancelado</span>';
+            case "En Proceso":
+              return '<span class="badge bg-info"><i class="fas fa-spinner me-1"></i> En Proceso</span>';
 
             default:
               break;
