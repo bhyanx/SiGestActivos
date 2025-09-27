@@ -3441,10 +3441,10 @@ function agregarActivoAlDetalle(activo) {
           // Para documentos de venta con cantidad > 1, permitir procesamiento
           inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="${cantidadInicial}" min="1" data-activo-id="${activo.id}">`;
           btnProcesar = `<button type="button" class="btn btn-warning btn-sm btnProcesarCantidad me-1" data-activo-id="${activo.id}" title="Procesar cantidad múltiple"><i class="fa fa-cogs"></i> Procesar (${cantidadInicial})</button>`;
-        } else if (tipoDoc === "venta" && activo.cantidad === 1) {
-          // Para documentos de venta con cantidad = 1, solo mostrar info
-          inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" readonly data-activo-id="${activo.id}">`;
-          btnProcesar = `<span class="badge badge-success">Cantidad: 1</span>`;
+        // } else if (tipoDoc === "venta" && activo.cantidad === 1) {
+        //   // Para documentos de venta con cantidad = 1, solo mostrar info
+        //   inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" readonly data-activo-id="${activo.id}">`;
+        //   btnProcesar = `<span class="badge badge-success">Cantidad: 1</span>`;
         } else {
           // Para documentos de ingreso (comportamiento normal)
           inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" data-activo-id="${activo.id}">`;
