@@ -428,16 +428,15 @@ class GestionarActivos
     {
         try {
             //code...
-            $stmt = $this->db->prepare("EXEC sp_GuardarActivoPRUEBA
+            $stmt = $this->db->prepare("EXEC sp_AsignarResponsableActivo
             @pIdActivo = ?,
             @pIdResponsable = ?,
-            @pUserMod = ?,
-            @pAccion = 4");
+            @pUserMod = ?");
 
             $stmt->bindParam(1, $data['IdActivo'], PDO::PARAM_INT);
             $stmt->bindParam(2, $data['IdResponsable'], PDO::PARAM_STR);
             $stmt->bindParam(3, $data['UserMod'], PDO::PARAM_STR);
-            $stmt->bindParam(4, $data['Accion'], PDO::PARAM_INT);
+            //$stmt->bindParam(4, $data['Accion'], PDO::PARAM_INT);
 
             $stmt->execute();
             return true;

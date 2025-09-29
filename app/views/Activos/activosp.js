@@ -1798,12 +1798,12 @@ function init() {
               .val(data.idCategoria)
               .trigger("change")
               .prop("disabled", true);
-    
+
             // Store original values to handle unchanged fields
             ambienteOriginal = data.idAmbiente;
             $("#frmEditarActivo").data("originalAmbiente", data.idAmbiente);
             $("#frmEditarActivo").data("originalEstado", data.idEstado);
-    
+
             // $("#Cantidad")
             //   .val(data.cantidad)
             //   .trigger("change")
@@ -1880,6 +1880,7 @@ function init() {
                 });
                 // Mostrar el modal después de cargar el combo
                 $("#modalAsignarResponsable").modal("show");
+                $("#modalDetallesActivo").modal("hide");
               } else {
                 Swal.fire("Error", res.message, "error");
               }
@@ -2053,7 +2054,7 @@ function init() {
                                 </div>
                                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
                                     <div class="d-inline-block px-4 py-2 rounded-pill" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
-                                        <i class="fas fa-dollar-sign me-1"></i>
+                                        <b>S/</b>
                                         <span class="fw-bold fs-5">${activo.valorAdquisicion}</span>
                                     </div>
                                 </div>
@@ -2267,7 +2268,7 @@ function init() {
                     <button type="button" class="btn btn-cyan btnAsignarResponsable px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${activo.idActivo}" style="min-width: 140px; background-color: #06b6d4; border-color: #06b6d4; color: white;">
                         <i class="fas fa-user-edit m-2"></i>Asignar
                     </button>
-                    <button type="button" class="btn btn-outline-slate btnDarBajaDesdeModal px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${activo.idActivo}" style="min-width: 120px; border-color: #64748b; color: #475569;">
+                    <button type="button" class="btn btn-outline-danger btnDarBajaDesdeModal px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${activo.idActivo}" style="min-width: 120px; border-color: #fa3434ff; color: #db0606ff;">
                         <i class="fas fa-trash-alt m-2"></i>Dar de Baja
                     </button>
                     <button type="button" class="btn btn-outline-slate px-4 py-2 rounded-pill shadow-sm m-1 btnCerrarModal" style="min-width: 100px; border-color: #64748b; color: #475569;">
@@ -2842,6 +2843,7 @@ function init() {
 
           // Mostrar el modal después de cargar los combos
           $("#modalBajaActivo").modal("show");
+          $("#modalDetallesActivo").modal("hide");
         } else {
           Swal.fire(
             "Error",
@@ -2986,15 +2988,16 @@ function init() {
       success: function (res) {
         console.log("Respuesta del servidor:", res);
         if (res.status) {
+          $("#modalBajaActivo").modal("hide"); // cerrar primero
+          $("#frmBajaActivo")[0].reset();
+          listarActivosTable();
+
           Swal.fire({
             icon: "success",
             title: "Éxito",
             text: res.message,
             timer: 1500,
-          }).then(() => {
-            $("#modalBajaActivo").modal("hide");
-            $("#frmBajaActivo")[0].reset();
-            listarActivosTable();
+            showConfirmButton: false,
           });
         } else {
           Swal.fire("Error", res.message, "error");
@@ -3070,7 +3073,10 @@ function init() {
 
     // Si no se selecciona un nuevo ambiente, enviar el que ya tiene actualmente
     const ambienteSeleccionado = $("#Ambiente").val();
-    const ambienteFinal = ambienteSeleccionado === "" || ambienteSeleccionado === null ? ambienteOriginal : ambienteSeleccionado;
+    const ambienteFinal =
+      ambienteSeleccionado === "" || ambienteSeleccionado === null
+        ? ambienteOriginal
+        : ambienteSeleccionado;
 
     // Solo enviamos los campos que realmente necesitamos actualizar
     const datos = {
@@ -3105,20 +3111,24 @@ function init() {
       data: datos,
       dataType: "json",
       success: function (res) {
-          if (res.status) {
-              Swal.fire("Éxito", res.message, "success");
-              $("#divModalActualizarActivo").modal("hide");
-              listarActivosTable();
-              const idArticulo = $("#frmEditarActivo").data("idArticulo");
-              // if (idArticulo) {
-              //   // listarActivosTableModal({
-              //   //   IdArticulo: idArticulo,
-              //   // });
-              // }
-          } else {
-              Swal.fire("Error", res.message || "Error al actualizar el activo", "error");
-              $("#divModalActualizarActivo").modal("hide");
-          }
+        if (res.status) {
+          Swal.fire("Éxito", res.message, "success");
+          $("#divModalActualizarActivo").modal("hide");
+          listarActivosTable();
+          const idArticulo = $("#frmEditarActivo").data("idArticulo");
+          // if (idArticulo) {
+          //   // listarActivosTableModal({
+          //   //   IdArticulo: idArticulo,
+          //   // });
+          // }
+        } else {
+          Swal.fire(
+            "Error",
+            res.message || "Error al actualizar el activo",
+            "error"
+          );
+          $("#divModalActualizarActivo").modal("hide");
+        }
       },
       error: function (xhr, status, error) {
         console.error("Error en la petición:", xhr.responseText);
@@ -3441,10 +3451,10 @@ function agregarActivoAlDetalle(activo) {
           // Para documentos de venta con cantidad > 1, permitir procesamiento
           inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="${cantidadInicial}" min="1" data-activo-id="${activo.id}">`;
           btnProcesar = `<button type="button" class="btn btn-warning btn-sm btnProcesarCantidad me-1" data-activo-id="${activo.id}" title="Procesar cantidad múltiple"><i class="fa fa-cogs"></i> Procesar (${cantidadInicial})</button>`;
-        // } else if (tipoDoc === "venta" && activo.cantidad === 1) {
-        //   // Para documentos de venta con cantidad = 1, solo mostrar info
-        //   inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" readonly data-activo-id="${activo.id}">`;
-        //   btnProcesar = `<span class="badge badge-success">Cantidad: 1</span>`;
+          // } else if (tipoDoc === "venta" && activo.cantidad === 1) {
+          //   // Para documentos de venta con cantidad = 1, solo mostrar info
+          //   inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" readonly data-activo-id="${activo.id}">`;
+          //   btnProcesar = `<span class="badge badge-success">Cantidad: 1</span>`;
         } else {
           // Para documentos de ingreso (comportamiento normal)
           inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" data-activo-id="${activo.id}">`;
@@ -3613,7 +3623,7 @@ function ListarCombosEstado(elemento) {
           "warning"
         );
       }
-    }
+    },
   });
 }
 
@@ -3809,9 +3819,9 @@ function mostrarNotificacionModalActivos(mensaje, tipo = "success") {
 
 function ListarCombosFiltros() {
   // Mostrar loading en los combos
-  $("#filtroEmpresa, #filtroSucursal, #filtroAmbiente, #filtroCategoria, #filtroEstado").html(
-    '<option value="">Cargando...</option>'
-  );
+  $(
+    "#filtroEmpresa, #filtroSucursal, #filtroAmbiente, #filtroCategoria, #filtroEstado"
+  ).html('<option value="">Cargando...</option>');
 
   $.ajax({
     url: "../../controllers/GestionarActivosController.php?action=combos",
@@ -4035,7 +4045,7 @@ function configurarEventListenersFiltros() {
         );
       }
     });
-    $("#filtroEmpresa").trigger("change");
+  $("#filtroEmpresa").trigger("change");
 }
 
 function ListarCombosMov() {

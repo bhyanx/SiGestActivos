@@ -193,7 +193,6 @@ switch ($action) {
                     'IdActivo' => $_POST['IdActivo'],
                     'IdResponsable' => $_POST['IdResponsable'],
                     'UserMod' => $_SESSION['CodEmpleado'],
-                    'Accion' => 4
                 ];
 
                 $activos->asignarResponsables($data);
