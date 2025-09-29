@@ -4035,7 +4035,7 @@ function configurarEventListenersFiltros() {
         );
       }
     });
-
+    $("#filtroEmpresa").trigger("change");
 }
 
 function ListarCombosMov() {
@@ -5600,6 +5600,9 @@ function addActivoManualForm(combos) {
       .html(combos.unidadesNegocio)
       .trigger("change");
     // No cargar combos.proveedores aquí
+
+    // newForm.find(`[name='Empresa[]']`).trigger("change");
+    // newForm.find(`[name='Empresa[]']`).trigger("change");
   }
 
   // Event listener para cambio de empresa
@@ -5644,6 +5647,7 @@ function addActivoManualForm(combos) {
     // Verificar correlativo cuando cambien empresa o categoría
     verificarCorrelativo(activoFormCount);
   });
+  newForm.find(`[name='Empresa[]']`).trigger("change");
 
   // Event listener para cambio de categoría
   newForm.find(`[name='Categoria[]']`).on("change", function () {

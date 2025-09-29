@@ -7,10 +7,12 @@ error_reporting(E_ALL);
 session_start();
 require_once __DIR__ . '/../config/configuracion.php';
 require_once __DIR__ . '/../models/Usuarios.php';
+require_once __DIR__ . '/../models/Roles.php';
 require_once __DIR__ . '/../models/Combos.php';
 
 $usuario = new Usuarios();
 $combo = new Combos();
+$roles = new Roles();
 
 $action = $_GET['action'] ?? $_POST['action'] ?? 'Consultar';
 
@@ -127,6 +129,27 @@ switch ($action) {
             echo json_encode(['status' => false, 'message' => 'Error al consultar usuarios: ' . $e->getMessage()]);
         }
         break;
+
+    case 'ActualizarRol':
+        try {
+            $data = $usuario->actualizarRolUsuario($_POST);
+            error_log("ActualizarRol resultados: " . print_r($data, true), 3, __DIR__ . '/../../logs/debug.log');
+            echo json_encode($data ?: []);
+        } catch (Exception $e) {
+            error_log("Error ActualizarRol: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode(['status' => false, 'message' => 'Error al consultar usuarios: ' . $e->getMessage()]);
+        }
+        break;
+
+    case 'ListarRoles':
+        try {
+            $data = $usuario->listarTodo();
+            error_log("ListarRoles resultados: " . print_r($data, true), 3, __DIR__ . '/../../logs/debug.log');
+            echo json_encode($data ?: []);
+        } catch (Exception $e) {
+            error_log("Error ListarRoles: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            echo json_encode(['status' => false, 'message' => 'Error al consultar roles: ' . $e->getMessage()]);
+        }
 
     case "combos":
         try {

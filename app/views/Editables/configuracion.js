@@ -212,7 +212,7 @@ function configurarEventListenersFiltros() {
         );
       }
     });
-
+    $("#filtroEmpresa").trigger("change");
 }
 
 function listarActivosTableConfiguracion() {

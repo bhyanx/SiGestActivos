@@ -59,11 +59,23 @@ function init() {
   $("#btnCancelarAsignacion")
     .off("click")
     .on("click", function () {
-      $("#divformularioasignacion").hide();
-      $("#divlistadomovimientos").show();
-      $("#divtblmovimientos").show();
+      Swal.fire({
+        title: "¿Cancelar asignación?",
+        text: "Se perderán todos los cambios realizados.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar",
+        cancelButtonColor: "#d33",
+        cancelButtonText: "Continuar editando",
+      }).then((result) => {
+        if (result.isConfirmed) {          
+          $("#divformularioasignacion").hide();
+          $("#divlistadomovimientos").show();
+          $("#divtblmovimientos").show();
+        }
+      });
     });
-
 
   // Botón procesar en generarmov
   $("#btnprocesarempresa")
@@ -122,7 +134,7 @@ function init() {
       $("#divlistadomovimientos").show();
     });
 
-  $("#btnVolver")
+  $("#btnVolverAsignacion")
     .off("click")
     .on("click", function () {
       Swal.fire({
@@ -137,9 +149,31 @@ function init() {
       }).then((result) => {
         if (result.isConfirmed) {
           $("#divformularioasignacion").hide();
-          // $("#divgenerarmov").show();
+          //$("#divgenerarmov").show();
           $("#divtblmovimientos").show();
           $("#divlistadomovimientos").show();
+        }
+      });
+    });
+
+    $("#btnVolverMovimiento")
+    .off("click")
+    .on("click", function () {
+      Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Volverás a la pestaña de procesar. Se perderán los cambios realizados",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar",
+        cancelButtonColor: "#d33",
+        cancelButtonText: "No, continuar aquí",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $("#divregistroMovimiento").hide();
+          //$("#divgenerarmov").show();
+          $("#divgenerarmov").show();
+          //$("#divlistadomovimientos").show();
         }
       });
     });
@@ -188,82 +222,86 @@ function init() {
   });
 
   // Función para guardar el movimiento completo
-  $(document).off("click", "#btnGuardarMov").on("click", "#btnGuardarMov", function () {
-    // Prevenir múltiples clics
-    if ($(this).data('processing')) {
-      return;
-    }
-    $(this).data('processing', true);
-
-    // Verificar si el activo padre destino es diferente al origen
-    const idActivoPadreOrigen = $("#IdActivoPadreOrigen").val();
-    const idActivoPadreDestino = $("#IdActivoPadreDestino").val();
-
-    if (idActivoPadreOrigen === idActivoPadreDestino) {
-      Swal.fire({
-        title: "Error",
-        text: "No se puede mover un componente al mismo activo padre",
-        icon: "error",
-        confirmButtonText: "Aceptar",
-      });
-      $(this).data('processing', false);
-      return;
-    }
-
-    // Verificar si hay componentes habilitados (los que se enviarán)
-    const componentesAEnviar = $(
-      "#tbldetallecomponentes tbody tr:not(.componente-deshabilitado)"
-    );
-    if (componentesAEnviar.length === 0) {
-      NotificacionToast(
-        "error",
-        "Debe seleccionar al menos un componente para mover"
-      );
-      $(this).data('processing', false);
-      return;
-    }
-
-    // Verificar que se haya seleccionado un activo padre destino
-    if (!$("#IdActivoPadreDestino").val()) {
-      NotificacionToast("error", "Debe seleccionar un activo padre destino");
-      $(this).data('processing', false);
-      return;
-    }
-
-    // Verificar que ningún componente se esté moviendo a sí mismo
-    let errorAutoAsignacion = false;
-    $("#tbldetallecomponentes tbody tr:not(.componente-deshabilitado)").each(function() {
-      const idComponente = $(this).data("id");
-      if (idComponente == idActivoPadreDestino) {
-        errorAutoAsignacion = true;
-        return false; // break del each
+  $(document)
+    .off("click", "#btnGuardarMov")
+    .on("click", "#btnGuardarMov", function () {
+      // Prevenir múltiples clics
+      if ($(this).data("processing")) {
+        return;
       }
-    });
+      $(this).data("processing", true);
 
-    if (errorAutoAsignacion) {
+      // Verificar si el activo padre destino es diferente al origen
+      const idActivoPadreOrigen = $("#IdActivoPadreOrigen").val();
+      const idActivoPadreDestino = $("#IdActivoPadreDestino").val();
+
+      if (idActivoPadreOrigen === idActivoPadreDestino) {
+        Swal.fire({
+          title: "Error",
+          text: "No se puede mover un componente al mismo activo padre",
+          icon: "error",
+          confirmButtonText: "Aceptar",
+        });
+        $(this).data("processing", false);
+        return;
+      }
+
+      // Verificar si hay componentes habilitados (los que se enviarán)
+      const componentesAEnviar = $(
+        "#tbldetallecomponentes tbody tr:not(.componente-deshabilitado)"
+      );
+      if (componentesAEnviar.length === 0) {
+        NotificacionToast(
+          "error",
+          "Debe seleccionar al menos un componente para mover"
+        );
+        $(this).data("processing", false);
+        return;
+      }
+
+      // Verificar que se haya seleccionado un activo padre destino
+      if (!$("#IdActivoPadreDestino").val()) {
+        NotificacionToast("error", "Debe seleccionar un activo padre destino");
+        $(this).data("processing", false);
+        return;
+      }
+
+      // Verificar que ningún componente se esté moviendo a sí mismo
+      let errorAutoAsignacion = false;
+      $("#tbldetallecomponentes tbody tr:not(.componente-deshabilitado)").each(
+        function () {
+          const idComponente = $(this).data("id");
+          if (idComponente == idActivoPadreDestino) {
+            errorAutoAsignacion = true;
+            return false; // break del each
+          }
+        }
+      );
+
+      if (errorAutoAsignacion) {
+        Swal.fire({
+          title: "Error de Auto-asignación",
+          text: "Un activo no puede ser su propio padre. Hay componentes seleccionados que coinciden con el activo padre destino.",
+          icon: "error",
+          confirmButtonText: "Aceptar",
+        });
+        $(this).data("processing", false);
+        return;
+      }
+
+      // Mostrar loading
       Swal.fire({
-        title: "Error de Auto-asignación",
-        text: "Un activo no puede ser su propio padre. Hay componentes seleccionados que coinciden con el activo padre destino.",
-        icon: "error",
-        confirmButtonText: "Aceptar"
+        title: "Procesando",
+        text: "Moviendo componentes...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
       });
-      $(this).data('processing', false);
-      return;
-    }
 
-    // Mostrar loading
-    Swal.fire({
-      title: "Procesando",
-      text: "Moviendo componentes...",
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
+      // Proceder directamente a mover los componentes
+      guardarDetallesMovimiento();
     });
-
-    // Proceder directamente a mover los componentes
-    guardarDetallesMovimiento();
-  });
 
   // Agregar evento para actualizar activos padres cuando cambie la sucursal destino
   $("#IdSucursalDestino").on("change", function () {
@@ -281,117 +319,125 @@ function init() {
   });
 
   // Evento para guardar la asignación de componentes
-  $(document).off("click", "#btnGuardarAsignacion").on("click", "#btnGuardarAsignacion", function () {
-    // Prevenir múltiples clics
-    if ($(this).data('processing')) {
-      return;
-    }
-    $(this).data('processing', true);
-
-    const idPadre = $("#IdAsignacionPadre").val();
-    if (!idPadre) {
-      Swal.fire("Error", "Debe seleccionar un activo padre.", "error");
-      $(this).data('processing', false);
-      return;
-    }
-    const filas = $("#tbldetalleactivos tbody tr");
-    if (filas.length === 0) {
-      Swal.fire("Error", "Debe agregar al menos un componente.", "error");
-      $(this).data('processing', false);
-      return;
-    }
-
-    // Validaciones previas
-    let erroresPrevios = [];
-    filas.each(function () {
-      const idComponente = $(this).data("id");
-      // Validación: no puede ser su propio padre
-      if (idComponente == idPadre) {
-        erroresPrevios.push("El componente " + idComponente + " no puede ser asignado a sí mismo como padre.");
+  $(document)
+    .off("click", "#btnGuardarAsignacion")
+    .on("click", "#btnGuardarAsignacion", function () {
+      // Prevenir múltiples clics
+      if ($(this).data("processing")) {
+        return;
       }
-    });
+      $(this).data("processing", true);
 
-    if (erroresPrevios.length > 0) {
-      Swal.fire({
-        icon: "error",
-        title: "Errores de validación",
-        html: erroresPrevios.join("<br>"),
+      const idPadre = $("#IdAsignacionPadre").val();
+      if (!idPadre) {
+        Swal.fire("Error", "Debe seleccionar un activo padre.", "error");
+        $(this).data("processing", false);
+        return;
+      }
+      const filas = $("#tbldetalleactivos tbody tr");
+      if (filas.length === 0) {
+        Swal.fire("Error", "Debe agregar al menos un componente.", "error");
+        $(this).data("processing", false);
+        return;
+      }
+
+      // Validaciones previas
+      let erroresPrevios = [];
+      filas.each(function () {
+        const idComponente = $(this).data("id");
+        // Validación: no puede ser su propio padre
+        if (idComponente == idPadre) {
+          erroresPrevios.push(
+            "El componente " +
+              idComponente +
+              " no puede ser asignado a sí mismo como padre."
+          );
+        }
       });
-      $(this).data('processing', false);
-      return;
-    }
 
-    let total = filas.length;
-    let exitos = 0;
-    let errores = 0;
-    let erroresMsg = [];
+      if (erroresPrevios.length > 0) {
+        Swal.fire({
+          icon: "error",
+          title: "Errores de validación",
+          html: erroresPrevios.join("<br>"),
+        });
+        $(this).data("processing", false);
+        return;
+      }
 
-    Swal.fire({
-      title: "Procesando",
-      text: "Asignando componentes...",
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-    });
+      let total = filas.length;
+      let exitos = 0;
+      let errores = 0;
+      let erroresMsg = [];
 
-    filas.each(function () {
-      const idComponente = $(this).data("id");
-      const observacion = $(this).find(".observacion-componente").val() || "";
-
-      $.ajax({
-        url: "../../controllers/GestionarMovimientosComponentesController.php?action=asignarComponente",
-        type: "POST",
-        data: {
-          IdActivoPadre: idPadre,
-          IdActivoComponente: idComponente,
+      Swal.fire({
+        title: "Procesando",
+        text: "Asignando componentes...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
         },
-        dataType: "json",
-        success: function (res) {
-          if (res.success) {
-            exitos++;
-          } else {
+      });
+
+      filas.each(function () {
+        const idComponente = $(this).data("id");
+        const observacion = $(this).find(".observacion-componente").val() || "";
+
+        $.ajax({
+          url: "../../controllers/GestionarMovimientosComponentesController.php?action=asignarComponente",
+          type: "POST",
+          data: {
+            IdActivoPadre: idPadre,
+            IdActivoComponente: idComponente,
+          },
+          dataType: "json",
+          success: function (res) {
+            if (res.success) {
+              exitos++;
+            } else {
+              errores++;
+              erroresMsg.push(
+                res.message || "Error al asignar componente " + idComponente
+              );
+            }
+            if (exitos + errores === total) {
+              Swal.close();
+              if (errores === 0) {
+                Swal.fire({
+                  icon: "success",
+                  title: "Éxito",
+                  text: "Todos los componentes fueron asignados correctamente.",
+                  timer: 1800,
+                });
+                $("#tbldetalleactivos tbody").empty();
+              } else {
+                Swal.fire({
+                  icon: "warning",
+                  title: "Algunos errores",
+                  html: erroresMsg.join("<br>"),
+                });
+              }
+              $("#btnGuardarAsignacion").data("processing", false);
+            }
+          },
+          error: function (xhr, status, error) {
             errores++;
             erroresMsg.push(
-              res.message || "Error al asignar componente " + idComponente
+              "Error de red al asignar componente " + idComponente
             );
-          }
-          if (exitos + errores === total) {
-            Swal.close();
-            if (errores === 0) {
-              Swal.fire({
-                icon: "success",
-                title: "Éxito",
-                text: "Todos los componentes fueron asignados correctamente.",
-                timer: 1800,
-              });
-              $("#tbldetalleactivos tbody").empty();
-            } else {
+            if (exitos + errores === total) {
+              Swal.close();
               Swal.fire({
                 icon: "warning",
                 title: "Algunos errores",
                 html: erroresMsg.join("<br>"),
               });
+              $("#btnGuardarAsignacion").data("processing", false);
             }
-            $("#btnGuardarAsignacion").data('processing', false);
-          }
-        },
-        error: function (xhr, status, error) {
-          errores++;
-          erroresMsg.push("Error de red al asignar componente " + idComponente);
-          if (exitos + errores === total) {
-            Swal.close();
-            Swal.fire({
-              icon: "warning",
-              title: "Algunos errores",
-              html: erroresMsg.join("<br>"),
-            });
-            $("#btnGuardarAsignacion").data('processing', false);
-          }
-        },
+          },
+        });
       });
     });
-  });
 }
 
 function cargarActivosPadres() {
@@ -687,7 +733,7 @@ function guardarDetallesMovimiento() {
                 listarMovimientos();
               });
             }
-            $("#btnGuardarMov").data('processing', false);
+            $("#btnGuardarMov").data("processing", false);
           }
         },
         error: function () {
@@ -1192,7 +1238,7 @@ function listarActivosModalBusqueda() {
     ajax: {
       url: "../../controllers/GestionarMovimientosComponentesController.php?action=ConsultarActivos",
       type: "POST",
-      data: { IdArticulo: "", IdActivo: ""},
+      data: { IdArticulo: "", IdActivo: "" },
       dataType: "json",
       dataSrc: function (json) {
         console.log("Respuesta del servidor:", json);
@@ -1201,7 +1247,7 @@ function listarActivosModalBusqueda() {
         // Excluir el activo seleccionado como padre
         const excludeId = $("#IdAsignacionPadre").val();
         if (excludeId) {
-          data = data.filter(item => item.idActivo != excludeId);
+          data = data.filter((item) => item.idActivo != excludeId);
         }
         return data;
       },

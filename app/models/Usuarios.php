@@ -119,6 +119,26 @@ LEFT JOIN tRoles r ON u.IdRol = r.IdRol");
         }
     }
 
+    public function actualizarRolUsuario($data){
+        try {
+            // Registrar los datos recibidos para depuración
+            error_log("Datos recibidos en actualizarRolUsuario: " . print_r($data, true), 3, __DIR__ . '/../../logs/debug.log');
+            
+            // Corregir el comando de ejecución del procedimiento almacenado
+            $stmt = $this->db->prepare('EXEC sp_ActualizarRolUsuario @CodUsuario = ?, @IdRol = ?, @UserMod = ?');
+            $stmt->bindParam(1, $data['CodUsuario'], \PDO::PARAM_STR);
+            $stmt->bindParam(2, $data['IdRol'], \PDO::PARAM_INT);
+            $stmt->bindParam(3, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->execute();
+            
+            // Devolver una respuesta estructurada
+            return ['status' => true, 'message' => 'Rol de usuario actualizado correctamente'];
+        } catch (\PDOException $e) {
+            error_log("Error in actualizarRol: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
+            return ['status' => false, 'message' => 'Error al actualizar rol: ' . $e->getMessage()];
+        }
+    }
+
     public function gestionarPermiso($data)
     {
         try {

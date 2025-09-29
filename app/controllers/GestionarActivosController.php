@@ -443,7 +443,7 @@ switch ($action) {
                     'Cantidad' => $row['Cantidad'],
                 ];
             }
-
+            
             error_log("Artículos por doc venta: IdDocVenta=$IdDocVenta, Resultados=" . json_encode($articulos), 3, __DIR__ . '/../../logs/debug.log');
             echo json_encode(['status' => true, 'data' => $articulos, 'message' => 'Artículos cargados correctamente.']);
         } catch (Exception $e) {

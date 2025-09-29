@@ -129,6 +129,38 @@ session_start();
                             </div>
                         </div>
                      </div>
+                    
+                    <!-- MODAL PARA EDITAR ROL DE USUARIO -->
+                    <div class="modal fade" id="ModalEditarRol" tabindex="-1" role="dialog" aria-labelledby="ModalEditarRolLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <form id="frmEditarRol" name="frmEditarRol" method="POST">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title" id="tituloModalEditarRol"><i class="fa fa-edit"></i> Editar Rol de Usuario</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="hidden" name="CodUsuario" id="CodUsuario" value="">
+
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label for="IdRol">Rol:</label>
+                                                    <select class="form-control select2" id="IdRol" name="IdRol" required></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Guardar</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
