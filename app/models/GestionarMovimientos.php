@@ -52,7 +52,7 @@ class GestionarMovimientos
         }
     }
 
-    public function crearDetalleMovimiento($data)
+    public function crearDetalleMovimiento2($data)
     {
         try {
             // Obtener datos del movimiento y del activo para completar la información
@@ -103,11 +103,169 @@ class GestionarMovimientos
             $stmt->bindValue(':idSucursalOrigen', $activo['idSucursalOrigen'], PDO::PARAM_INT);
 
             $stmt->execute();
+
+            // Obtener los hijos del activo (componentes asignados)
+            $sqlHijos = "SELECT idActivoComponente 
+             FROM tComponenteActivo 
+             WHERE idActivoPadre = ?";
+            $stmtHijos = $this->db->prepare($sqlHijos);
+            $stmtHijos->bindParam(1, $data['idActivo'], PDO::PARAM_INT);
+            $stmtHijos->execute();
+            $hijos = $stmtHijos->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($hijos as $hijo) {
+                // Obtener ubicación actual del hijo
+                $sqlUbicacionHijo = "SELECT ua.idAmbiente as idAmbienteAnterior, ua.idResponsable as idResponsableAnterior,
+                                ua.idEmpresa as idEmpresaOrigen, ua.idSucursal as idSucursalOrigen
+                         FROM tUbicacionActivo ua 
+                         WHERE ua.idActivo = ? 
+                         AND ua.esActual = 1";
+                $stmtUbHijo = $this->db->prepare($sqlUbicacionHijo);
+                $stmtUbHijo->bindParam(1, $hijo['idActivoComponente'], PDO::PARAM_INT);
+                $stmtUbHijo->execute();
+                $ubicacionHijo = $stmtUbHijo->fetch(PDO::FETCH_ASSOC);
+
+                // Insertar en detalle de movimiento igual que con el padre
+                $sqlInsertHijo = "INSERT INTO tDetalleMovimiento 
+        (idMovimiento, idActivo, idTipoMovimiento, idAmbienteAnterior, idAmbienteNuevo, 
+         idResponsableAnterior, idResponsableNuevo, fecha, userMod, 
+         idEmpresaDestino, idSucursalDestino, idEmpresaOrigen, idSucursalOrigen)
+        VALUES 
+        (:idMovimiento, :idActivo, :idTipoMovimiento, :idAmbienteAnterior, :idAmbienteNuevo,
+         :idResponsableAnterior, :idResponsableNuevo, GETDATE(), :userMod,
+         :idEmpresaDestino, :idSucursalDestino, :idEmpresaOrigen, :idSucursalOrigen)";
+
+                $stmtInsertHijo = $this->db->prepare($sqlInsertHijo);
+                $stmtInsertHijo->bindParam(':idMovimiento', $data['idMovimiento'], PDO::PARAM_INT);
+                $stmtInsertHijo->bindParam(':idActivo', $hijo['idActivoComponente'], PDO::PARAM_INT);
+                $stmtInsertHijo->bindParam(':idTipoMovimiento', $data['idTipoMovimiento'], PDO::PARAM_INT);
+                $stmtInsertHijo->bindValue(':idAmbienteAnterior', $ubicacionHijo['idAmbienteAnterior'], PDO::PARAM_INT);
+                $stmtInsertHijo->bindValue(':idAmbienteNuevo', $data['idAmbienteNuevo'], $data['idAmbienteNuevo'] !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+                $stmtInsertHijo->bindValue(':idResponsableAnterior', $ubicacionHijo['idResponsableAnterior'], PDO::PARAM_STR);
+                $stmtInsertHijo->bindValue(':idResponsableNuevo', $data['idResponsableNuevo'], $data['idResponsableNuevo'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+                $stmtInsertHijo->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
+                $stmtInsertHijo->bindValue(':idEmpresaDestino', $movimiento['idEmpresaDestino'], PDO::PARAM_INT);
+                $stmtInsertHijo->bindValue(':idSucursalDestino', $movimiento['idSucursalDestino'], PDO::PARAM_INT);
+                $stmtInsertHijo->bindValue(':idEmpresaOrigen', $ubicacionHijo['idEmpresaOrigen'], PDO::PARAM_INT);
+                $stmtInsertHijo->bindValue(':idSucursalOrigen', $ubicacionHijo['idSucursalOrigen'], PDO::PARAM_INT);
+                $stmtInsertHijo->execute();
+            }
+
             return true;
         } catch (PDOException $e) {
             throw new Exception("Error al registrar detalle de movimiento: " . $e->getMessage());
         }
     }
+
+    public function crearDetalleMovimiento($data)
+    {
+        try {
+            // Obtener datos del movimiento
+            $sqlMovimiento = "SELECT idEmpresaDestino, idSucursalDestino 
+                          FROM tMovimientos 
+                          WHERE idMovimiento = ?";
+            $stmtMov = $this->db->prepare($sqlMovimiento);
+            $stmtMov->bindParam(1, $data['idMovimiento'], PDO::PARAM_INT);
+            $stmtMov->execute();
+            $movimiento = $stmtMov->fetch(PDO::FETCH_ASSOC);
+
+            // Validar activo padre con estado permitido
+            $sqlActivo = "SELECT ua.idAmbiente as idAmbienteAnterior, ua.idResponsable as idResponsableAnterior,
+                             ua.idEmpresa as idEmpresaOrigen, ua.idSucursal as idSucursalOrigen
+                      FROM tUbicacionActivo ua
+                      INNER JOIN tActivos a ON a.idActivo = ua.idActivo
+                      WHERE ua.idActivo = ? 
+                        AND ua.esActual = 1
+                        AND a.idEstado IN (1,5,6,7)";
+            $stmtActivo = $this->db->prepare($sqlActivo);
+            $stmtActivo->bindParam(1, $data['idActivo'], PDO::PARAM_INT);
+            $stmtActivo->execute();
+            $activo = $stmtActivo->fetch(PDO::FETCH_ASSOC);
+
+            if ($activo) {
+                // Insertar detalle para el activo padre
+                $sql = "INSERT INTO tDetalleMovimiento 
+                    (idMovimiento, idActivo, idTipoMovimiento, idAmbienteAnterior, idAmbienteNuevo, 
+                     idResponsableAnterior, idResponsableNuevo, fecha, userMod, 
+                     idEmpresaDestino, idSucursalDestino, idEmpresaOrigen, idSucursalOrigen)
+                    VALUES 
+                    (:idMovimiento, :idActivo, :idTipoMovimiento, :idAmbienteAnterior, :idAmbienteNuevo,
+                     :idResponsableAnterior, :idResponsableNuevo, GETDATE(), :userMod,
+                     :idEmpresaDestino, :idSucursalDestino, :idEmpresaOrigen, :idSucursalOrigen)";
+                $stmt = $this->db->prepare($sql);
+
+                $stmt->bindParam(':idMovimiento', $data['idMovimiento'], PDO::PARAM_INT);
+                $stmt->bindParam(':idActivo', $data['idActivo'], PDO::PARAM_INT);
+                $stmt->bindParam(':idTipoMovimiento', $data['idTipoMovimiento'], PDO::PARAM_INT);
+                $stmt->bindValue(':idAmbienteAnterior', $activo['idAmbienteAnterior'], PDO::PARAM_INT);
+                $stmt->bindValue(':idAmbienteNuevo', $data['idAmbienteNuevo'], $data['idAmbienteNuevo'] !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+                $stmt->bindValue(':idResponsableAnterior', $activo['idResponsableAnterior'], PDO::PARAM_STR);
+                $stmt->bindValue(':idResponsableNuevo', $data['idResponsableNuevo'], $data['idResponsableNuevo'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+                $stmt->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
+                $stmt->bindValue(':idEmpresaDestino', $movimiento['idEmpresaDestino'], PDO::PARAM_INT);
+                $stmt->bindValue(':idSucursalDestino', $movimiento['idSucursalDestino'], PDO::PARAM_INT);
+                $stmt->bindValue(':idEmpresaOrigen', $activo['idEmpresaOrigen'], PDO::PARAM_INT);
+                $stmt->bindValue(':idSucursalOrigen', $activo['idSucursalOrigen'], PDO::PARAM_INT);
+                $stmt->execute();
+            }
+
+            // Obtener hijos
+            $sqlHijos = "SELECT idActivo 
+             FROM tActivos 
+             WHERE idActivoPadre = ?";
+
+            $stmtHijos = $this->db->prepare($sqlHijos);
+            $stmtHijos->bindParam(1, $data['idActivo'], PDO::PARAM_INT);
+            $stmtHijos->execute();
+            $hijos = $stmtHijos->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($hijos as $hijo) {
+                // Validar hijo con estado permitido
+                $sqlUbicacionHijo = "SELECT ua.idAmbiente as idAmbienteAnterior, ua.idResponsable as idResponsableAnterior,
+                                        ua.idEmpresa as idEmpresaOrigen, ua.idSucursal as idSucursalOrigen
+                                 FROM tUbicacionActivo ua
+                                 INNER JOIN tActivos a ON a.idActivo = ua.idActivo
+                                 WHERE ua.idActivo = ? 
+                                   AND ua.esActual = 1
+                                   AND a.idEstado IN (1,5,6,7)";
+                $stmtUbHijo = $this->db->prepare($sqlUbicacionHijo);
+                $stmtUbHijo->bindParam(1, $hijo['idActivo'], PDO::PARAM_INT);
+                $stmtUbHijo->execute();
+                $ubicacionHijo = $stmtUbHijo->fetch(PDO::FETCH_ASSOC);
+
+                if ($ubicacionHijo) {
+                    // Insertar detalle de hijo
+                    $sqlInsertHijo = "INSERT INTO tDetalleMovimiento 
+                        (idMovimiento, idActivo, idTipoMovimiento, idAmbienteAnterior, idAmbienteNuevo, 
+                         idResponsableAnterior, idResponsableNuevo, fecha, userMod, 
+                         idEmpresaDestino, idSucursalDestino, idEmpresaOrigen, idSucursalOrigen)
+                        VALUES 
+                        (:idMovimiento, :idActivo, :idTipoMovimiento, :idAmbienteAnterior, :idAmbienteNuevo,
+                         :idResponsableAnterior, :idResponsableNuevo, GETDATE(), :userMod,
+                         :idEmpresaDestino, :idSucursalDestino, :idEmpresaOrigen, :idSucursalOrigen)";
+                    $stmtInsertHijo = $this->db->prepare($sqlInsertHijo);
+                    $stmtInsertHijo->bindParam(':idMovimiento', $data['idMovimiento'], PDO::PARAM_INT);
+                    $stmtInsertHijo->bindParam(':idActivo', $hijo['idActivo'], PDO::PARAM_INT);
+                    $stmtInsertHijo->bindParam(':idTipoMovimiento', $data['idTipoMovimiento'], PDO::PARAM_INT);
+                    $stmtInsertHijo->bindValue(':idAmbienteAnterior', $ubicacionHijo['idAmbienteAnterior'], PDO::PARAM_INT);
+                    $stmtInsertHijo->bindValue(':idAmbienteNuevo', $data['idAmbienteNuevo'], $data['idAmbienteNuevo'] !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+                    $stmtInsertHijo->bindValue(':idResponsableAnterior', $ubicacionHijo['idResponsableAnterior'], PDO::PARAM_STR);
+                    $stmtInsertHijo->bindValue(':idResponsableNuevo', $data['idResponsableNuevo'], $data['idResponsableNuevo'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+                    $stmtInsertHijo->bindParam(':userMod', $data['userMod'], PDO::PARAM_STR);
+                    $stmtInsertHijo->bindValue(':idEmpresaDestino', $movimiento['idEmpresaDestino'], PDO::PARAM_INT);
+                    $stmtInsertHijo->bindValue(':idSucursalDestino', $movimiento['idSucursalDestino'], PDO::PARAM_INT);
+                    $stmtInsertHijo->bindValue(':idEmpresaOrigen', $ubicacionHijo['idEmpresaOrigen'], PDO::PARAM_INT);
+                    $stmtInsertHijo->bindValue(':idSucursalOrigen', $ubicacionHijo['idSucursalOrigen'], PDO::PARAM_INT);
+                    $stmtInsertHijo->execute();
+                }
+            }
+
+            return true;
+        } catch (PDOException $e) {
+            throw new Exception("Error al registrar detalle de movimiento: " . $e->getMessage());
+        }
+    }
+
 
 
 
@@ -344,10 +502,10 @@ class GestionarMovimientos
                 $sql .= " AND CONVERT(date, m.fechaMovimiento) BETWEEN ? AND ?";
                 $params[] = $fechaInicio;
                 $params[] = $fechaFin;
-            // } elseif (!empty($filtros['fecha'])) {
-            //     $fecha = date('Y-m-d', strtotime($filtros['fecha']));
-            //     $sql .= " AND CONVERT(date, m.fechaMovimiento) = ?";
-            //     $params[] = $fecha;
+                // } elseif (!empty($filtros['fecha'])) {
+                //     $fecha = date('Y-m-d', strtotime($filtros['fecha']));
+                //     $sql .= " AND CONVERT(date, m.fechaMovimiento) = ?";
+                //     $params[] = $fecha;
             }
 
             $sql .= " ORDER BY m.fechaMovimiento DESC;";

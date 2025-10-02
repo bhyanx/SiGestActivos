@@ -172,7 +172,7 @@ session_start();
                                                             <tr>
                                                                 <th>Código</th>
                                                                 <th>Nombre</th>
-                                                                <th>Marca</th>
+                                                                <th>Estado</th>
                                                                 <th>Serie</th>
                                                                 <th>Observaciones</th>
                                                                 <th>Acción</th>

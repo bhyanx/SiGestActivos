@@ -1951,14 +1951,18 @@ function init() {
       success: function (res) {
         console.log("Respuesta del servidor:", res);
         if (res.status) {
+          // cerrar modal primero
+          $("#modalAsignarResponsable").modal("hide");
+          $("#frmAsignarResponsable")[0].reset();
+          listarActivosTable();
+
+          // ahora mostrar el Swal
           Swal.fire({
+            icon: "success",
             title: "Éxito",
             text: res.message,
             timer: 1500,
-          }).then(() => {
-            $("#modalAsignarResponsable").modal("hide");
-            $("#frmAsignarResponsable")[0].reset();
-            listarActivosTable();
+            showConfirmButton: false,
           });
         } else {
           Swal.fire(
@@ -1968,6 +1972,7 @@ function init() {
           );
         }
       },
+
       error: function (xhr, status, error) {
         console.error("Error en la petición:", error);
         Swal.fire("Error", "Error al procesar la solicitud: " + error, "error");
@@ -4158,6 +4163,8 @@ function listarActivosTable() {
               return '<span class="badge bg-info"><i class="fas fa-exclamation-circle me-1"></i> Regular</span>';
             case "Malo":
               return '<span class="badge bg-dark"><i class="fas fa-skull-crossbones me-1"></i> Malo</span>';
+            case "Nuevo":
+              return '<span class="badge bg-primary"><i class="fas fa-plus-circle me-1"></i> Nuevo</span>';
             default:
               return '<span class="badge bg-dark"><i class="fas fa-question-circle me-1"></i> Desconocido</span>';
           }

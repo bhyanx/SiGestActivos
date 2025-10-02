@@ -23,7 +23,7 @@ class Combos
 
     public function comboTipoMovimiento()
     {
-        $sql = "SELECT idTipoMovimiento, nombre FROM tTipoMovimiento";
+        $sql = "SELECT idTipoMovimiento, nombre FROM tTipoMovimiento WHERE idTipoMovimiento NOT IN (5,8)";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -32,7 +32,7 @@ class Combos
     public function comboTipoMovimientov1()
     {
         $sql = "SELECT idTipoMovimiento, nombre FROM tTipoMovimiento 
-        WHERE idTipoMovimiento NOT IN ( 5, 7, 8)";
+        WHERE idTipoMovimiento NOT IN (5, 8)";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);

@@ -69,7 +69,7 @@ function init() {
         cancelButtonColor: "#d33",
         cancelButtonText: "Continuar editando",
       }).then((result) => {
-        if (result.isConfirmed) {          
+        if (result.isConfirmed) {
           $("#divformularioasignacion").hide();
           $("#divlistadomovimientos").show();
           $("#divtblmovimientos").show();
@@ -156,7 +156,7 @@ function init() {
       });
     });
 
-    $("#btnVolverMovimiento")
+  $("#btnVolverMovimiento")
     .off("click")
     .on("click", function () {
       Swal.fire({
@@ -408,6 +408,11 @@ function init() {
                   title: "Éxito",
                   text: "Todos los componentes fueron asignados correctamente.",
                   timer: 1800,
+                  showConfirmButton: false,
+                }).then(() => {
+                  $("#divformularioasignacion").hide();
+                  $("#divlistadomovimientos").show();
+                  $("#divtblmovimientos").show();
                 });
                 $("#tbldetalleactivos tbody").empty();
               } else {
@@ -523,6 +528,15 @@ function cargarActivosPadres() {
       .append('<option value="">Seleccione un activo padre</option>')
       .trigger("change");
   }
+
+  cargarDestino();
+
+  // volver a cargar si el usuario cambia la sucursal destino
+  $("#IdSucursalDestino")
+    .off("change")
+    .on("change", function () {
+      cargarDestino();
+    });
 }
 
 function cargarActivosParaAsignacion() {

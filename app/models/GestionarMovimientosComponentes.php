@@ -100,7 +100,7 @@ FROM vActivos a
 INNER JOIN vUnidadesdeNegocio s ON a.IdSucursal = s.cod_UnidadNeg
 INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
 WHERE a.idActivoPadre = ?
-AND a.idEstado = 1
+AND a.idEstado IN(1,5,6,7)
 ORDER BY a.NombreActivo";
 
             $stmt = $this->db->prepare($sql);

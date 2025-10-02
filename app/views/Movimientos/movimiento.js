@@ -520,6 +520,7 @@ function init() {
       success: function (res) {
         if (res.status && res.data.tieneComponentes) {
           // Mostrar alerta con información de componentes
+          let lista = `<ul class="mb-0 text-left text-primary"> ${res.data.listaComponentes}</ul>`;
           Swal.fire({
             title: "¡Activo con Componentes Detectado!",
             html: `
@@ -527,7 +528,7 @@ function init() {
                 <h5><i class="fas fa-info-circle"></i> ${activo.nombre}</h5>
                 <p><strong>Este activo tiene ${res.data.totalComponentes} componente(s) anidado(s):</strong></p>
                 <div class="text-left" style="max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                  <small>${res.data.listaComponentes}</small>
+                  <small>${lista}</small>
                 </div>
                 <div class="alert alert-warning mt-3 mb-3">
                   <h6><i class="fas fa-exclamation-triangle"></i> Comportamiento Automático:</h6>

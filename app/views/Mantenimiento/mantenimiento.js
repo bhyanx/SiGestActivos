@@ -500,7 +500,7 @@ function initMantenimiento() {
                 }</strong></h4>
               </div>
               <div class="progress mb-3">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
                      style="width: 0%" id="progressBar">0/${
                        $("#tblactivosmantenimiento tbody tr").length
                      }</div>
@@ -611,17 +611,13 @@ function verHistorialEstados2(idMantenimiento) {
   }
 
   // Limpiar cualquier backdrop previo
-  $(".modal-backdrop").remove();
+  // $(".modal-backdrop").remove();
 
   // Configurar z-index antes de abrir
-  $("#ModalEstadosMantenimiento").css("z-index", "10000");
+  $("#ModalEstadosMantenimiento").css("z-index", "99999");
 
   // Abrir el modal
-  $("#ModalEstadosMantenimiento").modal({
-    backdrop: "static",
-    keyboard: false,
-    show: true,
-  });
+  $("#ModalEstadosMantenimiento").modal("show");
 
   // Inicializar la DataTable después de que el modal se abra
   $("#ModalEstadosMantenimiento").on("shown.bs.modal", function () {
@@ -1101,7 +1097,7 @@ function agregarActivosAlMantenimiento(idMantenimiento, codigoMantenimiento) {
                       activosExitosos.length
                     } activos</strong> procesados correctamente</p>
                   </div>
-                  
+
                   <div class="row mt-4">
                     <div class="col-md-6">
                       <div class="card border-info">
@@ -1116,7 +1112,7 @@ function agregarActivosAlMantenimiento(idMantenimiento, codigoMantenimiento) {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div class="col-md-6">
                       <div class="card border-success">
                         <div class="card-header bg-success text-white">
@@ -1136,7 +1132,7 @@ function agregarActivosAlMantenimiento(idMantenimiento, codigoMantenimiento) {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div class="mt-3 p-3 bg-light rounded">
                     <small class="text-muted">
                       <i class="fas fa-search"></i> Para consultar este mantenimiento, busque por el código: <strong>${codigoMantenimiento}</strong>
@@ -1592,27 +1588,27 @@ function finalizarMantenimiento(idMantenimiento) {
                   </div>
                 </div>
               </div>
-              
+
               <form id="formFinalizarMantenimiento">
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label for="fechaCancelada" class="form-label"><strong>Fecha de Realización *</strong></label>
-                    <input type="date" class="form-control" id="fechaCancelada" name="fechaCancelada" 
+                    <input type="date" class="form-control" id="fechaCancelada" name="fechaCancelada"
                            value="${moment().format("YYYY-MM-DD")}" required>
                   </div>
-                  
+
                   <div class="col-md-6 mb-3">
                     <label for="costoReal" class="form-label"><strong>Costo Real</strong></label>
                     <div class="input-group">
                       <div class="input-group-prepend">
                         <span class="input-group-text">S/.</span>
                       </div>
-                      <input type="number" class="form-control" id="costoReal" name="costoReal" 
+                      <input type="number" class="form-control" id="costoReal" name="costoReal"
                              step="0.01" min="0" placeholder="0.00">
                     </div>
                   </div>
                 </div>
-                
+
                 <div class="row">
                   <div class="col-12 mb-3">
                     <label for="estadoFinal" class="form-label"><strong>Estado Final *</strong></label>
@@ -1621,11 +1617,11 @@ function finalizarMantenimiento(idMantenimiento) {
                     </select>
                   </div>
                 </div>
-                
+
                 <div class="row">
                   <div class="col-12 mb-3">
                     <label for="observacionesFinales" class="form-label"><strong>Observaciones Finales</strong></label>
-                    <textarea class="form-control" id="observacionesFinales" name="observacionesFinales" 
+                    <textarea class="form-control" id="observacionesFinales" name="observacionesFinales"
                               rows="4" maxlength="500" placeholder="Ingrese observaciones sobre la finalización del mantenimiento..."></textarea>
                     <small class="form-text text-muted">
                       <span id="contadorObservaciones">0</span>/500 caracteres
@@ -1751,17 +1747,17 @@ function procesarFinalizacionMantenimiento(idMantenimiento, datos) {
                 <div class="col-6">${moment(datos.fechaRealizada).format(
                   "DD/MM/YYYY"
                 )}</div>
-                
+
                 <div class="col-6"><strong>Costo Real:</strong></div>
                 <div class="col-6">S/. ${datos.costoReal || "0.00"}</div>
-                
+
                 <div class="col-6"><strong>Estado Final:</strong></div>
                 <div class="col-6">${$(
                   "#estadoFinal option:selected"
                 ).text()}</div>
               </div>
             </div>
-            
+
             <div class="mt-3 p-3 bg-light rounded">
               <small class="text-muted">
                 <i class="fas fa-info-circle"></i> Los activos han sido actualizados automáticamente a estado operativo.
@@ -1864,7 +1860,7 @@ function cancelarMantenimiento(idMantenimiento) {
                   </div>
                 </div>
               </div>
-              
+
               <form id="formCancelarMantenimiento">
                 <div class="row">
                   <div class="col-12 mb-3">
@@ -1874,18 +1870,18 @@ function cancelarMantenimiento(idMantenimiento) {
                     </select>
                   </div>
                 </div>
-                
+
                 <div class="row">
                   <div class="col-12 mb-3">
                     <label for="motivoCancelacion" class="form-label"><strong>Motivo de Cancelación *</strong></label>
-                    <textarea class="form-control" id="motivoCancelacion" name="motivoCancelacion" 
+                    <textarea class="form-control" id="motivoCancelacion" name="motivoCancelacion"
                               rows="4" maxlength="500" placeholder="Ingrese el motivo detallado de la cancelación..." required></textarea>
                     <small class="form-text text-muted">
                       <span id="contadorMotivo">0</span>/500 caracteres
                     </small>
                   </div>
                 </div>
-                
+
                 <div class="row">
                   <div class="col-12">
                     <div class="alert alert-info">
@@ -2041,7 +2037,7 @@ function procesarCancelacionMantenimiento(idMantenimiento, datos) {
                 </div>
               </div>
             </div>
-            
+
             <div class="mt-3 p-3 bg-light rounded">
               <small class="text-muted">
                 <i class="fas fa-info-circle"></i> Los activos han sido liberados automáticamente y están disponibles para otros mantenimientos.
@@ -2132,19 +2128,19 @@ function aprobarMantenimiento(idMantenimiento) {
                   </div>
                 </div>
               </div>
-              
+
               <form id="formAprobarMantenimiento">
                 <div class="row">
                   <div class="col-12 mb-3">
                     <label for="observacionesAprobacion" class="form-label"><strong>Observaciones de Aprobación</strong></label>
-                    <textarea class="form-control" id="observacionesAprobacion" name="observacionesAprobacion" 
+                    <textarea class="form-control" id="observacionesAprobacion" name="observacionesAprobacion"
                               rows="4" maxlength="500" placeholder="Ingrese observaciones sobre la aprobación del mantenimiento..."></textarea>
                     <small class="form-text text-muted">
                       <span id="contadorAprobacion">0</span>/500 caracteres
                     </small>
                   </div>
                 </div>
-                
+
                 <div class="row">
                   <div class="col-12">
                     <div class="alert alert-success">
@@ -2273,12 +2269,12 @@ function procesarAprobacionMantenimiento(idMantenimiento, datos) {
               <div class="row text-left">
                 <div class="col-6"><strong>Estado Anterior:</strong></div>
                 <div class="col-6">Pendiente</div>
-                
+
                 <div class="col-6"><strong>Estado Nuevo:</strong></div>
                 <div class="col-6">En Proceso</div>
               </div>
             </div>
-            
+
             <div class="mt-3 p-3 bg-light rounded">
               <small class="text-muted">
                 <i class="fas fa-info-circle"></i> Los activos han sido actualizados automáticamente a estado "En Mantenimiento".
