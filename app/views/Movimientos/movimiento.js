@@ -1503,6 +1503,7 @@ function ListarMovimientosEnviados() {
     destroy: true,
     //responsive: true,
     bInfo: true,
+    responsive: true,
     iDisplayLength: 10,
     order: [[7, "desc"]], // Ordenar por fecha descendente (columna 7 = fecha)
     ajax: {
