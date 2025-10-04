@@ -236,6 +236,7 @@ class GestionarActivos
                 @pIdCategoria = ?,
                 @pVidaUtil = ?,
                 @pSerie = ?,
+                @pModelo = ?,
                 @pObservaciones = ?,
                 @pValorAdquisicion = ?,
                 @pAplicaIGV = ?,
@@ -254,11 +255,12 @@ class GestionarActivos
             $stmt->bindParam(10, $data['IdCategoria'], \PDO::PARAM_INT);
             $stmt->bindParam(11, $data['VidaUtil'], \PDO::PARAM_INT);
             $stmt->bindParam(12, $data['Serie'], \PDO::PARAM_STR);
-            $stmt->bindParam(13, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(14, $data['ValorAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(15, $data['AplicaIGV'], \PDO::PARAM_INT);
-            $stmt->bindParam(16, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(17, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(13, $data['Modelo'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(14, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(15, $data['ValorAdquisicion'], \PDO::PARAM_STR);
+            $stmt->bindParam(16, $data['AplicaIGV'], \PDO::PARAM_INT);
+            $stmt->bindParam(17, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(18, $data['UserMod'], \PDO::PARAM_STR);
 
             $stmt->execute();
             return true;
@@ -283,6 +285,7 @@ class GestionarActivos
                 @pCantidad = ?,
                 @pIdProveedor = ?,
                 @pSerie = ?,
+                @pModelo = ?,
                 @pIdEmpresa = ?,
                 @pIdSucursal = ?,
                 @pIdAmbiente = ?,
@@ -300,16 +303,17 @@ class GestionarActivos
             $stmt->bindParam(4, $data['Cantidad'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
             $stmt->bindParam(5, $data['IdProveedor'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
             $stmt->bindParam(6, $data['Serie'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(7, $empresa, \PDO::PARAM_INT);
-            $stmt->bindParam(8, $sucursal, \PDO::PARAM_INT);
-            $stmt->bindParam(9, $data['IdAmbiente'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
-            $stmt->bindParam(10, $data['IdCategoria'], \PDO::PARAM_INT);
-            $stmt->bindParam(11, $data['VidaUtil'], \PDO::PARAM_INT);
-            $stmt->bindParam(12, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(13, $data['ValorAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(14, $data['AplicaIGV'], \PDO::PARAM_INT);
-            $stmt->bindParam(15, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(16, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(7, $data['Modelo'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(8, $empresa, \PDO::PARAM_INT);
+            $stmt->bindParam(9, $sucursal, \PDO::PARAM_INT);
+            $stmt->bindParam(10, $data['IdAmbiente'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(11, $data['IdCategoria'], \PDO::PARAM_INT);
+            $stmt->bindParam(12, $data['VidaUtil'], \PDO::PARAM_INT);
+            $stmt->bindParam(13, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(14, $data['ValorAdquisicion'], \PDO::PARAM_STR);
+            $stmt->bindParam(15, $data['AplicaIGV'], \PDO::PARAM_INT);
+            $stmt->bindParam(16, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(17, $data['UserMod'], \PDO::PARAM_STR);
 
             $stmt->execute();
             return true;
@@ -344,6 +348,7 @@ class GestionarActivos
                 @pIdAmbiente = ?,
                 @pIdCategoria = ?,
                 @pVidaUtil = ?,
+                @pModelo = ?
                 @pSerie = ?,
                 @pObservaciones = ?,
                 @pValorAdquisicion = ?,
@@ -371,14 +376,15 @@ class GestionarActivos
             $stmt->bindParam(14, $data['IdCategoria'], \PDO::PARAM_INT);
             $stmt->bindParam(15, $data['VidaUtil'], \PDO::PARAM_INT);
             $stmt->bindParam(16, $data['Serie'], \PDO::PARAM_STR);
-            $stmt->bindParam(17, $data['Observaciones'], \PDO::PARAM_STR);
-            $stmt->bindParam(18, $data['ValorAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(19, $data['AplicaIGV'], \PDO::PARAM_INT);
-            $stmt->bindParam(20, $data['FechaAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(21, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(17, $data['Modelo'], \PDO::PARAM_STR);
+            $stmt->bindParam(18, $data['Observaciones'], \PDO::PARAM_STR);
+            $stmt->bindParam(19, $data['ValorAdquisicion'], \PDO::PARAM_STR);
+            $stmt->bindParam(20, $data['AplicaIGV'], \PDO::PARAM_INT);
+            $stmt->bindParam(21, $data['FechaAdquisicion'], \PDO::PARAM_STR);
+            $stmt->bindParam(22, $data['UserMod'], \PDO::PARAM_STR);
             //$stmt->bindParam(22, $data['MotivoBaja'], \PDO::PARAM_STR);
-            $stmt->bindParam(22, $data['Cantidad'], \PDO::PARAM_INT);
-            $stmt->bindParam(23, $data['Correlativo'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(23, $data['Cantidad'], \PDO::PARAM_INT);
+            $stmt->bindParam(24, $data['Correlativo'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
 
             // Debug: Log del correlativo que se envía al SP
             error_log("Correlativo enviado al SP: " . ($data['Correlativo'] ?? 'NULL'), 3, __DIR__ . '/../../logs/debug.log');

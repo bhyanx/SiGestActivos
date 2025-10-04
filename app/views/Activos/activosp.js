@@ -758,7 +758,7 @@ function init() {
       const inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
       const inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" disabled>`;
 
-      // Para activos procesados, mostrar el proveedor pero deshabilitado
+      //! Para activos procesados, mostrar el proveedor pero deshabilitado
       const proveedorTexto =
         filaActual.find("select.proveedor option:selected").text() ||
         "No asignado";
@@ -1590,6 +1590,7 @@ function init() {
           IdAmbiente: form.find("select[name='Ambiente[]']").val(),
           IdCategoria: form.find("select[name='Categoria[]']").val(),
           Serie: fila.find(".serie-manual").val(), // Serie única de la tabla
+          Modelo: fila.find(".modelo-manual").val(), // Modelo único de la tabla
           Observaciones: form.find("textarea[name='Observaciones[]']").val(),
           ValorAdquisicion: parseFloat(
             form.find("input[name='ValorAdquisicion[]']").val()
@@ -1683,6 +1684,7 @@ function init() {
             IdAmbiente: form.find("select[name='Ambiente[]']").val(),
             IdCategoria: form.find("select[name='Categoria[]']").val(),
             Serie: form.find("input[name='serie[]']").val(),
+            Modelo: form.find("input[name='modelo[]']").val(),
             Observaciones: form.find("textarea[name='Observaciones[]']").val(),
             ValorAdquisicion: parseFloat(
               form.find("input[name='ValorAdquisicion[]']").val()
@@ -5627,6 +5629,12 @@ function addActivoManualForm(combos) {
             </div>
             <div class="col-md-4">
               <div class="form-group">
+                <label for="modelo_${activoFormCount}">Modelo: </label>
+                <input type="text" name="modelo[]" id="modelo_${activoFormCount}" class="form-control" placeholder="Ej. MODEL123" required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
                 <label for="serie_${activoFormCount}">Serie: </label>
                 <input type="text" name="serie[]" id="serie_${activoFormCount}" class="form-control" placeholder="Ej. ML-123" required>
               </div>
@@ -5722,6 +5730,7 @@ function addActivoManualForm(combos) {
                 <tr>
                   <th>Serie</th>
                   <th>Nombre</th>
+                  <th>Modelo</th>
                   <th>Estado</th>
                   <th>Categoría</th>
                   <th>Responsable</th>
@@ -6217,6 +6226,7 @@ $(document).ready(function () {
           IdCategoria: form.find("select[name='Categoria[]']").val(),
           VidaUtil: 3, // Valor por defecto
           Serie: fila.find(".serie-manual").val(), // Serie única de la tabla
+          Modelo: fila.find(".modelo-manual").val(),
           Observaciones: form.find("textarea[name='Observaciones[]']").val(),
           ValorAdquisicion: parseFloat(
             form.find("input[name='ValorAdquisicion[]']").val()
@@ -6261,6 +6271,7 @@ $(document).ready(function () {
             IdCategoria: form.find("select[name='Categoria[]']").val(),
             VidaUtil: 3, // Valor por defecto
             Serie: form.find("input[name='serie[]']").val(),
+            Modelo: form.find("input[name='modelo[]']").val(),
             Observaciones: form.find("textarea[name='Observaciones[]']").val(),
             ValorAdquisicion: parseFloat(
               form.find("input[name='ValorAdquisicion[]']").val()
