@@ -594,13 +594,15 @@ function init() {
 
     // Validar series duplicadas
     const validacion = validarSeriesDuplicadas(serieBase);
-    if (!validacion.esValida) {
+
+    // Solo mostrar alerta si la serie NO es "S/N" y está duplicada
+    if (serieBase.trim().toUpperCase() !== "S/N" && !validacion.esValida) {
       Swal.fire({
         title: "Serie Duplicada",
         html: `
-          <p>La serie base "<strong>${serieBase}</strong>" ya existe en la tabla.</p>
-          <p>¿Desea generar una serie única automáticamente?</p>
-        `,
+      <p>La serie base "<strong>${serieBase}</strong>" ya existe en la tabla.</p>
+      <p>¿Desea generar una serie única automáticamente?</p>
+    `,
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#28a745",
@@ -671,7 +673,18 @@ function init() {
     filaActual.find("input.cantidad").prop("disabled", true).val(1);
 
     // Actualizar la serie de la fila original y agregar distintivo visual
-    filaActual.find("input[name='serie[]']").val(serieBase + "-1");
+
+    // Actualizar la serie de la fila original y agregar distintivo visual
+    if (serieBase.trim().toUpperCase() === "S/N") {
+      // Si es "S/N", no se altera ni se agrega sufijo
+      filaActual.find("input[name='serie[]']").val("S/N");
+    } else {
+      // Para el resto de series sí se agrega el sufijo
+      filaActual.find("input[name='serie[]']").val(serieBase + "-1");
+    }
+
+    // filaActual.find("input[name='serie[]']").val(serieBase + "-1");
+
     filaActual.find("textarea[name='observaciones[]']").val(observacionesBase);
     // Mantener el estado del IGV de la fila principal
     filaActual
@@ -762,9 +775,18 @@ function init() {
                     <td>${activoId}</td>
                     <td>${indentacion} ${activoNombre} ${distintivo}</td>
                     <td>${activoMarca}</td>
-                    <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie ${
-                      i + 1
-                    }" value="${serieBase}-${i + 1}"></td>
+                    <td>
+                      <input 
+                        type="text" 
+                        class="form-control form-control-sm" 
+                        name="serie[]" 
+                        placeholder="Serie ${i + 1}" 
+                        value="${
+                          serieBase.trim().toUpperCase() === "S/N"
+                            ? "S/N"
+                            : serieBase + "-" + (i + 1)
+                        }">
+                    </td>
                     <td>${inputEstadoActivo}</td>
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
@@ -864,21 +886,29 @@ function init() {
   });
 
   // Validación en tiempo real de series duplicadas
+  // Validación en tiempo real de series duplicadas
   $(document).on("input", "#modalSerieBase", function () {
     const serieBase = $(this).val().trim();
     const inputElement = $(this);
 
     if (serieBase.length > 0) {
+      // Excepción para "S/N"
+      if (serieBase.toUpperCase() === "S/N") {
+        inputElement.removeClass("is-invalid");
+        inputElement.next(".invalid-feedback").remove();
+        return;
+      }
+
       const validacion = validarSeriesDuplicadas(serieBase);
 
       if (!validacion.esValida) {
         inputElement.addClass("is-invalid");
         inputElement.next(".invalid-feedback").remove();
         inputElement.after(`
-          <div class="invalid-feedback">
-            <i class="fas fa-exclamation-triangle"></i> Esta serie ya existe en la tabla
-          </div>
-        `);
+        <div class="invalid-feedback">
+          <i class="fas fa-exclamation-triangle"></i> Esta serie ya existe en la tabla
+        </div>
+      `);
       } else {
         inputElement.removeClass("is-invalid");
         inputElement.next(".invalid-feedback").remove();
@@ -959,10 +989,17 @@ function init() {
     const activoId = filaPrincipal.data("id");
     const activoNombre = filaPrincipal.data("activo-nombre");
     const activoMarca = filaPrincipal.data("activo-marca");
-    const serieBase = filaPrincipal
-      .find("input[name='serie[]']")
-      .val()
-      .replace("-1", "");
+    let serieBase = filaPrincipal.find("input[name='serie[]']").val();
+
+    // Si es "S/N", se deja igual y no se toca
+    if (serieBase.trim().toUpperCase() !== "S/N") {
+      serieBase = serieBase.replace("-1", "");
+    }
+
+    // const serieBase = filaPrincipal
+    //   .find("input[name='serie[]']")
+    //   .val()
+    //   .replace("-1", "");
     const valor = filaPrincipal.find("input[name='valor[]']").val();
     const aplicaIgv = filaPrincipal
       .find("input[name='aplicaIgv[]']")
@@ -1010,7 +1047,7 @@ function init() {
                       <td>${activoId}</td>
                       <td>${indentacion} ${activoNombre} ${distintivo}</td>
                       <td>${activoMarca}</td>
-                      <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie ${siguienteNumero}" value="${serieBase}-${siguienteNumero}"></td>
+                      <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie" value="${serieBase}"></td>
                       <td>${inputEstadoActivo}</td>
                       <td>${selectAmbiente}</td>
                       <td>${selectCategoria}</td>
@@ -1154,7 +1191,16 @@ function init() {
   }
 
   // Función para validar series duplicadas
+  // Función para validar series duplicadas
   function validarSeriesDuplicadas(serieBase, grupoId = null) {
+    // Si es "S/N", siempre válida (se puede repetir)
+    if (serieBase.trim().toUpperCase() === "S/N") {
+      return {
+        esValida: true,
+        seriesExistentes: [],
+      };
+    }
+
     const seriesExistentes = [];
 
     $("#tbldetalleactivoreg tbody tr").each(function () {
@@ -1176,6 +1222,11 @@ function init() {
 
   // Función para generar serie única automáticamente
   function generarSerieUnica(serieBase) {
+    // Si la serie es "S/N", se devuelve tal cual (se permite duplicar)
+    if (serieBase.trim().toUpperCase() === "S/N") {
+      return "S/N";
+    }
+
     let contador = 1;
     let serieNueva = serieBase;
 
@@ -1238,6 +1289,81 @@ function init() {
         return false;
       }
 
+      // // Para documentos de venta, crear múltiples activos individuales según la cantidad
+      // // Para documentos de ingreso, crear múltiples activos individuales como antes
+      // if (tipoDocFila === "venta" || tipoDocumento === "venta") {
+      //   // Para documentos de venta: crear múltiples activos individuales
+      //   for (let i = 0; i < cantidad; i++) {
+      //     let serieActual = row.find("input[name='serie[]']").val() || null;
+
+      //     // Si hay cantidad > 1, agregar sufijo a la serie
+      //     if (cantidad > 1 && serieActual) {
+      //       serieActual = serieActual + "-" + (i + 1);
+      //     }
+
+      //     let activo = {
+      //       IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
+      //       Serie: serieActual,
+      //       IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
+      //       IdCategoria: parseInt(row.find("select.categoria").val()) || null,
+      //       ValorAdquisicion:
+      //         parseFloat(row.find("input[name='valor[]']").val()) || 0,
+      //       AplicaIGV: row.find("input[name='aplicaIgv[]']").is(":checked")
+      //         ? 1
+      //         : 0,
+      //       IdProveedor: proveedor || null,
+      //       Observaciones:
+      //         row.find("textarea[name='observaciones[]']").val() || "",
+      //       IdEstado: 1, // Estado por defecto: Operativo
+      //       Garantia: 0, // Por defecto sin garantía
+      //       UserMod: userMod,
+      //       Accion: 1, // 1 = Insertar
+      //       VidaUtil: 3, // Vida útil por defecto
+      //       FechaAdquisicion: new Date().toISOString().split("T")[0], // Fecha actual
+      //       Cantidad: 1, // Cada iteración es 1 activo individual
+      //       IdDocVenta: parseInt(documento) || null,
+      //       IdDocIngresoAlm: null,
+      //     };
+
+      //     activos.push(activo);
+      //   }
+      // } else {
+      //   // Para documentos de ingreso: crear múltiples activos individuales
+      //   for (let i = 0; i < cantidad; i++) {
+      //     let serieActual = row.find("input[name='serie[]']").val() || null;
+
+      //     // Si hay cantidad > 1, agregar sufijo a la serie
+      //     if (cantidad > 1 && serieActual) {
+      //       serieActual = serieActual + "-" + (i + 1);
+      //     }
+
+      //     let activo = {
+      //       IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
+      //       Serie: serieActual,
+      //       IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
+      //       IdCategoria: parseInt(row.find("select.categoria").val()) || null,
+      //       ValorAdquisicion:
+      //         parseFloat(row.find("input[name='valor[]']").val()) || 0,
+      //       AplicaIGV: row.find("input[name='aplicaIgv[]']").is(":checked")
+      //         ? 1
+      //         : 0,
+      //       IdProveedor: proveedor || null,
+      //       Observaciones:
+      //         row.find("textarea[name='observaciones[]']").val() || "",
+      //       IdEstado: 1, // Estado por defecto: Operativo
+      //       Garantia: 0, // Por defecto sin garantía
+      //       UserMod: userMod,
+      //       Accion: 1, // 1 = Insertar
+      //       VidaUtil: 3, // Vida útil por defecto
+      //       FechaAdquisicion: new Date().toISOString().split("T")[0], // Fecha actual
+      //       Cantidad: 1, // Cada iteración es 1 activo
+      //       IdDocIngresoAlm: parseInt(documento) || null,
+      //       IdDocVenta: null,
+      //     };
+
+      //     activos.push(activo);
+      //   }
+      // }
       // Para documentos de venta, crear múltiples activos individuales según la cantidad
       // Para documentos de ingreso, crear múltiples activos individuales como antes
       if (tipoDocFila === "venta" || tipoDocumento === "venta") {
@@ -1245,9 +1371,18 @@ function init() {
         for (let i = 0; i < cantidad; i++) {
           let serieActual = row.find("input[name='serie[]']").val() || null;
 
-          // Si hay cantidad > 1, agregar sufijo a la serie
-          if (cantidad > 1 && serieActual) {
+          // Si no es "S/N" y hay cantidad > 1, agregar sufijo a la serie
+          if (
+            cantidad > 1 &&
+            serieActual &&
+            serieActual.trim().toUpperCase() !== "S/N"
+          ) {
             serieActual = serieActual + "-" + (i + 1);
+          } else if (
+            serieActual &&
+            serieActual.trim().toUpperCase() === "S/N"
+          ) {
+            serieActual = "S/N"; // se mantiene igual en todos
           }
 
           let activo = {
@@ -1281,9 +1416,18 @@ function init() {
         for (let i = 0; i < cantidad; i++) {
           let serieActual = row.find("input[name='serie[]']").val() || null;
 
-          // Si hay cantidad > 1, agregar sufijo a la serie
-          if (cantidad > 1 && serieActual) {
+          // Si no es "S/N" y hay cantidad > 1, agregar sufijo a la serie
+          if (
+            cantidad > 1 &&
+            serieActual &&
+            serieActual.trim().toUpperCase() !== "S/N"
+          ) {
             serieActual = serieActual + "-" + (i + 1);
+          } else if (
+            serieActual &&
+            serieActual.trim().toUpperCase() === "S/N"
+          ) {
+            serieActual = "S/N"; // se mantiene igual en todos
           }
 
           let activo = {
@@ -4839,47 +4983,114 @@ $(document).on("click", ".btnProcesarActivoManual", function () {
     return;
   }
 
+  // // Validar series duplicadas en todas las tablas de preview
+  // const validacion = validarSeriesDuplicadasManual(serie);
+  // if (!validacion.esValida) {
+  //   Swal.fire({
+  //     title: "Serie Duplicada",
+  //     html: `
+  //       <p>La serie base "<strong>${serie}</strong>" ya existe en las previsualizaciones.</p>
+  //       <p>¿Desea generar una serie única automáticamente?</p>
+  //     `,
+  //     icon: "warning",
+  //     showCancelButton: true,
+  //     confirmButtonColor: "#28a745",
+  //     confirmButtonText: "Sí, generar automáticamente",
+  //     cancelButtonColor: "#6c757d",
+  //     cancelButtonText: "No, cambiar manualmente",
+  //   }).then((result) => {
+  //     if (result.isConfirmed) {
+  //       const serieUnica = generarSerieUnicaManual(serie);
+  //       form.find("input[name='serie[]']").val(serieUnica);
+  //       NotificacionToast(
+  //         "info",
+  //         `Serie cambiada automáticamente a: ${serieUnica}`
+  //       );
+  //     }
+  //   });
+  //   return;
+  // }
+
+  // // Mostrar modal de confirmación con detalles
+  // Swal.fire({
+  //   title: "Procesar Activo Manual",
+  //   html: `
+  //     <div class="text-left">
+  //       <p><strong>Activo:</strong> ${nombre}</p>
+  //       <p><strong>Serie Base:</strong> ${serie}</p>
+  //       <p><strong>Cantidad:</strong> ${cantidad} unidades</p>
+  //       <p><strong>Valor Unitario:</strong> S/${valor}</p>
+  //       <hr>
+  //       <p class="text-info"><i class="fas fa-info-circle"></i> Se crearán ${cantidad} activos individuales con series únicas.</p>
+  //     </div>
+  //   `,
+  //   icon: "question",
+  //   showCancelButton: true,
+  //   confirmButtonColor: "#17a2b8",
+  //   confirmButtonText: "Sí, procesar",
+  //   cancelButtonColor: "#6c757d",
+  //   cancelButtonText: "Cancelar",
+  // }).then((result) => {
+  //   if (result.isConfirmed) {
+  //     procesarActivoManual(formId, {
+  //       nombre,
+  //       serie,
+  //       cantidad,
+  //       estado,
+  //       categoria,
+  //       responsable,
+  //       ambiente,
+  //       empresa,
+  //       unidadNegocio,
+  //       valor,
+  //       observaciones,
+  //     });
+  //   }
+  // });
   // Validar series duplicadas en todas las tablas de preview
-  const validacion = validarSeriesDuplicadasManual(serie);
-  if (!validacion.esValida) {
-    Swal.fire({
-      title: "Serie Duplicada",
-      html: `
+  // Excepción para "S/N"
+  if (serie.trim().toUpperCase() !== "S/N") {
+    const validacion = validarSeriesDuplicadasManual(serie);
+    if (!validacion.esValida) {
+      Swal.fire({
+        title: "Serie Duplicada",
+        html: `
         <p>La serie base "<strong>${serie}</strong>" ya existe en las previsualizaciones.</p>
         <p>¿Desea generar una serie única automáticamente?</p>
       `,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#28a745",
-      confirmButtonText: "Sí, generar automáticamente",
-      cancelButtonColor: "#6c757d",
-      cancelButtonText: "No, cambiar manualmente",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const serieUnica = generarSerieUnicaManual(serie);
-        form.find("input[name='serie[]']").val(serieUnica);
-        NotificacionToast(
-          "info",
-          `Serie cambiada automáticamente a: ${serieUnica}`
-        );
-      }
-    });
-    return;
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        confirmButtonText: "Sí, generar automáticamente",
+        cancelButtonColor: "#6c757d",
+        cancelButtonText: "No, cambiar manualmente",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const serieUnica = generarSerieUnicaManual(serie);
+          form.find("input[name='serie[]']").val(serieUnica);
+          NotificacionToast(
+            "info",
+            `Serie cambiada automáticamente a: ${serieUnica}`
+          );
+        }
+      });
+      return;
+    }
   }
 
   // Mostrar modal de confirmación con detalles
   Swal.fire({
     title: "Procesar Activo Manual",
     html: `
-      <div class="text-left">
-        <p><strong>Activo:</strong> ${nombre}</p>
-        <p><strong>Serie Base:</strong> ${serie}</p>
-        <p><strong>Cantidad:</strong> ${cantidad} unidades</p>
-        <p><strong>Valor Unitario:</strong> S/${valor}</p>
-        <hr>
-        <p class="text-info"><i class="fas fa-info-circle"></i> Se crearán ${cantidad} activos individuales con series únicas.</p>
-      </div>
-    `,
+    <div class="text-left">
+      <p><strong>Activo:</strong> ${nombre}</p>
+      <p><strong>Serie Base:</strong> ${serie}</p>
+      <p><strong>Cantidad:</strong> ${cantidad} unidades</p>
+      <p><strong>Valor Unitario:</strong> S/${valor}</p>
+      <hr>
+      <p class="text-info"><i class="fas fa-info-circle"></i> Se crearán ${cantidad} activos individuales con series únicas.</p>
+    </div>
+  `,
     icon: "question",
     showCancelButton: true,
     confirmButtonColor: "#17a2b8",
@@ -4981,7 +5192,12 @@ function procesarActivoManual(formId, datos) {
       `Creando activo ${indice + 1}/${datos.cantidad}...`
     );
 
-    const serieActual = `${datos.serie}-${indice + 1}`;
+    // const serieActual = `${datos.serie}-${indice + 1}`;
+    const serieActual =
+      datos.serie.trim().toUpperCase() === "S/N"
+        ? "S/N"
+        : `${datos.serie}-${indice + 1}`;
+
     const grupoId = `manual_${formId}_${Date.now()}`;
 
     const nuevaFila = `
@@ -5060,13 +5276,60 @@ function procesarActivoManual(formId, datos) {
 }
 
 // Función para validar series duplicadas en formularios manuales
+// function validarSeriesDuplicadasManual(serieBase) {
+//   const seriesExistentes = [];
+
+//   // Revisar todas las tablas de preview
+//   $("[id^='tblPreviewActivos_'] tbody tr").each(function () {
+//     const serie = $(this).find(".serie-manual").val();
+//     if (serie) {
+//       seriesExistentes.push(serie.toLowerCase());
+//     }
+//   });
+
+//   // También revisar la tabla principal si existe
+//   $("#tbldetalleactivoreg tbody tr").each(function () {
+//     const serie = $(this).find("input[name='serie[]']").val();
+//     if (serie) {
+//       seriesExistentes.push(serie.toLowerCase());
+//     }
+//   });
+
+//   return {
+//     esValida: !seriesExistentes.includes(serieBase.toLowerCase()),
+//     seriesExistentes: seriesExistentes,
+//   };
+// }
+
+// // Función para generar serie única en formularios manuales
+// function generarSerieUnicaManual(serieBase) {
+//   let contador = 1;
+//   let serieNueva = serieBase;
+
+//   while (!validarSeriesDuplicadasManual(serieNueva).esValida) {
+//     contador++;
+//     serieNueva = `${serieBase}-V${contador}`;
+//   }
+
+//   return serieNueva;
+// }
+
+// Validar series duplicadas en formularios manuales
 function validarSeriesDuplicadasManual(serieBase) {
+  // Si la serie es "S/N", siempre es válida (se puede repetir)
+  if (serieBase.trim().toUpperCase() === "S/N") {
+    return {
+      esValida: true,
+      seriesExistentes: [],
+    };
+  }
+
   const seriesExistentes = [];
 
   // Revisar todas las tablas de preview
   $("[id^='tblPreviewActivos_'] tbody tr").each(function () {
     const serie = $(this).find(".serie-manual").val();
-    if (serie) {
+    if (serie && serie.trim().toUpperCase() !== "S/N") {
       seriesExistentes.push(serie.toLowerCase());
     }
   });
@@ -5074,7 +5337,7 @@ function validarSeriesDuplicadasManual(serieBase) {
   // También revisar la tabla principal si existe
   $("#tbldetalleactivoreg tbody tr").each(function () {
     const serie = $(this).find("input[name='serie[]']").val();
-    if (serie) {
+    if (serie && serie.trim().toUpperCase() !== "S/N") {
       seriesExistentes.push(serie.toLowerCase());
     }
   });
@@ -5085,8 +5348,13 @@ function validarSeriesDuplicadasManual(serieBase) {
   };
 }
 
-// Función para generar serie única en formularios manuales
+// Generar serie única en formularios manuales
 function generarSerieUnicaManual(serieBase) {
+  // Si es "S/N", no se altera
+  if (serieBase.trim().toUpperCase() === "S/N") {
+    return "S/N";
+  }
+
   let contador = 1;
   let serieNueva = serieBase;
 
