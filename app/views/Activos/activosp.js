@@ -2257,6 +2257,19 @@ function init() {
                                             </div>
                                         </div>
                                         
+                                        <div class="col-sm-6">
+                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Modelo</label>
+                                                <div class="fw-bold text-slate-700">${activo.Modelo}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Marca</label>
+                                                <div class="fw-bold text-slate-700">${activo.Marca}</div>
+                                            </div>
+                                        </div>
+                                        
                                         <!-- Fila 3: Nombre del Activo -->
                                         <div class="col-12">
                                             <div class="info-card p-2 rounded-3" style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border-left: 4px solid #0d9488;">
@@ -2268,8 +2281,11 @@ function init() {
                                         <!-- Fila 4: Marca y Categoría -->
                                         <div class="col-sm-6">
                                             <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
-                                                <label class="form-label small mb-1 fw-bold text-uppercase">Marca</label>
-                                                <div class="fw-bold text-slate-700">${activo.Marca}</div>
+                                                <label class="form-label small mb-1 fw-bold text-uppercase">Proveedor</label>
+                                                <div class="fw-bold text-slate-700">
+                                                    <i class="fas fa-building me-2 text-success-500"></i>
+                                                    ${activo.RazonSocial}
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
@@ -2319,16 +2335,6 @@ function init() {
                                             </div>
                                         </div>
                                         
-                                        <!-- Fila 7: Proveedor -->
-                                        <div class="col-sm-6">
-                                            <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
-                                                <label class="form-label small mb-1 fw-bold text-uppercase">Proveedor</label>
-                                                <div class="fw-bold text-slate-700">
-                                                    <i class="fas fa-building me-2 text-success-500"></i>
-                                                    ${activo.RazonSocial}
-                                                </div>
-                                            </div>
-                                        </div>
                                         
                                         <!-- Fila 8: Observaciones -->
                                         <div class="col-12">
@@ -4934,6 +4940,7 @@ $(document).on("click", ".btnProcesarActivoManual", function () {
   // Obtener datos del formulario
   const nombre = form.find("input[name='nombre[]']").val().trim();
   const serie = form.find("input[name='serie[]']").val().trim();
+  const modelo = form.find("input[name='modelo[]']").val().trim();
   const cantidad = parseInt(form.find("input[name='Cantidad[]']").val()) || 1;
   const estado = form.find("select[name='Estado[]']").val();
   const categoria = form.find("select[name='Categoria[]']").val();
@@ -5104,6 +5111,7 @@ $(document).on("click", ".btnProcesarActivoManual", function () {
       procesarActivoManual(formId, {
         nombre,
         serie,
+        modelo,
         cantidad,
         estado,
         categoria,
@@ -5205,9 +5213,10 @@ function procesarActivoManual(formId, datos) {
     const nuevaFila = `
       <tr data-grupo-manual="${grupoId}" data-form-id="${formId}">
         <td>
-          <input type="text" class="form-control form-control-sm serie-manual" value="${serieActual}" readonly>
+          <input type="text" class="form-control form-control-sm serie-manual" value="${serieActual}">
         </td>
         <td>${datos.nombre}</td>
+        <td><input type="text" class="form-control form-control-sm modelo-manual" value="${datos.modelo}"></td>
         <td>${estadoTexto}</td>
         <td>${categoriaTexto}</td>
         <td>${responsableTexto}</td>
@@ -5254,7 +5263,7 @@ function procesarActivoManual(formId, datos) {
       actualizarContadorPreview(formId);
 
       // Deshabilitar campos del formulario
-      form.find("input, select, textarea").prop("disabled", true);
+      //form.find("input, select, textarea").prop("disabled", true);
       form.find(".btnProcesarActivoManual").hide();
 
       // Mostrar botón de reset
@@ -5744,7 +5753,7 @@ function addActivoManualForm(combos) {
               <tbody></tbody>
               <tfoot>
                 <tr>
-                  <th colspan="9" class="text-right">Total Activos:</th>
+                  <th colspan="10" class="text-right">Total Activos:</th>
                   <th class="text-center"><span class="badge badge-info total-activos-preview">0</span></th>
                 </tr>
               </tfoot>

@@ -348,7 +348,7 @@ class GestionarActivos
                 @pIdAmbiente = ?,
                 @pIdCategoria = ?,
                 @pVidaUtil = ?,
-                @pModelo = ?
+                @pModelo = ?,
                 @pSerie = ?,
                 @pObservaciones = ?,
                 @pValorAdquisicion = ?,
@@ -375,8 +375,8 @@ class GestionarActivos
             $stmt->bindParam(13, $data['IdAmbiente'], \PDO::PARAM_INT);
             $stmt->bindParam(14, $data['IdCategoria'], \PDO::PARAM_INT);
             $stmt->bindParam(15, $data['VidaUtil'], \PDO::PARAM_INT);
-            $stmt->bindParam(16, $data['Serie'], \PDO::PARAM_STR);
-            $stmt->bindParam(17, $data['Modelo'], \PDO::PARAM_STR);
+            $stmt->bindParam(16, $data['Modelo'], \PDO::PARAM_STR);
+            $stmt->bindParam(17, $data['Serie'], \PDO::PARAM_STR);
             $stmt->bindParam(18, $data['Observaciones'], \PDO::PARAM_STR);
             $stmt->bindParam(19, $data['ValorAdquisicion'], \PDO::PARAM_STR);
             $stmt->bindParam(20, $data['AplicaIGV'], \PDO::PARAM_INT);
