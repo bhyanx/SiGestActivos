@@ -15,6 +15,19 @@ session_start();
         .dropdown-menu .show {
             position: fixed !important;
         }
+
+        /* Fila con activo ya asignado (tiene padre) */
+        .activo-asignado-color-diferenciador {
+            background-color: #ffa662 !important;
+            /* naranja claro */
+        }
+
+        /* Fila que representa un activo padre */
+        .activo-padre-color-diferenciador {
+            background-color: #c6f6c6 !important;
+            /* verde claro */
+            font-weight: bold;
+        }
     </style>
 </head>
 

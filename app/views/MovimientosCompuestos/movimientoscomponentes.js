@@ -539,8 +539,48 @@ function cargarActivosPadres() {
     });
 }
 
+// function cargarActivosParaAsignacion() {
+//   // Cargar todos los activos disponibles para asignar como padre
+//   $.ajax({
+//     url: "../../controllers/GestionarMovimientosComponentesController.php?action=ConsultarActivos",
+//     type: "POST",
+//     data: { IdArticulo: "", IdActivo: "" },
+//     dataType: "json",
+//     success: function (res) {
+//       let data = res && res.length ? res : res.data || [];
+//       if (data.length > 0) {
+//         $("#IdAsignacionPadre").empty();
+//         $("#IdAsignacionPadre").append(
+//           '<option value="">Seleccione un activo padre</option>'
+//         );
+//         data.forEach(function (activo) {
+//           const id = activo.idActivo || activo.idActivo;
+//           const nombre =
+//             activo.NombreActivo || activo.Nombre || activo.nombreActivo;
+//           const codigo = activo.codigo || activo.Codigo;
+//           const serie = activo.NumeroSerie || activo.Serie || "";
+//           $("#IdAsignacionPadre").append(
+//             `<option value="${id}">${codigo} - ${nombre} </option>`
+//           );
+//         });
+//         if (!$("#IdAsignacionPadre").hasClass("select2-hidden-accessible")) {
+//           $("#IdAsignacionPadre").select2({
+//             theme: "bootstrap4",
+//             width: "100%",
+//           });
+//         }
+//       } else {
+//         Swal.fire("Error", "No se encontraron activos disponibles", "error");
+//       }
+//     },
+//     error: function (xhr, status, error) {
+//       Swal.fire("Error", "Error al cargar los activos: " + error, "error");
+//     },
+//   });
+//   // No llenar la tabla de detalle aquí
+// }
+
 function cargarActivosParaAsignacion() {
-  // Cargar todos los activos disponibles para asignar como padre
   $.ajax({
     url: "../../controllers/GestionarMovimientosComponentesController.php?action=ConsultarActivos",
     type: "POST",
@@ -549,24 +589,52 @@ function cargarActivosParaAsignacion() {
     success: function (res) {
       let data = res && res.length ? res : res.data || [];
       if (data.length > 0) {
-        $("#IdAsignacionPadre").empty();
-        $("#IdAsignacionPadre").append(
-          '<option value="">Seleccione un activo padre</option>'
-        );
+        const $select = $("#IdAsignacionPadre");
+        $select.empty();
+        $select.append('<option value="">Seleccione un activo padre</option>');
+
         data.forEach(function (activo) {
-          const id = activo.idActivo || activo.idActivo;
+          const id = activo.idActivo;
           const nombre =
             activo.NombreActivo || activo.Nombre || activo.nombreActivo;
-          const codigo = activo.codigo || activo.Codigo;
-          const serie = activo.NumeroSerie || activo.Serie || "";
-          $("#IdAsignacionPadre").append(
-            `<option value="${id}">${codigo} - ${nombre} </option>`
+          const codigo = activo.codigo || activo.Codigo || "";
+          const serie = activo.Serie || activo.NumeroSerie || "";
+          const idPadre = activo.idActivoPadre || 0;
+          const esPadre = activo.esPadre == 1 || activo.esPadre === true;
+
+          // Determinar color y etiqueta
+          let color = "#000"; // negro por defecto
+          let icono = "";
+
+          if (idPadre && idPadre != 0) {
+            color = "#FFA500"; // naranja: ya asignado
+            icono = "🟠 ";
+          }
+
+          if (esPadre) {
+            color = "#28a745"; // verde: activo padre
+            icono = "🟢 ";
+          }
+
+          // Agregar opción con color
+          $select.append(
+            `<option value="${id}" style="color:${color}; font-weight:bold;">
+              ${icono}${codigo} - ${nombre}
+            </option>`
           );
         });
-        if (!$("#IdAsignacionPadre").hasClass("select2-hidden-accessible")) {
-          $("#IdAsignacionPadre").select2({
+
+        // Activar Select2 si no está activo aún
+        if (!$select.hasClass("select2-hidden-accessible")) {
+          $select.select2({
             theme: "bootstrap4",
             width: "100%",
+            templateResult: function (data) {
+              return $(data.element).text();
+            },
+            templateSelection: function (data) {
+              return $(data.element).text();
+            },
           });
         }
       } else {
@@ -577,10 +645,10 @@ function cargarActivosParaAsignacion() {
       Swal.fire("Error", "Error al cargar los activos: " + error, "error");
     },
   });
-  // No llenar la tabla de detalle aquí
 }
 
 // Evento para seleccionar/deseleccionar componentes en la tabla
+
 $(document)
   .off("click", ".btnSeleccionarComponente")
   .on("click", ".btnSeleccionarComponente", function () {
@@ -1244,10 +1312,65 @@ function NotificacionToast(tipo, mensaje) {
 }
 
 // Función para listar activos en el modal de búsqueda
+// function listarActivosModalBusqueda() {
+//   if ($.fn.DataTable.isDataTable("#tblActivos")) {
+//     $("#tblActivos").DataTable().destroy();
+//   }
+//   $("#tblActivos").DataTable({
+//     ajax: {
+//       url: "../../controllers/GestionarMovimientosComponentesController.php?action=ConsultarActivos",
+//       type: "POST",
+//       data: { IdArticulo: "", IdActivo: "" },
+//       dataType: "json",
+//       dataSrc: function (json) {
+//         console.log("Respuesta del servidor:", json);
+//         // ConsultarActivos devuelve directamente un array, no un objeto con status
+//         let data = json || [];
+//         // Excluir el activo seleccionado como padre
+//         const excludeId = $("#IdAsignacionPadre").val();
+//         if (excludeId) {
+//           data = data.filter((item) => item.idActivo != excludeId);
+//         }
+//         return data;
+//       },
+//       error: function (xhr, status, error) {
+//         console.error("Error AJAX:", error);
+//         NotificacionToast("error", "Error al cargar los activos: " + error);
+//         return [];
+//       },
+//     },
+//     columns: [
+//       { data: "idActivo" },
+//       { data: "codigo" },
+//       { data: "NombreActivo" },
+//       { data: "Estado" },
+//       { data: "Serie" },
+//       {
+//         data: null,
+//         render: function (data, type, row) {
+//           return `<button type="button" class="btn btn-success btn-sm btnAgregarActivoDetalle"><i class="fa fa-plus"></i> Agregar</button>`;
+//         },
+//       },
+//     ],
+//     language: {
+//       url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+//     },
+//     destroy: true,
+//     responsive: true,
+//     autoWidth: false,
+//     pageLength: 10,
+//     lengthMenu: [
+//       [10, 25, 50, -1],
+//       [10, 25, 50, "Todos"],
+//     ],
+//   });
+// }
+
 function listarActivosModalBusqueda() {
   if ($.fn.DataTable.isDataTable("#tblActivos")) {
     $("#tblActivos").DataTable().destroy();
   }
+
   $("#tblActivos").DataTable({
     ajax: {
       url: "../../controllers/GestionarMovimientosComponentesController.php?action=ConsultarActivos",
@@ -1256,13 +1379,14 @@ function listarActivosModalBusqueda() {
       dataType: "json",
       dataSrc: function (json) {
         console.log("Respuesta del servidor:", json);
-        // ConsultarActivos devuelve directamente un array, no un objeto con status
         let data = json || [];
+
         // Excluir el activo seleccionado como padre
         const excludeId = $("#IdAsignacionPadre").val();
         if (excludeId) {
           data = data.filter((item) => item.idActivo != excludeId);
         }
+
         return data;
       },
       error: function (xhr, status, error) {
@@ -1280,10 +1404,27 @@ function listarActivosModalBusqueda() {
       {
         data: null,
         render: function (data, type, row) {
-          return `<button type="button" class="btn btn-success btn-sm btnAgregarActivoDetalle"><i class="fa fa-plus"></i> Agregar</button>`;
+          return `<button type="button" class="btn btn-success btn-sm btnAgregarActivoDetalle">
+                    <i class="fa fa-plus"></i> Agregar
+                  </button>`;
         },
       },
     ],
+    rowCallback: function (row, data) {
+      // Verificar si tiene padre o es padre
+      const tienePadre = data.idActivoPadre && data.idActivoPadre != 0;
+      const esPadre = data.esPadre == 1 || data.esPadre === true;
+
+      // Reiniciar estilos
+      $(row).removeClass("activo-asignado-color-diferenciador activo-padre-color-diferenciador");
+
+      if (tienePadre) {
+        $(row).addClass("activo-asignado-color-diferenciador"); // color naranja
+      }
+      if (esPadre) {
+        $(row).addClass("activo-padre-color-diferenciador"); // color verde
+      }
+    },
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
     },
@@ -1298,6 +1439,7 @@ function listarActivosModalBusqueda() {
   });
 }
 
+
 // Evento para agregar un activo seleccionado al detalle
 $(document).on("click", ".btnAgregarActivoDetalle", function () {
   const data = $("#tblActivos").DataTable().row($(this).closest("tr")).data();
@@ -1309,9 +1451,17 @@ $(document).on("click", ".btnAgregarActivoDetalle", function () {
     return;
   }
 
+    // Determinar clase según el tipo de activo
+    const tienePadre = data.idActivoPadre && data.idActivoPadre != 0;
+    const esPadre = data.esPadre == 1 || data.esPadre === true;
+  
+    let claseFila = "";
+    if (tienePadre) claseFila = "activo-asignado-color-diferenciador"; // amarillo: ya asignado
+    if (esPadre) claseFila = "activo-padre-color-diferenciador";    // verde: es activo padre
+
   // Agregar al detalle
   $("#tbldetalleactivos tbody").append(`
-    <tr data-id="${data.idActivo}">
+    <tr data-id="${data.idActivo}" class="${claseFila}">
       <td>${data.codigo}</td>
       <td>${data.NombreActivo}</td>
       <td>${data.Estado || ""}</td>
@@ -1323,7 +1473,7 @@ $(document).on("click", ".btnAgregarActivoDetalle", function () {
   NotificacionToast("success", "Activo agregado al detalle.");
 
   // Cerrar el modal después de agregar
-  $("#modalBuscarActivos").modal("hide");
+  //$("#modalBuscarActivos").modal("hide");
 });
 
 // Evento para quitar un activo del detalle
