@@ -249,7 +249,15 @@ $pdf->SetFont('Arial', 'B', 9);
 $pdf->Cell(60, 8, $pdf->convertToLatin1('Valor de Adquisición:'), 1, 0, 'L', true);
 $pdf->SetTextColor(0, 0, 0);
 $pdf->SetFont('Arial', '', 9);
-$pdf->Cell(130, 8, $pdf->convertToLatin1($detalleActivo['valorAdquisicion'] ?? ''), 1, 1, 'L');
+
+//? Variable para el valor de adquisición y formateo a 2 decimales
+$valor = isset($detalleActivo['valorAdquisicion']) 
+    ? number_format((float)$detalleActivo['valorAdquisicion'], 2, '.', '') 
+    : '0.00';
+
+//! Retorno de valor formateado
+$pdf->Cell(130, 8, 'S/ ' . $pdf->convertToLatin1($valor), 1, 1, 'L');
+
 
 $pdf->Ln(5);
 

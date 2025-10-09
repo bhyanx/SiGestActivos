@@ -2206,7 +2206,7 @@ function init() {
                                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
                                     <div class="d-inline-block px-4 py-2 rounded-pill" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
                                         <b>S/</b>
-                                        <span class="fw-bold fs-5">${activo.valorAdquisicion}</span>
+                                        <span class="fw-bold fs-5">${parseFloat(activo.valorAdquisicion).toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -2301,7 +2301,7 @@ function init() {
                                                 <label class="form-label small mb-1 fw-bold text-uppercase">Valor Adquisición</label>
                                                 <div class="fw-bold text-emerald-600 fs-6">
                                                     <i class="fas fa-hand-holding-dollar me-1 text-success-500"></i>
-                                                    ${activo.valorAdquisicion}
+                                                    ${parseFloat(activo.valorAdquisicion).toFixed(2)}
                                                 </div>
                                             </div>
                                         </div>
@@ -2825,7 +2825,7 @@ function init() {
                           item.NombreComponente
                         }</div>
                         <small class="text-muted">${
-                          item.Descripcion || "-"
+                          item.SerieComponente || "-"
                         }</small>
                       </td>
                       <td class="py-2">
@@ -4339,7 +4339,12 @@ function listarActivosTable() {
         },
       },
       { data: "Serie" },
-      { data: "valorAdquisicion" },
+      { data: "valorAdquisicion",
+        render: function (data, type, row) {
+          // RETORNAMOS EL FORMATEO PARA DECIMALES -> .10 = 0.10
+          return "S/ " + parseFloat(data).toFixed(2);
+        }
+       },
       { data: "fechaRegistro" },
       {
         data: null,
