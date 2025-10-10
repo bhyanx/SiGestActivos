@@ -579,24 +579,49 @@ function init() {
             `,
             icon: "info",
             showCancelButton: true,
-            confirmButtonText:
-              '<i class="fas fa-arrow-right"></i> Continuar con el Movimiento',
-            cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
+            confirmButtonText: "Padre + Hijos",
+            cancelButtonText: "Solo Padre",
             confirmButtonColor: "#28a745",
             cancelButtonColor: "#6c757d",
             width: "650px",
           }).then((result) => {
             if (result.isConfirmed) {
-              agregarActivoAlDetalle(activo, true);
+              // Agregar el activo padre primero
+              agregarActivoAlDetalle(activo);
+              
+              // Cargar hijos
+              $.ajax({
+                url: "../../controllers/GestionarMovimientoController.php?action=obtenerComponentesActivo",
+                type: "POST",
+                dataType: "json",
+                data: { idActivoPadre: activo.id },
+                success: function (rsHijos) {
+                  if (rsHijos.status && Array.isArray(rsHijos.data)) {
+                    rsHijos.data.forEach((hijo) => {
+                      agregarActivoAlDetalle({
+                        id: hijo.IdActivo,
+                        codigo: hijo.codigo,
+                        nombre: hijo.NombreActivo,
+                        Sucursal: hijo.Sucursal,
+                        Ambiente: hijo.Ambiente,
+                        idActivoPadre: activo.id,
+                        esPadre: 0,
+                      });
+                    });
+                  }
+                },
+              });
+            } else {
+              agregarActivoAlDetalle(activo);
             }
           });
         } else {
-          agregarActivoAlDetalle(activo, true);
+          agregarActivoAlDetalle(activo);
         }
       },
       error: function (xhr, status, error) {
         console.error("Error al verificar componentes:", error);
-        agregarActivoAlDetalle(activo, true);
+        agregarActivoAlDetalle(activo);
       },
     });
   }
@@ -621,19 +646,45 @@ function init() {
     }
 
     var numeroFilas = $("#tbldetalleactivomov").find("tbody tr").length;
+    
+    // Determinar si es hijo (componente)
+    const tienePadre = activo.idActivoPadre && activo.idActivoPadre != 0;
+    const esPadre = activo.esPadre == 1 || activo.esPadre === true;
 
-    var selectAmbienteDestino = `<select class='form-control form-control-sm ambiente-destino' name='ambiente_destino[]' id="comboAmbiente${numeroFilas}" required>
-      <option value="">Seleccione ambiente...</option>
-    </select>`;
-    var selectResponsableDestino = `<select class='form-control form-control-sm responsable-destino' name='responsable_destino[]' id="comboResponsable${numeroFilas}" required>
-      <option value="">Seleccione responsable...</option>
-    </select>`;
+    // Para hijos, usar los valores del padre si están disponibles
+    let selectAmbienteDestino, selectResponsableDestino;
+    
+    if (tienePadre) {
+      // Para hijos, buscar el destino del padre y deshabilitar
+      const padreRow = $(`#tbldetalleactivomov tbody tr[data-id='${activo.idActivoPadre}']`);
+      const ambientePadre = padreRow.find('.ambiente-destino').val();
+      const responsablePadre = padreRow.find('.responsable-destino').val();
+      
+      selectAmbienteDestino = `<select class='form-control form-control-sm ambiente-destino' name='ambiente_destino[]' id="comboAmbiente${numeroFilas}" disabled>
+        <option value="${ambientePadre || ''}" selected>Hereda del padre</option>
+      </select>`;
+      selectResponsableDestino = `<select class='form-control form-control-sm responsable-destino' name='responsable_destino[]' id="comboResponsable${numeroFilas}" disabled>
+        <option value="${responsablePadre || ''}" selected>Hereda del padre</option>
+      </select>`;
+    } else {
+      // Para padre, campos normales
+      selectAmbienteDestino = `<select class='form-control form-control-sm ambiente-destino' name='ambiente_destino[]' id="comboAmbiente${numeroFilas}" required>
+        <option value="">Seleccione ambiente...</option>
+      </select>`;
+      selectResponsableDestino = `<select class='form-control form-control-sm responsable-destino' name='responsable_destino[]' id="comboResponsable${numeroFilas}" required>
+        <option value="">Seleccione responsable...</option>
+      </select>`;
+    }
 
     // Indicador visual de origen vs destino
     var badgeOrigen = `<span class="badge badge-info">Origen</span>`;
     var badgeDestino = `<span class="badge badge-success">Destino</span>`;
+  
+    let claseFila = "";
+    if (tienePadre) claseFila = "activo-asignado-color-diferenciador"; // amarillo: ya asignado
+    if (esPadre) claseFila = "activo-padre-color-diferenciador";    // verde: es activo padre
 
-    var nuevaFila = `<tr data-id='${activo.id}' class='table-light border-left border-success border-3 agregado-temp'>
+    var nuevaFila = `<tr data-id='${activo.id}' ${tienePadre ? `data-padre='${activo.idActivoPadre}'` : ''} class="${claseFila}">
       <td class="text-center">${activo.id}</td>
       <td><strong>${activo.codigo}</strong></td>
       <td>${activo.nombre}</td>
@@ -649,29 +700,44 @@ function init() {
     </tr>`;
     $("#tbldetalleactivomov tbody").append(nuevaFila);
 
-    // Inicializar los combos con la sucursal destino actual
-    ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
-    ListarCombosResponsable(`comboResponsable${numeroFilas}`);
+    // Solo inicializar combos para el padre, no para hijos
+    if (!tienePadre) {
+      ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
+      ListarCombosResponsable(`comboResponsable${numeroFilas}`);
 
-    // Agregar validación mejorada al cambiar los combos
-    $(`#comboAmbiente${numeroFilas}, #comboResponsable${numeroFilas}`).on(
-      "change",
-      function () {
-        const $this = $(this);
-        const ambienteVal = $(`#comboAmbiente${numeroFilas}`).val();
-        const responsableVal = $(`#comboResponsable${numeroFilas}`).val();
+      // Agregar validación mejorada al cambiar los combos (solo para padre)
+      $(`#comboAmbiente${numeroFilas}, #comboResponsable${numeroFilas}`).on(
+        "change",
+        function () {
+          const $this = $(this);
+          const ambienteVal = $(`#comboAmbiente${numeroFilas}`).val();
+          const responsableVal = $(`#comboResponsable${numeroFilas}`).val();
 
-        // Validación individual
-        if (!$this.val()) {
-          $this.addClass("is-invalid").removeClass("is-valid");
-        } else {
-          $this.removeClass("is-invalid").addClass("is-valid");
+          // Validación individual
+          if (!$this.val()) {
+            $this.addClass("is-invalid").removeClass("is-valid");
+          } else {
+            $this.removeClass("is-invalid").addClass("is-valid");
+          }
+
+          // Actualizar destinos de los hijos automáticamente
+          actualizarDestinosHijos(activo.id, ambienteVal, responsableVal);
+
+          // Actualizar contador de activos listos
+          actualizarContadorActivosListos();
         }
-
-        // Actualizar contador de activos listos
-        actualizarContadorActivosListos();
+      );
+    } else {
+      // Para hijos, establecer los valores heredados
+      if (tienePadre) {
+        const padreRow = $(`#tbldetalleactivomov tbody tr[data-id='${activo.idActivoPadre}']`);
+        const ambientePadre = padreRow.find('.ambiente-destino').val();
+        const responsablePadre = padreRow.find('.responsable-destino').val();
+        
+        $(`#comboAmbiente${numeroFilas}`).val(ambientePadre);
+        $(`#comboResponsable${numeroFilas}`).val(responsablePadre);
       }
-    );
+    }
 
     // Animación de entrada
     setTimeout(function () {
@@ -691,13 +757,33 @@ function init() {
       `Activo <b>${activo.nombre}</b> agregado al detalle.`
     );
 
-    // Cerrar modal automáticamente
-    $("#ModalArticulos").modal("hide");
+    // Cerrar modal automáticamente solo si es el padre
+    if (!tienePadre) {
+      $("#ModalArticulos").modal("hide");
+    }
 
     // Actualizar contador
     actualizarContadorActivosListos();
 
     return true;
+  }
+
+  // Función para actualizar destinos de los hijos cuando el padre cambia
+  function actualizarDestinosHijos(idActivoPadre, nuevoAmbiente, nuevoResponsable) {
+    // Buscar todos los hijos de este padre en la tabla usando el atributo data-padre
+    $(`#tbldetalleactivomov tbody tr[data-padre='${idActivoPadre}']`).each(function() {
+      const $fila = $(this);
+      const ambienteHijo = $fila.find('.ambiente-destino');
+      const responsableHijo = $fila.find('.responsable-destino');
+      
+      // Actualizar valores
+      ambienteHijo.val(nuevoAmbiente);
+      responsableHijo.val(nuevoResponsable);
+      
+      // Actualizar el texto de la opción
+      ambienteHijo.find('option').text('Hereda del padre');
+      responsableHijo.find('option').text('Hereda del padre');
+    });
   }
 
   // Función para actualizar el contador de activos listos para procesar

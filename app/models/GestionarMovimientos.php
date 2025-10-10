@@ -736,6 +736,29 @@ class GestionarMovimientos
         }
     }
 
+    public function obtenerComponentesActivo($idActivoPadre)
+    {
+        try {
+            $sql = "SELECT 
+                        IdActivo,
+                        codigo,
+                        NombreActivo,
+                        Sucursal,
+                        Ambiente
+                    FROM vActivos 
+                    WHERE idActivoPadre = ? AND idEstado <> 3";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(1, $idActivoPadre, PDO::PARAM_INT);
+            $stmt->execute();
+            $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return $resultado;
+        } catch (PDOException $e) {
+            throw new Exception("Error al obtener componentes del activo: " . $e->getMessage());
+        }
+    }
+
     public function aprobarMovimiento($idMovimiento, $userMod)
     {
         try {

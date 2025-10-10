@@ -381,6 +381,26 @@ switch ($action) {
         }
         break;
 
+    case 'obtenerComponentesActivo':
+        try {
+            $idActivoPadre = $_POST['idActivoPadre'] ?? null;
+            if (!$idActivoPadre) {
+                throw new Exception("ID de activo padre no proporcionado");
+            }
+
+            $componentes = $movimientos->obtenerComponentesActivo($idActivoPadre);
+            echo json_encode([
+                'status' => true,
+                'data' => $componentes
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        break;
+
     case 'aprobarMovimiento':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
