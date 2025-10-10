@@ -572,6 +572,7 @@ class GestionarActivos
             hijo.codigo AS CodigoComponente,
             hijo.NombreActivo AS NombreComponente,
             hijo.Serie AS SerieComponente,
+            hijo.Estado AS EstadoComponente,
             padre.idActivo AS IdActivoPadre,
             padre.codigo AS CodigoPadre, padre.NombreActivo AS NombrePadre
             FROM vActivos hijo

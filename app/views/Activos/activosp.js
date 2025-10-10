@@ -2198,15 +2198,21 @@ function init() {
                         <div class="card-body text-white p-3">
                             <div class="row align-items-center">
                                 <div class="col-md-8">
-                                    <h5 class="mb-2 fw-bold">${activo.NombreActivo}</h5>
+                                    <h5 class="mb-2 fw-bold">${
+                                      activo.NombreActivo
+                                    }</h5>
                                     <p class="mb-0 opacity-90">
-                                        <i class="fas fa-tag me-2"></i> ${activo.Categoria}
+                                        <i class="fas fa-tag me-2"></i> ${
+                                          activo.Categoria
+                                        }
                                     </p>
                                 </div>
                                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
                                     <div class="d-inline-block px-4 py-2 rounded-pill" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
                                         <b>S/</b>
-                                        <span class="fw-bold fs-5">${parseFloat(activo.valorAdquisicion).toFixed(2)}</span>
+                                        <span class="fw-bold fs-5">${parseFloat(
+                                          activo.valorAdquisicion
+                                        ).toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -2233,13 +2239,17 @@ function init() {
                                         <div class="col-sm-6">
                                             <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
                                                 <label class="form-label small mb-1 fw-bold text-uppercase">ID Activo</label>
-                                                <div class="fw-semibold text-slate-700">${activo.idActivo}</div>
+                                                <div class="fw-semibold text-slate-700">${
+                                                  activo.idActivo
+                                                }</div>
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
                                                 <label class="form-label small mb-1 fw-bold text-uppercase">Serie</label>
-                                                <div class="fw-bold text-slate-700">${activo.Serie}</div>
+                                                <div class="fw-bold text-slate-700">${
+                                                  activo.Serie
+                                                }</div>
                                             </div>
                                         </div>
                                         
@@ -2247,26 +2257,34 @@ function init() {
                                         <div class="col-sm-6">
                                             <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
                                                 <label class="form-label small mb-1 fw-bold text-uppercase">Código</label>
-                                                <div class="fw-bold text-slate-700">${activo.codigo}</div>
+                                                <div class="fw-bold text-slate-700">${
+                                                  activo.codigo
+                                                }</div>
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #C42000; ">
                                                 <label class="form-label small mb-1 fw-bold text-uppercase">Código antiguo</label>
-                                                <div class="fw-bold text-danger">${activo.codigoAntiguo}</div>
+                                                <div class="fw-bold text-danger">${
+                                                  activo.codigoAntiguo
+                                                }</div>
                                             </div>
                                         </div>
                                         
                                         <div class="col-sm-6">
                                             <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
                                                 <label class="form-label small mb-1 fw-bold text-uppercase">Modelo</label>
-                                                <div class="fw-bold text-slate-700">${activo.Modelo}</div>
+                                                <div class="fw-bold text-slate-700">${
+                                                  activo.Modelo
+                                                }</div>
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
                                                 <label class="form-label small mb-1 fw-bold text-uppercase">Marca</label>
-                                                <div class="fw-bold text-slate-700">${activo.Marca}</div>
+                                                <div class="fw-bold text-slate-700">${
+                                                  activo.Marca
+                                                }</div>
                                             </div>
                                         </div>
                                         
@@ -2274,7 +2292,9 @@ function init() {
                                         <div class="col-12">
                                             <div class="info-card p-2 rounded-3" style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border-left: 4px solid #0d9488;">
                                                 <label class="form-label small mb-1 fw-bold text-uppercase">Nombre del Activo</label>
-                                                <div class="fw-bold text-slate-700 fs-6">${activo.NombreActivo}</div>
+                                                <div class="fw-bold text-slate-700 fs-6">${
+                                                  activo.NombreActivo
+                                                }</div>
                                             </div>
                                         </div>
                                         
@@ -2291,7 +2311,9 @@ function init() {
                                         <div class="col-sm-6">
                                             <div class="info-card p-2 rounded-3 h-100" style="background: #f0fdfa; border-left: 4px solid #28A745;">
                                                 <label class="form-label small mb-1 fw-bold text-uppercase">Categoría</label>
-                                                <div class="fw-bold text-slate-700">${activo.Categoria}</div>
+                                                <div class="fw-bold text-slate-700">${
+                                                  activo.Categoria
+                                                }</div>
                                             </div>
                                         </div>
                                         
@@ -2301,7 +2323,9 @@ function init() {
                                                 <label class="form-label small mb-1 fw-bold text-uppercase">Valor Adquisición</label>
                                                 <div class="fw-bold text-emerald-600 fs-6">
                                                     <i class="fas fa-hand-holding-dollar me-1 text-success-500"></i>
-                                                    ${parseFloat(activo.valorAdquisicion).toFixed(2)}
+                                                    ${parseFloat(
+                                                      activo.valorAdquisicion
+                                                    ).toFixed(2)}
                                                 </div>
                                             </div>
                                         </div>
@@ -2343,7 +2367,9 @@ function init() {
                                                     <i class="fas fa-sticky-note me-1"></i>
                                                     Observaciones
                                                 </label>
-                                                <div class="fw-semibold text-slate-600">${activo.Observaciones}</div>
+                                                <div class="fw-semibold text-slate-600">${
+                                                  activo.Observaciones
+                                                }</div>
                                             </div>
                                         </div>
                                         
@@ -2416,16 +2442,24 @@ function init() {
             <!-- Footer del Modal -->
             <div class="modal-footer border-0 p-4" style="background: #f8fafc; border-radius: 0 0 20px 20px;">
                 <div class="d-flex flex-wrap gap-3 w-100 justify-content-center">
-                    <button type="button" class="btn btn-outline-cyan btnEditarDesdeModal px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${activo.idActivo}" style="min-width: 120px; border-color: #06b6d4; color: #0891b2;">
+                    <button type="button" class="btn btn-outline-cyan btnEditarDesdeModal px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${
+                      activo.idActivo
+                    }" style="min-width: 120px; border-color: #06b6d4; color: #0891b2;">
                         <i class="fas fa-edit m-2"></i>Editar
                     </button>
-                    <button type="button" class="btn btn-outline-emerald btnImprimirDesdeModal px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${activo.idActivo}" style="min-width: 120px; border-color: #10b981; color: #059669;">
+                    <button type="button" class="btn btn-outline-emerald btnImprimirDesdeModal px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${
+                      activo.idActivo
+                    }" style="min-width: 120px; border-color: #10b981; color: #059669;">
                         <i class="fas fa-print m-2"></i>Imprimir
                     </button>
-                    <button type="button" class="btn btn-cyan btnAsignarResponsable px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${activo.idActivo}" style="min-width: 140px; background-color: #06b6d4; border-color: #06b6d4; color: white;">
+                    <button type="button" class="btn btn-cyan btnAsignarResponsable px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${
+                      activo.idActivo
+                    }" style="min-width: 140px; background-color: #06b6d4; border-color: #06b6d4; color: white;">
                         <i class="fas fa-user-edit m-2"></i>Asignar
                     </button>
-                    <button type="button" class="btn btn-outline-danger btnDarBajaDesdeModal px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${activo.idActivo}" style="min-width: 120px; border-color: #fa3434ff; color: #db0606ff;">
+                    <button type="button" class="btn btn-outline-danger btnDarBajaDesdeModal px-4 py-2 rounded-pill shadow-sm m-1" data-id-activo="${
+                      activo.idActivo
+                    }" style="min-width: 120px; border-color: #fa3434ff; color: #db0606ff;">
                         <i class="fas fa-trash-alt m-2"></i>Dar de Baja
                     </button>
                     <button type="button" class="btn btn-outline-slate px-4 py-2 rounded-pill shadow-sm m-1 btnCerrarModal" style="min-width: 100px; border-color: #64748b; color: #475569;">
@@ -2813,6 +2847,46 @@ function init() {
                       <tbody>`;
 
                 componentesRes.data.forEach((item) => {
+                  const estado = (item.EstadoComponente || "Activo")
+                    .toLowerCase()
+                    .trim();
+
+                  // Definir color según el estado real
+                  let colorClase = "bg-secondary text-white"; // Default gris neutro
+
+                  if (
+                    [
+                      "operativa",
+                      "activo",
+                      "funcional",
+                      "en buen estado",
+                    ].includes(estado)
+                  ) {
+                    colorClase = "bg-success text-white"; // 🟢 Verde: operativa / buena
+                  } else if (
+                    ["reparación", "reparacion", "en mantenimiento"].includes(
+                      estado
+                    )
+                  ) {
+                    colorClase = "bg-warning text-dark"; // 🟡 Amarillo: en mantenimiento
+                  } else if (
+                    ["baja", "retirado", "fuera de servicio"].includes(estado)
+                  ) {
+                    colorClase = "bg-danger text-white"; // 🔴 Rojo: baja / fuera de servicio
+                  } else if (["vendido"].includes(estado)) {
+                    colorClase = "bg-dark text-white"; // ⚫ Negro: vendido
+                  } else if (["regular", "regular estado"].includes(estado)) {
+                    colorClase = "bg-info text-white"; // 🔵 Celeste: regular
+                  } else if (["malo", "mal estado"].includes(estado)) {
+                    colorClase = "bg-danger text-white"; // 🔴 Rojo: mal estado
+                  } else if (
+                    ["nuevo", "recién comprado", "recien comprado"].includes(
+                      estado
+                    )
+                  ) {
+                    colorClase = "bg-primary text-white"; // 🔷 Azul: nuevo
+                  }
+
                   componentesHtml += `
                     <tr>
                       <td class="py-2">
@@ -2829,9 +2903,9 @@ function init() {
                         }</small>
                       </td>
                       <td class="py-2">
-                        <span class="badge bg-success-subtle text-success small">${
-                          item.Estado || "Activo"
-                        }</span>
+                        <span class="${colorClase} badge text-success small">${
+                    item.EstadoComponente || "Activo"
+                  }</span>
                       </td>
                     </tr>`;
                 });
@@ -4339,12 +4413,13 @@ function listarActivosTable() {
         },
       },
       { data: "Serie" },
-      { data: "valorAdquisicion",
+      {
+        data: "valorAdquisicion",
         render: function (data, type, row) {
           // RETORNAMOS EL FORMATEO PARA DECIMALES -> .10 = 0.10
           return "S/ " + parseFloat(data).toFixed(2);
-        }
-       },
+        },
+      },
       { data: "fechaRegistro" },
       {
         data: null,
@@ -5221,7 +5296,9 @@ function procesarActivoManual(formId, datos) {
           <input type="text" class="form-control form-control-sm serie-manual" value="${serieActual}">
         </td>
         <td>${datos.nombre}</td>
-        <td><input type="text" class="form-control form-control-sm modelo-manual" value="${datos.modelo}"></td>
+        <td><input type="text" class="form-control form-control-sm modelo-manual" value="${
+          datos.modelo
+        }"></td>
         <td>${estadoTexto}</td>
         <td>${categoriaTexto}</td>
         <td>${responsableTexto}</td>

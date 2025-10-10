@@ -47,6 +47,19 @@ session_start();
         .modal-backdrop {
             z-index: 10490 !important;
         }
+
+        /* Fila con activo ya asignado (tiene padre) */
+        .activo-asignado-color-diferenciador {
+            background-color: #ffa662 !important;
+            /* naranja claro */
+        }
+
+        /* Fila que representa un activo padre */
+        .activo-padre-color-diferenciador {
+            background-color: #c6f6c6 !important;
+            /* verde claro */
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -217,7 +230,10 @@ session_start();
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="DescripcionMantenimiento">Descripción:</label>
-                                                    <input type="text" name="DescripcionMantenimiento" id="DescripcionMantenimiento" class="form-control" placeholder="Descripción breve del mantenimiento" maxlength="255">
+                                                    <textarea name="DescripcionMantenimiento" id="DescripcionMantenimiento" class="form-control" rows="3" placeholder="Descripción breve del mantenimiento" maxlength="255"></textarea>
+                                                    <small class="form-text text-muted">
+                                                        <span id="contador-caracteres-mant">0</span>/255 caracteres
+                                                    </small>
                                                 </div>
                                             </div>
                                         </div>

@@ -324,7 +324,7 @@ class GestionarMovimientos
         try {
             $sql = "
             SELECT a.IdActivo, a.Serie, a.codigo, a.NombreActivo, s.Nombre_local AS Sucursal
-            ,amb.nombre AS Ambiente
+            ,amb.nombre AS Ambiente, a.idActivoPadre, a.esPadre
             FROM vActivos a
             INNER JOIN vUnidadesdeNegocio s ON a.IdSucursal = s.cod_UnidadNeg
             INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente

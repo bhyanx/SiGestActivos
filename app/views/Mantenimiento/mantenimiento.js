@@ -346,18 +346,21 @@ function initMantenimiento() {
       });
     });
 
-  // Evento específico para seleccionar activos desde el modal de mantenimiento
   $(document).on("click", ".btnSeleccionarActivoMantenimiento", function () {
-    var fila = $(this).closest("tr");
-    var activo = {
-      id: $(this).data("id"),
-      codigo: fila.find("td:eq(1)").text(),
-      nombre: fila.find("td:eq(2)").text(),
-      Sucursal: fila.find("td:eq(3)").text(),
-      Ambiente: fila.find("td:eq(4)").text(),
+    const table = $("#tbllistarActivosMantenimiento").DataTable();
+    const data = table.row($(this).closest("tr")).data();
+
+    const activo = {
+      id: data.IdActivo,
+      codigo: data.codigo,
+      nombre: data.NombreActivo,
+      Sucursal: data.Sucursal,
+      Ambiente: data.Ambiente,
+      idActivoPadre: data.idActivoPadre || 0,
+      esPadre: data.esPadre || 0,
     };
 
-    // Verificar si el activo tiene hijos antes de agregar
+    // Resto del código tal cual
     $.ajax({
       url: "../../controllers/MantenimientosController.php?action=ActivoTieneHijos",
       type: "POST",
@@ -365,12 +368,10 @@ function initMantenimiento() {
       data: { idActivo: activo.id },
       success: function (res) {
         if (res.status && res.data && res.data.tieneHijos) {
-          // Preguntar si desea incluir los hijos
           Swal.fire({
             title: "Activo con componentes",
-            html:
-              `<p>El activo <strong>${activo.nombre}</strong> tiene activos hijos asociados.</p>` +
-              `<p>¿Desea enviar a mantenimiento solo el activo padre o incluir también los hijos?</p>`,
+            html: `<p>El activo <strong>${activo.nombre}</strong> tiene activos hijos asociados.</p>
+                     <p>¿Desea enviar a mantenimiento solo el activo padre o incluir también los hijos?</p>`,
             icon: "question",
             showCancelButton: true,
             confirmButtonText: "Padre + Hijos",
@@ -378,43 +379,37 @@ function initMantenimiento() {
             reverseButtons: true,
           }).then((result) => {
             if (result.isConfirmed) {
-              // cargar hijos y agregarlos como filas regulares
+              // El padre (verde)
+              agregarActivoAMantenimiento({ ...activo, esPadre: 1 });
+              // Cargar hijos
               $.ajax({
                 url: "../../controllers/MantenimientosController.php?action=ListarHijosActivo",
                 type: "POST",
                 dataType: "json",
                 data: { idActivo: activo.id },
                 success: function (rsHijos) {
-                  agregarActivoAMantenimiento(activo);
                   if (rsHijos.status && Array.isArray(rsHijos.data)) {
-                    rsHijos.data.forEach(function (hijo) {
-                      var hijoActivo = {
+                    rsHijos.data.forEach((hijo) => {
+                      agregarActivoAMantenimiento({
                         id: hijo.IdActivo,
                         codigo: hijo.codigo,
                         nombre: hijo.NombreActivo,
                         Sucursal: hijo.Sucursal,
                         Ambiente: hijo.Ambiente,
-                        incluirHijos: 0
-                      };
-                      agregarActivoAMantenimiento(hijoActivo);
+                        idActivoPadre: activo.id,
+                        esPadre: 0,
+                      });
                     });
                   }
                 },
-                error: function () {
-                  agregarActivoAMantenimiento(activo);
-                },
               });
             } else {
-              agregarActivoAMantenimiento(activo);
+              agregarActivoAMantenimiento({ ...activo, esPadre: 0 });
             }
           });
         } else {
-          agregarActivoAMantenimiento(activo);
+          agregarActivoAMantenimiento({ ...activo, esPadre: 0 });
         }
-      },
-      error: function () {
-        // En caso de error, continuar como solo padre
-        agregarActivoAMantenimiento(activo);
       },
     });
   });
@@ -784,7 +779,7 @@ function listarActivosModalMantenimiento() {
     dom: "Bfrtip",
     responsive: false,
     ajax: {
-      url: "../../controllers/GestionarMovimientoController.php?action=ListarParaMovimiento",
+      url: "../../controllers/MantenimientosController.php?action=ListarParaMantenimiento",
       type: "POST",
       dataType: "json",
       dataSrc: function (json) {
@@ -805,6 +800,8 @@ function listarActivosModalMantenimiento() {
       { data: "NombreActivo" },
       { data: "Sucursal" },
       { data: "Ambiente" },
+      { data: "idActivoPadre", visible: false },
+      { data: "esPadre", visible: false },
       {
         data: null,
         render: function (data, type, row) {
@@ -839,14 +836,20 @@ function agregarActivoAMantenimiento(activo) {
     return false;
   }
 
-  // Validar que el activo tenga todos los datos necesarios
   if (!activo.id || !activo.nombre || !activo.Ambiente || !activo.Sucursal) {
     NotificacionToast("error", "El activo no tiene todos los datos necesarios");
     return false;
   }
 
-  var estadoTexto = 'Cargando...';
-  var nuevaFila = `<tr data-id='${activo.id}' class='table-light border-left border-info border-3 agregado-temp'>
+  const tienePadre = activo.idActivoPadre && activo.idActivoPadre != 0;
+  const esPadre = activo.esPadre == 1 || activo.esPadre === true;
+
+  let claseFila = "";
+  if (tienePadre) claseFila = "activo-asignado-color-diferenciador"; // amarillo: ya asignado
+  if (esPadre) claseFila = "activo-padre-color-diferenciador"; // verde: es padre
+
+  var estadoTexto = "Cargando...";
+  var nuevaFila = `<tr data-id='${activo.id}' class="${claseFila}">
     <td class="text-center">${activo.id}</td>
     <td><strong>${activo.codigo}</strong></td>
     <td>${activo.nombre}</td>
@@ -862,59 +865,41 @@ function agregarActivoAMantenimiento(activo) {
 
   $("#tblactivosmantenimiento tbody").append(nuevaFila);
 
-  // Cargar estado actual del activo y pintar
+  // Cargar estado actual del activo
   $.ajax({
     url: "../../controllers/MantenimientosController.php?action=ObtenerEstadoActivo",
     type: "POST",
     dataType: "json",
     data: { idActivo: activo.id },
     success: function (r) {
-      if (r.status && r.data && r.data.EstadoActual) {
-        $("#tblactivosmantenimiento tbody tr[data-id='" + activo.id + "'] .estado-actual").text(r.data.EstadoActual);
-      } else {
-        $("#tblactivosmantenimiento tbody tr[data-id='" + activo.id + "'] .estado-actual").text('N/D');
-      }
+      const estado =
+        r.status && r.data && r.data.EstadoActual ? r.data.EstadoActual : "N/D";
+      $(
+        `#tblactivosmantenimiento tbody tr[data-id='${activo.id}'] .estado-actual`
+      ).text(estado);
     },
     error: function () {
-      $("#tblactivosmantenimiento tbody tr[data-id='" + activo.id + "'] .estado-actual").text('N/D');
-    }
+      $(
+        `#tblactivosmantenimiento tbody tr[data-id='${activo.id}'] .estado-actual`
+      ).text("N/D");
+    },
   });
-
-  // Animación de entrada
-  setTimeout(function () {
-    $("#tblactivosmantenimiento tbody tr.agregado-temp")
-      .removeClass("table-light agregado-temp")
-      .addClass("table-active");
-
-    setTimeout(function () {
-      $("#tblactivosmantenimiento tbody tr.table-active").removeClass(
-        "table-active"
-      );
-    }, 1000);
-  }, 100);
 
   NotificacionToast(
     "success",
     `Activo <b>${activo.nombre}</b> agregado al mantenimiento.`
   );
 
-  // Cerrar modal automáticamente
   $("#ModalArticulosMantenimiento").modal("hide");
 
-  // Limpiar backdrop si queda residual
   setTimeout(() => {
-    if ($(".modal-backdrop").length > 0) {
-      $(".modal-backdrop").remove();
-      $("body").removeClass("modal-open");
-    }
+    $(".modal-backdrop").remove();
+    $("body").removeClass("modal-open");
   }, 300);
 
-  // Actualizar contador
   actualizarContadorActivosMantenimiento();
-
   return true;
 }
-
 
 function actualizarContadorActivosMantenimiento() {
   const totalActivos = $("#tblactivosmantenimiento tbody tr").length;
@@ -1244,8 +1229,8 @@ function ListarMantenimientos() {
       url: "../../controllers/MantenimientosController.php?action=Consultar",
       type: "POST",
       data: function (d) {
-          d.fechaInicio = $("#filtroFechaInicio").val();
-          d.fechaFin = $("#filtroFechaFin").val();
+        d.fechaInicio = $("#filtroFechaInicio").val();
+        d.fechaFin = $("#filtroFechaFin").val();
       },
       dataSrc: "data",
       error: function (xhr, status, error) {
@@ -1472,6 +1457,23 @@ function listarActivosModalMantenimiento() {
         },
       },
     ],
+    rowCallback: function (row, data) {
+      // Verificar si tiene padre o es padre
+      const tienePadre = data.idActivoPadre && data.idActivoPadre != 0;
+      const esPadre = data.esPadre == 1 || data.esPadre === true;
+
+      // Reiniciar estilos
+      $(row).removeClass(
+        "activo-asignado-color-diferenciador activo-padre-color-diferenciador"
+      );
+
+      if (tienePadre) {
+        $(row).addClass("activo-asignado-color-diferenciador"); // color naranja
+      }
+      if (esPadre) {
+        $(row).addClass("activo-padre-color-diferenciador"); // color verde
+      }
+    },
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
     },
@@ -2120,7 +2122,7 @@ function aprobarMantenimiento(idMantenimiento) {
                         : "No programada"
                     }</p>
                     <p class="mb-1"><strong>Costo Estimado:</strong> S/. ${
-                      mantenimiento.costoEstimado || "0.00"
+                      parseFloat(mantenimiento.costoEstimado || "0.00").toFixed(2)
                     }</p>
                     <p class="mb-0"><strong>Total de Activos:</strong> ${
                       mantenimiento.totalActivos

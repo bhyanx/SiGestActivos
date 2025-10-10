@@ -133,7 +133,7 @@ class Mantenimientos
     public function obtenerEstadoActualActivo($idActivo)
     {
         try {
-            $sql = "SELECT ea.nombre AS EstadoActual, a.idEstado
+            $sql = "SELECT ea.nombre AS EstadoActual, a.idEstado, a.idActivoPadre , a.esPadre
                     FROM vActivos a
                     LEFT JOIN tEstadoActivo ea ON a.idEstado = ea.idEstadoActivo
                     WHERE a.IdActivo = ?";
@@ -184,6 +184,7 @@ class Mantenimientos
             $sql = "
             SELECT a.IdActivo, a.Serie, a.codigo, a.NombreActivo, s.Nombre_local AS Sucursal
             ,amb.nombre AS Ambiente, a.idEstado, ea.nombre AS EstadoActual
+            , a.esPadre, a.idActivoPadre
             FROM vActivos a
             INNER JOIN vUnidadesdeNegocio s ON a.IdSucursal = s.cod_UnidadNeg
             INNER JOIN tAmbiente amb ON a.IdAmbiente = amb.idAmbiente
