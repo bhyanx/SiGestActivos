@@ -519,22 +519,59 @@ function init() {
       dataType: "json",
       success: function (res) {
         if (res.status && res.data.tieneComponentes) {
-          // Mostrar alerta con información de componentes
-          let lista = `<ul class="mb-0 text-left text-primary"> ${res.data.listaComponentes}</ul>`;
+          // 🔹 Convertir la lista de componentes a un <ul> bien formateado
+          let listaComponentes = "";
+
+          // Si la API devuelve una lista de texto (coma separada o salto de línea)
+          if (typeof res.data.listaComponentes === "string") {
+            const items = res.data.listaComponentes
+              .split(/,|\n|;/) // dividir por coma, salto de línea o punto y coma
+              .map((i) => i.trim())
+              .filter((i) => i !== "");
+
+            listaComponentes =
+              "<ul class='list-group list-group-flush'>" +
+              items
+                .map(
+                  (i) =>
+                    `<li class="list-group-item py-1 px-2 border-0"><i class="fas fa-puzzle-piece text-primary"></i> ${i}</li>`
+                )
+                .join("") +
+              "</ul>";
+          }
+
+          // Si la API devuelve un array (ideal)
+          if (Array.isArray(res.data.listaComponentes)) {
+            listaComponentes =
+              "<ul class='list-group list-group-flush'>" +
+              res.data.listaComponentes
+                .map(
+                  (comp) =>
+                    `<li class="list-group-item py-1 px-2 border-0"><i class="fas fa-puzzle-piece text-primary"></i> ${comp}</li>`
+                )
+                .join("") +
+              "</ul>";
+          }
+
+          // 🔹 Mostrar alerta de confirmación con diseño más claro
           Swal.fire({
             title: "¡Activo con Componentes Detectado!",
             html: `
-              <div class="alert alert-info">
+              <div class="alert alert-info text-left">
                 <h5><i class="fas fa-info-circle"></i> ${activo.nombre}</h5>
-                <p><strong>Este activo tiene ${res.data.totalComponentes} componente(s) anidado(s):</strong></p>
-                <div class="text-left" style="max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                  <small>${lista}</small>
+                <p><strong>Este activo tiene ${
+                  res.data.totalComponentes
+                } componente(s) asociados:</strong></p>
+                <div class="bg-light border rounded p-2 mb-3" style="max-height: 200px; overflow-y: auto;">
+                  ${
+                    listaComponentes || "<em>No se encontraron componentes</em>"
+                  }
                 </div>
                 <div class="alert alert-warning mt-3 mb-3">
                   <h6><i class="fas fa-exclamation-triangle"></i> Comportamiento Automático:</h6>
                   <ul class="mb-0 text-left">
-                    <li><strong>Mismo destino:</strong> Los componentes se moverán junto con el activo principal</li>
-                    <li><strong>Destino diferente:</strong> Los componentes se separarán automáticamente del activo principal</li>
+                    <li><strong>Mismo destino:</strong> Los componentes se moverán junto con el activo principal.</li>
+                    <li><strong>Destino diferente:</strong> Los componentes se separarán automáticamente del activo principal.</li>
                   </ul>
                 </div>
                 <p class="mb-0"><strong>¿Desea continuar con el movimiento?</strong></p>
@@ -550,18 +587,15 @@ function init() {
             width: "650px",
           }).then((result) => {
             if (result.isConfirmed) {
-              // El SP maneja automáticamente la lógica de separación
               agregarActivoAlDetalle(activo, true);
             }
           });
         } else {
-          // No tiene componentes, agregar normalmente
           agregarActivoAlDetalle(activo, true);
         }
       },
       error: function (xhr, status, error) {
         console.error("Error al verificar componentes:", error);
-        // En caso de error, agregar el activo normalmente
         agregarActivoAlDetalle(activo, true);
       },
     });
@@ -1826,6 +1860,22 @@ function listarActivosModal() {
         },
       },
     ],
+    createdRow: function (row, data) {
+      // 🟢 Si es padre → verde
+      // 🟡 Si tiene padre → amarillo
+      const tienePadre = data.idActivoPadre && data.idActivoPadre != 0;
+      const esPadre = data.esPadre == 1 || data.esPadre === true;
+
+      if (tienePadre) {
+        $(row)
+          .addClass("activo-asignado-color-diferenciador")
+          .attr("title", "Este activo es un componente (hijo)");
+      } else if (esPadre) {
+        $(row)
+          .addClass("activo-padre-color-diferenciador")
+          .attr("title", "Este activo tiene componentes (padre)");
+      }
+    },
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
     },

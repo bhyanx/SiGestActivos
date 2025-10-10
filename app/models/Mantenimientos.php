@@ -247,7 +247,7 @@ class Mantenimientos
     {
         try {
             $sql = "SELECT m.idMantenimiento, m.codigoMantenimiento, m.fechaRegistro,
-	            m.descripcion, m.observaciones, m.costoEstimado,
+	            m.descripcion, m.observaciones, m.costoEstimado, m.costoReal,
 	            tm.nombre as tipoMantenimiento,
 	            em.nombre as estadoMantenimiento,
 	            emp.NombreTrabajador as responsable,
@@ -448,7 +448,7 @@ class Mantenimientos
     {
         try {
             $sql = "SELECT h.idHistorialEstadoMantenimiento, h.idMantenimiento, ea.nombre as EstadoAnterior,
-            en.nombre AS estadoNuevo, h.fechaCambio, h.userMod, e.NombreTrabajador as nombreUsuario
+            en.nombre AS estadoNuevo, h.fechaCambio, h.userMod, e.NombreTrabajador as nombreUsuario, h.observacion
             FROM tHistorialEstadoMantenimiento h
             LEFT JOIN tEstadoMantenimiento ea ON h.idEstadoAnterior = ea.idEstadoMantenimiento
             INNER JOIN tEstadoMantenimiento en ON h.idEstadoNuevo = en.idEstadoMantenimiento

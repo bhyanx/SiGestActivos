@@ -556,6 +556,7 @@ function verHistorialEstados(idMantenimiento) {
                   <th>Estado Nuevo</th>
                   <th>Fecha Cambio</th>
                   <th>Usuario</th>
+                  <th>Observaciones</th>
                 </tr>
               </thead>
               <tbody>`;
@@ -565,12 +566,14 @@ function verHistorialEstados(idMantenimiento) {
           const estadoNuevo = item.estadoNuevo;
           const fecha = moment(item.fechaCambio).format("DD/MM/YYYY HH:mm:ss");
           const usuario = item.nombreUsuario || item.userMod;
+          const observacion = item.observacion;
 
           historialHtml += `
             <tr>
               <td><strong>${estadoNuevo}</strong></td>
               <td>${fecha}</td>
               <td>${usuario}</td>
+              <td>${observacion}</td>
             </tr>`;
         });
 
@@ -659,6 +662,10 @@ function verHistorialEstados2(idMantenimiento) {
           render: function (data, type, row) {
             return data || row.userMod || "N/A";
           },
+        },
+        {
+          data: "observacion",
+          title: "Observaciones",
         },
       ],
       language: {

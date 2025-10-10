@@ -2862,29 +2862,29 @@ function init() {
                       "en buen estado",
                     ].includes(estado)
                   ) {
-                    colorClase = "bg-success text-white"; // 🟢 Verde: operativa / buena
+                    colorClase = "bg-success text-light"; // 🟢 Verde: operativa / buena
                   } else if (
                     ["reparación", "reparacion", "en mantenimiento"].includes(
                       estado
                     )
                   ) {
-                    colorClase = "bg-warning text-dark"; // 🟡 Amarillo: en mantenimiento
+                    colorClase = "bg-warning text-light"; // 🟡 Amarillo: en mantenimiento
                   } else if (
                     ["baja", "retirado", "fuera de servicio"].includes(estado)
                   ) {
-                    colorClase = "bg-danger text-white"; // 🔴 Rojo: baja / fuera de servicio
+                    colorClase = "bg-danger text-light"; // 🔴 Rojo: baja / fuera de servicio
                   } else if (["vendido"].includes(estado)) {
-                    colorClase = "bg-dark text-white"; // ⚫ Negro: vendido
+                    colorClase = "bg-dark text-light"; // ⚫ Negro: vendido
                   } else if (["regular", "regular estado"].includes(estado)) {
-                    colorClase = "bg-info text-white"; // 🔵 Celeste: regular
+                    colorClase = "bg-info text-light"; // 🔵 Celeste: regular
                   } else if (["malo", "mal estado"].includes(estado)) {
-                    colorClase = "bg-danger text-white"; // 🔴 Rojo: mal estado
+                    colorClase = "bg-danger text-light"; // 🔴 Rojo: mal estado
                   } else if (
                     ["nuevo", "recién comprado", "recien comprado"].includes(
                       estado
                     )
                   ) {
-                    colorClase = "bg-primary text-white"; // 🔷 Azul: nuevo
+                    colorClase = "bg-primary text-light"; // 🔷 Azul: nuevo
                   }
 
                   componentesHtml += `
@@ -2903,7 +2903,7 @@ function init() {
                         }</small>
                       </td>
                       <td class="py-2">
-                        <span class="${colorClase} badge text-success small">${
+                        <span class="${colorClase} badge small">${
                     item.EstadoComponente || "Activo"
                   }</span>
                       </td>

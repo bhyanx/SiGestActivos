@@ -131,15 +131,15 @@ class PDF extends FPDF
     }
 
     // Función para calcular la altura necesaria para MultiCell
-    function GetMultiCellHeight($w, $h, $txt, $border=0, $align='J')
+    function GetMultiCellHeight($w, $h, $txt, $border = 0, $align = 'J')
     {
         $cw = &$this->CurrentFont['cw'];
-        if($w==0)
-            $w = $this->w-$this->rMargin-$this->x;
-        $wmax = ($w-2*$this->cMargin)*1000/$this->FontSize;
-        $s = str_replace("\r",'',$txt);
+        if ($w == 0)
+            $w = $this->w - $this->rMargin - $this->x;
+        $wmax = ($w - 2 * $this->cMargin) * 1000 / $this->FontSize;
+        $s = str_replace("\r", '', $txt);
         $nb = strlen($s);
-        if($nb>0 && $s[$nb-1]=="\n")
+        if ($nb > 0 && $s[$nb - 1] == "\n")
             $nb--;
         $sep = -1;
         $i = 0;
@@ -147,11 +147,9 @@ class PDF extends FPDF
         $l = 0;
         $ns = 0;
         $nl = 1;
-        while($i<$nb)
-        {
+        while ($i < $nb) {
             $c = $s[$i];
-            if($c=="\n")
-            {
+            if ($c == "\n") {
                 $i++;
                 $sep = -1;
                 $j = $i;
@@ -160,34 +158,28 @@ class PDF extends FPDF
                 $nl++;
                 continue;
             }
-            if($c==' ')
-            {
+            if ($c == ' ') {
                 $sep = $i;
                 $ls = $l;
                 $ns++;
             }
             $l += $cw[$c];
-            if($l>$wmax)
-            {
-                if($sep==-1)
-                {
-                    if($i==$j)
+            if ($l > $wmax) {
+                if ($sep == -1) {
+                    if ($i == $j)
                         $i++;
-                }
-                else
-                {
-                    $i = $sep+1;
+                } else {
+                    $i = $sep + 1;
                     $sep = -1;
                     $j = $i;
                     $l = 0;
                     $ns = 0;
                 }
                 $nl++;
-            }
-            else
+            } else
                 $i++;
         }
-        return $nl*$h;
+        return $nl * $h;
     }
 
     // Función para crear secciones de datos de mantenimiento
@@ -241,15 +233,35 @@ $y_start = $pdf->GetY();
 
 // Datos de la columna izquierda
 $leftData = [
-    ['label' => 'Fecha:', 'value' => $cabecera['fechaRegistro'] ? date('d/m/Y', strtotime($cabecera['fechaRegistro'])) : 'No programada'],
-    ['label' => 'Responsable:', 'value' => $cabecera['Proveedor'] ?? '']
+    [
+        'label' => 'Fecha:',
+        'value' => !empty($cabecera['fechaRegistro'])
+            ? date('d/m/Y', strtotime($cabecera['fechaRegistro']))
+            : 'No programada'
+    ],
+    [
+        'label' => 'Responsable:',
+        'value' => $cabecera['Proveedor'] ?? ''
+    ]
 ];
 
 // Datos de la columna derecha
-$rightData = [
-    ['label' => 'Costo Estimado:', 'value' => 'S/ ' . ($cabecera['costoEstimado'] ? number_format($cabecera['costoEstimado'], 2) : '0.00')]
-];
+$rightData = [];
 
+// Mostrar costo estimado si el costo real no existe o es nulo/vacío
+if (empty($cabecera['costoReal'])) {
+    $rightData[] = [
+        'label' => 'Costo Estimado:',
+        'value' => 'S/ ' . number_format($cabecera['costoEstimado'] ?? 0, 2)
+    ];
+} else {
+    $rightData[] = [
+        'label' => 'Costo Real:',
+        'value' => 'S/ ' . number_format($cabecera['costoReal'], 2)
+    ];
+}
+
+// Render de la sección
 $pdf->CreateMaintenanceDataSection($leftData, $rightData, $y_start);
 $pdf->Ln(3);
 $pdf->DrawDivider();

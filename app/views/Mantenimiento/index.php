@@ -517,6 +517,7 @@ session_start();
                                                 <th>Estado Nuevo</th>
                                                 <th>Fecha Cambio</th>
                                                 <th>Usuario</th>
+                                                <th>Observaciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -527,6 +528,7 @@ session_start();
                                                 <th>Estado Nuevo</th>
                                                 <th>Fecha Cambio</th>
                                                 <th>Usuario</th>
+                                                <th>Observaciones</th>
                                             </tr>
                                         </tfoot>
                                     </table>
