@@ -13,6 +13,7 @@ class Conectar
     {
         try {
             $conexion = new PDO("sqlsrv:Server=192.168.1.35;Database=bdActivosV1", "practsistAlfa", "Calichin2025");
+            //$conexion = new PDO("sqlsrv:Server=Zeus;Database=bdActivosV1", "sa", "Hades**2025");
             //$conexion = new PDO("sqlsrv:Server=192.168.1.37;Database=bdActivos", "","");
             //$conexion = new PDO("sqlsrv:Server=BHYANX;Database=bdActivos", "", "");
             //$conexion = new PDO("sqlsrv:Server=localhost;Database=bdActivos", "sa", "Bryan260904");
@@ -52,11 +53,19 @@ class Conectar
     //    $conexion = new PDO("sqlsrv:Server=BHYANX;Database=bdActivos", "", ""); 
     // }
 
+    //? RUTA PRODUCCION SERVIDOR
+    // public static function ruta()
+    // {
+    //     //return 'http://192.168.1.54:8088/SiGestActivos/';
+    //     return 'http://192.168.1.39:8088/SiGestActivos/';
+    //     //return 'http://192.168.1.14/';
+    // }
+
+    //? RUTA LOCAL DEV
     public static function ruta()
     {
         return 'http://192.168.1.54:8088/SiGestActivos/';
-        //return 'http://192.168.1.14/';
-    }
+    }   
 
     public static function rutaServidor()
     {

@@ -91,5 +91,6 @@ if (!isset($_SESSION["IdRol"])) {
 <?php
 } else {
     header("Location:" .Conectar::ruta());
+    //header("Location: " . Conectar::rutaLocal());
     exit();
 }

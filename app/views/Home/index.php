@@ -2,6 +2,7 @@
 require_once("../../config/configuracion.php");
 if (!isset($_SESSION["IdRol"])) {
     header("Location:" . Conectar::ruta());
+    //header("Location:" . Conectar::rutaLocal());
     exit();
 }
 ?>

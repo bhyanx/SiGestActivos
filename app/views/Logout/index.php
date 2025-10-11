@@ -5,5 +5,6 @@ session_start();
 require_once('../../config/configuracion.php');
 session_destroy();
 header('Location: ' . Conectar::ruta() . 'app/views/Login/');
+//header("Location: " . Conectar::rutaLocal() . 'app/views/Login/');
 exit();
 ?>
