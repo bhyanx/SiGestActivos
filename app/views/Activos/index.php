@@ -238,7 +238,8 @@ if (isset($_SESSION["IdRol"])) {
                                                             <thead class="table-success">
                                                                 <tr>
                                                                     <th>Id</th>
-                                                                    <th>Nombre</th>
+                                                                    <th>Nombre Generico</th>
+                                                                    <th>Nombre activo</th>
                                                                     <th>Marca</th>
                                                                     <!--<th>Código</th>-->
                                                                     <th>Serie</th>

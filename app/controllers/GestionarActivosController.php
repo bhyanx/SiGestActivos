@@ -405,6 +405,12 @@ switch ($action) {
                 $combos['estadoTodos'] .= "<option value='{$row['idEstadoActivo']}'>{$row['nombre']}</option>";
             }
 
+            $marcas = $combo->comboMarcas();
+            $combos['marcas'] = '<option value="">Seleccione</option>';
+            foreach ($marcas as $row) {
+                $combos['marcas'] .= "<option value='{$row['codMarca']}'>{$row['DescripcionMarca']}</option>";
+            }
+
             echo json_encode(['status' => true, 'data' => $combos, 'message' => 'Combos cargados correctamente.']);
         } catch (Exception $e) {
             error_log("Error Combos: " . $e->getMessage(), 3, __DIR__ . '/../../logs/errors.log');
@@ -414,7 +420,7 @@ switch ($action) {
 
     case 'articulos_por_doc_venta':
         try {
-            $dbv = (new Conectar())->ConexionBdProgSistemas();
+            $dbv = (new Conectar())->ConexionBdGestionLubriseng();
 
             $IdDocVenta = $_POST['IdDocVenta'] ?? null;
             if (!$IdDocVenta) {
@@ -427,7 +433,7 @@ switch ($action) {
             FROM vmListadoDeArticulosPorDocumentoDeVenta ing
             INNER JOIN vArticulosMaestro a ON ing.idArtServDetDocVta = a.IdArticulo
             LEFT JOIN vEmpresas e ON ing.Cod_Empresa = e.cod_empresa 
-            WHERE ing.idDocumentoVta = ? AND a.idLineaProd = 11
+            WHERE ing.idDocumentoVta = ? AND a.idLineaProd IN(11,9)
             ORDER BY a.Descripcion_articulo
             ");
             $stmt->execute([$IdDocVenta]);
@@ -581,9 +587,13 @@ switch ($action) {
                     $fechaAdquisicion = !empty($activo['FechaAdquisicion']) ? date('Y-m-d', strtotime($activo['FechaAdquisicion'])) : date('Y-m-d');
 
                     $data = [
+                        'Nombre' => $activo['Nombre'],
+                        'IdFactura' => $activo['IdFactura'],
                         'IdArticulo' => $activo['IdArticulo'],
+                        'Descripcion' => $activo['Descripcion'],
                         'IdEstado' => $activo['IdEstado'],
                         'IdProveedor' => $activo['IdProveedor'] ?? null,
+                        'IdMarca' => $activo['IdMarca'] ?? null,
                         'IdEmpresa' => $_SESSION['cod_empresa'] ?? null,
                         'IdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
                         'IdAmbiente' => $activo['IdAmbiente'],

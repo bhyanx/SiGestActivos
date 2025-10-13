@@ -755,6 +755,7 @@ function init() {
       const numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
       const selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
       const selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
+      const selectMarca = `<select class='form-control form-control-sm marca' name='marca[]' id="comboMarca${numeroFilas}"></select>`;
       const inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
       const inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" disabled>`;
 
@@ -822,11 +823,13 @@ function init() {
       // Para documentos de venta/ingreso, cargar ambientes basados en la sesión del usuario
       ListarCombosAmbienteSesion(`comboAmbiente${numeroFilas}`);
       ListarCombosCategoria(`comboCategoria${numeroFilas}`);
+      ListarCombosMarca(`comboMarca${numeroFilas}`);
 
       // Establecer los valores seleccionados en los combos
       setTimeout(() => {
         $(`#comboAmbiente${numeroFilas}`).val(ambienteId).trigger("change");
         $(`#comboCategoria${numeroFilas}`).val(categoriaId).trigger("change");
+        $(`#comboMarca${numeroFilas}`).val(marcaId).trigger("change");
       }, 100);
 
       // Continuar con la siguiente fila después de un pequeño delay
@@ -1030,6 +1033,7 @@ function init() {
         const numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
         const selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
         const selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
+        const selectMarca = `<select class='form-control form-control-sm marca' name='marca[]' id="comboMarca${numeroFilas}"></select>`;
         // Para unidades adicionales del grupo, mostrar el proveedor heredado
         const proveedorTexto =
           filaPrincipal.find("select.proveedor option:selected").text() ||
@@ -1046,7 +1050,7 @@ function init() {
         const nuevaFila = `<tr data-id='${activoId}' class='table-info activo-procesado activo-grupo-hijo' data-procesado='true' data-grupo-id='${grupoId}' data-activo-nombre="${activoNombre}" data-activo-marca="${activoMarca}">
                       <td>${activoId}</td>
                       <td>${indentacion} ${activoNombre} ${distintivo}</td>
-                      <td>${activoMarca}</td>
+                      <td>${selectMarca}</td>
                       <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie" value="${serieBase}"></td>
                       <td>${inputEstadoActivo}</td>
                       <td>${selectAmbiente}</td>
@@ -1080,11 +1084,13 @@ function init() {
         // Usar ambientes filtrados por empresa/sucursal de la sesión
         ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
         ListarCombosCategoria(`comboCategoria${numeroFilas}`);
+        ListarCombosMarca(`comboMarca${numeroFilas}`);
 
         // Establecer los valores seleccionados en los combos
         setTimeout(() => {
           $(`#comboAmbiente${numeroFilas}`).val(ambienteId).trigger("change");
           $(`#comboCategoria${numeroFilas}`).val(categoriaId).trigger("change");
+          $(`#comboMarca${numeroFilas}`).val(marcaId).trigger("change");
         }, 100);
 
         // Forzar sincronización de opciones de ambiente con la fila principal (clonar opciones)
@@ -1387,6 +1393,7 @@ function init() {
 
           let activo = {
             IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
+            IdMarca: parseInt(row.find("select.marca").val()) || null,
             Serie: serieActual,
             IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
             IdCategoria: parseInt(row.find("select.categoria").val()) || null,
@@ -1431,7 +1438,9 @@ function init() {
           }
 
           let activo = {
+
             IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
+            IdMarca: parseInt(row.find("select.marca").val()) || null,
             Serie: serieActual,
             IdAmbiente: parseInt(row.find("select.ambiente").val()) || null,
             IdCategoria: parseInt(row.find("select.categoria").val()) || null,
@@ -1464,6 +1473,7 @@ function init() {
       // Validación básica
       const validacionBasica =
         activo.IdArticulo &&
+        activo.IdMarca &&
         activo.IdAmbiente &&
         activo.IdCategoria &&
         activo.Cantidad > 0;
@@ -1483,6 +1493,8 @@ function init() {
       activos.forEach((activo, index) => {
         if (!activo.IdArticulo)
           errores.push(`Fila ${index + 1}: Falta artículo`);
+        if (!activo.IdMarca)
+          errores.push(`Fila ${index + 1}: Falta marca`);
         if (!activo.IdAmbiente)
           errores.push(`Fila ${index + 1}: Falta ambiente`);
         if (!activo.IdCategoria)
@@ -3670,6 +3682,8 @@ function agregarActivoAlDetalle(activo) {
         }
 
         var numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
+        var inputNombre = `<input type="text" class="form-control form-control-sm" name="nombre[]" value="${activo.nombre}">`;
+        var selectMarca = `<select class='form-control form-control-sm marca' name='marca[]' id="comboMarca${numeroFilas}"></select>`;
         var selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
         var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
         var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
@@ -3704,7 +3718,8 @@ function agregarActivoAlDetalle(activo) {
         var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp activo-principal' data-activo-nombre="${activo.nombre}" data-activo-marca="${activo.marca}" data-tipo-doc="${tipoDoc}">
                     <td>${activo.id}</td>
                     <td>${activo.nombre}</td>
-                    <td>${activo.marca}</td>
+                    <td>${inputNombre}</td>
+                    <td>${selectMarca}</td>
                     <td>
                       <input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie">
                     </td>
@@ -3735,6 +3750,7 @@ function agregarActivoAlDetalle(activo) {
         // Para documentos de venta/ingreso, cargar ambientes basados en la sesión del usuario
         ListarCombosAmbienteSesion(`comboAmbiente${numeroFilas}`);
         ListarCombosCategoria(`comboCategoria${numeroFilas}`);
+        ListarCombosMarca(`comboMarca${numeroFilas}`)
 
         // Determinar si el proveedor es obligatorio según el tipo de documento
         const esProveedorObligatorio = tipoDoc === "venta";
@@ -3831,6 +3847,37 @@ function ListarCombosCategoria(elemento) {
       );
     },
   });
+}
+
+function ListarCombosMarca(elemento) {
+  $.ajax({
+    url: "../../controllers/GestionarActivosController.php?action=combos",
+    type: "POST",
+    dataType: "json",
+    async: false,
+    success: (res) => {
+      if (res.status) {
+        $(`#${elemento}`).html(res.data.marcas).trigger("change");
+        $(`#${elemento}`).select2({
+          theme: "bootstrap4",
+          width: "100%",
+        });
+      } else {
+        Swal.fire(
+          "Filtro de marcas",
+          "No se pudieron cargar los combos: " + res.message,
+          "warning"
+        );
+      }
+    },
+    error: (xhr, status, error) => {
+      Swal.fire(
+        "Filtro de marcas",
+        "No se pudieron cargar los combos: " + res.message,
+        "warning"
+      );
+    },
+  })
 }
 
 function ListarCombosEstado(elemento) {
