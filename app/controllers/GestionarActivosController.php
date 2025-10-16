@@ -49,12 +49,14 @@ switch ($action) {
             $filtroAmbiente = $_POST['filtroAmbiente'] ?? null;
             $filtroCategoria = $_POST['filtroCategoria'] ?? null;
             $filtroEstado = $_POST['filtroEstado'] ?? null;
+            $filtroResponsable = $_POST['filtroResponsable'] ?? null;
 
             // Si el valor es "TODOS", convertir a null para mostrar todos los registros
             if ($filtroSucursal === 'TODOS') $filtroSucursal = null;
             if ($filtroAmbiente === 'TODOS') $filtroAmbiente = null;
             if ($filtroCategoria === 'TODOS') $filtroCategoria = null;
             if ($filtroEstado === 'TODOS') $filtroEstado = null;
+            if ($filtroResponsable === 'TODOS') $filtroResponsable = null;
 
             $filtros = [
                 'pCodigo' => $_POST['pCodigo'] ?? null,
@@ -62,7 +64,8 @@ switch ($action) {
                 'pIdSucursal' => $filtroSucursal,
                 'pIdAmbiente' => $filtroAmbiente,
                 'pIdCategoria' => $filtroCategoria,
-                'pIdEstado' => $filtroEstado
+                'pIdEstado' => $filtroEstado,
+                'pIdResponsable' => $filtroResponsable
             ];
             $resultados = $activos->consultarActivosModal($filtros);
             error_log("Consultar resultados: " . print_r($resultados, true), 3, __DIR__ . '/../../logs/debug.log');
@@ -409,6 +412,12 @@ switch ($action) {
             $combos['marcas'] = '<option value="">Seleccione</option>';
             foreach ($marcas as $row) {
                 $combos['marcas'] .= "<option value='{$row['codMarca']}'>{$row['DescripcionMarca']}</option>";
+            }
+
+            $responsables = $combo->comboResponsables();
+            $combos['responsables'] = '<option value="">Seleccione</option>';
+            foreach ($responsables as $row) {
+                $combos['responsables'] .= "<option value='{$row['codTrabajador']}'>{$row['NombreTrabajador']}</option>";
             }
 
             echo json_encode(['status' => true, 'data' => $combos, 'message' => 'Combos cargados correctamente.']);

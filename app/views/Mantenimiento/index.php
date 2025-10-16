@@ -113,20 +113,24 @@ session_start();
                                                     <input type="date" class="form-control" name="filtroFechaFin" id="filtroFechaFin" value="<?php echo date('Y-m-d'); ?>">
                                                 </div>
                                             </div>
-                                            <div class="col-md-2 offset-md-6">
-                                                <div class="form-group mb-0">
-                                                    <label for="">&nbsp;</label>
-                                                    <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">
-                                                        <i class="fa fa-search"></i> Buscar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group mb-0">
-                                                    <label for="">&nbsp;</label>
-                                                    <button type="button" class="btn btn-warning btn-sm btn-block" id="btnmantenimiento">
-                                                        <i class="fa fa-tools"></i> Enviar a Mantenimiento
-                                                    </button>
+
+                                            <div class="col-md-10 mt-2 mb-3 mx-auto">
+                                                <div class="row justify-content-center">
+                                                    <div class="col-md-3">
+                                                        <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">
+                                                            <i class="fa fa-search"></i> Buscar
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <button type="button" class="btn btn-warning btn-sm btn-block" id="btnmantenimiento">
+                                                            <i class="fa fa-tools"></i> Enviar a Mantenimiento
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <button type="button" class="btn btn-warning btn-sm btn-block" id="btnLimpiar">
+                                                            <i class="fas fa-eraser"></i> Limpiar
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -136,8 +140,8 @@ session_start();
                         </div>
                         <div class="col-12" id="divtblmovimientos" style="display: none;">
                             <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title" id="tituloTablaMovimientos"><i class="fa fa-list-check"></i> Lista de Movimientos Enviados</h3>
+                                <div class="card-header bg-warning">
+                                    <h3 class="card-title" id="tituloTablaMovimientos"><i class="fas fa-list-check text-black"></i> Lista de Movimientos Enviados</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="col-md-12">

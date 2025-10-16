@@ -21,7 +21,7 @@ if (isset($_SESSION["IdRol"])) {
                     <div class="container-fluid">
                         <div class="row mb-2">
                             <div class="col-sm-6">
-                                <h1>Gestion de Activos</h1>
+                                <h1><i class="fas fa-boxes-stacked text-success"> </i> Gestion de Activos</h1>
                             </div>
                             <div class="col-sm-6">
                                 <ol class="breadcrumb float-sm-right">
@@ -71,36 +71,43 @@ if (isset($_SESSION["IdRol"])) {
                                                         <select class="form-control" name="filtroEstado" id="filtroEstado"></select>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="filtroResponsable">Responsable:</label>
+                                                        <select class="form-control" name="filtroResponsable" id="filtroResponsable"></select>
+                                                    </div>
+                                                </div>
+                                                <!-- Botones de acción debajo de los filtros -->
+                                                <div class="col-md-12 mt-2 mb-3 mx-auto">
+                                                    <div class="row justify-content-center">
+                                                        <div class="col-md-2">
+                                                            <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">
+                                                                <i class="fa fa-search"></i> Buscar
+                                                            </button>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <button type="button" class="btn btn-success btn-sm btn-block" id="btnnuevo">
+                                                                <i class="fa fa-file-import"></i> Registrar con Doc.
+                                                            </button>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <button type="button" class="btn btn-info btn-sm btn-block" id="btnCrearActivo">
+                                                                <i class="fas fa-plus"></i> Registrar Manual
+                                                            </button>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <button type="button" class="btn btn-warning btn-sm btn-block" id="btnLimpiar">
+                                                                <i class="fas fa-eraser"></i> Limpiar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 <!--<div class="col-md-2">
                                                     <div class="form-group">
                                                         <label for="filtroFecha">Fecha Registro:</label>
                                                         <input type="date" class="form-control" name="filtroFecha" id="filtroFecha" value="<?php echo date('Y-m-d'); ?>">
                                                     </div>
                                                 </div>-->
-                                                <div class="col-md-2 offset-md-6">
-                                                    <div class="form-group mb-0">
-                                                        <label>&nbsp;</label>
-                                                        <button type="submit" class="btn btn-primary btn-sm btn-block" id="btnlistar">
-                                                            <i class="fa fa-search"></i> Buscar
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <div class="form-group mb-0">
-                                                        <label>&nbsp;</label>
-                                                        <button type="button" class="btn btn-success btn-sm btn-block" id="btnnuevo">
-                                                            <i class="fa fa-file-import" style="margin-right: 5px;"></i> Registar con Doc.
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <div class="form-group mb-0">
-                                                        <label>&nbsp;</label>
-                                                        <button type="button" class="btn btn-info btn-sm btn-block" id="btnCrearActivo">
-                                                            <i class="fas fa-plus" style="margin-right: 5px;"></i> Registrar Manual
-                                                        </button>
-                                                    </div>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -108,8 +115,8 @@ if (isset($_SESSION["IdRol"])) {
                             </div>
                             <div class="col-12" id="divtblRegistros" style="display: none;">
                                 <div class="card">
-                                    <div class="card-header">
-                                        <h3 class="card-title"><i class="fa fa-list-check"></i> Lista de Activos Registrados</h3>
+                                    <div class="card-header bg-success">
+                                        <h3 class="card-title"><i class="fas fa-list"></i> Lista de Activos Registrados</h3>
                                     </div>
                                     <div class="dataTables_wrapper dt-bootstrap4">
                                         <div class="card-body">
@@ -165,10 +172,8 @@ if (isset($_SESSION["IdRol"])) {
                                                     </table>
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
 

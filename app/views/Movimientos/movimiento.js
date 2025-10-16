@@ -14,6 +14,29 @@ function init() {
   ListarCombosMov();
   ListarCombosFiltros();
 
+  $("#btnLimpiar").on("click", function () {
+    // Reinicia los valores del formulario
+    $("#frmbusqueda")[0].reset();
+
+    // Limpia selects (si están cargados dinámicamente o con plugins)
+    $(
+      "#filtroTipoMovimiento, #filtroFechaInicio, #filtroFechaFin"
+    )
+      .val("") // quita el valor seleccionado
+      .trigger("change"); // refresca si usas Select2 u otro plugin similar
+
+    // Si usas algún campo de fecha (comentado en tu HTML), también lo puedes limpiar así:
+    // $("#filtroFechaInicio").val("");
+    // $("#filtroFechaFin").val("");
+
+
+    // Oculta la tabla de resultados (si existe)
+    $("#divtblmovimientos").slideUp();
+
+    // Opcional: Mostrar un pequeño mensaje visual
+    toastr.success("Filtros limpiados correctamente");
+  });
+
   // Manejar el evento submit del formulario de búsqueda
   $("#frmbusqueda")
     .off("submit")

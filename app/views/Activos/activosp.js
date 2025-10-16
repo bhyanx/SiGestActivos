@@ -62,6 +62,28 @@ function init() {
     inputDocumento.val("");
   });
 
+  // Clear filters button
+  $("#btnLimpiar").on("click", function () {
+    // Reinicia los valores del formulario
+    $("#frmbusqueda")[0].reset();
+
+    // Limpia selects (si están cargados dinámicamente o con plugins)
+    $(
+      "#filtroSucursal, #filtroAmbiente, #filtroCategoria, #filtroEstado, #filtroResponsable"
+    )
+      .val("") // quita el valor seleccionado
+      .trigger("change"); // refresca si usas Select2 u otro plugin similar
+
+    // Si usas algún campo de fecha (comentado en tu HTML), también lo puedes limpiar así:
+    // $("#filtroFecha").val("");
+
+    // Oculta la tabla de resultados (si existe)
+    $("#divtblRegistros").slideUp();
+
+    // Opcional: Mostrar un pequeño mensaje visual
+    toastr.success("Filtros limpiados correctamente");
+  });
+
   $(document).on("click", "#btnBuscarDocumento", function () {
     let documento = $("#inputDocumento").val().trim();
     let tipoDoc = $("#tipoDocumento").val();
@@ -188,7 +210,6 @@ function init() {
       $("#frmArticulos")[0].reset();
       $("#ModalArticulos").modal("show");
     });
-   
 
   $("#btnCrearActivo")
     .off("click")
@@ -571,7 +592,9 @@ function init() {
   $(document).on("click", "#btnConfirmarProcesar", function () {
     const filaActual = $("#modalProcesarCantidad").data("filaActual");
     const activoId = $("#modalProcesarCantidad").data("activoId");
-    const activoNombreGenerico = $("#modalProcesarCantidad").data("activoNombre");
+    const activoNombreGenerico = $("#modalProcesarCantidad").data(
+      "activoNombre"
+    );
     const activoNombre = $("#modalProcesarCantidad").data("activoNombre");
     const activoMarca = $("#modalProcesarCantidad").data("activoMarca");
     const tipoDoc = filaActual.data("tipo-doc") || "ingreso";
@@ -1129,7 +1152,7 @@ function init() {
   });
 
   // Función para actualizar los badges de numeración de un grupo
-  function actualizarBadgesGrupo(grupoId) {    
+  function actualizarBadgesGrupo(grupoId) {
     //debugger;
     const filasGrupo = $(`tr[data-grupo-id='${grupoId}']`);
     const total = filasGrupo.length;
@@ -1138,8 +1161,12 @@ function init() {
     filasGrupo.each(function (index) {
       const fila = $(this);
       const activoNombre = fila.data("activo-nombre");
-      const cantidadInicial = filaPrincipal.find("td").eq(9).find("input").data("cantidadinicial");      
-      console.log(cantidadInicial)
+      const cantidadInicial = filaPrincipal
+        .find("td")
+        .eq(9)
+        .find("input")
+        .data("cantidadinicial");
+      console.log(cantidadInicial);
 
       if (fila.hasClass("activo-grupo-principal")) {
         // Fila principal - actualizar botones si es necesario
@@ -1147,17 +1174,24 @@ function init() {
         fila.find("td:eq(1)").html(`${activoNombre} ${distintivoPrincipal}`);
 
         // Actualizar botones de control
-        const btnColapsar = total > 2 ? `<button type='button' class='btn btn-outline-secondary btn-sm btnColapsarGrupo me-1' data-grupo-id='${grupoId}' title="Colapsar grupo"><i class='fa fa-chevron-down'></i></button>`
+        const btnColapsar =
+          total > 2
+            ? `<button type='button' class='btn btn-outline-secondary btn-sm btnColapsarGrupo me-1' data-grupo-id='${grupoId}' title="Colapsar grupo"><i class='fa fa-chevron-down'></i></button>`
             : "";
 
-        let btnAgregarMas
-        if(total == 1){
-          filaPrincipal.find("td").eq(9).find("input").val(cantidadInicial).change();
-          filaPrincipal.attr("data-procesado", "false");          
+        let btnAgregarMas;
+        if (total == 1) {
+          filaPrincipal
+            .find("td")
+            .eq(9)
+            .find("input")
+            .val(cantidadInicial)
+            .change();
+          filaPrincipal.attr("data-procesado", "false");
           btnAgregarMas = `<button type="button" class="btn btn-warning btn-sm btnProcesarCantidad me-1" data-activo-id="${grupoId}" title="Procesar cantidad múltiple"><i class="fa fa-cogs"></i> Procesar (${cantidadInicial})</button>`;
-        }else{
+        } else {
           btnAgregarMas = `<button type='button' class='btn btn-success btn-sm btnAgregarMasUnidades ms-1' data-grupo-id='${grupoId}' title="Agregar más unidades a este grupo"><i class='fa fa-plus'></i> +1</button>`;
-        }                
+        }
         //const btnAgregarMas = `<button type='button' class='btn btn-success btn-sm btnAgregarMasUnidades ms-1' data-grupo-id='${grupoId}' title="Agregar más unidades a este grupo"><i class='fa fa-plus'></i> +1</button>`;
 
         fila.find("td:last").html(`
@@ -1453,7 +1487,6 @@ function init() {
           }
 
           let activo = {
-
             IdArticulo: parseInt(row.find("td:eq(0)").text()) || null,
             IdMarca: parseInt(row.find("select.marca").val()) || null,
             Serie: serieActual,
@@ -1508,8 +1541,7 @@ function init() {
       activos.forEach((activo, index) => {
         if (!activo.IdArticulo)
           errores.push(`Fila ${index + 1}: Falta artículo`);
-        if (!activo.IdMarca)
-          errores.push(`Fila ${index + 1}: Falta marca`);
+        if (!activo.IdMarca) errores.push(`Fila ${index + 1}: Falta marca`);
         if (!activo.IdAmbiente)
           errores.push(`Fila ${index + 1}: Falta ambiente`);
         if (!activo.IdCategoria)
@@ -3677,7 +3709,6 @@ function agregarActivoAlDetalle(activo) {
     dataType: "json",
     success: function (res) {
       if (res.status) {
-        
         if (res.existe) {
           NotificacionToast(
             "error",
@@ -3696,7 +3727,7 @@ function agregarActivoAlDetalle(activo) {
           );
           return false;
         }
-        console.log([activo,res]);
+        console.log([activo, res]);
         var numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
         var inputNombre = `<input type="text" class="form-control form-control-sm" name="nombre[]" value="${activo.nombre}">`;
         //var selectMarca = `<select class='form-control form-control-sm marca' name='marca[]' id="comboMarca${numeroFilas}"></select>`;
@@ -3897,7 +3928,7 @@ function ListarCombosMarca(elemento) {
         "warning"
       );
     },
-  })
+  });
 }
 
 function ListarCombosEstado(elemento) {
@@ -4161,7 +4192,7 @@ function mostrarNotificacionModalActivos(mensaje, tipo = "success") {
 function ListarCombosFiltros() {
   // Mostrar loading en los combos
   $(
-    "#filtroEmpresa, #filtroSucursal, #filtroAmbiente, #filtroCategoria, #filtroEstado"
+    "#filtroEmpresa, #filtroSucursal, #filtroAmbiente, #filtroCategoria, #filtroEstado, #filtroResponsable"
   ).html('<option value="">Cargando...</option>');
 
   $.ajax({
@@ -4218,9 +4249,15 @@ function cargarTodosLosCombosOptimizado(data) {
       data.ambientes
   );
 
+  // 5. Cargar responsables
+  $("#filtroResponsable").html(
+    '<option value="">Seleccionar Responsable</option><option value="TODOS">Todos los Responsables</option>' +
+      data.responsables
+  );
+
   // 5. Inicializar todos los Select2 de una vez
   $(
-    "#filtroCategoria, #filtroEmpresa, #filtroSucursal, #filtroAmbiente, #filtroEstado"
+    "#filtroCategoria, #filtroEmpresa, #filtroSucursal, #filtroAmbiente, #filtroEstado, #filtroResponsable"
   ).select2({
     theme: "bootstrap4",
     width: "100%",
@@ -4260,6 +4297,13 @@ function cargarTodosLosCombosOptimizado(data) {
     theme: "bootstrap4",
     width: "100%",
     placeholder: "Filtrar por Ambiente",
+    allowClear: true,
+  });
+
+  $("#filtroResponsable").select2("destroy").select2({
+    theme: "bootstrap4",
+    width: "100%",
+    placeholder: "Filtrar por Responsable",
     allowClear: true,
   });
 
@@ -4442,7 +4486,7 @@ function listarActivosTable() {
             autoFilter: true,
             sheetName: "Data",
             exportOptions: {
-              columns: [0, 1, 2, 3, 5, 12, 14, 15],
+              columns: [0, 1, 2, 3, 5, 12, 13, 14, 15],
             },
           },
           {
@@ -4452,7 +4496,7 @@ function listarActivosTable() {
             className: "btn btn-danger",
             autoFilter: true,
             exportOptions: {
-              columns: [0, 1, 2, 3, 5, 12, 14, 15],
+              columns: [0, 1, 2, 3, 5, 12, 13, 14, 15],
             },
           },
           "pageLength",
@@ -4480,6 +4524,7 @@ function listarActivosTable() {
           filtroAmbiente: $("#filtroAmbiente").val() || null,
           filtroCategoria: $("#filtroCategoria").val() || null,
           filtroEstado: $("#filtroEstado").val() || null,
+          filtroResponsable: $("#filtroResponsable").val() || null,
           //filtroFecha: $("#filtroFecha").val() || null,
         };
       },
@@ -4489,7 +4534,7 @@ function listarActivosTable() {
       },
     },
     columns: [
-      { data: "idActivo" , visible: false },
+      { data: "idActivo", visible: false },
       { data: "codigo" },
       { data: "codigoAntiguo", visible: false },
       { data: "NombreActivo" },

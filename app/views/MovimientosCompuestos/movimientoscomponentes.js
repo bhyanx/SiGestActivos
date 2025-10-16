@@ -29,6 +29,29 @@ function init() {
       }
     });
 
+  $("#btnLimpiar").on("click", function () {
+    // Reinicia los valores del formulario
+    $("#frmbusqueda")[0].reset();
+
+    // Limpia selects (si están cargados dinámicamente o con plugins)
+    $(
+      "#filtroFechaInicio, #filtroFechaFin"
+    )
+      .val("") // quita el valor seleccionado
+      .trigger("change"); // refresca si usas Select2 u otro plugin similar
+
+    // Si usas algún campo de fecha (comentado en tu HTML), también lo puedes limpiar así:
+    // $("#filtroFechaInicio").val("");
+    // $("#filtroFechaFin").val("");
+
+
+    // Oculta la tabla de resultados (si existe)
+    $("#divtblmovimientos").slideUp();
+
+    // Opcional: Mostrar un pequeño mensaje visual
+    toastr.success("Filtros limpiados correctamente");
+  });
+
   // Ocultar secciones al cargar
   $("#divgenerarmov").hide();
   $("#divregistroMovimiento").hide();
@@ -936,7 +959,19 @@ function listarMovimientos() {
           {
             extend: "excelHtml5",
             title: "Listado Movimientos",
-            text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
+            text: '<i class="fas fa-file-excel bg-success"></i> Exportar a Excel',
+            className: "btn btn-success",
+            autoFilter: true,
+            sheetName: "Data",
+            exportOptions: {
+              columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            },
+          },
+          {
+            extend: "pdfHtml5",
+            title: "Listado Movimientos",
+            text: '<i class="fas fa-file-pdf bg-danger"></i> Exportar a PDF',
+            className: "btn btn-danger",
             autoFilter: true,
             sheetName: "Data",
             exportOptions: {

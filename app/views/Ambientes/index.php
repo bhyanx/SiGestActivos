@@ -98,7 +98,7 @@ $codEmpleado = htmlspecialchars($_SESSION['CodEmpleado'] ?? '');
                                             <div class="table-responsive">
                                                 <table id="tblAmbientes" class="table table-bordered table-striped table-hover mt-2"
                                                        role="table" aria-label="Tabla de ambientes">
-                                                    <thead class="table-success">
+                                                    <thead class="thead-primary">
                                                         <tr>
                                                             <th scope="col">#</th>
                                                             <th scope="col" class="d-none">IdAmbiente</th>
@@ -114,6 +114,19 @@ $codEmpleado = htmlspecialchars($_SESSION['CodEmpleado'] ?? '');
                                                     <tbody>
                                                         <!-- Data will be loaded via AJAX -->
                                                     </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th scope="row">#</th>
+                                                            <th scope="row" class="d-none">IdAmbiente</th>
+                                                            <th scope="row">Nombre</th>
+                                                            <th scope="row">Descripción</th>
+                                                            <th scope="row">Sucursal</th>
+                                                            <th scope="row">Estado</th>
+                                                            <th scope="row" class="text-center">
+                                                                <i class="fas fa-cogs" title="Acciones"></i>
+                                                            </th>
+                                                        </tr>
+                                                    </tfoot>
                                                 </table>
                                             </div>
                                         </div>
