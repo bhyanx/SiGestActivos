@@ -4437,11 +4437,22 @@ function listarActivosTable() {
           {
             extend: "excelHtml5",
             title: "Listado Activos",
-            text: "<i class='fas fa-file-excel'></i> Exportar",
+            text: "<i class='fas fa-file-excel bg-success'></i> Exportar",
+            className: "btn btn-success",
             autoFilter: true,
             sheetName: "Data",
             exportOptions: {
-              columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+              columns: [0, 1, 2, 3, 5, 12, 14, 15],
+            },
+          },
+          {
+            extend: "pdfHtml5",
+            title: "Listado Activos",
+            text: "<i class='fas fa-file-pdf bg-danger'></i> PDF",
+            className: "btn btn-danger",
+            autoFilter: true,
+            exportOptions: {
+              columns: [0, 1, 2, 3, 5, 12, 14, 15],
             },
           },
           "pageLength",
@@ -4478,7 +4489,7 @@ function listarActivosTable() {
       },
     },
     columns: [
-      { data: "idActivo" },
+      { data: "idActivo" , visible: false },
       { data: "codigo" },
       { data: "codigoAntiguo", visible: false },
       { data: "NombreActivo" },
