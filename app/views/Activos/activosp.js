@@ -188,6 +188,7 @@ function init() {
       $("#frmArticulos")[0].reset();
       $("#ModalArticulos").modal("show");
     });
+   
 
   $("#btnCrearActivo")
     .off("click")
@@ -391,8 +392,8 @@ function init() {
         cancelButtonText: "Cancelar",
       }).then((result) => {
         if (result.isConfirmed) {
-          filaActual.remove();
           // Actualizar los badges del grupo
+          filaActual.remove();
           actualizarBadgesGrupo(grupoId);
           NotificacionToast("success", "Unidad eliminada.");
         }
@@ -460,6 +461,8 @@ function init() {
     $("#modalSerieBase").val(serie);
     $("#modalObservacionesBase").val(observaciones);
     $("#cantidadACrear").text(cantidad);
+    $("#idmarcaactivo").val(marcaId);
+    $("#nombreactivo").val(activoNombre);
 
     // Mostrar información adicional si es documento de venta
     if (tipoDoc === "venta") {
@@ -568,6 +571,7 @@ function init() {
   $(document).on("click", "#btnConfirmarProcesar", function () {
     const filaActual = $("#modalProcesarCantidad").data("filaActual");
     const activoId = $("#modalProcesarCantidad").data("activoId");
+    const activoNombreGenerico = $("#modalProcesarCantidad").data("activoNombre");
     const activoNombre = $("#modalProcesarCantidad").data("activoNombre");
     const activoMarca = $("#modalProcesarCantidad").data("activoMarca");
     const tipoDoc = filaActual.data("tipo-doc") || "ingreso";
@@ -774,7 +778,8 @@ function init() {
 
       const nuevaFila = `<tr data-id='${activoId}' class='table-info activo-procesado activo-grupo-hijo' data-procesado='true' data-grupo-id='${grupoId}' data-activo-nombre="${activoNombre}" data-activo-marca="${activoMarca}" data-tipo-doc="${tipoDoc}">
                     <td>${activoId}</td>
-                    <td>${indentacion} ${activoNombre} ${distintivo}</td>
+                    <td>${indentacion} ${activoNombreGenerico} ${distintivo}</td>
+                    <td>${activoNombre}</td>
                     <td>${activoMarca}</td>
                     <td>
                       <input 
@@ -1124,14 +1129,17 @@ function init() {
   });
 
   // Función para actualizar los badges de numeración de un grupo
-  function actualizarBadgesGrupo(grupoId) {
+  function actualizarBadgesGrupo(grupoId) {    
+    //debugger;
     const filasGrupo = $(`tr[data-grupo-id='${grupoId}']`);
     const total = filasGrupo.length;
     const filaPrincipal = filasGrupo.filter(".activo-grupo-principal");
-
+    //console.log(filaPrincipal)
     filasGrupo.each(function (index) {
       const fila = $(this);
       const activoNombre = fila.data("activo-nombre");
+      const cantidadInicial = filaPrincipal.find("td").eq(9).find("input").data("cantidadinicial");      
+      console.log(cantidadInicial)
 
       if (fila.hasClass("activo-grupo-principal")) {
         // Fila principal - actualizar botones si es necesario
@@ -1139,11 +1147,18 @@ function init() {
         fila.find("td:eq(1)").html(`${activoNombre} ${distintivoPrincipal}`);
 
         // Actualizar botones de control
-        const btnColapsar =
-          total > 2
-            ? `<button type='button' class='btn btn-outline-secondary btn-sm btnColapsarGrupo me-1' data-grupo-id='${grupoId}' title="Colapsar grupo"><i class='fa fa-chevron-down'></i></button>`
+        const btnColapsar = total > 2 ? `<button type='button' class='btn btn-outline-secondary btn-sm btnColapsarGrupo me-1' data-grupo-id='${grupoId}' title="Colapsar grupo"><i class='fa fa-chevron-down'></i></button>`
             : "";
-        const btnAgregarMas = `<button type='button' class='btn btn-success btn-sm btnAgregarMasUnidades ms-1' data-grupo-id='${grupoId}' title="Agregar más unidades a este grupo"><i class='fa fa-plus'></i> +1</button>`;
+
+        let btnAgregarMas
+        if(total == 1){
+          filaPrincipal.find("td").eq(9).find("input").val(cantidadInicial).change();
+          filaPrincipal.attr("data-procesado", "false");          
+          btnAgregarMas = `<button type="button" class="btn btn-warning btn-sm btnProcesarCantidad me-1" data-activo-id="${grupoId}" title="Procesar cantidad múltiple"><i class="fa fa-cogs"></i> Procesar (${cantidadInicial})</button>`;
+        }else{
+          btnAgregarMas = `<button type='button' class='btn btn-success btn-sm btnAgregarMasUnidades ms-1' data-grupo-id='${grupoId}' title="Agregar más unidades a este grupo"><i class='fa fa-plus'></i> +1</button>`;
+        }                
+        //const btnAgregarMas = `<button type='button' class='btn btn-success btn-sm btnAgregarMasUnidades ms-1' data-grupo-id='${grupoId}' title="Agregar más unidades a este grupo"><i class='fa fa-plus'></i> +1</button>`;
 
         fila.find("td:last").html(`
           <div class="btn-group">
@@ -3662,6 +3677,7 @@ function agregarActivoAlDetalle(activo) {
     dataType: "json",
     success: function (res) {
       if (res.status) {
+        
         if (res.existe) {
           NotificacionToast(
             "error",
@@ -3680,10 +3696,10 @@ function agregarActivoAlDetalle(activo) {
           );
           return false;
         }
-
+        console.log([activo,res]);
         var numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
         var inputNombre = `<input type="text" class="form-control form-control-sm" name="nombre[]" value="${activo.nombre}">`;
-        var selectMarca = `<select class='form-control form-control-sm marca' name='marca[]' id="comboMarca${numeroFilas}"></select>`;
+        //var selectMarca = `<select class='form-control form-control-sm marca' name='marca[]' id="comboMarca${numeroFilas}"></select>`;
         var selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
         var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
         var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
@@ -3694,7 +3710,7 @@ function agregarActivoAlDetalle(activo) {
 
         if (tipoDoc === "venta" && activo.cantidad && activo.cantidad > 1) {
           // Para documentos de venta con cantidad > 1, permitir procesamiento
-          inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="${cantidadInicial}" min="1" data-activo-id="${activo.id}">`;
+          inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="${cantidadInicial}" min="1" data-activo-id="${activo.id}" data-cantidadinicial="${cantidadInicial}">`;
           btnProcesar = `<button type="button" class="btn btn-warning btn-sm btnProcesarCantidad me-1" data-activo-id="${activo.id}" title="Procesar cantidad múltiple"><i class="fa fa-cogs"></i> Procesar (${cantidadInicial})</button>`;
           // } else if (tipoDoc === "venta" && activo.cantidad === 1) {
           //   // Para documentos de venta con cantidad = 1, solo mostrar info
@@ -3702,7 +3718,7 @@ function agregarActivoAlDetalle(activo) {
           //   btnProcesar = `<span class="badge badge-success">Cantidad: 1</span>`;
         } else {
           // Para documentos de ingreso (comportamiento normal)
-          inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" data-activo-id="${activo.id}">`;
+          inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" data-activo-id="${activo.id}" data-cantidadinicial="${cantidadInicial}">`;
           btnProcesar = `<button type="button" class="btn btn-warning btn-sm btnProcesarCantidad me-1" data-activo-id="${activo.id}" title="Procesar cantidad múltiple"><i class="fa fa-cogs"></i> Procesar</button>`;
         }
 
@@ -3714,6 +3730,7 @@ function agregarActivoAlDetalle(activo) {
 
         // Crear select de proveedor
         var selectProveedor = `<select class='form-control form-control-sm proveedor' name='proveedor[]' id="comboProveedor${numeroFilas}"></select>`;
+        var selectMarca = `<select class='form-control form-control-sm marca' name='marca[]' id="comboMarca${numeroFilas}"></select>`;
 
         var nuevaFila = `<tr data-id='${activo.id}' class='table-success agregado-temp activo-principal' data-activo-nombre="${activo.nombre}" data-activo-marca="${activo.marca}" data-tipo-doc="${tipoDoc}">
                     <td>${activo.id}</td>
@@ -3750,7 +3767,10 @@ function agregarActivoAlDetalle(activo) {
         // Para documentos de venta/ingreso, cargar ambientes basados en la sesión del usuario
         ListarCombosAmbienteSesion(`comboAmbiente${numeroFilas}`);
         ListarCombosCategoria(`comboCategoria${numeroFilas}`);
-        ListarCombosMarca(`comboMarca${numeroFilas}`)
+        //ListarCombosMarca(`comboMarca${numeroFilas}`)
+
+        const esMarcaObligatorio = tipoDoc === "venta";
+        ListarCombosMarca(`comboMarca${numeroFilas}`, esMarcaObligatorio);
 
         // Determinar si el proveedor es obligatorio según el tipo de documento
         const esProveedorObligatorio = tipoDoc === "venta";
@@ -4009,6 +4029,49 @@ function ListarCombosAmbienteSesion(elemento) {
     // Si no se pudo detectar empresa/sucursal, cargar todos los ambientes
     ListarCombosAmbiente(elemento);
   }
+}
+
+function ListarCombosMarca(elemento, esObligatorio = false) {
+  // Inicializar Select2 con AJAX para búsqueda dinámica
+  $(`#${elemento}`).select2({
+    dropdownParent: $(`#${elemento}`).closest("tr"),
+    minimumInputLength: 2,
+    theme: "bootstrap4",
+    width: "100%",
+    language: {
+      inputTooShort: function (args) {
+        return "Ingresar más de 2 caracteres para buscar...";
+      },
+      noResults: function () {
+        return "No se encontraron marcas.";
+      },
+      searching: function () {
+        return "Buscando marcas...";
+      },
+    },
+    ajax: {
+      url: "../../controllers/GestionarActivosController.php?action=comboMarcas",
+      type: "GET",
+      dataType: "json",
+      delay: 250,
+      data: function (params) {
+        return {
+          filtro: params.term, // término de búsqueda
+        };
+      },
+      processResults: function (data) {
+        // data ya debe ser un array de objetos {id, text}
+        return {
+          results: data || [],
+        };
+      },
+      cache: true,
+    },
+    placeholder: esObligatorio
+      ? "🔍 Buscar y Seleccionar Marca"
+      : "🔍 Buscar Marca (Opcional)",
+    allowClear: !esObligatorio,
+  });
 }
 
 function ListarCombosProveedor(elemento, esObligatorio = false) {
@@ -4701,7 +4764,7 @@ function obtenerCombosActivos(callback) {
       },
       cache: true,
     },
-    placeholder: "Ingresar/Seleccionar Marca",
+    placeholder: "Ingresar/Seleccionar Marc",
     allowClear: true,
   });
 

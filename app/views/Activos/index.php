@@ -751,9 +751,11 @@ if (isset($_SESSION["IdRol"])) {
                                                         <div class="card-body">
                                                             <div class="row">
                                                                 <div class="col-md-6">
+                                                                    <input type="hidden" id="nombreactivo">
                                                                     <strong>Nombre:</strong> <span id="modalActivoNombre">-</span>
                                                                 </div>
                                                                 <div class="col-md-6">
+                                                                    <input type="hidden" id="idmarcaactivo">
                                                                     <strong>Marca:</strong> <span id="modalActivoMarca">-</span>
                                                                 </div>
                                                             </div>
