@@ -107,152 +107,23 @@
 
 <!-- <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script> -->
-<!-- <script>
-    /// TODO: Abrir menus y dar estilo actiado al modulo del menu izquierdo
-    // var nomview = window.location.pathname.split('/')
-    // var url = window.location.href;
-    // var pathname = window.location.pathname;
+<script>
+    function get_HoraDiaActual() {
+        moment.locale('es', {
+            months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
+            monthsShort: 'Enero._Feb._Mar_Abr._May_Jun_Jul._Ago_Sept._Oct._Nov._Dec.'.split('_'),
+            weekdays: 'Domingo_Lunes_Martes_Miercoles_Jueves_Viernes_Sabado'.split('_'),
+            weekdaysShort: 'Dom._Lun._Mar._Mier._Jue._Vier._Sab.'.split('_'),
+            weekdaysMin: 'Do_Lu_Ma_Mi_Ju_Vi_Sa'.split('_')
+        });
+        const diahoraactual = moment().format('LLLL');
+        return diahoraactual;
+    }
 
-    // $("input[data-bootstrap-switch]").each(function() {
-    //     $(this).bootstrapSwitch('state', $(this).prop('checked'));
-    // })
-
-    // $(`#${nomview[3]}`).addClass("active")
-    // //console.log(nomview,Padrelink,Ppadrelink)
-    // if (nomview[4] == null || nomview[4] == "") {} else {
-    //     var Padrelink = document.getElementById(nomview[3]).parentNode.parentNode.parentNode;
-    //     var Ppadrelink = document.getElementById(nomview[3]).parentNode.parentNode.parentNode.parentNode.parentNode;
-    //     Padrelink.classList.add("menu-is-opening", "menu-open");
-    //     Ppadrelink.classList.add("menu-is-opening", "menu-open");
-    // }
-
-    // window.addEventListener("DOMContentLoaded", () => {
-    //     $(document).resize();
-    //     // console.log('sistema cargado 100%')
-    //     if (nomview[3] != 'Login') {
-    //         //GetTipoCambioSunat()
-    //         ValidarSession()
-    //         ActualizarUrlUltimaSession(url)
-    //     }
-
-    //     if (!$(".modal.in").length) {
-    //         $(".modal-dialog").css({
-    //             top: 0,
-    //             left: 0,
-    //         });
-    //     }
-
-    //     $(".modal-dialog").draggable({
-    //         cursor: "move",
-    //         handle: ".dragable_touch",
-    //     });
-
-    //     //push()
-    // });
-
-    // // TODO: Captura evento del click en cualquier parte del DOM
-    // window.addEventListener("click", () => {
-    //     //$(document).resize();
-    //     if (nomview[3] != 'Login') {
-    //         //GetTipoCambioSunat()
-    //         ValidarSession()
-    //     }
-    // });
-
-    // function ValidarSession() {
-    //     $.ajax({
-    //         url: "/controller/usuario.php?op=ValidarSession",
-    //         type: "POST",
-    //         // async: false,
-    //         success: (res) => {
-    //             res = JSON.parse(res);
-    //             //console.log(res)                    
-    //             if (res.status == false) {
-    //                 location.href = "../Logout/logout.php";
-    //             }
-    //         },
-    //     });
-    // }
-
-    // function ActualizarUrlUltimaSession(lasturl) {
-    //     $.ajax({
-    //         url: "/controller/usuario.php?op=ActualizarUrlSession",
-    //         type: "POST",
-    //         async: false,
-    //         data: {
-    //             CodUsuario: $("#CodUsuario").val(),
-    //             lasturl: pathname
-    //         },
-    //         success: (res) => {
-    //             res = JSON.parse(res);
-    //         },
-    //     });
-    // }
-
-    // function ActivarDesactivarLoader(activar, mensaje) {
-    //     if (activar) {
-    //         if (mensaje === '' || mensaje === null) {
-    //             $("#textpreloader").html('').hide()
-    //         } else {
-    //             $("#textpreloader").html(mensaje).show()
-    //         }
-    //         $(".preloader ").css({
-    //             "height": "100%"
-    //         });
-    //         $(".preloader ").show()
-    //         $(".iconloader").show()
-    //         $(".animation__shake").show()
-    //     } else {
-    //         $("#textpreloader").html('').hide()
-    //         $(".preloader ").fadeOut()
-    //         $(".iconloader").fadeOut()
-    //         $(".animation__shake").fadeOut()
-    //         $(".preloader ").css({
-    //             "height": "0px"
-    //         });
-    //     }
-    // }
-
-    // Fancybox.bind("[data-fancybox]", {}); //ACTIVAR TODOS LOS FANCYBOX IAMGENES TIPO GALERIA
-
-    // // Función para obtener el nombre del mes
-    // function obtenerNombreMes(numeroMes) {
-    //     var meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
-    //     return meses[numeroMes];
-    // }
-
-    // function obtenerNumeroMes(numeroMes) {
-    //     numeroMes = numeroMes + 1
-    //     return numeroMes.toString().padStart(2, '0');
-    // }
-
-    // // Función para obtener el número de días del mes
-    // function obtenerNumDiasMes(numeroMes, año) {
-    //     return new Date(año, numeroMes + 1, 0).getDate();
-    // }
-
-    // $(document).on('select2:open', (e) => {
-    //     document.querySelector('.select2-search__field').focus();
-    // });
-
-
-    // // TODO: Función para calcular alto de pagina y cuadrar datatables JCABR 06-02-2025
-    // var calcDataTableHeight = function() {
-    //     return $(window).height() * 49 / 100;
-    // };
-
-    // function push(){
-    //     Push.Permission.request();
-    //     Push.create('Hola mundo que tal?', {
-    //         body: 'Soy tu notificación nueva',
-    //         icon: "img/logo.png",
-    //         timeout: 1500000,             
-    //         vibrate: [100, 100, 100],    
-    //         onClick: function() {
-    //             window.location="https://google.es";
-    //             console.log(this);
-    //         }  
-    //     });
-
-    // }
-</script> -->
+    $(document).ready(function() {
+        //getStateDarkMode()
+        setInterval(() => {
+            $("#diaactual").html(get_HoraDiaActual())
+        }, 1000);
+    });
+</script>

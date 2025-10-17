@@ -103,14 +103,20 @@ if (!$tienePermiso) {
                 <i class="fas fa-expand-arrows-alt"></i>
             </a>
         </li>
-        <a class="nav-link text-success" data-toggle="dropdown" href="#">
+        <li class="nav-item">
+            <a class="nav-link text-success" href="#" style="padding-right: 0 !important; height: auto;">
+                <span><i class="far fa-clock"></i> <b id="diaactual"></b></span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-success" data-toggle="dropdown" href="#">
             <i class="fas fa-user-cog"></i>
             <!-- <span class="badge badge-warning navbar-badge">15</span> -->
         </a>
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
 
             <!-- CODEMPLEADO/CODUSUARIO CREADO POR SESSION -->
-            <span class="dropdown-item dropdown-header"><?php echo $_SESSION["CodUsuario"] ?></span>
+            <span class="dropdown-item dropdown-header text-success"><?php echo $_SESSION["NombreTrabajador"] ?></span>
 
             <div class="dropdown-divider"></div>
 
@@ -118,7 +124,7 @@ if (!$tienePermiso) {
 
 
             <div class="dropdown-divider"></div>
-            <a href="../../../app/views/Logout/" class="dropdown-item dropdown-footer"><i class="fas fa-sign-out-alt"></i> Cerrar Sessión</a>
+            <a href="../../../app/views/Logout/" class="dropdown-item dropdown-footer text-success"><i class="fas fa-sign-out-alt"></i> Cerrar Sessión</a>
         </div>
         </li>
     </ul>
