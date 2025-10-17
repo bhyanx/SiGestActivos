@@ -4321,7 +4321,7 @@ function cargarTodosLosCombosOptimizado(data) {
   ).select2({
     theme: "bootstrap4",
     width: "100%",
-    allowClear: true,
+    allowClear: false,
   });
 
   // 6. Establecer placeholders específicos
@@ -4329,14 +4329,14 @@ function cargarTodosLosCombosOptimizado(data) {
     theme: "bootstrap4",
     width: "100%",
     placeholder: "Filtrar por Categoría",
-    allowClear: true,
+    allowClear: false,
   });
 
   $("#filtroEstado").select2("destroy").select2({
     theme: "bootstrap4",
     width: "100%",
     placeholder: "Filtrar por Estado",
-    allowClear: true,
+    allowClear: false,
   });
 
   $("#filtroEmpresa").select2("destroy").select2({
@@ -4350,21 +4350,21 @@ function cargarTodosLosCombosOptimizado(data) {
     theme: "bootstrap4",
     width: "100%",
     placeholder: "Filtrar por Sucursal",
-    allowClear: true,
+    allowClear: false,
   });
 
   $("#filtroAmbiente").select2("destroy").select2({
     theme: "bootstrap4",
     width: "100%",
     placeholder: "Filtrar por Ambiente",
-    allowClear: true,
+    allowClear: false,
   });
 
   $("#filtroResponsable").select2("destroy").select2({
     theme: "bootstrap4",
     width: "100%",
     placeholder: "Filtrar por Responsable",
-    allowClear: true,
+    allowClear: false,
   });
 
   // 7. Establecer valores por defecto de sesión

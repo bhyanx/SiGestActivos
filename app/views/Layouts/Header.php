@@ -12,16 +12,18 @@ ob_start();
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css" /> -->
 
 <!-- Font Awesome -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" /> -->
+<link rel="stylesheet" href="../../../public/plugins/fontawesome-free/css/all.min.css">
+lin
 
 <!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+<!-- <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" /> -->
 
 <!-- MDB
 <link href="https://cdn.jsdelivr.net/npm/mdb-ui-kit@9.0.0/css/mdb.min.css" rel="stylesheet" /> -->
 
 <!-- Local CSS Files -->
-<link rel="stylesheet" href="../../../public/plugins/fontawesome-free/css/all.min.css" />
+<!-- <link rel="stylesheet" href="../../../public/plugins/fontawesome-free/css/all.min.css" /> -->
 <link rel="stylesheet" href="../../../public/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css" />
 <link rel="stylesheet" href="../../../public/plugins/icheck-bootstrap/icheck-bootstrap.min.css" />
 <link rel="stylesheet" href="../../../public/plugins/jqvmap/jqvmap.min.css" />
@@ -34,9 +36,13 @@ ob_start();
 <link rel="stylesheet" href="../../../public/plugins/sweetalert2/sweetalert2.all.min.js">
 <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> -->
 
-<!-- Select2 -->
+<!-- Select2
 <link rel="stylesheet" href="../../../public/plugins/select2/js/select2.full.min.js">
 <link rel="stylesheet" href="../../../public/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" href="../../../public/plugins/select2/js/select2.min.js"> -->
+
+<link rel="stylesheet" href="../../../public/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" href="../../../public/plugins/select2/css/select2.css">
 
 <!-- DataTables -->
 <link rel="stylesheet" href="../../../public/plugins/datatables2/datatables.min.css" />
@@ -50,7 +56,7 @@ ob_start();
 <link href="../../../public/plugins/fancybox/dist/fancybox/fancybox.css" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="../../../public/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css" />
 
-<link rel="stylesheet" href="../../../public/plugins/select2/css/select2.min.css">
+<!-- <link rel="stylesheet" href="../../../public/plugins/select2/css/select2.min.css"> -->
 
 <link rel="stylesheet" href="../../../public/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
 <link rel="stylesheet" href="../../../public/css/modals.css">
