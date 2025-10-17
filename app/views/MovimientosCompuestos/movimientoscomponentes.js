@@ -1052,7 +1052,7 @@ function listarMovimientos() {
       },
     ],
     language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
     },
     buttons: [
       {
@@ -1262,7 +1262,7 @@ function listarComponentesModal(idActivoPadre) {
       },
     ],
     language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
     },
   });
 }
@@ -1461,7 +1461,7 @@ function listarActivosModalBusqueda() {
       }
     },
     language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
     },
     destroy: true,
     responsive: true,

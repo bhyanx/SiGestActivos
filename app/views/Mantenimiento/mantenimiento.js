@@ -691,7 +691,7 @@ function verHistorialEstados2(idMantenimiento) {
         },
       ],
       language: {
-        url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+        url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
       },
       order: [[1, "asc"]], // Ordenar por fecha ascendente (más antiguo primero)
       pageLength: 10,
@@ -843,7 +843,7 @@ function listarActivosModalMantenimiento() {
       },
     ],
     language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
     },
     order: [[2, "asc"]], // Ordenar por NombreArticulo
     pageLength: 10,
@@ -1405,7 +1405,7 @@ function ListarMantenimientos() {
       },
     ],
     language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
     },
   });
 }
@@ -1504,7 +1504,7 @@ function listarActivosModalMantenimiento() {
       }
     },
     language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
     },
     order: [[2, "asc"]], // Ordenar por NombreArticulo
     pageLength: 10,

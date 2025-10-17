@@ -88,7 +88,7 @@ function init() {
       iDisplayLength: 10,
       autoWidth: false,
       language: {
-        url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+        url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
       },
   
       columns: [

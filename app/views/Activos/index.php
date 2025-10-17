@@ -125,7 +125,7 @@ if (isset($_SESSION["IdRol"])) {
                                             </div>
                                             <div class="col-sm-12">
                                                 <div class="table-responsive">
-                                                    <table id="tblRegistros" class="table table-bordered table-striped mt-4 table-hover">
+                                                    <table id="tblRegistros" class="table table-bordered table-striped mt-4 table-hover cell-border">
                                                         <thead class="table-success">
                                                             <tr>
                                                                 <th>Id</th>
@@ -178,16 +178,19 @@ if (isset($_SESSION["IdRol"])) {
                             </div>
 
                             <div class="col-12" id="divregistroActivo" style="display: none;">
-                                <div class=" alert alert-info alert-dismissible">
-                                    <span id="lbldatosactivo"> Guardar activos</span>
-                                    <button type="button" class="close btn" id="btnvolverprincipal"><i class="fas fa-undo-alt"></i></button>
+                                <div class="alert alert-info alert-dismissible">
+                                    <span id="lbldatosactivo">Guardar activos</span>
+                                    <button type="button" class="close btn" id="btnvolverprincipal">
+                                        <i class="fas fa-undo-alt"></i>
+                                    </button>
                                 </div>
 
                                 <div class="col-md-12">
                                     <div class="card card-success">
-                                        <!-- /.card-header -->
                                         <div class="card-header">
-                                            <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Detalle Registro de activos</h3>
+                                            <h3 class="card-title">
+                                                <i class="fas fa-clipboard-list"></i> Detalle Registro de activos
+                                            </h3>
                                             <div class="card-tools">
                                                 <button type="button" class="btn btn-tool" data-card-widget="maximize">
                                                     <i class="fas fa-expand"></i>
@@ -200,44 +203,45 @@ if (isset($_SESSION["IdRol"])) {
                                                 </button>
                                             </div>
                                         </div>
-                                        <!-- /.card-body -->
+
                                         <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <!-- ...existing code... -->
-                                                    <div class="row mb-2">
-                                                        <div class="col-md-3">
-                                                            <div class="form-group">
-                                                                <label for="tipoDocumento">Tipo de Documento:</label>
-                                                                <select class="form-control" id="tipoDocumento" disabled>
-                                                                    <option value="ingreso">Doc. Ingreso Almacén</option>
-                                                                    <option value="venta">Doc. Venta</option>
-                                                                </select>
-                                                            </div>
+                                            <form id="frmArticulos">
+                                                <div class="row mb-2">
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="tipoDocumento">Tipo de Documento:</label>
+                                                            <select class="form-control" id="tipoDocumento" disabled>
+                                                                <option value="ingreso">Doc. Ingreso Almacén</option>
+                                                                <option value="venta">Doc. Venta</option>
+                                                            </select>
                                                         </div>
-                                                        <div class="col-md-5 col-lg-4 col-xl-4">
-                                                            <div class="form-group">
-                                                                <label for="inputDocumento" id="labelDocumento">
-                                                                    Doc. Ingreso Almacén:&nbsp;
-                                                                </label>
-                                                                <div class="input-group">
-                                                                    <input type="text" id="inputDocumento" placeholder="ID de Documento" class="form-control">
-                                                                    <div class="input-group-append">
-                                                                        <button class="btn btn-primary" type="button" id="btnBuscarDocumento"><i class="fa fa-search"></i> Buscar</button>
-                                                                    </div>
+                                                    </div>
+
+                                                    <div class="col-md-5 col-lg-4 col-xl-4">
+                                                        <div class="form-group">
+                                                            <label for="inputDocumento" id="labelDocumento">
+                                                                Doc. Ingreso Almacén:&nbsp;
+                                                            </label>
+                                                            <div class="input-group">
+                                                                <input type="text" id="inputDocumento" placeholder="ID de Documento" class="form-control" />
+                                                                <div class="input-group-append">
+                                                                    <button class="btn btn-primary" type="button" id="btnBuscarDocumento">
+                                                                        <i class="fa fa-search"></i> Buscar
+                                                                    </button>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <!-- ...la tabla aquí... -->
                                                 </div>
+
                                                 <div class="col-md-12" id="divdetalle">
-                                                    <hr>
+                                                    <hr />
                                                     <div class="row">
                                                         <div class="col-md-2">
                                                             <h5>Detalles</h5>
                                                         </div>
                                                     </div>
+
                                                     <div class="table-responsive">
                                                         <table id="tbldetalleactivoreg" class="table table-hover table-bordered table-striped table-sm w-100">
                                                             <thead class="table-success">
@@ -246,7 +250,6 @@ if (isset($_SESSION["IdRol"])) {
                                                                     <th>Nombre Generico</th>
                                                                     <th>Nombre activo</th>
                                                                     <th>Marca</th>
-                                                                    <!--<th>Código</th>-->
                                                                     <th>Serie</th>
                                                                     <th>Estado</th>
                                                                     <th>Ambiente</th>
@@ -258,22 +261,19 @@ if (isset($_SESSION["IdRol"])) {
                                                                     <th>Acciones</th>
                                                                 </tr>
                                                             </thead>
-                                                            <tbody>
-                                                            </tbody>
+                                                            <tbody></tbody>
                                                             <tfoot>
                                                                 <tr>
-                                                                    <th colspan="11" style="text-align: right;" class="">TOTAL DETALLE &nbsp;&nbsp;</th>
-                                                                    <!-- <th style="text-align: right;"></th> -->
+                                                                    <th colspan="11" style="text-align: right;">TOTAL DETALLE &nbsp;&nbsp;</th>
                                                                     <th class="text-center">
                                                                         <span id="CantRegistros">0</span>
                                                                     </th>
-
                                                                 </tr>
                                                             </tfoot>
                                                         </table>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -297,52 +297,48 @@ if (isset($_SESSION["IdRol"])) {
                                     </div>
                                 </div>
 
-
                                 <!-- Modal Articulos -->
                                 <div class="modal fade" id="ModalArticulos" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalArticulosTitle">
-                                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document" id="frmArticulos">
+                                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
                                         <div class="modal-content">
                                             <div class="modal-header dragable_touch bg-primary">
-                                                <h5 class="modal-title" id="ModalArticulosTitulo"><i class="fas fa-box"></i> Lista de artículos</h5>
+                                                <h5 class="modal-title" id="ModalArticulosTitulo">
+                                                    <i class="fas fa-box"></i> Lista de artículos
+                                                </h5>
                                                 <button class="close" data-dismiss="modal" aria-label="Close">
                                                     <span>&times;</span>
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="table-responsive">
-                                                            <table id="tbllistarActivos" class="table table-bordered table-striped display nowrap" style="width:100%">
-                                                                <thead class="table-primary">
-                                                                    <tr>
-                                                                        <th>Id</th>
-                                                                        <th>Nombre</th>
-                                                                        <th>Marca</th>
-                                                                        <th>Proveedor</th>
-                                                                        <th><i class="fa fa-cogs"></i></th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <!-- Aquí se llenarán los datos dinámicamente -->
-                                                                </tbody>
-                                                                <tfoot class="table-primary">
-                                                                    <tr>
-                                                                        <th>Id</th>
-                                                                        <th>Nombre</th>
-                                                                        <th>Marca</th>
-                                                                        <th>Proveedor</th>
-                                                                        <th><i class="fa fa-cogs"></i></th>
-                                                                    </tr>
-                                                                </tfoot>
-                                                            </table>
-                                                        </div>
-                                                    </div>
+                                                <div class="table-responsive">
+                                                    <table id="tbllistarActivos" class="table table-bordered table-striped display nowrap" style="width:100%">
+                                                        <thead class="table-primary">
+                                                            <tr>
+                                                                <th>Id</th>
+                                                                <th>Nombre</th>
+                                                                <th>Marca</th>
+                                                                <th>Proveedor</th>
+                                                                <th><i class="fa fa-cogs"></i></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody></tbody>
+                                                        <tfoot class="table-primary">
+                                                            <tr>
+                                                                <th>Id</th>
+                                                                <th>Nombre</th>
+                                                                <th>Marca</th>
+                                                                <th>Proveedor</th>
+                                                                <th><i class="fa fa-cogs"></i></th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
 
                             <!-- Nuevo div para registro manual de multiples activos -->
                             <div class="col-12" id="divRegistroManualActivoMultiple" style="display: none;">

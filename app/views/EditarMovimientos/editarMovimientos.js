@@ -176,7 +176,7 @@ function listarMovimientosPendientes() {
       { data: "observaciones" },
     ],
     language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
     },
     order: [[9, "desc"]], // Ordenar por fecha descendente
     pageLength: 10,
@@ -503,7 +503,7 @@ function listarActivosParaSeleccion() {
       },
     ],
     language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
     },
     order: [[2, "asc"]], // Ordenar por NombreActivo
     pageLength: 10,

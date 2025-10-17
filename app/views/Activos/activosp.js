@@ -1,6 +1,18 @@
 let activoFormCount = 0;
 let combosActivos = null;
 
+const CONFIGURACION = {
+  URLS: {
+    //CONTROLADOR: "../../controllers/AmbienteController.php",
+    IDIOMA_DATATABLES: "../../../public/plugins/datatables/json/Spanish.json",
+  },
+  VALORES_POR_DEFECTO: {
+    ESTADO_ACTIVO: 1,
+    ESTADO_INACTIVO: 0,
+    LONGITUD_TABLA: 10,
+  },
+};
+
 $(document).ready(function () {
   init();
 });
@@ -9,6 +21,7 @@ function init() {
   listarActivosTable();
   ListarCombosMov();
   ListarCombosFiltros();
+  // resetearFormularioDetalle();
   // ListarCombosModalActualizarActivo();
 
   // Establecer documento de venta como opción por defecto
@@ -85,7 +98,7 @@ function init() {
   });
 
   $(document).on("click", "#btnBuscarDocumento", function () {
-    let documento = $("#inputDocumento").val().trim();
+    let documento = $("#inputDocumento").val();
     let tipoDoc = $("#tipoDocumento").val();
 
     console.log("Data enviada a listarActivo:", documento, "Tipo:", tipoDoc);
@@ -195,20 +208,61 @@ function init() {
 
   $("#divregistroActivo").hide();
 
+  // $("#btnnuevo")
+  //   .off("click")
+  //   .on("click", function () {
+  //     $("#divregistroActivo").show();
+  //     $("#tblRegistros").hide();
+  //     $("#divtblRegistros").hide();
+  //     $("#divtblactivos").hide();
+  //     $("#divlistadoactivos").hide();
+  //     $("#divRegistroManualActivoMultiple").hide();
+  //     $("#tituloModalMovimiento").html(
+  //       '<i class="fa fa-plus-circle"></i> Registrar Movimiento'
+  //     );
+  //     $("#frmArticulos")[0].reset();
+  //     $("#ModalArticulos").modal("show");
+  //   });
+
   $("#btnnuevo")
     .off("click")
     .on("click", function () {
+      // Mostrar / ocultar secciones
       $("#divregistroActivo").show();
-      $("#tblRegistros").hide();
-      $("#divtblRegistros").hide();
-      $("#divtblactivos").hide();
-      $("#divlistadoactivos").hide();
-      $("#divRegistroManualActivoMultiple").hide();
+      $(
+        "#tblRegistros, #divtblRegistros, #divtblactivos, #divlistadoactivos, #divRegistroManualActivoMultiple"
+      ).hide();
+
+      // Cambiar título
       $("#tituloModalMovimiento").html(
         '<i class="fa fa-plus-circle"></i> Registrar Movimiento'
       );
+
+      // Guardar valor actual de tipoDocumento
+      const tipoDocumentoActual = $("#tipoDocumento").val();
+
+      // Resetear formulario completo
       $("#frmArticulos")[0].reset();
-      $("#ModalArticulos").modal("show");
+
+      // Restaurar valor del tipoDocumento
+      $("#tipoDocumento").val(tipoDocumentoActual).trigger("change");
+
+      // Limpiar tabla detalle (si usas DataTables)
+      //const tablaDetalle = $("#tbldetalleactivoreg").DataTable();
+      // Limpiar tabla detalle
+      if ($.fn.DataTable.isDataTable("#tbldetalleactivoreg")) {
+        const tablaDetalle = $("#tbldetalleactivoreg").DataTable();
+        tablaDetalle.clear(); // elimina todas las filas y refresca la vista
+      } else {
+        // Si no es DataTable, limpiar el cuerpo manualmente
+        $("#tbldetalleactivoreg tbody").empty();
+      }
+
+      // Reiniciar contador de registros
+      //$("#CantRegistros").text("0");
+
+      // Mostrar modal
+      //$("#ModalArticulos").modal("show");
     });
 
   $("#btnCrearActivo")
@@ -299,7 +353,7 @@ function init() {
   });
 
   $("#ModalArticulos").on("shown.bs.modal", function () {
-    let docIngreso = $("#inputDocIngresoAlm").val().trim();
+    let docIngreso = $("#inputDocIngresoAlm").val();
     if (docIngreso) {
       listarActivosModal(docIngreso);
     }
@@ -656,6 +710,7 @@ function init() {
       .is(":checked");
     const ambienteId = filaActual.find("select.ambiente").val();
     const categoriaId = filaActual.find("select.categoria").val();
+    const marcaId = filaActual.find("select.marca").val();
     // Para documentos de venta, usar el proveedor del modal; para ingreso, usar el de la fila
     const proveedorId =
       tipoDoc === "venta"
@@ -780,6 +835,7 @@ function init() {
       actualizarProgreso(i, cantidad, `Creando activo ${i + 1}/${cantidad}...`);
 
       const numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
+      const inputNombre = `<input type="text" class="form-control form-control-sm" name="nombre[]" value="${activoNombre}" disabled>`;
       const selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
       const selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
       const selectMarca = `<select class='form-control form-control-sm marca' name='marca[]' id="comboMarca${numeroFilas}"></select>`;
@@ -799,11 +855,11 @@ function init() {
       }/${cantidad}</span>`;
       const indentacion = `<span class="grupo-indent">└─</span>`;
 
-      const nuevaFila = `<tr data-id='${activoId}' class='table-info activo-procesado activo-grupo-hijo' data-procesado='true' data-grupo-id='${grupoId}' data-activo-nombre="${activoNombre}" data-activo-marca="${activoMarca}" data-tipo-doc="${tipoDoc}">
+      const nuevaFila = `<tr data-id='${activoId}' class='table-info activo-procesado activo-grupo-hijo' data-procesado='true' data-grupo-id='${grupoId}' data-activo-nombre="${activoNombre}" data-tipo-doc="${tipoDoc}">
                     <td>${activoId}</td>
                     <td>${indentacion} ${activoNombreGenerico} ${distintivo}</td>
-                    <td>${activoNombre}</td>
-                    <td>${activoMarca}</td>
+                    <td>${inputNombre}</td>
+                    <td>${selectMarca}</td>
                     <td>
                       <input 
                         type="text" 
@@ -877,7 +933,7 @@ function init() {
           `Se han creado ${cantidad} filas individuales para el activo "${activoNombre}".`
         );
         // Actualizar contador total
-        actualizarContadorTotal();
+        //actualizarContadorTotal();
 
         // Auto-colapsar grupos grandes (más de 5 unidades)
         if (cantidad > 5) {
@@ -1216,34 +1272,34 @@ function init() {
     });
 
     // Actualizar contador total después de cambios en grupo
-    actualizarContadorTotal();
+    //actualizarContadorTotal();
   }
 
   // Función para actualizar contador total en tiempo real
-  function actualizarContadorTotal() {
-    const totalFilas = $("#tbldetalleactivoreg tbody tr").length;
-    const totalGrupos =
-      $("#tbldetalleactivoreg tbody tr.activo-grupo-principal").length +
-      $("#tbldetalleactivoreg tbody tr:not([data-grupo-id])").length;
+  // function actualizarContadorTotal() {
+  //   const totalFilas = $("#tbldetalleactivoreg tbody tr").length;
+  //   const totalGrupos =
+  //     $("#tbldetalleactivoreg tbody tr.activo-grupo-principal").length +
+  //     $("#tbldetalleactivoreg tbody tr:not([data-grupo-id])").length;
 
-    $("#CantRegistros").html(`
-      <div class="contador-detalle">
-        <span class="badge badge-success">${totalFilas} Activos</span>
-        <span class="badge badge-info">${totalGrupos} Grupos</span>
-      </div>
-    `);
+  //   $("#CantRegistros").html(`
+  //     <div class="contador-detalle">
+  //       <span class="badge badge-success">${totalFilas} Activos</span>
+  //       <span class="badge badge-info">${totalGrupos} Grupos</span>
+  //     </div>
+  //   `);
 
-    // Actualizar también el título de la sección
-    const tituloDetalle =
-      totalFilas > 0
-        ? `Detalles <small class="text-muted">(${totalFilas} activos en ${totalGrupos} grupos)</small>`
-        : "Detalles";
+  //   // Actualizar también el título de la sección
+  //   const tituloDetalle =
+  //     totalFilas > 0
+  //       ? `Detalles <small class="text-muted">(${totalFilas} activos en ${totalGrupos} grupos)</small>`
+  //       : "Detalles";
 
-    $("#tbldetalleactivoreg")
-      .closest(".card")
-      .find('h5:contains("Detalles")')
-      .html(`<i class="fas fa-list"></i> ${tituloDetalle}`);
-  }
+  //   $("#tbldetalleactivoreg")
+  //     .closest(".card")
+  //     .find('h5:contains("Detalles")')
+  //     .html(`<i class="fas fa-list"></i> ${tituloDetalle}`);
+  // }
 
   // Función para validar series duplicadas
   // Función para validar series duplicadas
@@ -2644,6 +2700,8 @@ function init() {
             url: "../../controllers/GestionarActivosController.php?action=verHistorial",
             type: "POST",
             data: { idActivo: datos.idActivo },
+            proccesing: true,
+            serverSide: true,
             dataType: "json",
             success: function (historialRes) {
               if (historialRes.status && historialRes.data.length > 0) {
@@ -2678,7 +2736,7 @@ function init() {
 
                 $("#tblMovimientosActivo").DataTable({
                   language: {
-                    url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+                    url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
                   },
                   responsive: true,
                   destroy: true,
@@ -3578,8 +3636,10 @@ function listarActivosModal(documento, tipoDoc = "ingreso") {
     destroy: true,
     ajax: ajaxConfig,
     columns: columns,
+    processing: true,
+    serverSide: true,
     language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
     },
   });
 }
@@ -3660,7 +3720,7 @@ function listarActivosModalMantenimiento() {
       { data: "responsable" },
     ],
     language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
     },
     order: [[2, "asc"]], // Ordenar por NombreArticulo
     pageLength: 10,
@@ -3821,7 +3881,7 @@ function agregarActivoAlDetalle(activo) {
           `Activo <b>${activo.nombre}</b> agregado al detalle.`
         );
         // Actualizar contador total
-        actualizarContadorTotal();
+        //actualizarContadorTotal();
         return true;
       } else {
         NotificacionToast("error", res.message);
@@ -4473,7 +4533,6 @@ function ListarCombosMov() {
 function listarActivosTable() {
   $("#tblRegistros").DataTable({
     aProcessing: true,
-    //responsive: true,
     aServerSide: true,
     layout: {
       topStart: {
@@ -4609,7 +4668,7 @@ function listarActivosTable() {
       },
     ],
     language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
     },
   });
 }

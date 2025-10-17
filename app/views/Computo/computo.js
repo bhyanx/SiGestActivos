@@ -2730,7 +2730,7 @@ function init() {
 
                 $("#tblMovimientosActivo").DataTable({
                   language: {
-                    url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+                    url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
                   },
                   responsive: true,
                   destroy: true,
@@ -3577,7 +3577,7 @@ function listarActivosModal(documento, tipoDoc = "ingreso") {
     ajax: ajaxConfig,
     columns: columns,
     language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
     },
   });
 }
@@ -4336,7 +4336,7 @@ function listarActivosTable() {
       },
     ],
     language: {
-      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
     },
   });
 }

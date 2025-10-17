@@ -8,7 +8,7 @@ const CONFIGURACION = {
   URLS: {
     CONTROLADOR: "../../controllers/AmbienteController.php",
     IDIOMA_DATATABLES:
-      "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+      "../../../public/plugins/datatables/json/Spanish.json",
   },
   VALORES_POR_DEFECTO: {
     ESTADO_ACTIVO: 1,

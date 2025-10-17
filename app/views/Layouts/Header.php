@@ -31,10 +31,16 @@ ob_start();
 <link rel="stylesheet" href="../../../public/plugins/summernote/summernote-bs4.min.css" />
 
 <!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="../../../public/plugins/sweetalert2/sweetalert2.all.min.js">
+<!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> -->
+
+<!-- Select2 -->
+<link rel="stylesheet" href="../../../public/plugins/select2/js/select2.full.min.js">
+<link rel="stylesheet" href="../../../public/plugins/select2/css/select2.min.css">
 
 <!-- DataTables -->
 <link rel="stylesheet" href="../../../public/plugins/datatables2/datatables.min.css" />
+<link rel="stylesheet" href="../../../public/plugins/datatables2/datatables.min.js">
 
 <!-- Additional Plugins -->
 <link rel="stylesheet" href="../../../public/plugins/fullcalendar/main.css" />
