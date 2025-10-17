@@ -843,6 +843,7 @@ function init() {
       const selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
       const selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
       const selectMarca = `<select class='form-control form-control-sm marca' name='marca[]' id="comboMarca${numeroFilas}"></select>`;
+      const selectEstadoActivo = `<select class='form-control form-control-sm estado_activo' name='estado_activo[]' id="comboEstadoActivo${numeroFilas}"></select>`;
       const inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
       const inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" disabled>`;
 
@@ -878,7 +879,7 @@ function init() {
                             : serieBase + "-" + (i + 1)
                         }">
                     </td>
-                    <td>${inputEstadoActivo}</td>
+                    <td>${selectEstadoActivo}</td>
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
                     <td>
@@ -3880,6 +3881,7 @@ function agregarActivoAlDetalle(activo) {
         //var selectMarca = `<select class='form-control form-control-sm marca' name='marca[]' id="comboMarca${numeroFilas}"></select>`;
         var selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
         var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
+        var selectEstadoActivo = `<select class='form-control form-control-sm estado_activo' name='estado_activo[]' id="comboEstadoActivo${numeroFilas}"></select>`;
         var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" style="width: 15rem;" disabled>`;
         var inputSerie = `<input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie" style="width: 15rem;">`;
 
@@ -3919,7 +3921,7 @@ function agregarActivoAlDetalle(activo) {
                     <td>
                       ${inputSerie}
                     </td>
-                    <td>${inputEstadoActivo}</td>
+                    <td>${selectEstadoActivo}</td>
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
                     <td>
