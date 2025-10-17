@@ -2700,8 +2700,6 @@ function init() {
             url: "../../controllers/GestionarActivosController.php?action=verHistorial",
             type: "POST",
             data: { idActivo: datos.idActivo },
-            proccesing: true,
-            serverSide: true,
             dataType: "json",
             success: function (historialRes) {
               if (historialRes.status && historialRes.data.length > 0) {
@@ -3636,8 +3634,6 @@ function listarActivosModal(documento, tipoDoc = "ingreso") {
     destroy: true,
     ajax: ajaxConfig,
     columns: columns,
-    processing: true,
-    serverSide: true,
     language: {
       url: CONFIGURACION.URLS.IDIOMA_DATATABLES,
     },

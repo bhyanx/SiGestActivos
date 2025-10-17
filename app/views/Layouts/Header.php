@@ -14,7 +14,7 @@ ob_start();
 <!-- Font Awesome -->
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" /> -->
 <link rel="stylesheet" href="../../../public/plugins/fontawesome-free/css/all.min.css">
-lin
+<link rel="stylesheet" href="../../../public/plugins/font-awesome-6-pro/css/all.min.css">
 
 <!-- Google Fonts -->
 <!-- <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" /> -->

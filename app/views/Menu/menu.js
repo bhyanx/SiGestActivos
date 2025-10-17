@@ -2,6 +2,18 @@ $(document).ready(() => {
   init();
 });
 
+const CONFIGURACION = {
+  URLS: {
+    //CONTROLADOR: "../../controllers/AmbienteController.php",
+    IDIOMA_DATATABLES: "../../../public/plugins/datatables/json/Spanish.json",
+  },
+  VALORES_POR_DEFECTO: {
+    ESTADO_ACTIVO: 1,
+    ESTADO_INACTIVO: 0,
+    LONGITUD_TABLA: 10,
+  },
+};
+
 function init() {
   ListarMenu();
 }

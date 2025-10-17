@@ -2,6 +2,18 @@ $(document).ready(function () {
   initConfiguracion();
 });
 
+const CONFIGURACION = {
+  URLS: {
+    //CONTROLADOR: "../../controllers/AmbienteController.php",
+    IDIOMA_DATATABLES: "../../../public/plugins/datatables/json/Spanish.json",
+  },
+  VALORES_POR_DEFECTO: {
+    ESTADO_ACTIVO: 1,
+    ESTADO_INACTIVO: 0,
+    LONGITUD_TABLA: 10,
+  },
+};
+
 function initConfiguracion() {
   ListarCombosFiltros();
   listarActivosTableConfiguracion();
@@ -51,7 +63,7 @@ function ListarCombosFiltros() {
         ).select2({
           theme: "bootstrap4",
           width: "100%",
-          allowClear: true,
+          allowClear: false,
         });
 
         // 6. Establecer placeholders específicos
@@ -59,14 +71,14 @@ function ListarCombosFiltros() {
           theme: "bootstrap4",
           width: "100%",
           placeholder: "Filtrar por Categoría",
-          allowClear: true,
+          allowClear: false,
         });
 
         $("#filtroEstado").select2("destroy").select2({
           theme: "bootstrap4",
           width: "100%",
           placeholder: "Filtrar por Estado",
-          allowClear: true,
+          allowClear: false,
         });
 
         $("#filtroEmpresa").select2("destroy").select2({
@@ -80,14 +92,14 @@ function ListarCombosFiltros() {
           theme: "bootstrap4",
           width: "100%",
           placeholder: "Filtrar por Sucursal",
-          allowClear: true,
+          allowClear: false,
         });
 
         $("#filtroAmbiente").select2("destroy").select2({
           theme: "bootstrap4",
           width: "100%",
           placeholder: "Filtrar por Ambiente",
-          allowClear: true,
+          allowClear: false,
         });
 
         // 8. Configurar event listeners optimizados
@@ -310,7 +322,11 @@ function listarActivosTableConfiguracion() {
         },
       },
       { data: "Serie" },
-      { data: "valorAdquisicion" },
+      { data: "valorAdquisicion",
+        render: function (data) {
+          return "S/ " + parseFloat(data).toFixed(2)
+        }
+       },
       { data: "fechaRegistro" },
       {
         data: 'esEditable',
