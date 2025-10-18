@@ -35,7 +35,8 @@
 <!-- Select2 -->
 <!-- <script src="/public/plugins/select2/dist/js/select2.min.js"></script> -->
 <!-- ChartJS -->
-<script src="../../../public/plugins/chart.js/Chart.min.js"></script>
+<!-- <script src="../../../public/plugins/chart.js/Chart.min.js"></script> -->
+<script src="../../../public/plugins/chartjs4/dist/chart.umd.min.js"></script>
 <!-- Sparkline -->
 <script src="../../../public/plugins/sparklines/sparkline.js"></script>
 <!-- JQVMap -->

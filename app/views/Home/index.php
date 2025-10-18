@@ -46,7 +46,8 @@ if (!isset($_SESSION["IdRol"])) {
                     <!-- <div class="col-md-6 col-lg-3 col-xl-2">
                         <div class="card shadow">
                             <div class="card-body">
-                                <img class='img-fluid w-100' src="<?php //echo Conectar::ruta(); ?>public/img/Logo-Lubriseng.png" alt="" />
+                                <img class='img-fluid w-100' src="<?php //echo Conectar::ruta(); 
+                                                                    ?>public/img/Logo-Lubriseng.png" alt="" />
                             </div>
                         </div>
                     </div> -->
@@ -97,28 +98,41 @@ if (!isset($_SESSION["IdRol"])) {
                     <div class="col-md-6 col-lg-3 col-xl-2">
                         <div class="small-box bg-info shadow">
                             <div class="inner">
-                                <h3 id="lblvalordeactivos">0</h3>
+                                <h3 id="lblvalordeactivos"></h3>
                                 <p>Valor Activos</p>
                             </div>
                             <div class="icon">
-                                <i class="fas fa-hand-holding-dollar"></i>
+                                <i class="fas fa-hand-holding"></i>
                             </div>
                         </div>
                     </div>
                 </div>
                 <!-- Gráfico de activos asignados y no asignados -->
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div class="card shadow">
-                            <div class="card-header bg-primary">
-                                <h3 class="card-title"><i class="fas fa-chart-pie mr-2"></i>Distribución de Activos</h3>
+                <div class="col-4 mt-4" id="divGraficoActivos">
+                    <div class="card card-primary shadow">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-pie mr-2"></i> Distribución de Activos
+                            </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
                             </div>
-                            <div class="card-body">
-                                <canvas id="graficoActivosAsignados" height="300"></canvas>
+                        </div>
+                        <div class="card-body">
+                            <div class="row justify-content-center">
+                                <div class="col-md-8">
+                                    <canvas id="graficoActivosAsignados" height="300"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </section>
             <!-- /.content -->
 
