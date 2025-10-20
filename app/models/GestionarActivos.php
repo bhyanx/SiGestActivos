@@ -283,6 +283,7 @@ class GestionarActivos
             $stmt = $this->db->prepare('EXEC sp_RegistrarActivoDesdeDocumentoVenta
                 @pNombre = ?,
                 @pIdFactura = ?,
+                @pCodigoAntiguo = ?,
                 @pIdDocumentoVta = ?,
                 @pIdArticulo = ?,
                 @pDescripcion = ?,
@@ -296,6 +297,7 @@ class GestionarActivos
                 @pIdSucursal = ?,
                 @pIdAmbiente = ?,
                 @pIdCategoria = ?,
+                @pIdResponsable = ?,
                 @pVidaUtil = ?,
                 @pObservaciones = ?,
                 @pValorAdquisicion = ?,
@@ -304,26 +306,28 @@ class GestionarActivos
                 @pUserMod = ?');
 
             $stmt->bindParam(1, $data['Nombre'], \PDO::PARAM_STR);
-            $stmt->bindParam(2, $data['IdFactura'], \PDO::PARAM_INT);
-            $stmt->bindParam(3, $data['IdDocVenta'], \PDO::PARAM_INT);
-            $stmt->bindParam(4, $data['IdArticulo'], \PDO::PARAM_INT);
-            $stmt->bindParam(5, $data['Descripcion'], \PDO::PARAM_STR);
-            $stmt->bindParam(6, $data['IdEstado'], \PDO::PARAM_INT);
-            $stmt->bindParam(7, $data['Cantidad'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
-            $stmt->bindParam(8, $data['IdProveedor'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(9, $data['IdMarca'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
-            $stmt->bindParam(10, $data['Serie'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(11, $data['Modelo'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(12, $empresa, \PDO::PARAM_INT);
-            $stmt->bindParam(13, $sucursal, \PDO::PARAM_INT);
-            $stmt->bindParam(14, $data['IdAmbiente'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
-            $stmt->bindParam(15, $data['IdCategoria'], \PDO::PARAM_INT);
-            $stmt->bindParam(16, $data['VidaUtil'], \PDO::PARAM_INT);
-            $stmt->bindParam(17, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(18, $data['ValorAdquisicion'], \PDO::PARAM_STR);
-            $stmt->bindParam(19, $data['AplicaIGV'], \PDO::PARAM_INT);
-            $stmt->bindParam(20, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
-            $stmt->bindParam(21, $data['UserMod'], \PDO::PARAM_STR);
+            $stmt->bindParam(2, $data['IdFactura'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(3, $data['CodigoAntiguo'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(4, $data['IdDocVenta'], \PDO::PARAM_INT);
+            $stmt->bindParam(5, $data['IdArticulo'], \PDO::PARAM_INT);
+            $stmt->bindParam(6, $data['Descripcion'], \PDO::PARAM_STR);
+            $stmt->bindParam(7, $data['IdEstado'], \PDO::PARAM_INT);
+            $stmt->bindParam(8, $data['Cantidad'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(9, $data['IdProveedor'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(10, $data['IdMarca'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(11, $data['Serie'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(12, $data['Modelo'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(13, $empresa, \PDO::PARAM_INT);
+            $stmt->bindParam(14, $sucursal, \PDO::PARAM_INT);
+            $stmt->bindParam(15, $data['IdAmbiente'], \PDO::PARAM_INT | \PDO::PARAM_NULL);
+            $stmt->bindParam(16, $data['IdCategoria'], \PDO::PARAM_INT);
+            $stmt->bindParam(17, $data['IdResponsable'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(18, $data['VidaUtil'], \PDO::PARAM_INT);
+            $stmt->bindParam(19, $data['Observaciones'], \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(20, $data['ValorAdquisicion'], \PDO::PARAM_STR);
+            $stmt->bindParam(21, $data['AplicaIGV'], \PDO::PARAM_INT);
+            $stmt->bindParam(22, $fechaAdquisicion, \PDO::PARAM_STR | \PDO::PARAM_NULL);
+            $stmt->bindParam(23, $data['UserMod'], \PDO::PARAM_STR);
 
             $stmt->execute();
             return true;

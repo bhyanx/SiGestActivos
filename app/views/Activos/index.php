@@ -248,7 +248,9 @@ if (isset($_SESSION["IdRol"])) {
                                                                 <tr>
                                                                     <th>Id</th>
                                                                     <th>Nombre Generico</th>
+                                                                    <th>Código Antiguo</th>
                                                                     <th>Nombre activo</th>
+                                                                    <th>Modelo</th>
                                                                     <th>Marca</th>
                                                                     <th>Serie</th>
                                                                     <th>Estado</th>
@@ -257,6 +259,9 @@ if (isset($_SESSION["IdRol"])) {
                                                                     <th>Valor Unitario</th>
                                                                     <th>Cantidad</th>
                                                                     <th>Proveedor</th>
+                                                                    <th>Responsable</th>
+                                                                    <th>Descripción</th>
+                                                                    <th>Fecha Adquisición</th>
                                                                     <th>Observaciones</th>
                                                                     <th>Acciones</th>
                                                                 </tr>
@@ -264,10 +269,11 @@ if (isset($_SESSION["IdRol"])) {
                                                             <tbody></tbody>
                                                             <tfoot>
                                                                 <tr>
-                                                                    <th colspan="11" style="text-align: right;">TOTAL DETALLE &nbsp;&nbsp;</th>
+                                                                    <th colspan="13" style="text-align: right;">TOTAL DETALLE &nbsp;&nbsp;</th>
                                                                     <th class="text-center">
                                                                         <span id="CantRegistros">0</span>
                                                                     </th>
+                                                                    <th colspan="4"></th>
                                                                 </tr>
                                                             </tfoot>
                                                         </table>

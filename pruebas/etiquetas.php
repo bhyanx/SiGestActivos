@@ -16,7 +16,7 @@ $zpl = "^XA
 ^FO150,30^FD$codigo^FS
 ^FO30,70^FDNombre:^FS
 ^FO150,70^FD$nombre^FS
-^FO30,110^FDUbicación:^FS
+^FO30,110^FDUbicacion:^FS
 ^FO150,110^FD$ubicacion^FS
 ^FO30,150^BY2
 ^BCN,80,Y,N,N

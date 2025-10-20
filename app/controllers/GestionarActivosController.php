@@ -598,6 +598,7 @@ switch ($action) {
                     $data = [
                         'Nombre' => $activo['Nombre'],
                         'IdFactura' => $activo['IdFactura'],
+                        'CodigoAntiguo' => $activo['CodigoAntiguo'],
                         'IdArticulo' => $activo['IdArticulo'],
                         'Descripcion' => $activo['Descripcion'],
                         'IdEstado' => $activo['IdEstado'],
@@ -607,6 +608,7 @@ switch ($action) {
                         'IdSucursal' => $_SESSION['cod_UnidadNeg'] ?? null,
                         'IdAmbiente' => $activo['IdAmbiente'],
                         'IdCategoria' => $activo['IdCategoria'] ?? 2,
+                        'IdResponsable' => $activo['IdResponsable'],
                         'VidaUtil' => $activo['VidaUtil'] ?? 3,
                         'Serie' => $activo['Serie'],
                         'Modelo' => $activo['Modelo'] ?? null,

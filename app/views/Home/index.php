@@ -12,6 +12,38 @@ if (!isset($_SESSION["IdRol"])) {
 <head>
     <?php require_once("../Layouts/Header.php"); ?>
     <title>Inicio | Sistema Activos</title>
+    <style>
+        .contador-dashboard {
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        @keyframes contadorAnimado {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .contador-animado {
+            animation: contadorAnimado 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
 </head>
 
 <body class="sidebar-mini control-sidebar-slide-open layout-navbar-fixed layout-fixed sidebar-mini-xs sidebar-mini-md sidebar-collapse">
@@ -54,7 +86,7 @@ if (!isset($_SESSION["IdRol"])) {
                     <div class="col-md-6 col-lg-3 col-xl-2">
                         <div class="small-box bg-success shadow">
                             <div class="inner">
-                                <h3 id="lblcantidadactivos">0</h3>
+                                <h3 id="lblcantidadactivos" class="contador-dashboard">0</h3>
                                 <p>Total Activos</p>
                             </div>
                             <div class="icon">
@@ -65,7 +97,7 @@ if (!isset($_SESSION["IdRol"])) {
                     <div class="col-md-6 col-lg-3 col-xl-2">
                         <div class="small-box bg-primary shadow">
                             <div class="inner">
-                                <h3 id="lblcantidadoperativos">0</h3>
+                                <h3 id="lblcantidadoperativos" class="contador-dashboard">0</h3>
                                 <p>Activos Operativos</p>
                             </div>
                             <div class="icon">
@@ -76,7 +108,7 @@ if (!isset($_SESSION["IdRol"])) {
                     <div class="col-md-6 col-lg-3 col-xl-2">
                         <div class="small-box bg-warning shadow">
                             <div class="inner">
-                                <h3 id="lblcantidadactivosmantenimiento">0</h3>
+                                <h3 id="lblcantidadactivosmantenimiento" class="contador-dashboard">0</h3>
                                 <p>Activos Mantenimiento</p>
                             </div>
                             <div class="icon">
@@ -87,7 +119,7 @@ if (!isset($_SESSION["IdRol"])) {
                     <div class="col-md-6 col-lg-3 col-xl-2">
                         <div class="small-box bg-danger shadow">
                             <div class="inner">
-                                <h3 id="lblcantidadactivosbaja">0</h3>
+                                <h3 id="lblcantidadactivosbaja" class="contador-dashboard">0</h3>
                                 <p>Activos Baja</p>
                             </div>
                             <div class="icon">
@@ -98,7 +130,7 @@ if (!isset($_SESSION["IdRol"])) {
                     <div class="col-md-6 col-lg-3 col-xl-2">
                         <div class="small-box bg-info shadow">
                             <div class="inner">
-                                <h3 id="lblvalordeactivos"></h3>
+                                <h3 id="lblvalordeactivos" class="contador-dashboard"></h3>
                                 <p>Valor Activos</p>
                             </div>
                             <div class="icon">
