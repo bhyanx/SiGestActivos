@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  web:
+    build: .
+    container_name: sigestactivos_web
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html/
+    depends_on:
+      - db
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sigestactivos_sql
+    environment:
+      SA_PASSWORD: "TuPassword123!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+
+volumes:
+  sql_data:
