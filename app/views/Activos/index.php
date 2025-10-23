@@ -237,46 +237,26 @@ if (isset($_SESSION["IdRol"])) {
                                                 <div class="col-md-12" id="divdetalle">
                                                     <hr />
                                                     <div class="row">
-                                                        <div class="col-md-2">
-                                                            <h5>Detalles</h5>
+                                                        <div class="col-md-6">
+                                                            <h5><i class="fas fa-list"></i> Detalles de Activos</h5>
+                                                        </div>
+                                                        <div class="col-md-6 text-right">
+                                                            <span class="badge badge-success" id="CantRegistros">0 Activos</span>
                                                         </div>
                                                     </div>
 
-                                                    <div class="table-responsive">
-                                                        <table id="tbldetalleactivoreg" class="table table-hover table-bordered table-striped table-sm w-100">
-                                                            <thead class="table-success">
-                                                                <tr>
-                                                                    <th>Id</th>
-                                                                    <th>Nombre Generico</th>
-                                                                    <th>Código Antiguo</th>
-                                                                    <th>Nombre activo</th>
-                                                                    <th>Modelo</th>
-                                                                    <th>Marca</th>
-                                                                    <th>Serie</th>
-                                                                    <th>Estado</th>
-                                                                    <th>Ambiente</th>
-                                                                    <th>Categoría</th>
-                                                                    <th>Valor Unitario</th>
-                                                                    <th>Cantidad</th>
-                                                                    <th>Proveedor</th>
-                                                                    <th>Responsable</th>
-                                                                    <th>Descripción</th>
-                                                                    <th>Fecha Adquisición</th>
-                                                                    <th>Observaciones</th>
-                                                                    <th>Acciones</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody></tbody>
-                                                            <tfoot>
-                                                                <tr>
-                                                                    <th colspan="13" style="text-align: right;">TOTAL DETALLE &nbsp;&nbsp;</th>
-                                                                    <th class="text-center">
-                                                                        <span id="CantRegistros">0</span>
-                                                                    </th>
-                                                                    <th colspan="4"></th>
-                                                                </tr>
-                                                            </tfoot>
-                                                        </table>
+                                                    <!-- Contenedor de formularios de activos -->
+                                                    <div id="activosFormContainer" class="mt-3">
+                                                        <!-- Los formularios de activos se agregarán aquí dinámicamente -->
+                                                    </div>
+
+                                                    <!-- Botón para agregar nuevo activo -->
+                                                    <div class="row mt-3">
+                                                        <div class="col-md-12 text-center">
+                                                            <button type="button" class="btn btn-success btn-sm" id="btnAgregarActivoDetalle">
+                                                                <i class="fas fa-plus"></i> Agregar Activo al Detalle
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </form>
