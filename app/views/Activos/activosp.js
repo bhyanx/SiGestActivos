@@ -454,6 +454,13 @@ function init() {
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
+        // Si tiene activos procesados, limpiar también esas tablas
+        const grupoId = cardActual.attr("data-grupo-id");
+        if (grupoId) {
+          $(`#tblPreviewActivosProcesados-${grupoId} tbody`).empty();
+          $(`#tablaPreviewProcesados-${grupoId}`).hide();
+        }
+        
         cardActual.fadeOut(300, function () {
           $(this).remove();
           actualizarContadorActivos();
@@ -467,6 +474,22 @@ function init() {
   $(document).on("click", "#btnAgregarActivoDetalle", function () {
     // Abrir el modal de artículos para seleccionar un activo
     $("#ModalArticulos").modal("show");
+  });
+
+  // Event listener para mostrar/ocultar botón de procesar según la cantidad en tarjetas de activos
+  $(document).on("input change keyup", ".activo-form-card input.cantidad", function () {
+    const cardActual = $(this).closest(".activo-form-card");
+    const cantidad = parseInt($(this).val()) || 1;
+    const btnProcesar = cardActual.find(".btnProcesarCantidad");
+    const esProcesado = cardActual.attr("data-procesado") === "true";
+    const tieneActivosProcesados = cardActual.find(".activos-procesados-container:visible").length > 0;
+
+    // Solo mostrar el botón si la cantidad > 1, no ha sido procesado y no tiene activos procesados visibles
+    if (cantidad > 1 && !esProcesado && !tieneActivosProcesados) {
+      btnProcesar.show().html(`<i class="fa fa-cogs"></i> Procesar Activo (${cantidad})`);
+    } else {
+      btnProcesar.hide();
+    }
   });
 
   // Manejador para el botón "Procesar Cantidad" - Abre el modal
@@ -958,47 +981,61 @@ function init() {
     const cantidadActual = $(`#tblPreviewActivosProcesados-${grupoId} tbody tr`).length;
     $(`#tablaPreviewProcesados-${grupoId} .total-activos-preview`).text(cantidadActual);
 
-    // Si no quedan filas, ocultar la tabla
+    // Si no quedan filas, resetear el estado del grupo
     if (cantidadActual === 0) {
       $(`#tablaPreviewProcesados-${grupoId}`).hide();
       $("#btnGuardarActivosProcesados").hide();
+      
+      // Resetear el estado de la tarjeta principal
+      const cardPrincipal = $(`.activo-form-card[data-id='${grupoId.split('_')[1]}']`);
+      if (cardPrincipal.length > 0) {
+        resetearEstadoTarjeta(cardPrincipal);
+      }
     }
   });
 
   // Manejador para cancelar el procesamiento
-  $(document).on("click", "#btnCancelarProcesamiento", function () {
-    $("#tblPreviewProcesados tbody").empty();
-    $("#tablaPreviewProcesados").hide();
-    $("#btnGuardarActivosProcesados").hide();
-    $("#contadorActivosProcesados").text("0");
+  $(document).on("click", ".btnCancelarProcesamiento", function () {
+    const grupoId = $(this).data("grupo-id");
+    const cardActual = $(`.activo-form-card[data-id='${grupoId.split('_')[1]}']`);
+    
+    if (cardActual.length > 0) {
+      // Limpiar la tabla de previsualización
+      $(`#tblPreviewActivosProcesados-${grupoId} tbody`).empty();
+      
+      // Resetear el estado de la tarjeta
+      resetearEstadoTarjeta(cardActual);
+      
+      NotificacionToast("info", "Procesamiento cancelado.");
+    }
   });
 
   // Manejador para reiniciar el procesamiento
   $(document).on("click", ".btnReiniciarProcesamiento", function () {
     const grupoId = $(this).data("grupo-id");
-    const cardActual = $(`tr[data-grupo-id='${grupoId}'].activo-grupo-principal`);
+    const cardActual = $(`.activo-form-card[data-id='${grupoId.split('_')[1]}']`);
     
-    // Limpiar la tabla de previsualización
-    $(`#tblPreviewActivosProcesados-${grupoId} tbody`).empty();
-    
-    // Ocultar el contenedor de activos procesados
-    cardActual.find(".activos-procesados-container").hide();
-    
-    // Mostrar el botón de procesar nuevamente
-    cardActual.find(".btnProcesarCantidad").show();
-    
-    // Reiniciar el contador
-    $(`#tablaPreviewProcesados-${grupoId} .total-activos-preview`).text("0");
-    
-    NotificacionToast(
-      "info",
-      "Procesamiento reiniciado. Puede volver a procesar los activos."
-    );
+    if (cardActual.length > 0) {
+      // Limpiar la tabla de previsualización
+      $(`#tblPreviewActivosProcesados-${grupoId} tbody`).empty();
+      
+      // Resetear el estado de la tarjeta
+      resetearEstadoTarjeta(cardActual);
+      
+      // Reiniciar el contador
+      $(`#tablaPreviewProcesados-${grupoId} .total-activos-preview`).text("0");
+      
+      NotificacionToast(
+        "info",
+        "Procesamiento reiniciado. Puede volver a procesar los activos."
+      );
+    }
   });
 
   // Manejador para guardar los activos procesados
   $(document).on("click", ".btnGuardarActivosProcesados", function () {
     const grupoId = $(this).data("grupo-id");
+    const cardActual = $(`.activo-form-card[data-id='${grupoId.split('_')[1]}']`);
     
     // Aquí se implementaría la lógica para guardar los activos procesados
     // Por ahora, solo mostraremos un mensaje de éxito
@@ -1007,9 +1044,13 @@ function init() {
       "Los activos han sido guardados correctamente."
     );
 
-    // Ocultar la tabla y limpiar
+    // Limpiar la tabla y resetear el estado
     $(`#tblPreviewActivosProcesados-${grupoId} tbody`).empty();
     $(`#tablaPreviewProcesados-${grupoId}`).hide();
+    
+    if (cardActual.length > 0) {
+      resetearEstadoTarjeta(cardActual);
+    }
   });
 
   // Debug: verificar que el botón se creó
@@ -4102,6 +4143,36 @@ function listarActivosModalMantenimiento() {
   });
 }
 
+// Función para resetear el estado de una tarjeta de activo
+function resetearEstadoTarjeta(cardActual) {
+  // Marcar como no procesado
+  cardActual.attr("data-procesado", "false");
+  cardActual.removeAttr("data-grupo-id");
+  cardActual.removeClass("activo-grupo-principal");
+  
+  // Ocultar el contenedor de activos procesados
+  cardActual.find(".activos-procesados-container").hide();
+  
+  // Habilitar el campo de cantidad
+  cardActual.find("input.cantidad").prop("disabled", false);
+  
+  // Limpiar cualquier tabla de previsualización asociada
+  const grupoId = cardActual.attr("data-grupo-id");
+  if (grupoId) {
+    $(`#tablaPreviewProcesados-${grupoId}`).remove();
+  }
+  
+  // Verificar si debe mostrar el botón de procesar basándose en la cantidad actual
+  const cantidad = parseInt(cardActual.find("input.cantidad").val()) || 1;
+  const btnProcesar = cardActual.find("#areaProcesarActivosVenta");
+  
+  if (cantidad > 1) {
+    btnProcesar.show().html(`<i class="fa fa-cogs"></i> Procesar (${cantidad})`);
+  } else {
+    btnProcesar.hide();
+  }
+}
+
 // Función para crear un formulario de activo individual
 function crearFormularioActivo(activo, numeroFormulario) {
   const tipoDoc = $("#tipoDocumento").val();
@@ -4109,17 +4180,11 @@ function crearFormularioActivo(activo, numeroFormulario) {
   const valorPrellenado =
     tipoDoc === "venta" && activo.valorUnitario ? activo.valorUnitario : "";
 
-  // Determinar si mostrar botón de procesar cantidad
-  let btnProcesar = "";
-  if (tipoDoc === "venta" && activo.cantidad && activo.cantidad > 1) {
-    btnProcesar = `<button type="button" class="btn btn-warning btn-sm btnProcesarCantidad" data-activo-id="${activo.id}" title="Procesar cantidad múltiple">
-      <i class="fa fa-cogs"></i> Procesar (${cantidadInicial})
-    </button>`;
-  } else {
-    btnProcesar = `<button type="button" class="btn btn-warning btn-sm btnProcesarCantidad" data-activo-id="${activo.id}" title="Procesar cantidad múltiple">
-      <i class="fa fa-cogs"></i> Procesar
-    </button>`;
-  }
+  // Determinar si mostrar botón de procesar cantidad (inicialmente oculto, se mostrará dinámicamente)
+  const mostrarBoton = cantidadInicial > 1 ? "block" : "none";
+  const btnProcesar = `<button type="button" class="btn btn-info btn-sm btnProcesarCantidad" data-activo-id="${activo.id}" title="Procesar cantidad múltiple" style="display: ${mostrarBoton};">
+    <i class="fa fa-cogs"></i> Procesar${cantidadInicial > 1 ? ` (${cantidadInicial})` : ''}
+  </button>`;
 
   const formularioHTML = `
     <div class="card mb-3 activo-form-card" data-id="${
@@ -4268,14 +4333,6 @@ function crearFormularioActivo(activo, numeroFormulario) {
                 .slice(0, 10)}">
             </div>
           </div>
-          <div class="col-md-6">
-            <div class="form-group">
-              <label><i class="fas fa-cogs"></i> Acciones:</label>
-              <div class="btn-group w-100">
-                ${btnProcesar}
-              </div>
-            </div>
-          </div>
 
           <!-- Descripción y Observaciones -->
           <div class="col-md-12">
@@ -4290,6 +4347,18 @@ function crearFormularioActivo(activo, numeroFormulario) {
               <textarea class="form-control" name="observaciones[]" rows="2" placeholder="Observaciones adicionales"></textarea>
             </div>
           </div>
+          <div class="col-md-12" id="areaProcesarActivosVenta">
+            <div class="form-group text-center">
+              <div class="alert alert-info procesar-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Procesar Activo:</strong> Cuando la cantidad sea mayor a 1, use este botón para generar múltiples activos individuales con series únicas automáticamente.
+              </div>
+              <div class="btn-group justify-content-center">
+                ${btnProcesar}
+              </div>
+            </div>
+          </div>
+
           
           <!-- Tabla de Activos Procesados -->
           <div class="col-md-12 mt-3">
@@ -4421,6 +4490,12 @@ function agregarActivoAlDetalle(activo) {
 
         // Actualizar contador
         actualizarContadorActivos();
+
+        // Activar el event listener para el campo cantidad de la nueva tarjeta
+        setTimeout(() => {
+          const nuevaTarjeta = $(`.activo-form-card[data-id='${activo.id}']`);
+          nuevaTarjeta.find("input.cantidad").trigger("change");
+        }, 100);
 
         NotificacionToast(
           "success",
