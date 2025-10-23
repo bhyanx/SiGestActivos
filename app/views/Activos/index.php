@@ -264,6 +264,38 @@ if (isset($_SESSION["IdRol"])) {
                                     </div>
                                 </div>
 
+                                <!-- Tabla de previsualización de activos procesados -->
+                                <div class="tabla-preview-activos" id="tablaPreviewProcesados" style="display: none;">
+                                    <hr>
+                                    <h6><i class="fas fa-eye"></i> Previsualización de Activos a Crear</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered" id="tblPreviewActivosProcesados">
+                                            <thead class="table-info">
+                                                <tr>
+                                                    <th>Serie</th>
+                                                    <th>Nombre</th>
+                                                    <th>Modelo</th>
+                                                    <th>Estado</th>
+                                                    <th>Categoría</th>
+                                                    <th>Responsable</th>
+                                                    <th>Empresa</th>
+                                                    <th>Unidad Negocio</th>
+                                                    <th>Ambiente</th>
+                                                    <th>Valor</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <th colspan="10" class="text-right">Total Activos:</th>
+                                                    <th class="text-center"><span class="badge badge-info total-activos-preview">0</span></th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+
                                 <div class="col-md-12 mt-3">
                                     <div class="card">
                                         <div class="card-footer">
@@ -819,6 +851,51 @@ if (isset($_SESSION["IdRol"])) {
                                             </button>
                                             <button type="button" class="btn btn-info" id="btnConfirmarProcesar">
                                                 <i class="fas fa-cogs"></i> Procesar Activos
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Tabla de previsualización de activos procesados -->
+                            <div class="tabla-preview-activos" id="tablaPreviewProcesados" style="display: none;">
+                                <div class="card">
+                                    <div class="card-header bg-info">
+                                        <h5 class="mb-0 text-white">
+                                            <i class="fas fa-eye"></i> Previsualización de Activos Procesados
+                                            <span class="badge badge-light ml-2">Total: <span id="contadorActivosProcesados">0</span></span>
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="datosActivosProcesados"></div>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered table-hover" id="tblPreviewProcesados">
+                                                <thead class="table-info">
+                                                    <tr>
+                                                        <th>Serie</th>
+                                                        <th>Nombre</th>
+                                                        <th>Modelo</th>
+                                                        <th>Estado</th>
+                                                        <th>Categoría</th>
+                                                        <th>Responsable</th>
+                                                        <th>Empresa</th>
+                                                        <th>Unidad Negocio</th>
+                                                        <th>Ambiente</th>
+                                                        <th>Valor</th>
+                                                        <th>Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Aquí se agregarán dinámicamente las filas de activos procesados -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="text-center mt-3">
+                                            <button type="button" class="btn btn-success" id="btnGuardarActivosProcesados" style="display: none;">
+                                                <i class="fas fa-save"></i> Guardar Activos Procesados
+                                            </button>
+                                            <button type="button" class="btn btn-danger" id="btnCancelarProcesamiento">
+                                                <i class="fas fa-times"></i> Cancelar Procesamiento
                                             </button>
                                         </div>
                                     </div>
