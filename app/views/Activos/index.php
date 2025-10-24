@@ -237,62 +237,50 @@ if (isset($_SESSION["IdRol"])) {
                                                 <div class="col-md-12" id="divdetalle">
                                                     <hr />
                                                     <div class="row">
-                                                        <div class="col-md-6">
-                                                            <h5><i class="fas fa-list"></i> Detalles de Activos</h5>
-                                                        </div>
-                                                        <div class="col-md-6 text-right">
-                                                            <span class="badge badge-success" id="CantRegistros">0 Activos</span>
+                                                        <div class="col-md-2">
+                                                            <h5>Detalles</h5>
                                                         </div>
                                                     </div>
 
-                                                    <!-- Contenedor de formularios de activos -->
-                                                    <div id="activosFormContainer" class="mt-3">
-                                                        <!-- Los formularios de activos se agregarán aquí dinámicamente -->
-                                                    </div>
-
-                                                    <!-- Botón para agregar nuevo activo -->
-                                                    <div class="row mt-3">
-                                                        <div class="col-md-12 text-center">
-                                                            <button type="button" class="btn btn-success btn-sm" id="btnAgregarActivoDetalle">
-                                                                <i class="fas fa-plus"></i> Agregar Activo al Detalle
-                                                            </button>
-                                                        </div>
+                                                    <div class="table-responsive">
+                                                        <table id="tbldetalleactivoreg" class="table table-hover table-bordered table-striped table-sm w-100">
+                                                            <thead class="table-success">
+                                                                <tr>
+                                                                    <th>Id</th>
+                                                                    <th>Nombre Generico</th>
+                                                                    <th>Código Antiguo</th>
+                                                                    <th>Nombre activo</th>
+                                                                    <th>Modelo</th>
+                                                                    <th>Marca</th>
+                                                                    <th>Serie</th>
+                                                                    <th>Estado</th>
+                                                                    <th>Ambiente</th>
+                                                                    <th>Categoría</th>
+                                                                    <th>Valor Unitario</th>
+                                                                    <th>Cantidad</th>
+                                                                    <th>Proveedor</th>
+                                                                    <th>Responsable</th>
+                                                                    <th>Descripción</th>
+                                                                    <th>Fecha Adquisición</th>
+                                                                    <th>Observaciones</th>
+                                                                    <th>Acciones</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody></tbody>
+                                                            <tfoot>
+                                                                <tr>
+                                                                    <th colspan="13" style="text-align: right;">TOTAL DETALLE &nbsp;&nbsp;</th>
+                                                                    <th class="text-center">
+                                                                        <span id="CantRegistros">0</span>
+                                                                    </th>
+                                                                    <th colspan="4"></th>
+                                                                </tr>
+                                                            </tfoot>
+                                                        </table>
                                                     </div>
                                                 </div>
                                             </form>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <!-- Tabla de previsualización de activos procesados -->
-                                <div class="tabla-preview-activos" id="tablaPreviewProcesados" style="display: none;">
-                                    <hr>
-                                    <h6><i class="fas fa-eye"></i> Previsualización de Activos a Crear</h6>
-                                    <div class="table-responsive">
-                                        <table class="table table-sm table-bordered" id="tblPreviewActivosProcesados">
-                                            <thead class="table-info">
-                                                <tr>
-                                                    <th>Serie</th>
-                                                    <th>Nombre</th>
-                                                    <th>Modelo</th>
-                                                    <th>Estado</th>
-                                                    <th>Categoría</th>
-                                                    <th>Responsable</th>
-                                                    <th>Empresa</th>
-                                                    <th>Unidad Negocio</th>
-                                                    <th>Ambiente</th>
-                                                    <th>Valor</th>
-                                                    <th>Acciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                            <tfoot>
-                                                <tr>
-                                                    <th colspan="10" class="text-right">Total Activos:</th>
-                                                    <th class="text-center"><span class="badge badge-info total-activos-preview">0</span></th>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
                                     </div>
                                 </div>
 
@@ -856,51 +844,6 @@ if (isset($_SESSION["IdRol"])) {
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- Tabla de previsualización de activos procesados -->
-                            <div class="tabla-preview-activos" id="tablaPreviewProcesados" style="display: none;">
-                                <div class="card">
-                                    <div class="card-header bg-info">
-                                        <h5 class="mb-0 text-white">
-                                            <i class="fas fa-eye"></i> Previsualización de Activos Procesados
-                                            <span class="badge badge-light ml-2">Total: <span id="contadorActivosProcesados">0</span></span>
-                                        </h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div id="datosActivosProcesados"></div>
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-bordered table-hover" id="tblPreviewProcesados">
-                                                <thead class="table-info">
-                                                    <tr>
-                                                        <th>Serie</th>
-                                                        <th>Nombre</th>
-                                                        <th>Modelo</th>
-                                                        <th>Estado</th>
-                                                        <th>Categoría</th>
-                                                        <th>Responsable</th>
-                                                        <th>Empresa</th>
-                                                        <th>Unidad Negocio</th>
-                                                        <th>Ambiente</th>
-                                                        <th>Valor</th>
-                                                        <th>Acciones</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <!-- Aquí se agregarán dinámicamente las filas de activos procesados -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="text-center mt-3">
-                                            <button type="button" class="btn btn-success" id="btnGuardarActivosProcesados" style="display: none;">
-                                                <i class="fas fa-save"></i> Guardar Activos Procesados
-                                            </button>
-                                            <button type="button" class="btn btn-danger" id="btnCancelarProcesamiento">
-                                                <i class="fas fa-times"></i> Cancelar Procesamiento
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
                             <div class="modal fade" id="ModalMantenimiento" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="ModalMantenimientoTitle">
                                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document" id="frmMantenimiento">
@@ -959,7 +902,6 @@ if (isset($_SESSION["IdRol"])) {
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </section>
             </div>
