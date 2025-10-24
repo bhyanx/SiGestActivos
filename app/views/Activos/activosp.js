@@ -897,11 +897,13 @@ function init() {
       // Campos adicionales con valores heredados de la fila principal
       const modeloPrincipal = filaActual.find("input[name='modelo[]']").val() || "";
       const codigoAntiguoPrincipal = filaActual.find("input[name='codigoAntiguo[]']").val() || "";
+      const numFacturaPrincipal = filaActual.find("input[name='numFactura[]']").val() || "";
       const descripcionPrincipal = filaActual.find("textarea[name='descripcion[]']").val() || "";
       const fechaAdquisicionPrincipal = filaActual.find("input[name='fechaAdquisicion[]']").val() || new Date().toISOString().slice(0, 10);
 
       const inputModelo = `<input type="text" class="form-control form-control-sm" name="modelo[]" placeholder="Modelo" value="${modeloPrincipal}">`;
       const inputCodigoAntiguo = `<input type="text" class="form-control form-control-sm" name="codigoAntiguo[]" placeholder="Código Antiguo" value="${codigoAntiguoPrincipal}">`;
+      const inputFactura = `<input type="text" class="form-control form-control-sm" name="numFactura[]" placeholder="Nro. Factura" value="${numFacturaPrincipal}">`;
       const textareaDescripcion = `<textarea class='form-control form-control-sm' name='descripcion[]' rows='1' placeholder='Descripción'>${descripcionPrincipal}</textarea>`;
       const inputFechaAdq = `<input type="date" class="form-control form-control-sm" name="fechaAdquisicion[]" value="${fechaAdquisicionPrincipal}">`;
 
@@ -916,6 +918,7 @@ function init() {
                     <td>${activoId}</td>
                     <td>${indentacion} ${nombreEditadoPrincipal} ${distintivo}</td>
                     <td>${inputCodigoAntiguo}</td>
+                    <td>${inputFactura}</td>
                     <td>${inputNombre}</td>
                     <td>${inputModelo}</td>
                     <td>${selectMarca}</td>
@@ -1308,11 +1311,13 @@ function init() {
         // Campos adicionales
         const modeloPrincipal = filaPrincipal.find("input[name='modelo[]']").val() || "";
         const codigoAntiguoPrincipal = filaPrincipal.find("input[name='codigoAntiguo[]']").val() || "";
+        const numFacturaPrincipal = filaPrincipal.find("input[name='numFactura[]']").val() || "";
         const descripcionPrincipal = filaPrincipal.find("textarea[name='descripcion[]']").val() || "";
         const fechaAdquisicionPrincipal = filaPrincipal.find("input[name='fechaAdquisicion[]']").val() || new Date().toISOString().slice(0, 10);
 
         const inputModelo = `<input type="text" class="form-control form-control-sm mt-1" name="modelo[]" value="${modeloPrincipal}">`;
         const inputCodigoAntiguo = `<input type="text" class="form-control form-control-sm mt-1" name="codigoAntiguo[]" value="${codigoAntiguoPrincipal}">`;
+        const inputFactura = `<input type="text" class="form-control form-control-sm mt-1" name="numFactura[]" value="${numFacturaPrincipal}">`;
         const textareaDescripcion = `<textarea class='form-control form-control-sm mt-1' name='descripcion[]' rows='1' placeholder='Descripción'>${descripcionPrincipal}</textarea>`;
         const inputFechaAdq = `<input type="date" class="form-control form-control-sm mt-1" name="fechaAdquisicion[]" value="${fechaAdquisicionPrincipal}">`;
 
@@ -1325,6 +1330,7 @@ function init() {
                       <td>${activoId}</td>
                       <td>${indentacion} ${activoNombre} ${distintivo}</td>
                       <td>${inputCodigoAntiguo}</td>
+                      <td>${inputFactura}</td>
                       <td>${inputNombre}</td>
                       <td>${inputModelo}</td>
                       <td>${selectMarca}</td>
@@ -4080,6 +4086,7 @@ function agregarActivoAlDetalle(activo) {
         // Campos adicionales solicitados
         var inputModelo = `<input type="text" class="form-control form-control-sm mt-1" name="modelo[]" placeholder="Modelo">`;
         var inputCodigoAntiguo = `<input type="text" class="form-control form-control-sm mt-1" name="codigoAntiguo[]" placeholder="Código Antiguo">`;
+        var inputFactura = `<input type="text" class="form-control form-control-sm mt-1" name="numFactura[]" placeholder="Nro. Factura">`;
         var selectResponsable = `<select class='form-control form-control-sm responsable mt-1' name='responsable[]' id="comboResponsable${numeroFilas}"></select>`;
         var textareaDescripcion = `<textarea class='form-control form-control-sm mb-1' name='descripcion[]' rows='1' placeholder='Descripción'></textarea>`;
         var inputFechaAdq = `<input type="date" class="form-control form-control-sm mt-2" name="fechaAdquisicion[]" value="${new Date()
@@ -4118,6 +4125,7 @@ function agregarActivoAlDetalle(activo) {
                     <td>${activo.id}</td>
                     <td>${activo.nombre}</td>
                     <td>${inputCodigoAntiguo}</td>
+                    <td>${inputFactura}</td>
                     <td>${inputNombre}</td>
                     <td>${inputModelo}</td>
                     <td>${selectMarca}</td>
@@ -6267,13 +6275,13 @@ function addActivoManualForm(combos) {
                 <label for="codigoAntiguo_${activoFormCount}">Código Antiguo: </label>
                 <input type="text" name="codigoAntiguo[]" id="codigoAntiguo_${activoFormCount}" class="form-control" placeholder="Ej. ACH-001">
               </div>
-            </div> 
+            </div>
             <div class="col-md-4">
               <div class="form-group">
                 <label for="numFactura_${activoFormCount}">Nro. Factura: </label>
                 <input type="text" name="numFactura[]" id="numFactura_${activoFormCount}" class="form-control" placeholder="Ej. F001-010203">
               </div>
-            </div> 
+            </div>
             <div class="col-md-4">
               <div class="form-group">
                 <label for="nombre_${activoFormCount}">Nombre: </label>
@@ -6865,7 +6873,7 @@ $(document).ready(function () {
 
         const activo = {
           Nombre: form.find("input[name='nombre[]']").val(),
-          IdFactura: form.find("input[name='numfactura[]']").val(),
+          IdFactura: form.find("input[name='numFactura[]']").val(),
           CodigoAntiguo: form.find("input[name='codigoAntiguo[]']").val(),
           Descripcion: form.find("textarea[name='Descripcion[]']").val(),
           IdEstado: form.find("select[name='Estado[]']").val(),
