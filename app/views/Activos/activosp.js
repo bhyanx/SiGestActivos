@@ -428,6 +428,18 @@ function init() {
     }
 
     agregarActivoAlDetalle(activo);
+
+    // Set marca in the newly added row
+    setTimeout(() => {
+      const $row = $(`#tbldetalleactivoreg tbody tr[data-id='${activo.id}']:last`);
+      if ($row.length > 0 && activo.marcaId) {
+        const $marcaSelect = $row.find("select.marca");
+        if ($marcaSelect.length > 0 && !$marcaSelect.val()) {
+          const newOption = new Option(activo.marca, activo.marcaId, true, true);
+          $marcaSelect.append(newOption).trigger("change");
+        }
+      }
+    }, 300);
   });
 
   $(document).on("click", ".btnQuitarActivo", function () {
@@ -482,6 +494,31 @@ function init() {
     } else {
       // Fila normal sin grupo (método anterior)
       $(`#tbldetalleactivoreg tbody tr[data-id='${activoId}']`).remove();
+    }
+  });
+
+  // Event listener para sincronizar marca en filas procesadas cuando cambia en la fila principal
+  $(document).on("change", "select.marca", function () {
+    const fila = $(this).closest("tr");
+    if (fila.hasClass("activo-grupo-principal")) {
+      const grupoId = fila.data("grupo-id");
+      const marcaId = $(this).val();
+      const marcaTexto = $(this).find("option:selected").text();
+
+      // Actualizar todas las filas procesadas del grupo
+      $(`tr[data-grupo-id='${grupoId}'].activo-procesado`).each(function() {
+        const $comboMarca = $(this).find("select.marca");
+        if (marcaId) {
+          if ($comboMarca.find(`option[value='${marcaId}']`).length === 0) {
+            const newOption = new Option(marcaTexto, marcaId, true, true);
+            $comboMarca.append(newOption).trigger("change");
+          } else {
+            $comboMarca.val(marcaId).trigger("change");
+          }
+        } else {
+          $comboMarca.val(null).trigger("change");
+        }
+      });
     }
   });
 
@@ -853,27 +890,20 @@ function init() {
       const inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
       const inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" disabled>`;
 
-      //! Para activos procesados, mostrar el proveedor pero deshabilitado
-      const proveedorTexto =
-        filaActual.find("select.proveedor option:selected").text() ||
-        "No asignado";
-      const proveedorDisplay = `<input type="hidden" name="proveedor[]" value="${
-        proveedorId || ""
-      }"><span class="text-muted small">${proveedorTexto}</span>`;
-      // Responsable heredado en filas procesadas
-      const responsableTexto =
-        filaActual.find("select.responsable option:selected").text() ||
-        "No asignado";
-      const responsableDisplay = `<input type="hidden" name="responsable[]" value="${
-        filaActual.find("select.responsable").val() || ""
-      }"><span class="text-muted small">${responsableTexto}</span>`;
-      // Campos adicionales
-      const inputModelo = `<input type="text" class="form-control form-control-sm mt-1" name="modelo[]" placeholder="Modelo">`;
-      const inputCodigoAntiguo = `<input type="text" class="form-control form-control-sm mt-1" name="codigoAntiguo[]" placeholder="Código Antiguo">`;
-      const textareaDescripcion = `<textarea class='form-control form-control-sm mt-1' name='descripcion[]' rows='1' placeholder='Descripción'></textarea>`;
-      const inputFechaAdq = `<input type="date" class="form-control form-control-sm mt-1" name="fechaAdquisicion[]" value="${new Date()
-        .toISOString()
-        .slice(0, 10)}">`;
+      // Para activos procesados, proveedor y responsable editables
+      const selectProveedor = `<select class='form-control form-control-sm proveedor' name='proveedor[]' id="comboProveedor${numeroFilas}"></select>`;
+      const selectResponsable = `<select class='form-control form-control-sm responsable' name='responsable[]' id="comboResponsable${numeroFilas}"></select>`;
+
+      // Campos adicionales con valores heredados de la fila principal
+      const modeloPrincipal = filaActual.find("input[name='modelo[]']").val() || "";
+      const codigoAntiguoPrincipal = filaActual.find("input[name='codigoAntiguo[]']").val() || "";
+      const descripcionPrincipal = filaActual.find("textarea[name='descripcion[]']").val() || "";
+      const fechaAdquisicionPrincipal = filaActual.find("input[name='fechaAdquisicion[]']").val() || new Date().toISOString().slice(0, 10);
+
+      const inputModelo = `<input type="text" class="form-control form-control-sm" name="modelo[]" placeholder="Modelo" value="${modeloPrincipal}">`;
+      const inputCodigoAntiguo = `<input type="text" class="form-control form-control-sm" name="codigoAntiguo[]" placeholder="Código Antiguo" value="${codigoAntiguoPrincipal}">`;
+      const textareaDescripcion = `<textarea class='form-control form-control-sm' name='descripcion[]' rows='1' placeholder='Descripción'>${descripcionPrincipal}</textarea>`;
+      const inputFechaAdq = `<input type="date" class="form-control form-control-sm" name="fechaAdquisicion[]" value="${fechaAdquisicionPrincipal}">`;
 
       const distintivo = `<span class="badge badge-info grupo-badge">📦 ${
         i + 1
@@ -885,14 +915,16 @@ function init() {
         `
                     <td>${activoId}</td>
                     <td>${indentacion} ${nombreEditadoPrincipal} ${distintivo}</td>
+                    <td>${inputCodigoAntiguo}</td>
                     <td>${inputNombre}</td>
+                    <td>${inputModelo}</td>
                     <td>${selectMarca}</td>
                     <td>
-                      <input 
-                        type="text" 
-                        class="form-control form-control-sm" 
-                        name="serie[]" 
-                        placeholder="Serie ${i + 1}" 
+                      <input
+                        type="text"
+                        class="form-control form-control-sm"
+                        name="serie[]"
+                        placeholder="Serie ${i + 1}"
                         value="${
                           serieBase.trim().toUpperCase() === "S/N"
                             ? "S/N"
@@ -913,13 +945,12 @@ function init() {
                         </label>
                       </div>
                     </td>
-                    <td>${inputModelo}</td>
-                    <td>${inputCodigoAntiguo}</td>
-                    <td>${inputFechaAdq}</td>
                     <td>${inputCantidad}</td>
-                    <td>${proveedorDisplay}<br>${responsableDisplay}</td>
+                    <td>${selectProveedor}</td>
+                    <td>${selectResponsable}</td>
+                    <td>${textareaDescripcion}</td>
+                    <td>${inputFechaAdq}</td>
                     <td>
-                      ${textareaDescripcion}
                       <textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea>
                     </td>
                     <td>
@@ -936,30 +967,126 @@ function init() {
       // Efecto visual de aparición
       ultimaFilaInsertada.hide().fadeIn(300);
 
-      // Cargar combos para la nueva fila (solo ambiente y categoría para filas procesadas)
+      // Cargar combos para la nueva fila (ambiente, categoría, proveedor, responsable, estado y marca para filas procesadas)
       // Para documentos de venta/ingreso, cargar ambientes basados en la sesión del usuario
       ListarCombosAmbienteSesion(`comboAmbiente${numeroFilas}`);
       ListarCombosCategoria(`comboCategoria${numeroFilas}`);
       ListarCombosEstado(`comboEstadoActivo${numeroFilas}`);
-      ListarCombosMarca(`comboMarca${numeroFilas}`);
+
+      // Inicializar Select2 para marca con AJAX
+      $(`#comboMarca${numeroFilas}`).select2({
+        dropdownParent: $(`#comboMarca${numeroFilas}`).closest("tr"),
+        minimumInputLength: 2,
+        theme: "bootstrap4",
+        language: {
+          inputTooShort: function (args) {
+            return "Ingresar Marca.";
+          },
+          noResults: function () {
+            return "Datos no encontrados.";
+          },
+          searching: function () {
+            return "Buscando...";
+          },
+        },
+        ajax: {
+          url: "../../controllers/GestionarActivosController.php?action=comboMarcas",
+          type: "GET",
+          dataType: "json",
+          delay: 250,
+          data: function (params) {
+            return {
+              filtro: params.term,
+            };
+          },
+          processResults: function (data) {
+            return {
+              results: data || [],
+            };
+          },
+          cache: true,
+        },
+        placeholder: "Ingresar/Seleccionar Marca",
+        allowClear: false,
+      });
+
+      // Inicializar Select2 para proveedor con AJAX
+      $(`#comboProveedor${numeroFilas}`).select2({
+        dropdownParent: $(`#comboProveedor${numeroFilas}`).closest("tr"),
+        minimumInputLength: 2,
+        theme: "bootstrap4",
+        language: {
+          inputTooShort: function (args) {
+            return "Ingresar mas de 2 caracteres.";
+          },
+          noResults: function () {
+            return "Datos no encontrados.";
+          },
+          searching: function () {
+            return "Buscando...";
+          },
+        },
+        ajax: {
+          url: "../../controllers/GestionarActivosController.php?action=comboProveedor",
+          type: "GET",
+          dataType: "json",
+          delay: 250,
+          data: function (params) {
+            return {
+              filtro: params.term,
+            };
+          },
+          processResults: function (data) {
+            return {
+              results: data || [],
+            };
+          },
+          cache: true,
+        },
+        placeholder: "Ingresar/Seleccionar Proveedor",
+        allowClear: false,
+      });
+
+      // Inicializar Select2 para responsable
+      $(`#comboResponsable${numeroFilas}`).select2({
+        dropdownParent: $(`#comboResponsable${numeroFilas}`).closest("tr"),
+        theme: "bootstrap4",
+        width: "100%",
+        placeholder: "Seleccionar Responsable",
+      });
 
       // Establecer los valores seleccionados en los combos
       setTimeout(() => {
         $(`#comboAmbiente${numeroFilas}`).val(ambienteId).trigger("change");
         $(`#comboCategoria${numeroFilas}`).val(categoriaId).trigger("change");
-        // Asegurar visualmente la marca seleccionada para Select2 AJAX
-        const $comboMarca = $(`#comboMarca${numeroFilas}`);
+        $(`#comboEstadoActivo${numeroFilas}`).val(filaActual.find("select.estado_activo").val()).trigger("change");
+
+        // Establecer proveedor con Select2 AJAX
+        if (proveedorId) {
+          const proveedorTexto = filaActual.find("select.proveedor option:selected").text();
+          if (proveedorTexto && proveedorTexto !== "") {
+            const newOption = new Option(proveedorTexto, proveedorId, true, true);
+            $(`#comboProveedor${numeroFilas}`).append(newOption).trigger("change");
+          }
+        }
+
+        // Establecer responsable - copiar opciones de la fila principal
+        const $comboResponsable = $(`#comboResponsable${numeroFilas}`);
+        const $responsablePrincipal = filaActual.find("select.responsable");
+        if ($responsablePrincipal.length) {
+          $comboResponsable.html($responsablePrincipal.html());
+          const responsableId = filaActual.find("select.responsable").val();
+          if (responsableId) {
+            $comboResponsable.val(responsableId).trigger("change");
+          }
+        }
+
+        // Establecer marca con Select2 AJAX
         if (marcaId) {
-          const marcaTexto = filaActual
-            .find("select.marca option:selected")
-            .text();
+          const marcaTexto = filaActual.find("select.marca option:selected").text();
           if (marcaTexto && marcaTexto !== "") {
-            if ($comboMarca.find(`option[value='${marcaId}']`).length === 0) {
-              const newOption = new Option(marcaTexto, marcaId, true, true);
-              $comboMarca.append(newOption).trigger("change");
-            } else {
-              $comboMarca.val(marcaId).trigger("change");
-            }
+            const newOption = new Option(marcaTexto, marcaId, true, true);
+            $(`#comboMarca${numeroFilas}`).append(newOption).trigger("change");
           }
         }
       }, 120);
@@ -1131,10 +1258,6 @@ function init() {
       serieBase = serieBase.replace("-1", "");
     }
 
-    // const serieBase = filaPrincipal
-    //   .find("input[name='serie[]']")
-    //   .val()
-    //   .replace("-1", "");
     const valor = filaPrincipal.find("input[name='valor[]']").val();
     const aplicaIgv = filaPrincipal
       .find("input[name='aplicaIgv[]']")
@@ -1162,46 +1285,64 @@ function init() {
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        // Crear nueva fila
+        // Crear nueva fila procesada como en btnConfirmarProcesar
         const numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
-        const selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id=\"comboAmbiente${numeroFilas}\"></select>`;
-        const selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id=\"comboCategoria${numeroFilas}\"></select>`;
-        const selectEstadoActivo = `<select class='form-control form-control-sm estado_activo' name='estado_activo[]' id=\"comboEstadoActivo${numeroFilas}\"></select>`;
-        const selectMarca = `<select class='form-control form-control-sm marca' name='marca[]' id=\"comboMarca${numeroFilas}\"></select>`;
-        // Para unidades adicionales del grupo, mostrar el proveedor heredado
-        const proveedorTexto =
-          filaPrincipal.find("select.proveedor option:selected").text() ||
-          "No asignado";
-        const proveedorDisplay = `<input type="hidden" name="proveedor[]" value="${
-          proveedorId || ""
-        }"><span class="text-muted small">${proveedorTexto}</span>`;
+        const inputNombre = `<input type=\"text\" class=\"form-control form-control-sm\" name=\"nombre[]\" value=\"${activoNombre}\" disabled>`;
+        const selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
+        const selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
+        const selectMarca = `<select class='form-control form-control-sm marca' name='marca[]' id="comboMarca${numeroFilas}"></select>`;
+        const selectEstadoActivo = `<select class='form-control form-control-sm estado_activo' name='estado_activo[]' id="comboEstadoActivo${numeroFilas}"></select>`;
         const inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
         const inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" disabled>`;
 
-        const distintivo = `<span class=\"badge badge-info grupo-badge\">📦 ${siguienteNumero}/${siguienteNumero}</span>`;
+        // Para activos procesados, mostrar el proveedor pero deshabilitado
+        const proveedorTexto =
+          filaPrincipal.find("select.proveedor option:selected").text() ||
+          "No asignado";
+        const proveedorDisplay = `<input type="hidden" name="proveedor[]" value="${proveedorId || ""}"><span class="text-muted small">${proveedorTexto}</span>`;
+        // Responsable heredado en filas procesadas
+        const responsableTexto =
+          filaPrincipal.find("select.responsable option:selected").text() ||
+          "No asignado";
+        const responsableDisplay = `<input type="hidden" name="responsable[]" value="${filaPrincipal.find("select.responsable").val() || ""}"><span class="text-muted small">${responsableTexto}</span>`;
+        // Campos adicionales
+        const modeloPrincipal = filaPrincipal.find("input[name='modelo[]']").val() || "";
+        const codigoAntiguoPrincipal = filaPrincipal.find("input[name='codigoAntiguo[]']").val() || "";
+        const descripcionPrincipal = filaPrincipal.find("textarea[name='descripcion[]']").val() || "";
+        const fechaAdquisicionPrincipal = filaPrincipal.find("input[name='fechaAdquisicion[]']").val() || new Date().toISOString().slice(0, 10);
+
+        const inputModelo = `<input type="text" class="form-control form-control-sm mt-1" name="modelo[]" value="${modeloPrincipal}">`;
+        const inputCodigoAntiguo = `<input type="text" class="form-control form-control-sm mt-1" name="codigoAntiguo[]" value="${codigoAntiguoPrincipal}">`;
+        const textareaDescripcion = `<textarea class='form-control form-control-sm mt-1' name='descripcion[]' rows='1' placeholder='Descripción'>${descripcionPrincipal}</textarea>`;
+        const inputFechaAdq = `<input type="date" class="form-control form-control-sm mt-1" name="fechaAdquisicion[]" value="${fechaAdquisicionPrincipal}">`;
+
+        const distintivo = `<span class="badge badge-info grupo-badge">📦 ${siguienteNumero}/${siguienteNumero}</span>`;
         const indentacion = `<span class="grupo-indent">└─</span>`;
 
-        const nombreEditadoPrincipal =
-          filaPrincipal.find("input[name='nombre[]']").val() || activoNombre;
-        const inputNombre = `<input type=\"text\" class=\"form-control form-control-sm\" name=\"nombre[]\" value=\"${nombreEditadoPrincipal}\" disabled>`;
-
         const nuevaFila =
-          `<tr data-id='${activoId}' class='table-info activo-procesado activo-grupo-hijo' data-procesado='true' data-grupo-id='${grupoId}' data-activo-nombre=\"${nombreEditadoPrincipal}\" data-activo-marca=\"${activoMarca}\">` +
+          `<tr data-id='${activoId}' class='table-info activo-procesado activo-grupo-hijo' data-procesado='true' data-grupo-id='${grupoId}' data-activo-nombre=\"${activoNombre}\" data-tipo-doc=\"${filaPrincipal.data("tipo-doc")}\">` +
           `
                       <td>${activoId}</td>
-                      <td>${indentacion} ${nombreEditadoPrincipal} ${distintivo}</td>
+                      <td>${indentacion} ${activoNombre} ${distintivo}</td>
+                      <td>${inputCodigoAntiguo}</td>
                       <td>${inputNombre}</td>
+                      <td>${inputModelo}</td>
                       <td>${selectMarca}</td>
-                      <td><input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie" value="${serieBase}"></td>
-                      <td>${inputEstadoActivo}</td>
+                      <td>
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          name="serie[]"
+                          placeholder="Serie ${siguienteNumero}"
+                          value="${serieBase.trim().toUpperCase() === "S/N" ? "S/N" : serieBase + "-" + siguienteNumero}">
+                      </td>
+                      <td>${selectEstadoActivo}</td>
                       <td>${selectAmbiente}</td>
                       <td>${selectCategoria}</td>
                       <td>
                         <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}">
                         <div class="custom-control custom-switch custom-switch-sm mt-2">
-                          <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${
-            aplicaIgv ? "checked" : ""
-          }>
+                          <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${aplicaIgv ? "checked" : ""}>
                           <label class="custom-control-label small text-success font-weight-bold" for="aplicaIgv${numeroFilas}">
                             <i class="fas fa-percentage mr-1"></i>IGV
                           </label>
@@ -1209,7 +1350,12 @@ function init() {
                       </td>
                       <td>${inputCantidad}</td>
                       <td>${proveedorDisplay}</td>
-                      <td><textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea></td>
+                      <td>${responsableDisplay}</td>
+                      <td>${textareaDescripcion}</td>
+                      <td>${inputFechaAdq}</td>
+                      <td>
+                        <textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea>
+                      </td>
                       <td>
                         <button type='button' class='btn btn-danger btn-sm btnQuitarActivo' title="Eliminar solo esta unidad">
                           <i class='fa fa-trash'></i>
@@ -1221,9 +1367,12 @@ function init() {
         const ultimaFilaGrupo = $(`tr[data-grupo-id='${grupoId}']`).last();
         ultimaFilaGrupo.after(nuevaFila);
 
-        // Cargar combos para la nueva fila (general)
-        // Usar ambientes filtrados por empresa/sucursal de la sesión
-        ListarCombosAmbiente(`comboAmbiente${numeroFilas}`);
+        // Efecto visual de aparición
+        const nuevaFilaElement = ultimaFilaGrupo.next();
+        nuevaFilaElement.hide().fadeIn(300);
+
+        // Cargar combos para la nueva fila (solo ambiente y categoría para filas procesadas)
+        ListarCombosAmbienteSesion(`comboAmbiente${numeroFilas}`);
         ListarCombosCategoria(`comboCategoria${numeroFilas}`);
         ListarCombosEstado(`comboEstadoActivo${numeroFilas}`);
         ListarCombosMarca(`comboMarca${numeroFilas}`);
@@ -1232,44 +1381,20 @@ function init() {
         setTimeout(() => {
           $(`#comboAmbiente${numeroFilas}`).val(ambienteId).trigger("change");
           $(`#comboCategoria${numeroFilas}`).val(categoriaId).trigger("change");
-          // Asegurar visualmente la marca seleccionada (Select2 AJAX)
+          // Asegurar visualmente la marca seleccionada para Select2 AJAX
           const $comboMarca = $(`#comboMarca${numeroFilas}`);
           if (marcaId) {
-            // Si la opción no existe, inyectarla; si existe, seleccionarla
-            const marcaTextoSel = filaPrincipal
-              .find("select.marca option:selected")
-              .text();
-            if ($comboMarca.find(`option[value='${marcaId}']`).length === 0) {
-              const texto =
-                marcaTextoSel && marcaTextoSel.trim() !== ""
-                  ? marcaTextoSel
-                  : "Seleccionado";
-              const opt = new Option(texto, marcaId, true, true);
-              $comboMarca.append(opt).trigger("change");
-            } else {
-              $comboMarca.val(marcaId).trigger("change");
+            const marcaTexto = filaPrincipal.find("select.marca option:selected").text();
+            if (marcaTexto && marcaTexto !== "") {
+              if ($comboMarca.find(`option[value='${marcaId}']`).length === 0) {
+                const newOption = new Option(marcaTexto, marcaId, true, true);
+                $comboMarca.append(newOption).trigger("change");
+              } else {
+                $comboMarca.val(marcaId).trigger("change");
+              }
             }
           }
         }, 120);
-
-        // Forzar sincronización de opciones de ambiente con la fila principal (clonar opciones)
-        setTimeout(() => {
-          const $nuevoAmb = $(`#comboAmbiente${numeroFilas}`);
-          const $ambPrincipal = filaPrincipal.find("select.ambiente");
-          if ($ambPrincipal.length && $nuevoAmb.length) {
-            // Copiar opciones para asegurar misma fuente/filtrado
-            $nuevoAmb.html($ambPrincipal.html());
-            // Re-inicializar select2 en el nuevo select con el mismo contexto
-            if ($nuevoAmb.hasClass("select2-hidden-accessible")) {
-              $nuevoAmb.select2("destroy");
-            }
-            $nuevoAmb.select2({
-              theme: "bootstrap4",
-              width: "100%",
-              dropdownParent: $nuevoAmb.closest("tr"),
-            });
-          }
-        }, 50);
 
         // Actualizar los badges de todas las filas del grupo
         actualizarBadgesGrupo(grupoId);
