@@ -229,8 +229,9 @@ function init() {
     .on("click", function () {
       // Mostrar / ocultar secciones
       $("#divregistroActivo").show();
+      //$("#divdetalle").show();
       $(
-        "#tblRegistros, #divtblRegistros, #divtblactivos, #divlistadoactivos, #divRegistroManualActivoMultiple"
+        "#tblRegistros, #divdetalle, #divtblRegistros, #divtblactivos, #divlistadoactivos, #divRegistroManualActivoMultiple"
       ).hide();
 
       // Cambiar título
@@ -431,15 +432,23 @@ function init() {
 
     // Set marca in the newly added row
     setTimeout(() => {
-      const $row = $(`#tbldetalleactivoreg tbody tr[data-id='${activo.id}']:last`);
+      const $row = $(
+        `#tbldetalleactivoreg tbody tr[data-id='${activo.id}']:last`
+      );
       if ($row.length > 0 && activo.marcaId) {
         const $marcaSelect = $row.find("select.marca");
         if ($marcaSelect.length > 0 && !$marcaSelect.val()) {
-          const newOption = new Option(activo.marca, activo.marcaId, true, true);
+          const newOption = new Option(
+            activo.marca,
+            activo.marcaId,
+            true,
+            true
+          );
           $marcaSelect.append(newOption).trigger("change");
         }
       }
     }, 300);
+    $("#divdetalle").show();
   });
 
   $(document).on("click", ".btnQuitarActivo", function () {
@@ -506,7 +515,7 @@ function init() {
       const marcaTexto = $(this).find("option:selected").text();
 
       // Actualizar todas las filas procesadas del grupo
-      $(`tr[data-grupo-id='${grupoId}'].activo-procesado`).each(function() {
+      $(`tr[data-grupo-id='${grupoId}'].activo-procesado`).each(function () {
         const $comboMarca = $(this).find("select.marca");
         if (marcaId) {
           if ($comboMarca.find(`option[value='${marcaId}']`).length === 0) {
@@ -882,7 +891,7 @@ function init() {
       actualizarProgreso(i, cantidad, `Creando activo ${i + 1}/${cantidad}...`);
 
       const numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
-      const inputNombre = `<input type=\"text\" class=\"form-control form-control-sm\" name=\"nombre[]\" value=\"${nombreEditadoPrincipal}\" disabled>`;
+      const inputNombre = `<input type=\"text\" class=\"form-control form-control-sm\" name=\"nombre[]\" value=\"${nombreEditadoPrincipal}\" >`;
       const selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
       const selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
       const selectMarca = `<select class='form-control form-control-sm marca' name='marca[]' id="comboMarca${numeroFilas}"></select>`;
@@ -895,17 +904,23 @@ function init() {
       const selectResponsable = `<select class='form-control form-control-sm responsable' name='responsable[]' id="comboResponsable${numeroFilas}"></select>`;
 
       // Campos adicionales con valores heredados de la fila principal
-      const modeloPrincipal = filaActual.find("input[name='modelo[]']").val() || "";
-      const codigoAntiguoPrincipal = filaActual.find("input[name='codigoAntiguo[]']").val() || "";
-      const numFacturaPrincipal = filaActual.find("input[name='numFactura[]']").val() || "";
-      const descripcionPrincipal = filaActual.find("textarea[name='descripcion[]']").val() || "";
-      const fechaAdquisicionPrincipal = filaActual.find("input[name='fechaAdquisicion[]']").val() || new Date().toISOString().slice(0, 10);
+      const modeloPrincipal =
+        filaActual.find("input[name='modelo[]']").val() || "";
+      const codigoAntiguoPrincipal =
+        filaActual.find("input[name='codigoAntiguo[]']").val() || "";
+      const numFacturaPrincipal =
+        filaActual.find("input[name='numFactura[]']").val() || "";
+      const descripcionPrincipal =
+        filaActual.find("textarea[name='descripcion[]']").val() || "";
+      const fechaAdquisicionPrincipal =
+        filaActual.find("input[name='fechaAdquisicion[]']").val() ||
+        new Date().toISOString().slice(0, 10);
 
-      const inputModelo = `<input type="text" class="form-control form-control-sm" name="modelo[]" placeholder="Modelo" value="${modeloPrincipal}">`;
-      const inputCodigoAntiguo = `<input type="text" class="form-control form-control-sm" name="codigoAntiguo[]" placeholder="Código Antiguo" value="${codigoAntiguoPrincipal}">`;
-      const inputFactura = `<input type="text" class="form-control form-control-sm" name="numFactura[]" placeholder="Nro. Factura" value="${numFacturaPrincipal}">`;
-      const textareaDescripcion = `<textarea class='form-control form-control-sm' name='descripcion[]' rows='1' placeholder='Descripción'>${descripcionPrincipal}</textarea>`;
-      const inputFechaAdq = `<input type="date" class="form-control form-control-sm" name="fechaAdquisicion[]" value="${fechaAdquisicionPrincipal}">`;
+      const inputModelo = `<input type="text" class="form-control form-control-sm campoDet" name="modelo[]" placeholder="Modelo" value="${modeloPrincipal}">`;
+      const inputCodigoAntiguo = `<input type="text" class="form-control form-control-sm campoDet" name="codigoAntiguo[]" placeholder="Código Antiguo" value="${codigoAntiguoPrincipal}">`;
+      const inputFactura = `<input type="text" class="form-control form-control-sm campoDet" name="numFactura[]" placeholder="Nro. Factura" value="${numFacturaPrincipal}">`;
+      const textareaDescripcion = `<textarea class='form-control form-control-sm campoDet' name='descripcion[]' rows='1' placeholder='Descripción'>${descripcionPrincipal}</textarea>`;
+      const inputFechaAdq = `<input type="date" class="form-control form-control-sm campoDet" name="fechaAdquisicion[]" value="${fechaAdquisicionPrincipal}">`;
 
       const distintivo = `<span class="badge badge-info grupo-badge">📦 ${
         i + 1
@@ -938,7 +953,7 @@ function init() {
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
                     <td>
-                      <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}">
+                      <input type="text" class="form-control form-control-sm campoDet" name="valor[]" placeholder="Valor" value="${valor}">
                       <div class="custom-control custom-switch custom-switch-sm mt-2">
                         <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${
           aplicaIgvPrincipal ? "checked" : ""
@@ -954,7 +969,7 @@ function init() {
                     <td>${textareaDescripcion}</td>
                     <td>${inputFechaAdq}</td>
                     <td>
-                      <textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea>
+                      <textarea class='form-control form-control-sm campoDet' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea>
                     </td>
                     <td>
                       <button type='button' class='btn btn-danger btn-sm btnQuitarActivo' title="Eliminar solo esta unidad">
@@ -1062,14 +1077,25 @@ function init() {
       setTimeout(() => {
         $(`#comboAmbiente${numeroFilas}`).val(ambienteId).trigger("change");
         $(`#comboCategoria${numeroFilas}`).val(categoriaId).trigger("change");
-        $(`#comboEstadoActivo${numeroFilas}`).val(filaActual.find("select.estado_activo").val()).trigger("change");
+        $(`#comboEstadoActivo${numeroFilas}`)
+          .val(filaActual.find("select.estado_activo").val())
+          .trigger("change");
 
         // Establecer proveedor con Select2 AJAX
         if (proveedorId) {
-          const proveedorTexto = filaActual.find("select.proveedor option:selected").text();
+          const proveedorTexto = filaActual
+            .find("select.proveedor option:selected")
+            .text();
           if (proveedorTexto && proveedorTexto !== "") {
-            const newOption = new Option(proveedorTexto, proveedorId, true, true);
-            $(`#comboProveedor${numeroFilas}`).append(newOption).trigger("change");
+            const newOption = new Option(
+              proveedorTexto,
+              proveedorId,
+              true,
+              true
+            );
+            $(`#comboProveedor${numeroFilas}`)
+              .append(newOption)
+              .trigger("change");
           }
         }
 
@@ -1086,7 +1112,9 @@ function init() {
 
         // Establecer marca con Select2 AJAX
         if (marcaId) {
-          const marcaTexto = filaActual.find("select.marca option:selected").text();
+          const marcaTexto = filaActual
+            .find("select.marca option:selected")
+            .text();
           if (marcaTexto && marcaTexto !== "") {
             const newOption = new Option(marcaTexto, marcaId, true, true);
             $(`#comboMarca${numeroFilas}`).append(newOption).trigger("change");
@@ -1110,8 +1138,8 @@ function init() {
           "success",
           `Se han creado ${cantidad} filas individuales para el activo "${activoNombre}".`
         );
-        // Actualizar contador total
-        //actualizarContadorTotal();
+        // Actualizar contador total de forma asíncrona
+        actualizarContadorTotal();
 
         // Auto-colapsar grupos grandes (más de 5 unidades)
         if (cantidad > 5) {
@@ -1290,42 +1318,41 @@ function init() {
       if (result.isConfirmed) {
         // Crear nueva fila procesada como en btnConfirmarProcesar
         const numeroFilas = $("#tbldetalleactivoreg").find("tbody tr").length;
-        const inputNombre = `<input type=\"text\" class=\"form-control form-control-sm\" name=\"nombre[]\" value=\"${activoNombre}\" disabled>`;
+        const inputNombre = `<input type=\"text\" class=\"form-control form-control-sm\" name=\"nombre[]\" value=\"${activoNombre}\" >`;
         const selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
         const selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
         const selectMarca = `<select class='form-control form-control-sm marca' name='marca[]' id="comboMarca${numeroFilas}"></select>`;
         const selectEstadoActivo = `<select class='form-control form-control-sm estado_activo' name='estado_activo[]' id="comboEstadoActivo${numeroFilas}"></select>`;
         const inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" disabled>`;
         const inputCantidad = `<input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" disabled>`;
-
-        // Para activos procesados, mostrar el proveedor pero deshabilitado
-        const proveedorTexto =
-          filaPrincipal.find("select.proveedor option:selected").text() ||
-          "No asignado";
-        const proveedorDisplay = `<input type="hidden" name="proveedor[]" value="${proveedorId || ""}"><span class="text-muted small">${proveedorTexto}</span>`;
-        // Responsable heredado en filas procesadas
-        const responsableTexto =
-          filaPrincipal.find("select.responsable option:selected").text() ||
-          "No asignado";
-        const responsableDisplay = `<input type="hidden" name="responsable[]" value="${filaPrincipal.find("select.responsable").val() || ""}"><span class="text-muted small">${responsableTexto}</span>`;
+        const selectProveedor = `<select class='form-control form-control-sm proveedor' name='proveedor[]' id="comboProveedor${numeroFilas}"></select>`;
+        const selectResponsable = `<select class='form-control form-control-sm responsable' name='responsable[]' id="comboResponsable${numeroFilas}"></select>`;
         // Campos adicionales
-        const modeloPrincipal = filaPrincipal.find("input[name='modelo[]']").val() || "";
-        const codigoAntiguoPrincipal = filaPrincipal.find("input[name='codigoAntiguo[]']").val() || "";
-        const numFacturaPrincipal = filaPrincipal.find("input[name='numFactura[]']").val() || "";
-        const descripcionPrincipal = filaPrincipal.find("textarea[name='descripcion[]']").val() || "";
-        const fechaAdquisicionPrincipal = filaPrincipal.find("input[name='fechaAdquisicion[]']").val() || new Date().toISOString().slice(0, 10);
+        const modeloPrincipal =
+          filaPrincipal.find("input[name='modelo[]']").val() || "";
+        const codigoAntiguoPrincipal =
+          filaPrincipal.find("input[name='codigoAntiguo[]']").val() || "";
+        const numFacturaPrincipal =
+          filaPrincipal.find("input[name='numFactura[]']").val() || "";
+        const descripcionPrincipal =
+          filaPrincipal.find("textarea[name='descripcion[]']").val() || "";
+        const fechaAdquisicionPrincipal =
+          filaPrincipal.find("input[name='fechaAdquisicion[]']").val() ||
+          new Date().toISOString().slice(0, 10);
 
-        const inputModelo = `<input type="text" class="form-control form-control-sm mt-1" name="modelo[]" value="${modeloPrincipal}">`;
-        const inputCodigoAntiguo = `<input type="text" class="form-control form-control-sm mt-1" name="codigoAntiguo[]" value="${codigoAntiguoPrincipal}">`;
-        const inputFactura = `<input type="text" class="form-control form-control-sm mt-1" name="numFactura[]" value="${numFacturaPrincipal}">`;
-        const textareaDescripcion = `<textarea class='form-control form-control-sm mt-1' name='descripcion[]' rows='1' placeholder='Descripción'>${descripcionPrincipal}</textarea>`;
-        const inputFechaAdq = `<input type="date" class="form-control form-control-sm mt-1" name="fechaAdquisicion[]" value="${fechaAdquisicionPrincipal}">`;
+        const inputModelo = `<input type="text" class="form-control form-control-sm mt-1 campoDet" name="modelo[]" value="${modeloPrincipal}">`;
+        const inputCodigoAntiguo = `<input type="text" class="form-control form-control-sm mt-1 campoDet" name="codigoAntiguo[]" value="${codigoAntiguoPrincipal}">`;
+        const inputFactura = `<input type="text" class="form-control form-control-sm mt-1 campoDet" name="numFactura[]" value="${numFacturaPrincipal}">`;
+        const textareaDescripcion = `<textarea class='form-control form-control-sm mt-1 campoDet' name='descripcion[]' rows='1' placeholder='Descripción'>${descripcionPrincipal}</textarea>`;
+        const inputFechaAdq = `<input type="date" class="form-control form-control-sm mt-1 campoDet" name="fechaAdquisicion[]" value="${fechaAdquisicionPrincipal}">`;
 
         const distintivo = `<span class="badge badge-info grupo-badge">📦 ${siguienteNumero}/${siguienteNumero}</span>`;
         const indentacion = `<span class="grupo-indent">└─</span>`;
 
         const nuevaFila =
-          `<tr data-id='${activoId}' class='table-info activo-procesado activo-grupo-hijo' data-procesado='true' data-grupo-id='${grupoId}' data-activo-nombre=\"${activoNombre}\" data-tipo-doc=\"${filaPrincipal.data("tipo-doc")}\">` +
+          `<tr data-id='${activoId}' class='table-info activo-procesado activo-grupo-hijo' data-procesado='true' data-grupo-id='${grupoId}' data-activo-nombre=\"${activoNombre}\" data-tipo-doc=\"${filaPrincipal.data(
+            "tipo-doc"
+          )}\">` +
           `
                       <td>${activoId}</td>
                       <td>${indentacion} ${activoNombre} ${distintivo}</td>
@@ -1340,27 +1367,33 @@ function init() {
                           class="form-control form-control-sm"
                           name="serie[]"
                           placeholder="Serie ${siguienteNumero}"
-                          value="${serieBase.trim().toUpperCase() === "S/N" ? "S/N" : serieBase + "-" + siguienteNumero}">
+                          value="${
+                            serieBase.trim().toUpperCase() === "S/N"
+                              ? "S/N"
+                              : serieBase + "-" + siguienteNumero
+                          }">
                       </td>
                       <td>${selectEstadoActivo}</td>
                       <td>${selectAmbiente}</td>
                       <td>${selectCategoria}</td>
                       <td>
-                        <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valor}">
+                        <input type="text" class="form-control form-control-sm campoDet" name="valor[]" placeholder="Valor" value="${valor}">
                         <div class="custom-control custom-switch custom-switch-sm mt-2">
-                          <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${aplicaIgv ? "checked" : ""}>
+                          <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1" ${
+            aplicaIgv ? "checked" : ""
+          }>
                           <label class="custom-control-label small text-success font-weight-bold" for="aplicaIgv${numeroFilas}">
                             <i class="fas fa-percentage mr-1"></i>IGV
                           </label>
                         </div>
                       </td>
                       <td>${inputCantidad}</td>
-                      <td>${proveedorDisplay}</td>
-                      <td>${responsableDisplay}</td>
+                      <td>${selectProveedor}</td>
+                      <td>${selectResponsable}</td>
                       <td>${textareaDescripcion}</td>
                       <td>${inputFechaAdq}</td>
                       <td>
-                        <textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea>
+                        <textarea class='form-control form-control-sm campoDet' name='observaciones[]' rows='1' placeholder='Observaciones'>${observacionesBase}</textarea>
                       </td>
                       <td>
                         <button type='button' class='btn btn-danger btn-sm btnQuitarActivo' title="Eliminar solo esta unidad">
@@ -1377,20 +1410,52 @@ function init() {
         const nuevaFilaElement = ultimaFilaGrupo.next();
         nuevaFilaElement.hide().fadeIn(300);
 
-        // Cargar combos para la nueva fila (solo ambiente y categoría para filas procesadas)
+        // Cargar combos para la nueva fila (ambiente, categoría, proveedor, responsable, estado y marca para filas procesadas)
         ListarCombosAmbienteSesion(`comboAmbiente${numeroFilas}`);
         ListarCombosCategoria(`comboCategoria${numeroFilas}`);
         ListarCombosEstado(`comboEstadoActivo${numeroFilas}`);
         ListarCombosMarca(`comboMarca${numeroFilas}`);
+        ListarCombosProveedor(`comboProveedor${numeroFilas}`);
+        ListarCombosResponsable(`comboResponsable${numeroFilas}`);
 
         // Establecer los valores seleccionados en los combos
         setTimeout(() => {
           $(`#comboAmbiente${numeroFilas}`).val(ambienteId).trigger("change");
           $(`#comboCategoria${numeroFilas}`).val(categoriaId).trigger("change");
+          $(`#comboEstadoActivo${numeroFilas}`)
+            .val(filaPrincipal.find("select.estado_activo").val())
+            .trigger("change");
+
+          // Establecer proveedor con Select2 AJAX
+          if (proveedorId) {
+            const proveedorTexto = filaPrincipal
+              .find("select.proveedor option:selected")
+              .text();
+            if (proveedorTexto && proveedorTexto !== "") {
+              const newOption = new Option(proveedorTexto, proveedorId, true, true);
+              $(`#comboProveedor${numeroFilas}`)
+                .append(newOption)
+                .trigger("change");
+            }
+          }
+
+          // Establecer responsable - copiar opciones de la fila principal
+          const $comboResponsable = $(`#comboResponsable${numeroFilas}`);
+          const $responsablePrincipal = filaPrincipal.find("select.responsable");
+          if ($responsablePrincipal.length) {
+            $comboResponsable.html($responsablePrincipal.html());
+            const responsableId = filaPrincipal.find("select.responsable").val();
+            if (responsableId) {
+              $comboResponsable.val(responsableId).trigger("change");
+            }
+          }
+
           // Asegurar visualmente la marca seleccionada para Select2 AJAX
           const $comboMarca = $(`#comboMarca${numeroFilas}`);
           if (marcaId) {
-            const marcaTexto = filaPrincipal.find("select.marca option:selected").text();
+            const marcaTexto = filaPrincipal
+              .find("select.marca option:selected")
+              .text();
             if (marcaTexto && marcaTexto !== "") {
               if ($comboMarca.find(`option[value='${marcaId}']`).length === 0) {
                 const newOption = new Option(marcaTexto, marcaId, true, true);
@@ -1477,35 +1542,37 @@ function init() {
       }
     });
 
-    // Actualizar contador total después de cambios en grupo
-    //actualizarContadorTotal();
+    // Actualizar contador total después de cambios en grupo de forma asíncrona
+    actualizarContadorTotal();
   }
 
-  // Función para actualizar contador total en tiempo real
-  // function actualizarContadorTotal() {
-  //   const totalFilas = $("#tbldetalleactivoreg tbody tr").length;
-  //   const totalGrupos =
-  //     $("#tbldetalleactivoreg tbody tr.activo-grupo-principal").length +
-  //     $("#tbldetalleactivoreg tbody tr:not([data-grupo-id])").length;
+  // Función para actualizar contador total en tiempo real de forma asíncrona
+  function actualizarContadorTotal() {
+    setTimeout(() => {
+      const totalFilas = $("#tbldetalleactivoreg tbody tr").length;
+      const totalGrupos =
+        $("#tbldetalleactivoreg tbody tr.activo-grupo-principal").length +
+        $("#tbldetalleactivoreg tbody tr:not([data-grupo-id])").length;
 
-  //   $("#CantRegistros").html(`
-  //     <div class="contador-detalle">
-  //       <span class="badge badge-success">${totalFilas} Activos</span>
-  //       <span class="badge badge-info">${totalGrupos} Grupos</span>
-  //     </div>
-  //   `);
+      $("#CantRegistros").html(`
+        <div class="contador-detalle">
+          <span class="badge badge-success">${totalFilas} Activos</span>
+          <span class="badge badge-info">${totalGrupos} Grupos</span>
+        </div>
+      `);
 
-  //   // Actualizar también el título de la sección
-  //   const tituloDetalle =
-  //     totalFilas > 0
-  //       ? `Detalles <small class="text-muted">(${totalFilas} activos en ${totalGrupos} grupos)</small>`
-  //       : "Detalles";
+      // Actualizar también el título de la sección
+      const tituloDetalle =
+        totalFilas > 0
+          ? `Detalles <small class="text-muted">(${totalFilas} activos en ${totalGrupos} grupos)</small>`
+          : "Detalles";
 
-  //   $("#tbldetalleactivoreg")
-  //     .closest(".card")
-  //     .find('h5:contains("Detalles")')
-  //     .html(`<i class="fas fa-list"></i> ${tituloDetalle}`);
-  // }
+      $("#tbldetalleactivoreg")
+        .closest(".card")
+        .find('h5:contains("Detalles")')
+        .html(`<i class="fas fa-list"></i> ${tituloDetalle}`);
+    }, 0);
+  }
 
   // Función para validar series duplicadas
   // Función para validar series duplicadas
@@ -1606,7 +1673,9 @@ function init() {
       Swal.fire({
         icon: "error",
         title: "Marca Requerida",
-        html: `Debe seleccionar una marca para los siguientes activos:<br><br>${filasSinMarca.join("<br>")}`,
+        html: `Debe seleccionar una marca para los siguientes activos:<br><br>${filasSinMarca.join(
+          "<br>"
+        )}`,
       });
       return;
     }
@@ -4081,15 +4150,15 @@ function agregarActivoAlDetalle(activo) {
         var selectAmbiente = `<select class='form-control form-control-sm ambiente' name='ambiente[]' id="comboAmbiente${numeroFilas}"></select>`;
         var selectCategoria = `<select class='form-control form-control-sm categoria' name='categoria[]' id="comboCategoria${numeroFilas}"></select>`;
         var selectEstadoActivo = `<select class='form-control form-control-sm estado_activo' name='estado_activo[]' id="comboEstadoActivo${numeroFilas}"></select>`;
-        var inputEstadoActivo = `<input type="text" class="form-control form-control-sm" name="estado_activo[]" value="Operativa" style="width: 15rem;" disabled>`;
-        var inputSerie = `<input type="text" class="form-control form-control-sm" name="serie[]" placeholder="Serie" style="width: 15rem;">`;
+        var inputEstadoActivo = `<input type="text" class="form-control form-control-sm campoDet" name="estado_activo[]" value="Operativa" disabled>`;
+        var inputSerie = `<input type="text" class="form-control form-control-sm campoDet" name="serie[]" placeholder="Serie">`;
         // Campos adicionales solicitados
-        var inputModelo = `<input type="text" class="form-control form-control-sm mt-1" name="modelo[]" placeholder="Modelo">`;
-        var inputCodigoAntiguo = `<input type="text" class="form-control form-control-sm mt-1" name="codigoAntiguo[]" placeholder="Código Antiguo">`;
-        var inputFactura = `<input type="text" class="form-control form-control-sm mt-1" name="numFactura[]" placeholder="Nro. Factura">`;
-        var selectResponsable = `<select class='form-control form-control-sm responsable mt-1' name='responsable[]' id="comboResponsable${numeroFilas}"></select>`;
-        var textareaDescripcion = `<textarea class='form-control form-control-sm mb-1' name='descripcion[]' rows='1' placeholder='Descripción'></textarea>`;
-        var inputFechaAdq = `<input type="date" class="form-control form-control-sm mt-2" name="fechaAdquisicion[]" value="${new Date()
+        var inputModelo = `<input type="text" class="form-control form-control-sm mt-1 campoDet" name="modelo[]" placeholder="Modelo">`;
+        var inputCodigoAntiguo = `<input type="text" class="form-control form-control-sm mt-1 campoDet" name="codigoAntiguo[]" placeholder="Código Antiguo">`;
+        var inputFactura = `<input type="text" class="form-control form-control-sm mt-1 campoDet" name="numFactura[]" placeholder="Nro. Factura">`;
+        var selectResponsable = `<select class='form-control form-control-sm responsable mt-1 campoDet' name='responsable[]' id="comboResponsable${numeroFilas}"></select>`;
+        var textareaDescripcion = `<textarea class='form-control form-control-sm mb-1 campoDet' name='descripcion[]' rows='1' placeholder='Descripción'></textarea>`;
+        var inputFechaAdq = `<input type="date" class="form-control form-control-sm mt-2 campoDet" name="fechaAdquisicion[]" value="${new Date()
           .toISOString()
           .slice(0, 10)}">`;
 
@@ -4134,7 +4203,7 @@ function agregarActivoAlDetalle(activo) {
                     <td>${selectAmbiente}</td>
                     <td>${selectCategoria}</td>
                     <td>
-                      <input type="text" class="form-control form-control-sm" name="valor[]" placeholder="Valor" value="${valorPrellenado}">
+                      <input type="text" class="form-control form-control-sm campoDet" name="valor[]" placeholder="Valor" value="${valorPrellenado}">
                       <div class="custom-control custom-switch custom-switch-sm mt-2">
                         <input type="checkbox" class="custom-control-input" name="aplicaIgv[]" id="aplicaIgv${numeroFilas}" value="1">
                         <label class="custom-control-label small text-success font-weight-bold" for="aplicaIgv${numeroFilas}">
@@ -4148,7 +4217,7 @@ function agregarActivoAlDetalle(activo) {
                       <td>${textareaDescripcion}</td>
                       <td>${inputFechaAdq}</td>
                     <td>
-                      <textarea class='form-control form-control-sm' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea>
+                      <textarea class='form-control form-control-sm campoDet' name='observaciones[]' rows='1' placeholder='Observaciones'></textarea>
                     </td>
                     <td>
                       <div class="btn-group">
@@ -4187,8 +4256,8 @@ function agregarActivoAlDetalle(activo) {
           "success",
           `Activo <b>${activo.nombre}</b> agregado al detalle.`
         );
-        // Actualizar contador total
-        //actualizarContadorTotal();
+        // Actualizar contador total de forma asíncrona
+        actualizarContadorTotal();
         return true;
       } else {
         NotificacionToast("error", res.message);
@@ -4247,7 +4316,8 @@ function ListarCombosCategoria(elemento) {
         $(`#${elemento}`).html(res.data.categorias).trigger("change");
         $(`#${elemento}`).select2({
           theme: "bootstrap4",
-          width: "100%",
+          width: "10rem",
+          placeholder: "Seleccione Categoria",
         });
       } else {
         Swal.fire(
@@ -4278,7 +4348,8 @@ function ListarCombosMarca(elemento) {
         $(`#${elemento}`).html(res.data.marcas).trigger("change");
         $(`#${elemento}`).select2({
           theme: "bootstrap4",
-          width: "100%",
+          width: "10rem",
+          placeholder: "Seleccione Marca",
         });
       } else {
         Swal.fire(
@@ -4310,7 +4381,8 @@ function ListarCombosEstado(elemento) {
         $(`#${elemento}`).html(res.data.estadoTodos).trigger("change");
         $(`#${elemento}`).select2({
           theme: "bootstrap4",
-          width: "100%",
+          width: "10rem",
+          placeholder: "Seleccione Estado",
         });
       } else {
         Swal.fire(
@@ -4334,7 +4406,8 @@ function ListarCombosAmbiente(elemento) {
         $(`#${elemento}`).html(res.data.ambientes).trigger("change");
         $(`#${elemento}`).select2({
           theme: "bootstrap4",
-          width: "100%",
+          width: "10rem",
+          placeholder: "Seleccione Ambiente",
         });
       } else {
         Swal.fire(
@@ -4444,7 +4517,8 @@ function ListarCombosResponsable(elemento) {
         }
         $el.select2({
           theme: "bootstrap4",
-          width: "100%",
+          width: "10rem",
+          placeholder: "Seleccione Responsable",
           dropdownParent: $el.closest("tr").length
             ? $el.closest("tr")
             : $("body"),
